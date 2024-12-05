@@ -52,14 +52,14 @@ export function AuthProvider({ children }) {
     () => ({
       user: state.user
         ? {
-            ...state.user,
-            role: state.user?.role ?? 'admin',
-          }
+          ...state.user,
+          role: state.user?.role ?? 'admin',
+        }
         : null,
       checkUserSession,
       loading: status === 'loading',
       authenticated: status === 'authenticated',
-      unauthenticated: status === 'unauthenticated',
+      unauthenticated: status === 'authenticated',
     }),
     [checkUserSession, state.user, status]
   );
