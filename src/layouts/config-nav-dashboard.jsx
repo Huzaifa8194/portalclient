@@ -79,6 +79,7 @@ export const navData = [
       { title: 'Messages', path: paths.dashboard.chat, icon: ICONS.chat },
       { title: 'Appointment Status', path: paths.dashboard.product.root, icon: ICONS.calendar },
 
+
       {
         title: 'Appointment',
         path: paths.dashboard.post.root,
@@ -100,7 +101,8 @@ export const navData = [
         ],
       },
 
-
+      { title: 'Assessments', path: paths.dashboard.assessment, icon: ICONS.calendar },
+      { title: 'Housing', path: paths.dashboard.housing, icon: ICONS.tour },
       {
         title: 'User',
         path: paths.dashboard.user.root,

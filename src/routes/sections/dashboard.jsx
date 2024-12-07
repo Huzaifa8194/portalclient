@@ -23,6 +23,13 @@ const ProductDetailsPage = lazy(() => import('src/pages/dashboard/product/detail
 const ProductListPage = lazy(() => import('src/pages/dashboard/product/list'));
 const ProductCreatePage = lazy(() => import('src/pages/dashboard/product/new'));
 const ProductEditPage = lazy(() => import('src/pages/dashboard/product/edit'));
+
+// Assessment
+const AssessmentsPage = lazy(() => import('src/pages/dashboard/assessment/list'));
+// Housing
+
+const HousingPage = lazy(() => import('src/pages/dashboard/housing/list'));
+
 // Order
 const OrderListPage = lazy(() => import('src/pages/dashboard/order/list'));
 const OrderDetailsPage = lazy(() => import('src/pages/dashboard/order/details'));
@@ -101,6 +108,8 @@ export const dashboardRoutes = [
           { path: 'account', element: <UserAccountPage /> },
         ],
       },
+
+
       {
         path: 'product',
         children: [
@@ -160,6 +169,13 @@ export const dashboardRoutes = [
         ],
       },
       { path: 'file-manager', element: <FileManagerPage /> },
+
+
+
+      { path: 'assessments', element: <AssessmentsPage /> },
+
+      { path: 'housing', element: <HousingPage /> },
+
       { path: 'mail', element: <MailPage /> },
       { path: 'chat', element: <ChatPage /> },
       { path: 'calendar', element: <CalendarPage /> },

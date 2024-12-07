@@ -97,6 +97,8 @@ export const paths = {
     mail: `${ROOTS.DASHBOARD}/mail`,
     chat: `${ROOTS.DASHBOARD}/chat`,
     blank: `${ROOTS.DASHBOARD}/blank`,
+    assessment: `${ROOTS.DASHBOARD}/assessments`,
+    housing: `${ROOTS.DASHBOARD}/housing`,
     kanban: `${ROOTS.DASHBOARD}/kanban`,
     calendar: `${ROOTS.DASHBOARD}/calendar`,
     fileManager: `${ROOTS.DASHBOARD}/file-manager`,
