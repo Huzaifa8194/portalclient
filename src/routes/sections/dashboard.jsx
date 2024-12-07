@@ -27,8 +27,27 @@ const ProductEditPage = lazy(() => import('src/pages/dashboard/product/edit'));
 // Assessment
 const AssessmentsPage = lazy(() => import('src/pages/dashboard/assessment/list'));
 // Housing
-
 const HousingPage = lazy(() => import('src/pages/dashboard/housing/list'));
+
+// BusinessQeury
+
+const BusinessQueryPage = lazy(() => import('src/pages/dashboard/post/new'));
+
+// Entrepenaur
+
+const Entrepenaur = lazy(() => import('src/pages/dashboard/entrepenaur/new'));
+
+// Import Export Services
+
+const ImportExportServices = lazy(() => import('src/pages/dashboard/importexport/new'));
+
+// Investors
+
+const Investors = lazy(() => import('src/pages/dashboard/investors/new'));
+
+
+
+
 
 // Order
 const OrderListPage = lazy(() => import('src/pages/dashboard/order/list'));
@@ -173,6 +192,14 @@ export const dashboardRoutes = [
 
 
       { path: 'assessments', element: <AssessmentsPage /> },
+
+      { path: 'businessquery', element: <  BusinessQueryPage /> },
+
+      { path: 'entrepenaur', element: < Entrepenaur /> },
+      { path: 'importexport', element: < ImportExportServices /> },
+      { path: 'investors', element: < Investors /> },
+
+
 
       { path: 'housing', element: <HousingPage /> },
 

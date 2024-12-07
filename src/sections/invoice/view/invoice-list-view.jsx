@@ -53,11 +53,11 @@ import { InvoiceTableFiltersResult } from '../invoice-table-filters-result';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'invoiceNumber', label: 'Customer' },
-  { id: 'createDate', label: 'Create' },
-  { id: 'dueDate', label: 'Due' },
+  { id: 'invoiceNumber', label: 'Invoice Number' },
+  { id: 'createDate', label: 'Created At' },
+  { id: 'dueDate', label: 'Payment Method' },
   { id: 'price', label: 'Amount' },
-  { id: 'sent', label: 'Sent', align: 'center' },
+  { id: 'sent', label: 'Payable', align: 'center' },
   { id: 'status', label: 'Status' },
   { id: '' },
 ];
@@ -197,21 +197,22 @@ export function InvoiceListView() {
     <>
       <DashboardContent>
         <CustomBreadcrumbs
-          heading="List"
+          heading="Invoices (Faktura)"
           links={[
             { name: 'Dashboard', href: paths.dashboard.root },
-            { name: 'Invoice', href: paths.dashboard.invoice.root },
-            { name: 'List' },
+
+            { name: 'Invoices (Faktura)' },
           ]}
           action={
-            <Button
-              component={RouterLink}
-              href={paths.dashboard.invoice.new}
-              variant="contained"
-              startIcon={<Iconify icon="mingcute:add-line" />}
-            >
-              New invoice
-            </Button>
+            <></>
+            // <Button
+            //   component={RouterLink}
+            //   href={paths.dashboard.invoice.new}
+            //   variant="contained"
+            //   startIcon={<Iconify icon="mingcute:add-line" />}
+            // >
+            //   New invoice
+            // </Button>
           }
           sx={{ mb: { xs: 3, md: 5 } }}
         />

@@ -98,11 +98,18 @@ export const paths = {
     chat: `${ROOTS.DASHBOARD}/chat`,
     blank: `${ROOTS.DASHBOARD}/blank`,
     assessment: `${ROOTS.DASHBOARD}/assessments`,
+
     housing: `${ROOTS.DASHBOARD}/housing`,
     kanban: `${ROOTS.DASHBOARD}/kanban`,
     calendar: `${ROOTS.DASHBOARD}/calendar`,
     fileManager: `${ROOTS.DASHBOARD}/file-manager`,
     permission: `${ROOTS.DASHBOARD}/permission`,
+
+    business: {
+      entrepenaur: `${ROOTS.DASHBOARD}/entrepenaur`,
+      importexport: `${ROOTS.DASHBOARD}/importexport`,
+      investors: `${ROOTS.DASHBOARD}/investors`,
+    },
     general: {
       app: `${ROOTS.DASHBOARD}/app`,
       ecommerce: `${ROOTS.DASHBOARD}/ecommerce`,

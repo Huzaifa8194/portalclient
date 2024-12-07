@@ -14,7 +14,7 @@ import ListItemText from '@mui/material/ListItemText';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import { fCurrency } from 'src/utils/format-number';
+import { fCurrency, fData } from 'src/utils/format-number';
 import { fDate, fTime } from 'src/utils/format-time';
 
 import { Label } from 'src/components/label';
@@ -42,24 +42,23 @@ export function InvoiceTableRow({ row, selected, onSelectRow, onViewRow, onEditR
 
         <TableCell>
           <Stack spacing={2} direction="row" alignItems="center">
-            <Avatar alt={row.invoiceTo.name}>{row.invoiceTo.name.charAt(0).toUpperCase()}</Avatar>
+
 
             <ListItemText
               disableTypography
               primary={
-                <Typography variant="body2" noWrap>
-                  {row.invoiceTo.name}
-                </Typography>
-              }
-              secondary={
                 <Link
                   noWrap
                   variant="body2"
                   onClick={onViewRow}
-                  sx={{ color: 'text.disabled', cursor: 'pointer' }}
+                  sx={{ cursor: 'pointer' }}
                 >
                   {row.invoiceNumber}
                 </Link>
+              }
+              secondary={
+                <></>
+
               }
             />
           </Stack>
@@ -67,25 +66,97 @@ export function InvoiceTableRow({ row, selected, onSelectRow, onViewRow, onEditR
 
         <TableCell>
           <ListItemText
-            primary={fDate(row.createDate)}
-            secondary={fTime(row.createDate)}
+            primary={<>Create Date: {fDate(row.createDate)}</>}
+            secondary={<>Due Date: {fDate(row.createDate)}</>}
             primaryTypographyProps={{ typography: 'body2', noWrap: true }}
             secondaryTypographyProps={{ mt: 0.5, component: 'span', typography: 'caption' }}
           />
         </TableCell>
 
         <TableCell>
-          <ListItemText
-            primary={fDate(row.dueDate)}
-            secondary={fTime(row.dueDate)}
-            primaryTypographyProps={{ typography: 'body2', noWrap: true }}
-            secondaryTypographyProps={{ mt: 0.5, component: 'span', typography: 'caption' }}
-          />
+          <p>Cash</p>
         </TableCell>
 
-        <TableCell>{fCurrency(row.totalAmount)}</TableCell>
+        <TableCell
 
-        <TableCell align="center">{row.sent}</TableCell>
+        >
+
+          <Label sx={{ display: 'block' }}
+            variant="soft"
+            color={
+              (row.status === 'paid' && 'success') ||
+              (row.status === 'pending' && 'warning') ||
+              (row.status === 'overdue' && 'error') ||
+              'default'
+            }
+          >
+            Amount: {fCurrency(row.totalAmount)}
+
+          </Label>
+
+          <Label
+            sx={{ display: 'inline-block' }}
+            variant="soft"
+            color={
+              (row.status === 'paid' && 'success') ||
+              (row.status === 'pending' && 'warning') ||
+              (row.status === 'overdue' && 'error') ||
+              'default'
+            }
+          >
+
+            VAT: {fCurrency(row.totalAmount)}
+          </Label>
+
+
+        </TableCell>
+
+        <TableCell
+          align="center"
+          sx={{
+            display: 'flex', // Enables Flexbox
+            flexDirection: 'column', // Stacks children in a column
+            alignItems: 'center', // Centers items horizontally
+            gap: 1, // Adds spacing between elements
+          }}
+        >
+          <Label
+            variant="soft"
+            color={
+              (row.status === 'paid' && 'success') ||
+              (row.status === 'pending' && 'warning') ||
+              (row.status === 'overdue' && 'error') ||
+              'default'
+            }
+          >
+            Payable: {fCurrency(row.totalAmount)}
+          </Label>
+
+          <Label
+            variant="soft"
+            color={
+              (row.status === 'paid' && 'success') ||
+              (row.status === 'pending' && 'warning') ||
+              (row.status === 'overdue' && 'error') ||
+              'default'
+            }
+          >
+            Recieved: {fCurrency(row.totalAmount)}
+          </Label>
+
+          <Label
+            variant="soft"
+            color={
+              (row.status === 'paid' && 'success') ||
+              (row.status === 'pending' && 'warning') ||
+              (row.status === 'overdue' && 'error') ||
+              'default'
+            }
+          >
+            Balance: {fCurrency(row.totalAmount)}
+          </Label>
+        </TableCell>
+
 
         <TableCell>
           <Label

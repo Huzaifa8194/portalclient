@@ -103,6 +103,23 @@ export const navData = [
 
       { title: 'Assessments', path: paths.dashboard.assessment, icon: ICONS.calendar },
       { title: 'Housing', path: paths.dashboard.housing, icon: ICONS.tour },
+
+      { title: 'Invoices (Faktura)', path: paths.dashboard.invoice.root, icon: ICONS.order },
+
+      {
+        title: 'Business',
+        path: paths.dashboard.user.root,
+        icon: ICONS.user,
+        children: [
+          { title: 'Entrepenaur', path: paths.dashboard.business.entrepenaur },
+          { title: 'Import-Export Services', path: paths.dashboard.business.importexport },
+          { title: 'Investors', path: paths.dashboard.business.investors },
+
+
+
+        ],
+      },
+
       {
         title: 'User',
         path: paths.dashboard.user.root,
