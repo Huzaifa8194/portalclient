@@ -11,10 +11,11 @@ import { PlanFreeIcon, PlanStarterIcon, PlanPremiumIcon } from 'src/assets/icons
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 
-import cap1 from 'src/assets/images/cap1.png';
-import cap2 from 'src/assets/images/cap2.png';
+import cap1 from 'src/assets/images/cap1.PNG';
+import cap2 from 'src/assets/images/cap2.PNG';
 
-import cap3 from 'src/assets/images/cap3.png';
+import cap3 from 'src/assets/images/cap3.PNG';
+
 
 
 // ----------------------------------------------------------------------
