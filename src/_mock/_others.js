@@ -135,29 +135,23 @@ export const _socials = [
 
 export const _pricingPlans = [
   {
-    subscription: 'basic',
-    price: 0,
-    caption: 'Forever',
+    subscription: 'starter',
+    price: 'Private',
+    caption: 'Set up your account to get full access to our online portal.',
     lists: ['3 prototypes', '3 boards', 'Up to 5 team members'],
-    labelAction: 'Current plan',
+    labelAction: 'Choose Private',
   },
   {
     subscription: 'starter',
-    price: 4.99,
-    caption: 'Saving $24 a year',
-    lists: [
-      '3 prototypes',
-      '3 boards',
-      'Up to 5 team members',
-      'Advanced security',
-      'Issue escalation',
-    ],
-    labelAction: 'Choose starter',
+    price: 'Companies',
+    caption: 'At the moment this service is available for Swedish companies.',
+    lists: ['3 prototypes'],
+    labelAction: 'Choose Comapanies',
   },
   {
-    subscription: 'premium',
-    price: 9.99,
-    caption: 'Saving $124 a year',
+    subscription: 'starter',
+    price: 'Partners',
+    caption: 'Sign up and join our partner program and start Today.',
     lists: [
       '3 prototypes',
       '3 boards',
@@ -167,7 +161,7 @@ export const _pricingPlans = [
       'Issue development license',
       'Permissions & workflows',
     ],
-    labelAction: 'Choose premium',
+    labelAction: 'Choose Partners',
   },
 ];
 

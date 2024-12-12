@@ -29,6 +29,9 @@ const Page404 = lazy(() => import('src/pages/error/404'));
 // Blank
 const BlankPage = lazy(() => import('src/pages/blank'));
 
+
+// temp pre signup
+
 // ----------------------------------------------------------------------
 
 export const mainRoutes = [
@@ -83,6 +86,15 @@ export const mainRoutes = [
       },
       {
         path: 'pricing',
+        element: (
+          <SimpleLayout>
+            <PricingPage />
+          </SimpleLayout>
+        ),
+      },
+
+      {
+        path: 'presignup',
         element: (
           <SimpleLayout>
             <PricingPage />

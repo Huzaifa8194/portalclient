@@ -31,15 +31,15 @@ export function PricingView() {
   return (
     <Container sx={{ pt: { xs: 3, md: 5 }, pb: 10 }}>
       <Typography variant="h3" align="center" sx={{ mb: 2 }}>
-        Flexible plans for your
-        <br /> {`community's size and needs`}
+        Sign Up - Setup your account
+        <br />
       </Typography>
 
       <Typography align="center" sx={{ color: 'text.secondary' }}>
-        Choose your plan and make modern online conversation magic
+        Already have an account? login
       </Typography>
 
-      <Box sx={{ mt: 9, mb: 5, position: 'relative' }}>
+      {/* <Box sx={{ mt: 9, mb: 5, position: 'relative' }}>
         <Stack direction="row" alignItems="center" justifyContent="center">
           <Typography variant="overline">MONTHLY</Typography>
 
@@ -59,7 +59,7 @@ export function PricingView() {
             <Typography variant="overline">YEARLY</Typography>
           </Box>
         </Stack>
-      </Box>
+      </Box> */}
 
       <Box
         gap={{ xs: 3, md: 0 }}

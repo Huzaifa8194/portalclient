@@ -89,9 +89,34 @@ export function JwtSignUpView() {
       <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: 'column', sm: 'row' }}>
         <Field.Text name="firstName" label="First name" InputLabelProps={{ shrink: true }} />
         <Field.Text name="lastName" label="Last name" InputLabelProps={{ shrink: true }} />
+
       </Box>
 
-      <Field.Text name="email" label="Email address" InputLabelProps={{ shrink: true }} />
+
+
+
+
+      <Field.DatePicker name="dateOfBirth" label="Date of birth" InputLabelProps={{ shrink: true }} />
+      <Field.CountrySelect name="nationality" label="Nationality" InputLabelProps={{ shrink: true }} />
+
+
+      <Field.CountrySelect name="placeofbirth" label="Place of Birth" InputLabelProps={{ shrink: true }} />
+      <Field.CountrySelect name="countryresiding" label="Country Residing In" InputLabelProps={{ shrink: true }} />
+
+      <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: 'column', sm: 'row' }}>
+        <Field.Text name="address" label="Address" InputLabelProps={{ shrink: true }} />
+        <Field.Text name="city" label="City" InputLabelProps={{ shrink: true }} />
+
+      </Box>
+
+
+
+      <Field.Text name='zipCode' label="Zip Code" />
+
+
+
+
+
 
       <Field.Text
         name="password"

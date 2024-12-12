@@ -39,7 +39,7 @@ export function Content({ sx, children, layoutQuery, ...other }) {
         width: 1,
         display: 'flex',
         flexDirection: 'column',
-        maxWidth: 'var(--layout-auth-content-width)',
+        maxWidth: '80%',
       }}
     >
       {children}

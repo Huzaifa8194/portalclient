@@ -11,6 +11,12 @@ import { PlanFreeIcon, PlanStarterIcon, PlanPremiumIcon } from 'src/assets/icons
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 
+import cap1 from 'src/assets/images/cap1.png';
+import cap2 from 'src/assets/images/cap2.png';
+
+import cap3 from 'src/assets/images/cap3.png';
+
+
 // ----------------------------------------------------------------------
 
 export function PricingCard({ card, sx, ...other }) {
@@ -24,19 +30,21 @@ export function PricingCard({ card, sx, ...other }) {
 
   const renderIcon = (
     <Stack direction="row" alignItems="center" justifyContent="space-between">
-      {basic && <PlanFreeIcon sx={{ width: 64 }} />}
-      {starter && <PlanStarterIcon sx={{ width: 64 }} />}
-      {premium && <PlanPremiumIcon sx={{ width: 64 }} />}
+      {price === 'Private' && <img src={cap1} alt="" style={{ width: '100%', height: '100%' }} />}
+      {price === 'Companies' && <img src={cap2} alt="" />}
+      {price === 'Partners' && <img src={cap3} alt="" />}
 
-      {starter && <Label color="info">POPULAR</Label>}
+
+
+
+
+      {/* {starter && <Label color="info">POPULAR</Label>} */}
     </Stack>
   );
 
   const renderSubscription = (
     <Stack spacing={1}>
-      <Typography variant="h4" sx={{ textTransform: 'capitalize' }}>
-        {subscription}
-      </Typography>
+
       <Typography variant="subtitle2">{caption}</Typography>
     </Stack>
   );
@@ -45,36 +53,26 @@ export function PricingCard({ card, sx, ...other }) {
     <Typography variant="h2">Free</Typography>
   ) : (
     <Stack direction="row">
-      <Typography variant="h4">$</Typography>
 
-      <Typography variant="h2">{price}</Typography>
 
-      <Typography
-        component="span"
-        sx={{
-          alignSelf: 'center',
-          color: 'text.disabled',
-          ml: 1,
-          typography: 'body2',
-        }}
-      >
-        / mo
-      </Typography>
+      {/* <Typography variant="h2" textAlign="center" >{price}</Typography> */}
+
+
     </Stack>
   );
 
   const renderList = (
     <Stack spacing={2}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between">
+      {/* <Stack direction="row" alignItems="center" justifyContent="space-between">
         <Box component="span" sx={{ typography: 'overline' }}>
           Features
         </Box>
         <Link variant="body2" color="inherit" underline="always">
           All
         </Link>
-      </Stack>
+      </Stack> */}
 
-      {lists.map((item) => (
+      {/* {lists.map((item) => (
         <Stack
           key={item}
           spacing={1}
@@ -85,7 +83,7 @@ export function PricingCard({ card, sx, ...other }) {
           <Iconify icon="eva:checkmark-fill" width={16} sx={{ mr: 1 }} />
           {item}
         </Stack>
-      ))}
+      ))} */}
     </Stack>
   );
 
@@ -122,17 +120,17 @@ export function PricingCard({ card, sx, ...other }) {
       {renderSubscription}
 
       {renderPrice}
+      {/* 
+      <Divider sx={{ borderStyle: 'dashed' }} /> */}
 
-      <Divider sx={{ borderStyle: 'dashed' }} />
-
-      {renderList}
 
       <Button
         fullWidth
         size="large"
         variant="contained"
         disabled={basic}
-        color={starter ? 'primary' : 'inherit'}
+        color={starter ? 'inherit' : 'inherit'}
+        href="/auth/jwt/sign-up"
       >
         {labelAction}
       </Button>

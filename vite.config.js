@@ -21,6 +21,7 @@ export default defineConfig({
       },
     }),
   ],
+  assetsInclude: ['**/*.PNG', '**/*.png'],
   resolve: {
     alias: [
       {
