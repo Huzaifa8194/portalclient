@@ -15,6 +15,12 @@ import { GuestGuard } from 'src/auth/guard';
 const Jwt = {
   SignInPage: lazy(() => import('src/pages/auth/jwt/sign-in')),
   SignUpPage: lazy(() => import('src/pages/auth/jwt/sign-up')),
+  SignUpPageCompany: lazy(() => import('src/pages/auth/jwt/sign-up-company')),
+  SignUpPagePartner: lazy(() => import('src/pages/auth/jwt/sign-up-partner')),
+  SignUpPageOptions: lazy(() => import('src/pages/auth/jwt/sign-up-options')),
+  SignInPageOptions: lazy(() => import('src/pages/auth/jwt/sign-in-options')),
+
+
 };
 
 const authJwt = {
@@ -40,6 +46,54 @@ const authJwt = {
         </GuestGuard>
       ),
     },
+
+
+    {
+      path: 'sign-up-company',
+      element: (
+        <GuestGuard>
+          <AuthSplitLayout>
+            <Jwt.SignUpPageCompany />
+          </AuthSplitLayout>
+        </GuestGuard>
+      ),
+    },
+
+    {
+      path: 'sign-up-partner',
+      element: (
+        <GuestGuard>
+          <AuthSplitLayout>
+            <Jwt.SignUpPagePartner />
+          </AuthSplitLayout>
+        </GuestGuard>
+      ),
+    },
+
+
+    {
+      path: 'sign-up-options',
+      element: (
+        <GuestGuard>
+          <AuthSplitLayout>
+            <Jwt.SignUpPageOptions />
+          </AuthSplitLayout>
+        </GuestGuard>
+      ),
+    },
+
+    {
+      path: 'sign-in-options',
+      element: (
+        <GuestGuard>
+          <AuthSplitLayout>
+            <Jwt.SignInPageOptions />
+          </AuthSplitLayout>
+        </GuestGuard>
+      ),
+    },
+
+
   ],
 };
 

@@ -29,6 +29,21 @@ export function PricingCard({ card, sx, ...other }) {
 
   const premium = subscription === 'premium';
 
+
+
+  const getHref = (labelaction) => {
+    switch (labelaction) {
+      case 'Choose Private':
+        return '/auth/jwt/sign-up-options';
+      case 'Choose Companies':
+        return '/auth/jwt/sign-up-company';
+      case 'Choose Partners':
+        return '/auth/jwt/sign-up-partner';
+      default:
+        return '#'; // Fallback to prevent invalid links
+    }
+  };
+
   const renderIcon = (
     <Stack direction="row" alignItems="center" justifyContent="space-between">
       {price === 'Private' && <img src={cap1} alt="" style={{ width: '100%', height: '100%' }} />}
@@ -131,7 +146,7 @@ export function PricingCard({ card, sx, ...other }) {
         variant="contained"
         disabled={basic}
         color={starter ? 'inherit' : 'inherit'}
-        href="/auth/jwt/sign-up"
+        href={getHref(labelAction)} // Dynamically set href
       >
         {labelAction}
       </Button>

@@ -36,8 +36,8 @@ export const endpoints = {
   calendar: '/api/calendar',
   auth: {
     me: '/api/auth/me',
-    signIn: '/api/auth/sign-in',
-    signUp: '/api/auth/sign-up',
+    signIn: '/api/clientLogin',
+    signUp: '/api/clientRegistration',
   },
   mail: {
     list: '/api/mail/list',

@@ -146,7 +146,7 @@ export const _pricingPlans = [
     price: 'Companies',
     caption: 'At the moment this service is available for Swedish companies.',
     lists: ['3 prototypes'],
-    labelAction: 'Choose Comapanies',
+    labelAction: 'Choose Companies',
   },
   {
     subscription: 'starter',

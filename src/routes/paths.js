@@ -20,6 +20,7 @@ export const paths = {
   comingSoon: '/coming-soon',
   maintenance: '/maintenance',
   pricing: '/pricing',
+  presignup: '/presignup',
   payment: '/payment',
   about: '/about-us',
   contact: '/contact-us',
@@ -55,8 +56,12 @@ export const paths = {
       resetPassword: `${ROOTS.AUTH}/amplify/reset-password`,
     },
     jwt: {
-      signIn: `${ROOTS.AUTH}/jwt/sign-in`,
+      signIn: `${ROOTS.AUTH}/jwt/sign-in-options`,
+      signInEmail: `${ROOTS.AUTH}/jwt/sign-in`,
       signUp: `${ROOTS.AUTH}/jwt/sign-up`,
+      signUpComany: `${ROOTS.AUTH}/jwt/sign-up-company`,
+      signUpPartner: `${ROOTS.AUTH}/jwt/sign-up-partner`,
+      signUpOptions: `${ROOTS.AUTH}/jwt/sign-up-options`,
     },
     firebase: {
       signIn: `${ROOTS.AUTH}/firebase/sign-in`,

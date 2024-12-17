@@ -26,7 +26,7 @@ import { SignUpTerms } from '../../components/sign-up-terms';
 
 // ----------------------------------------------------------------------
 
-export const SignUpSchema = zod.object({
+export const SignUpSchemaPartner = zod.object({
   firstName: zod.string().min(1, { message: 'First name is required!' }),
   lastName: zod.string().min(1, { message: 'Last name is required!' }),
 
@@ -61,7 +61,7 @@ export const SignUpSchema = zod.object({
 });
 // ----------------------------------------------------------------------
 
-export function JwtSignUpView() {
+export function JwtSignUpViewPartner() {
   const { checkUserSession } = useAuthContext();
 
   const router = useRouter();
@@ -78,7 +78,7 @@ export function JwtSignUpView() {
   };
 
   const methods = useForm({
-    resolver: zodResolver(SignUpSchema),
+    resolver: zodResolver(SignUpSchemaPartner),
     defaultValues,
   });
 

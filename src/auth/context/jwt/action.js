@@ -28,16 +28,39 @@ export const signInWithPassword = async ({ email, password }) => {
 /** **************************************
  * Sign up
  *************************************** */
-export const signUp = async ({ email, password, firstName, lastName }) => {
-  const params = {
-    email,
-    password,
-    firstName,
-    lastName,
-  };
+
+export const signUp = async ({
+  firstName,
+  email,
+  password,
+  passwordConfirmation,
+  dateOfBirth,
+  nationality,
+  placeOfBirth,
+  countryResiding,
+  address,
+  contactNumber,
+}) => {
+  // Prepare the form data for multipart/form-data
+  const formData = new FormData();
+  formData.append('name', firstName);
+  formData.append('email', email);
+  formData.append('password', password);
+  formData.append('password_confirmation', passwordConfirmation);
+  formData.append('dob', dateOfBirth);
+  formData.append('place_of_birth', placeOfBirth);
+  formData.append('currently_residing', countryResiding);
+  formData.append('nationality', nationality);
+  formData.append('address', address);
+  formData.append('contact_number', contactNumber);
 
   try {
-    const res = await axios.post(endpoints.auth.signUp, params);
+    const res = await axios.post(`${endpoints.auth.signUp}`, formData, {
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'multipart/form-data',
+      },
+    });
 
     const { accessToken } = res.data;
 
@@ -48,6 +71,7 @@ export const signUp = async ({ email, password, firstName, lastName }) => {
     sessionStorage.setItem(STORAGE_KEY, accessToken);
   } catch (error) {
     console.error('Error during sign up:', error);
+
     throw error;
   }
 };

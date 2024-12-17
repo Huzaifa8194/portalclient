@@ -9,6 +9,9 @@ import Alert from '@mui/material/Alert';
 import IconButton from '@mui/material/IconButton';
 import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import { Divider } from '@mui/material';
+import { Icon } from '@iconify/react';
+
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -23,10 +26,9 @@ import { signUp } from '../../context/jwt';
 import { useAuthContext } from '../../hooks';
 import { FormHead } from '../../components/form-head';
 import { SignUpTerms } from '../../components/sign-up-terms';
-
 // ----------------------------------------------------------------------
 
-export const SignUpSchema = zod.object({
+export const SignUpSchemaTemp = zod.object({
   firstName: zod.string().min(1, { message: 'First name is required!' }),
   lastName: zod.string().min(1, { message: 'Last name is required!' }),
 
@@ -61,7 +63,7 @@ export const SignUpSchema = zod.object({
 });
 // ----------------------------------------------------------------------
 
-export function JwtSignUpView() {
+export function JwtSignUpViewOptions() {
   const { checkUserSession } = useAuthContext();
 
   const router = useRouter();
@@ -78,7 +80,7 @@ export function JwtSignUpView() {
   };
 
   const methods = useForm({
-    resolver: zodResolver(SignUpSchema),
+    resolver: zodResolver(SignUpSchemaTemp),
     defaultValues,
   });
 
@@ -116,57 +118,37 @@ export function JwtSignUpView() {
 
   const renderForm = (
     <Box gap={3} display="flex" flexDirection="column">
-      <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: 'column', sm: 'row' }}>
-        <Field.Text name="firstName" label="First name" InputLabelProps={{ shrink: true }} />
-        <Field.Text name="lastName" label="Last name" InputLabelProps={{ shrink: true }} />
-
-      </Box>
-
-
-
-      <Field.Text name="email" label="Email" InputLabelProps={{ shrink: true }} />
-
-      <Field.Text name="phonenumber" label="Phone number" InputLabelProps={{ shrink: true }} />
-
-
-      <Field.DatePicker name="dateOfBirth" label="Date of birth" InputLabelProps={{ shrink: true }} />
-      <Field.CountrySelect name="nationality" label="Nationality" InputLabelProps={{ shrink: true }} />
-
-
-      <Field.CountrySelect name="placeofbirth" label="Place of Birth" InputLabelProps={{ shrink: true }} />
-      <Field.CountrySelect name="countryresiding" label="Country Residing In" InputLabelProps={{ shrink: true }} />
-
-      <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: 'column', sm: 'row' }}>
-        <Field.Text name="address" label="Address" InputLabelProps={{ shrink: true }} />
-        <Field.Text name="city" label="City" InputLabelProps={{ shrink: true }} />
-
-      </Box>
-
-
-
-      <Field.Text name='zipCode' label="Zip Code" />
 
 
 
 
 
+      <Link component={RouterLink} href={paths.auth.jwt.signUp} variant="subtitle2">
+        <LoadingButton
+          fullWidth
+          color="inherit"
+          size="large"
+          type="submit"
+          variant="contained"
+          loading={isSubmitting}
+          loadingIndicator="Create account..."
 
-      <Field.Text
-        name="password"
-        label="Password"
-        placeholder="6+ characters"
-        type={password.value ? 'text' : 'password'}
-        InputLabelProps={{ shrink: true }}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton onClick={password.onToggle} edge="end">
-                <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-      />
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%',
+            }}
+          >
+            <span>Sign Up With Email</span>
+            <Icon icon="mdi:globe" />
+          </Box>
+        </LoadingButton>
+
+      </Link>
+      <Divider sx={{ my: 3 }}>OR</Divider>
 
       <LoadingButton
         fullWidth
@@ -175,39 +157,96 @@ export function JwtSignUpView() {
         type="submit"
         variant="contained"
         loading={isSubmitting}
-        loadingIndicator="Create account..."
+        sx={{
+          backgroundColor: 'white',
+          color: 'black',
+          border: '2px solid #1976D2',
+          '&:hover': {
+            backgroundColor: '#f0f0f0',
+            borderColor: '#1565C0',
+          },
+        }}
       >
-        Create account
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%',
+          }}
+        >
+          <span>Sign Up With BankID</span>
+          <Icon icon="twemoji:flag-sweden" />
+        </Box>
+      </LoadingButton>
+
+      <LoadingButton
+        fullWidth
+        color="inherit"
+        size="large"
+        type="submit"
+        variant="contained"
+        loading={isSubmitting}
+        sx={{
+          backgroundColor: 'white',
+          color: 'black',
+          border: '2px solid #1976D2',
+          '&:hover': {
+            backgroundColor: '#f0f0f0',
+            borderColor: '#1565C0',
+          },
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%',
+          }}
+        >
+          <span>Sign Up With MitID</span>
+          <Icon icon="twemoji:flag-norway" />
+        </Box>
       </LoadingButton>
     </Box>
   );
 
   return (
     <>
-      <FormHead
-        title="Get started absolutely free"
-        description={
-          <>
-            {`Already have an account? `}
-            <Link component={RouterLink} href={paths.auth.jwt.signIn} variant="subtitle2">
-              Get started
-            </Link>
-          </>
-        }
-        sx={{ textAlign: { xs: 'center', md: 'left' } }}
-      />
+      <Box sx={{ width: '55%', mx: 'auto' }}>
 
-      {!!errorMsg && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {errorMsg}
-        </Alert>
-      )}
+        {/* Form Header */}
+        <FormHead
+          title="Get started absolutely free"
+          description={
+            <>
+              {`Already have an account? `}
+              <Link component={RouterLink} href={paths.auth.jwt.signIn} variant="subtitle2">
+                Get started
+              </Link>
+            </>
+          }
+          sx={{ textAlign: { xs: 'center', md: 'left' }, mb: 3 }}
+        />
 
-      <Form methods={methods} onSubmit={onSubmit}>
-        {renderForm}
-      </Form>
+        {/* Error Message */}
+        {!!errorMsg && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {errorMsg}
+          </Alert>
+        )}
 
-      <SignUpTerms />
+        {/* Form */}
+        <Form methods={methods} onSubmit={onSubmit}>
+          {renderForm}
+        </Form>
+
+        {/* Terms Component */}
+        <Box sx={{ mt: 3 }}>
+          <SignUpTerms />
+        </Box>
+      </Box>
     </>
   );
 }
