@@ -503,12 +503,12 @@ export const _tags = [
 // ----------------------------------------------------------------------
 
 export const _taskNames = [
-  `Prepare Monthly Financial Report`,
-  `Design New Marketing Campaign`,
-  `Analyze Customer Feedback`,
-  `Update Website Content`,
-  `Conduct Market Research`,
-  `Develop Software Application`,
+  `I submitted all the correct information.`,
+  `All fields were filled.`,
+  `All the data is legit and not fake.`,
+  `I made sure to include all the necessary information.`,
+  `I included all the necessary files.`,
+  `You may submit another assessment`,
   `Organize Team Meeting`,
   `Create Social Media Posts`,
   `Review Project Plan`,

@@ -77,7 +77,7 @@ export const navData = [
       },
 
       { title: 'Messages', path: paths.dashboard.chat, icon: ICONS.chat },
-      { title: 'Appointment Status', path: paths.dashboard.product.root, icon: ICONS.calendar },
+      { title: 'Assessment Status', path: paths.dashboard.general.analytics, icon: ICONS.calendar },
 
 
       {

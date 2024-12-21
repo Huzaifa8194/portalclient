@@ -69,8 +69,8 @@ export function TourItem({ tour, onView, onEdit, onDelete }) {
   const renderImages = (
     <Box gap={0.5} display="flex" sx={{ p: 1 }}>
       <Box flexGrow={1} sx={{ position: 'relative' }}>
-        {/* {renderPrice}
-        {renderRating} */}
+        {/* {renderPrice} */}
+        {/* {renderRating} */}
         <Image
           alt={tour.images[0]}
           src={tour.images[0]}
@@ -78,7 +78,7 @@ export function TourItem({ tour, onView, onEdit, onDelete }) {
         />
       </Box>
 
-      <Box gap={0.5} display="flex" flexDirection="column">
+      {/* <Box gap={0.5} display="flex" flexDirection="column">
         <Image
           alt={tour.images[1]}
           src={tour.images[1]}
@@ -91,7 +91,7 @@ export function TourItem({ tour, onView, onEdit, onDelete }) {
           ratio="1/1"
           sx={{ borderRadius: 1, width: 80, height: 80 }}
         />
-      </Box>
+      </Box> */}
     </Box>
   );
 
@@ -126,16 +126,17 @@ export function TourItem({ tour, onView, onEdit, onDelete }) {
 
       {[
         {
-          icon: <Iconify icon="mingcute:location-fill" sx={{ color: 'error.main' }} />,
+          icon: <></>,
           label: tour.destination,
+        },
+
+        {
+          icon: <></>,
+          label: `${tour.status} `,
         },
         {
           icon: <Iconify icon="solar:clock-circle-bold" sx={{ color: 'info.main' }} />,
           label: fDateRangeShortLabel(tour.available.startDate, tour.available.endDate),
-        },
-        {
-          icon: <Iconify icon="solar:users-group-rounded-bold" sx={{ color: 'primary.main' }} />,
-          label: `${tour.status} `,
         },
       ].map((item) => (
         <Stack

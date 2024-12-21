@@ -28,6 +28,10 @@ import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
+
+
+import { TourItem } from 'src/sections/tour/document-item';
+
 import {
   useTable,
   emptyRows,
@@ -138,6 +142,70 @@ export function OrderListView() {
     [router]
   );
 
+
+  const tours = [
+    {
+      id: 1,
+      name: "3123",
+
+
+      images: [
+        "beach1.jpg",
+        "beach2.jpg",
+        "beach3.jpg",
+      ],
+      createdAt: "312334",
+      destination: "Pakistan",
+      available: {
+        startDate: "2024-12-15",
+        endDate: "2024-12-30",
+      },
+      bookers: [{}, {}, {}, {}, {}],
+      status: "Pending",// 5 bookings
+    },
+    {
+      id: 2,
+      name: "4637",
+
+      price: 300,
+      priceSale: null,
+      images: [
+        "mountain1.jpg",
+        "mountain2.jpg",
+        "mountain3.jpg",
+      ],
+      createdAt: "34343",
+      destination: "Pakistan",
+      available: {
+        startDate: "2025-01-10",
+        endDate: "2025-01-20",
+      },
+      status: "pending",
+      bookers: [{}, {}, {}, {}], // 4 bookings
+    },
+    {
+      id: 3,
+      name: "City Lights Tour",
+
+      price: 150,
+      priceSale: 120,
+      images: [
+        "city1.jpg",
+        "city2.jpg",
+        "city3.jpg",
+      ],
+      createdAt: "132132",
+      destination: "4213",
+      available: {
+        startDate: "2025-02-01",
+        endDate: "2025-02-05",
+      },
+      status: "up-coming",
+      bookers: [{}, {}, {}, {}, {}, {}], // 6 bookings
+    },
+  ];
+
+
   const handleFilterStatus = useCallback(
     (event, newValue) => {
       table.onResetPage();
@@ -232,6 +300,20 @@ export function OrderListView() {
               }
             />
 
+
+            <Box
+              gap={3}
+              display="grid"
+              gridTemplateColumns={{ xs: 'repeat(1, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }}
+            >
+              {tours.map((tour) => (
+                <TourItem
+                  key={tour.id}
+                  tour={tour}
+
+                />
+              ))}
+            </Box>
             <Scrollbar sx={{ minHeight: 444 }}>
               <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
                 <TableHeadCustom
@@ -277,7 +359,7 @@ export function OrderListView() {
             </Scrollbar>
           </Box>
 
-          <TablePaginationCustom
+          {/* <TablePaginationCustom
             page={table.page}
             dense={table.dense}
             count={dataFiltered.length}
@@ -285,7 +367,7 @@ export function OrderListView() {
             onPageChange={table.onChangePage}
             onChangeDense={table.onChangeDense}
             onRowsPerPageChange={table.onChangeRowsPerPage}
-          />
+          /> */}
         </Card>
       </DashboardContent>
 

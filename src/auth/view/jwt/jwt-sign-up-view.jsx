@@ -58,7 +58,13 @@ export const SignUpSchema = zod.object({
     .string()
     .min(1, { message: 'Password is required!' })
     .min(6, { message: 'Password must be at least 6 characters!' }),
+
+  phonenumber: zod
+    .string()
+    .min(1, { message: 'Phone number is required!' }) // Ensure not empty
+
 });
+
 // ----------------------------------------------------------------------
 
 export function JwtSignUpView() {
@@ -89,6 +95,8 @@ export function JwtSignUpView() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
+
+      console.log(data.phonenumber, "THIS IS THE PHONEN UMBER HERE")
       await signUp({
         email: data.email,
         password: data.password,
@@ -103,6 +111,9 @@ export function JwtSignUpView() {
         zipCode: data.zipCode,
         contactNumber: data.phonenumber,
       });
+
+
+
 
       await checkUserSession?.();
 

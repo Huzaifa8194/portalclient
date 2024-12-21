@@ -50,7 +50,7 @@ export function JobList({ jobs }) {
       <Box
         gap={3}
         display="grid"
-        gridTemplateColumns={{ xs: 'repeat(1, 1fr)', sm: 'repeat(1, 1fr)', md: 'repeat(2, 1fr)' }}
+        gridTemplateColumns={{ xs: 'repeat(1, 1fr)', sm: 'repeat(1, 1fr)', md: 'repeat(1, 1fr)' }}
         backgroundColor="white"
       >
         {jobs.map((job) => (

@@ -27,6 +27,7 @@ module.exports = {
    * 2 ~ 'error'
    */
   rules: {
+    'react/self-closing-comp': 'off',
     'no-use-before-define': 0,
     'no-alert': 0,
     camelcase: 0,

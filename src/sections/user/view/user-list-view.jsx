@@ -39,6 +39,8 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 
+import { TourItem } from 'src/sections/tour/tour-item';
+
 import { UserTableRow } from '../user-table-row';
 import { UserTableToolbar } from '../user-table-toolbar';
 import { UserTableFiltersResult } from '../user-table-filters-result';
@@ -59,6 +61,73 @@ const TABLE_HEAD = [
 // ----------------------------------------------------------------------
 
 export function UserListView() {
+
+
+
+  const tours = [
+    {
+      id: 1,
+      name: "3123",
+
+
+      images: [
+        "beach1.jpg",
+        "beach2.jpg",
+        "beach3.jpg",
+      ],
+      createdAt: "Business Visa Assessment",
+      destination: "Pakistan",
+      available: {
+        startDate: "2024-12-15",
+        endDate: "2024-12-30",
+      },
+      bookers: [{}, {}, {}, {}, {}],
+      status: "Pending",// 5 bookings
+    },
+    {
+      id: 2,
+      name: "4637",
+
+      price: 300,
+      priceSale: null,
+      images: [
+        "mountain1.jpg",
+        "mountain2.jpg",
+        "mountain3.jpg",
+      ],
+      createdAt: "Visit Visa Assignment",
+      destination: "Pakistan",
+      available: {
+        startDate: "2025-01-10",
+        endDate: "2025-01-20",
+      },
+      status: "pending",
+      bookers: [{}, {}, {}, {}], // 4 bookings
+    },
+    {
+      id: 3,
+      name: "City Lights Tour",
+
+      price: 150,
+      priceSale: 120,
+      images: [
+        "city1.jpg",
+        "city2.jpg",
+        "city3.jpg",
+      ],
+      createdAt: "EU Assessment",
+      destination: "4213",
+      available: {
+        startDate: "2025-02-01",
+        endDate: "2025-02-05",
+      },
+      status: "up-coming",
+      bookers: [{}, {}, {}, {}, {}, {}], // 6 bookings
+    },
+  ];
+
+
+
   const table = useTable();
 
   const router = useRouter();
@@ -136,55 +205,90 @@ export function UserListView() {
           action={
             <Button
               component={RouterLink}
-              href={paths.dashboard.user.new}
+              href={paths.dashboard.post.new}
               variant="contained"
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
-              New user
+              New Appointment
             </Button>
           }
           sx={{ mb: { xs: 3, md: 5 } }}
         />
 
-        <Card>
-          <Tabs
-            value={filters.state.status}
-            onChange={handleFilterStatus}
-            sx={{
-              px: 2.5,
-              boxShadow: (theme) =>
-                `inset 0 -2px 0 0 ${varAlpha(theme.vars.palette.grey['500Channel'], 0.08)}`,
-            }}
-          >
-            {STATUS_OPTIONS.map((tab) => (
-              <Tab
-                key={tab.value}
-                iconPosition="end"
-                value={tab.value}
-                label={tab.label}
-                icon={
-                  <Label
-                    variant={
-                      ((tab.value === 'all' || tab.value === filters.state.status) && 'filled') ||
-                      'soft'
-                    }
-                    color={
-                      (tab.value === 'active' && 'success') ||
-                      (tab.value === 'pending' && 'warning') ||
-                      (tab.value === 'banned' && 'error') ||
-                      'default'
-                    }
-                  >
-                    {['active', 'pending', 'banned', 'rejected'].includes(tab.value)
-                      ? tableData.filter((user) => user.status === tab.value).length
-                      : tableData.length}
-                  </Label>
-                }
-              />
-            ))}
-          </Tabs>
 
-          <UserTableToolbar
+        <Tabs
+          value={filters.state.status}
+          onChange={handleFilterStatus}
+          sx={{
+            px: 0,
+            display: 'flex',
+            justifyContent: 'center',
+            pb: 3,
+
+            boxShadow: (theme) =>
+              `inset 0 -2px 0 0 ${varAlpha(theme.vars.palette.grey['500Channel'], 0.08)}`,
+          }}
+        >
+          {STATUS_OPTIONS.map((tab) => (
+            <Tab
+              key={tab.value}
+              iconPosition="end"
+              value={tab.value}
+              label={tab.label}
+              sx={{
+
+                mx: 'auto',  // Centers the container horizontally
+                py: 6,
+                border: '1px solid #ccc',  // Light border
+                boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',  // Subtle shadow
+                // Use flexbox to manage the layout
+                width: '100%',  // Make the tabs take up the entire width
+                // Distribute tabs evenly across the space
+                borderRadius: '12px',  // Add rounded corners (adjust the value for more/less rounding)
+              }}
+
+
+
+              icon={
+                <Label
+                  variant={
+                    ((tab.value === 'all' || tab.value === filters.state.status) && 'filled') ||
+                    'soft'
+                  }
+                  color={
+                    (tab.value === 'active' && 'success') ||
+                    (tab.value === 'pending' && 'warning') ||
+                    (tab.value === 'banned' && 'error') ||
+                    'default'
+                  }
+                >
+                  {['active', 'pending', 'banned', 'rejected'].includes(tab.value)
+                    ? tableData.filter((user) => user.status === tab.value).length
+                    : tableData.length}
+                </Label>
+              }
+            />
+          ))}
+        </Tabs>
+        <Card>
+
+
+
+          {tours.map((tour) => (
+            <>
+              <TourItem
+                key={tour.id} // Use the unique `id` as the key
+                tour={tour}   // Pass each tour object to the `TourItem` component
+
+              />
+
+              <div style={{ height: '20px' }} />
+            </>
+          ))}
+
+
+
+          {/* <UserTableToolbar
             filters={filters}
             onResetPage={table.onResetPage}
             options={{ roles: _roles }}
@@ -197,9 +301,9 @@ export function UserListView() {
               onResetPage={table.onResetPage}
               sx={{ p: 2.5, pt: 0 }}
             />
-          )}
+          )} */}
 
-          <Box sx={{ position: 'relative' }}>
+          {/* <Box sx={{ position: 'relative' }}>
             <TableSelectedAction
               dense={table.dense}
               numSelected={table.selected.length}
@@ -217,54 +321,54 @@ export function UserListView() {
                   </IconButton>
                 </Tooltip>
               }
-            />
+            /> */}
 
-            <Scrollbar>
-              <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
-                <TableHeadCustom
-                  order={table.order}
-                  orderBy={table.orderBy}
-                  headLabel={TABLE_HEAD}
-                  rowCount={dataFiltered.length}
-                  numSelected={table.selected.length}
-                  onSort={table.onSort}
-                  onSelectAllRows={(checked) =>
-                    table.onSelectAllRows(
-                      checked,
-                      dataFiltered.map((row) => row.id)
-                    )
-                  }
+          {/* <Scrollbar>
+            <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
+              <TableHeadCustom
+                order={table.order}
+                orderBy={table.orderBy}
+                headLabel={TABLE_HEAD}
+                rowCount={dataFiltered.length}
+                numSelected={table.selected.length}
+                onSort={table.onSort}
+                onSelectAllRows={(checked) =>
+                  table.onSelectAllRows(
+                    checked,
+                    dataFiltered.map((row) => row.id)
+                  )
+                }
+              />
+
+              <TableBody>
+                {dataFiltered
+                  .slice(
+                    table.page * table.rowsPerPage,
+                    table.page * table.rowsPerPage + table.rowsPerPage
+                  )
+                  .map((row) => (
+                    <UserTableRow
+                      key={row.id}
+                      row={row}
+                      selected={table.selected.includes(row.id)}
+                      onSelectRow={() => table.onSelectRow(row.id)}
+                      onDeleteRow={() => handleDeleteRow(row.id)}
+                      onEditRow={() => handleEditRow(row.id)}
+                    />
+                  ))}
+
+                <TableEmptyRows
+                  height={table.dense ? 56 : 56 + 20}
+                  emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
                 />
 
-                <TableBody>
-                  {dataFiltered
-                    .slice(
-                      table.page * table.rowsPerPage,
-                      table.page * table.rowsPerPage + table.rowsPerPage
-                    )
-                    .map((row) => (
-                      <UserTableRow
-                        key={row.id}
-                        row={row}
-                        selected={table.selected.includes(row.id)}
-                        onSelectRow={() => table.onSelectRow(row.id)}
-                        onDeleteRow={() => handleDeleteRow(row.id)}
-                        onEditRow={() => handleEditRow(row.id)}
-                      />
-                    ))}
+                <TableNoData notFound={notFound} />
+              </TableBody>
+            </Table>
+          </Scrollbar>
+        </Box> */}
 
-                  <TableEmptyRows
-                    height={table.dense ? 56 : 56 + 20}
-                    emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
-                  />
-
-                  <TableNoData notFound={notFound} />
-                </TableBody>
-              </Table>
-            </Scrollbar>
-          </Box>
-
-          <TablePaginationCustom
+          {/* <TablePaginationCustom
             page={table.page}
             dense={table.dense}
             count={dataFiltered.length}
@@ -272,9 +376,9 @@ export function UserListView() {
             onPageChange={table.onChangePage}
             onChangeDense={table.onChangeDense}
             onRowsPerPageChange={table.onChangeRowsPerPage}
-          />
+          /> */}
         </Card>
-      </DashboardContent>
+      </DashboardContent >
 
       <ConfirmDialog
         open={confirm.value}
