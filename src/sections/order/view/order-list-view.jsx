@@ -146,7 +146,7 @@ export function OrderListView() {
   const tours = [
     {
       id: 1,
-      name: "3123",
+      name: "Myself",
 
 
       images: [
@@ -154,18 +154,18 @@ export function OrderListView() {
         "beach2.jpg",
         "beach3.jpg",
       ],
-      createdAt: "312334",
-      destination: "Pakistan",
+      createdAt: "#312334",
+      destination: "PDF",
       available: {
         startDate: "2024-12-15",
         endDate: "2024-12-30",
       },
       bookers: [{}, {}, {}, {}, {}],
-      status: "Pending",// 5 bookings
+      status: "Sample detail Sample Detail Sample Details Sample Details",
     },
     {
       id: 2,
-      name: "4637",
+      name: "Myself",
 
       price: 300,
       priceSale: null,
@@ -174,18 +174,18 @@ export function OrderListView() {
         "mountain2.jpg",
         "mountain3.jpg",
       ],
-      createdAt: "34343",
-      destination: "Pakistan",
+      createdAt: "#34343",
+      destination: "DOCX",
       available: {
         startDate: "2025-01-10",
         endDate: "2025-01-20",
       },
-      status: "pending",
+      status: "Sample detail Sample Detail Sample Details Sample Details",
       bookers: [{}, {}, {}, {}], // 4 bookings
     },
     {
       id: 3,
-      name: "City Lights Tour",
+      name: "Myself",
 
       price: 150,
       priceSale: 120,
@@ -194,13 +194,13 @@ export function OrderListView() {
         "city2.jpg",
         "city3.jpg",
       ],
-      createdAt: "132132",
-      destination: "4213",
+      createdAt: "#132132",
+      destination: "PNG",
       available: {
         startDate: "2025-02-01",
         endDate: "2025-02-05",
       },
-      status: "up-coming",
+      status: "Sample detail Sample Detail Sample Details Sample Details",
       bookers: [{}, {}, {}, {}, {}, {}], // 6 bookings
     },
   ];
@@ -314,7 +314,7 @@ export function OrderListView() {
                 />
               ))}
             </Box>
-            <Scrollbar sx={{ minHeight: 444 }}>
+            {/* <Scrollbar sx={{ minHeight: 444 }}>
               <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
                 <TableHeadCustom
                   order={table.order}
@@ -356,7 +356,7 @@ export function OrderListView() {
                   <TableNoData notFound={notFound} />
                 </TableBody>
               </Table>
-            </Scrollbar>
+            </Scrollbar> */}
           </Box>
 
           {/* <TablePaginationCustom

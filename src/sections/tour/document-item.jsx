@@ -101,7 +101,7 @@ export function TourItem({ tour, onView, onEdit, onDelete }) {
       primary={`${tour.createdAt}`}
       secondary={
         <Link component={RouterLink} href={paths.dashboard.tour.details(tour.id)} color="inherit">
-          Apt No: {tour.name}
+          For: {' '}  {tour.name}
         </Link>
       }
       primaryTypographyProps={{ typography: 'caption', color: 'text.disabled' }}
