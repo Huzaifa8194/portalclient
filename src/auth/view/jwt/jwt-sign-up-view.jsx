@@ -115,9 +115,9 @@ export function JwtSignUpView() {
 
 
 
-      await checkUserSession?.();
+      // await checkUserSession?.();
 
-      router.refresh();
+      // router.refresh();
     } catch (error) {
       console.error(error);
       setErrorMsg(typeof error === 'string' ? error : error.message);

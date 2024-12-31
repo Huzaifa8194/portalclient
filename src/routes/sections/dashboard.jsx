@@ -49,6 +49,13 @@ const Investors = lazy(() => import('src/pages/dashboard/investors/new'));
 
 
 
+// Appointment Calender
+const AppointmentCalendarPage = lazy(() => import('src/pages/dashboard/appointmentcalendar'));
+
+// Appointment List
+
+const AppointmentListPage = lazy(() => import('src/pages/dashboard/appointmentlist/list'));
+
 // Order
 const OrderListPage = lazy(() => import('src/pages/dashboard/order/list'));
 const OrderDetailsPage = lazy(() => import('src/pages/dashboard/order/details'));
@@ -121,7 +128,7 @@ export const dashboardRoutes = [
           { path: 'coapplicant', element: <JobListPage /> },
           { path: 'profile', element: <UserProfilePage /> },
           { path: 'cards', element: <UserCardsPage /> },
-          { path: 'list', element: <UserListPage /> },
+          { path: 'list', element: <AppointmentListPage /> },
           { path: 'new', element: <UserCreatePage /> },
           { path: ':id/edit', element: <UserEditPage /> },
           { path: 'account', element: <UserAccountPage /> },
@@ -206,6 +213,7 @@ export const dashboardRoutes = [
       { path: 'mail', element: <MailPage /> },
       { path: 'chat', element: <ChatPage /> },
       { path: 'calendar', element: <CalendarPage /> },
+      { path: 'appointmentcalendar', element: <AppointmentCalendarPage /> },
       { path: 'kanban', element: <KanbanPage /> },
       { path: 'permission', element: <PermissionDeniedPage /> },
       { path: 'params', element: <ParamsPage /> },

@@ -7,6 +7,7 @@ export const ORDER_STATUS_OPTIONS = [
   { value: 'completed', label: 'Completed' },
   { value: 'cancelled', label: 'Cancelled' },
   { value: 'refunded', label: 'Refunded' },
+  { value: 'authorities', label: 'Authorities' },
 ];
 
 const ITEMS = [...Array(3)].map((_, index) => ({
