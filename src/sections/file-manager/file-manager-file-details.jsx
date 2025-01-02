@@ -21,8 +21,6 @@ import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 import { fileFormat, FileThumbnail } from 'src/components/file-thumbnail';
 
-import { FileManagerShareDialog } from './file-manager-share-dialog';
-import { FileManagerInvitedItem } from './file-manager-invited-item';
 
 // ----------------------------------------------------------------------
 
@@ -36,76 +34,21 @@ export function FileManagerFileDetails({
   onCopyLink,
   ...other
 }) {
-  const { name, size, url, type, shared, modifiedAt } = item;
+  const { name, size, url, type, modifiedAt } = item;
 
-  const hasShared = shared && !!shared.length;
 
-  const toggleTags = useBoolean(true);
 
-  const share = useBoolean();
 
   const properties = useBoolean(true);
 
   const [inviteEmail, setInviteEmail] = useState('');
 
-  const [tags, setTags] = useState(item.tags.slice(0, 3));
 
   const handleChangeInvite = useCallback((event) => {
     setInviteEmail(event.target.value);
   }, []);
 
-  const handleChangeTags = useCallback((newValue) => {
-    setTags(newValue);
-  }, []);
 
-  const renderTags = (
-    <Stack spacing={1.5}>
-      <Stack
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        sx={{ typography: 'subtitle2' }}
-      >
-        Tags
-        <IconButton size="small" onClick={toggleTags.onToggle}>
-          <Iconify
-            icon={toggleTags.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
-          />
-        </IconButton>
-      </Stack>
-
-      {toggleTags.value && (
-        <Autocomplete
-          multiple
-          freeSolo
-          options={item.tags.map((option) => option)}
-          getOptionLabel={(option) => option}
-          defaultValue={item.tags.slice(0, 3)}
-          value={tags}
-          onChange={(event, newValue) => {
-            handleChangeTags(newValue);
-          }}
-          renderOption={(props, option) => (
-            <li {...props} key={option}>
-              {option}
-            </li>
-          )}
-          renderTags={(selected, getTagProps) =>
-            selected.map((option, index) => (
-              <Chip
-                {...getTagProps({ index })}
-                size="small"
-                variant="soft"
-                label={option}
-                key={option}
-              />
-            ))
-          }
-          renderInput={(params) => <TextField {...params} placeholder="#Add a tags" />}
-        />
-      )}
-    </Stack>
-  );
 
   const renderProperties = (
     <Stack spacing={1.5}>
@@ -150,36 +93,7 @@ export function FileManagerFileDetails({
     </Stack>
   );
 
-  const renderShared = (
-    <>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2.5 }}>
-        <Typography variant="subtitle2"> Share with </Typography>
 
-        <IconButton
-          size="small"
-          color="primary"
-          onClick={share.onTrue}
-          sx={{
-            width: 24,
-            height: 24,
-            bgcolor: 'primary.main',
-            color: 'primary.contrastText',
-            '&:hover': { bgcolor: 'primary.dark' },
-          }}
-        >
-          <Iconify icon="mingcute:add-line" />
-        </IconButton>
-      </Stack>
-
-      {hasShared && (
-        <Box component="ul" sx={{ pl: 2, pr: 1 }}>
-          {shared.map((person) => (
-            <FileManagerInvitedItem key={person.id} person={person} />
-          ))}
-        </Box>
-      )}
-    </>
-  );
 
   return (
     <>
@@ -230,12 +144,9 @@ export function FileManagerFileDetails({
 
             <Divider sx={{ borderStyle: 'dashed' }} />
 
-            {renderTags}
-
             {renderProperties}
           </Stack>
 
-          {renderShared}
         </Scrollbar>
 
         <Box sx={{ p: 2.5 }}>
@@ -252,17 +163,7 @@ export function FileManagerFileDetails({
         </Box>
       </Drawer>
 
-      <FileManagerShareDialog
-        open={share.value}
-        shared={shared}
-        inviteEmail={inviteEmail}
-        onChangeInvite={handleChangeInvite}
-        onCopyLink={onCopyLink}
-        onClose={() => {
-          share.onFalse();
-          setInviteEmail('');
-        }}
-      />
+    
     </>
   );
 }

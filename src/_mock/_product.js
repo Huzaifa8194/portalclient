@@ -122,6 +122,7 @@ export const FAMILY_CATEGORY_OPTIONS = [
   {
     group: 'Choose an Option',
     classify: [
+      'Myself',
       'Father',
       'Mother',
       'Husband',

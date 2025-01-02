@@ -14,6 +14,12 @@ import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -59,6 +65,8 @@ export function ProductNewEditForm({ currentProduct }) {
   const router = useRouter();
 
   const [includeTaxes, setIncludeTaxes] = useState(false);
+  const [openFolderDialog, setOpenFolderDialog] = useState(false);
+  const [folderName, setFolderName] = useState('');
 
   const defaultValues = useMemo(
     () => ({
@@ -115,6 +123,10 @@ export function ProductNewEditForm({ currentProduct }) {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
+      if (!data.code || !data.sku || !data.category || data.images.length === 0) {
+        toast.error('Please fill in all fields');
+        return;
+      }
       await new Promise((resolve) => setTimeout(resolve, 500));
       reset();
       toast.success(currentProduct ? 'Update success!' : 'Create success!');
@@ -122,6 +134,7 @@ export function ProductNewEditForm({ currentProduct }) {
       console.info('DATA', data);
     } catch (error) {
       console.error(error);
+      toast.error('An error occurred. Please try again.');
     }
   });
 
@@ -141,13 +154,30 @@ export function ProductNewEditForm({ currentProduct }) {
     setIncludeTaxes(event.target.checked);
   }, []);
 
+  const handleOpenFolderDialog = () => {
+    setOpenFolderDialog(true);
+  };
+
+  const handleCloseFolderDialog = () => {
+    setOpenFolderDialog(false);
+    setFolderName('');
+  };
+
+  const handleCreateFolder = () => {
+    if (folderName.trim()) {
+      // Here you would typically handle the actual folder creation logic
+      console.info('Creating folder:', folderName);
+      toast.success(`Folder "${folderName}" created successfully!`);
+      handleCloseFolderDialog();
+    } else {
+      toast.error('Please enter a folder name.');
+    }
+  };
+
   const renderDetails = (
     <Card>
       <CardHeader title="Files" subheader="Upload your documents." sx={{ mb: 3 }} />
-
       <Divider />
-
-
     </Card>
   );
 
@@ -157,6 +187,15 @@ export function ProductNewEditForm({ currentProduct }) {
         title="Document Details"
         subheader="Give details about the Document"
         sx={{ mb: 3 }}
+        action={
+          <LoadingButton
+            variant="contained"
+            size="medium"
+            onClick={handleOpenFolderDialog}
+          >
+            Create Folder
+          </LoadingButton>
+        }
       />
 
       <Divider />
@@ -169,10 +208,7 @@ export function ProductNewEditForm({ currentProduct }) {
           gridTemplateColumns={{ xs: 'repeat(1, 1fr)', md: 'repeat(2, 1fr)' }}
         >
           <Field.Text name="code" label="Document Type" />
-
           <Field.Text name="sku" label="Document Details" />
-
-
 
           <Field.Select native name="category" label="Who is the Document for" InputLabelProps={{ shrink: true }}>
             {FAMILY_CATEGORY_OPTIONS.map((category) => (
@@ -185,12 +221,7 @@ export function ProductNewEditForm({ currentProduct }) {
               </optgroup>
             ))}
           </Field.Select>
-
-
-
-
         </Box>
-
 
         <Stack spacing={1.5}>
           <Typography variant="subtitle2">Upload Documents</Typography>
@@ -203,111 +234,57 @@ export function ProductNewEditForm({ currentProduct }) {
             onRemoveAll={handleRemoveAllFiles}
             onUpload={() => console.info('ON UPLOAD')}
           />
+          {/* Add Document Button */}
+          <Box sx={{ textAlign: 'right', mt: 1 }}>
+            <LoadingButton
+              variant="contained"
+              size="medium"
+              onClick={() => {
+                const { code, sku, category, images } = methods.getValues();
+                if (!code || !sku || !category || images.length === 0) {
+                  toast.error('Please fill in all fields and upload at least one document.');
+                } else {
+                  toast.success('Document added successfully!');
+                  console.info('Add Document Clicked');
+                  // Here you would typically handle the actual document addition logic
+                }
+              }}
+            >
+              Add Document
+            </LoadingButton>
+          </Box>
         </Stack>
-
-
-
-
-
       </Stack>
     </Card>
-  );
-
-  const renderPricing = (
-    <Card>
-      <CardHeader title="Pricing" subheader="Price related inputs" sx={{ mb: 3 }} />
-
-      <Divider />
-
-      <Stack spacing={3} sx={{ p: 3 }}>
-        <Field.Text
-          name="price"
-          label="Regular price"
-          placeholder="0.00"
-          type="number"
-          InputLabelProps={{ shrink: true }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Box component="span" sx={{ color: 'text.disabled' }}>
-                  $
-                </Box>
-              </InputAdornment>
-            ),
-          }}
-        />
-
-        <Field.Text
-          name="priceSale"
-          label="Sale price"
-          placeholder="0.00"
-          type="number"
-          InputLabelProps={{ shrink: true }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Box component="span" sx={{ color: 'text.disabled' }}>
-                  $
-                </Box>
-              </InputAdornment>
-            ),
-          }}
-        />
-
-        <FormControlLabel
-          control={
-            <Switch id="toggle-taxes" checked={includeTaxes} onChange={handleChangeIncludeTaxes} />
-          }
-          label="Price includes taxes"
-        />
-
-        {!includeTaxes && (
-          <Field.Text
-            name="taxes"
-            label="Tax (%)"
-            placeholder="0.00"
-            type="number"
-            InputLabelProps={{ shrink: true }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Box component="span" sx={{ color: 'text.disabled' }}>
-                    %
-                  </Box>
-                </InputAdornment>
-              ),
-            }}
-          />
-        )}
-      </Stack>
-    </Card>
-  );
-
-  const renderActions = (
-    <Stack spacing={3} direction="row" alignItems="center" flexWrap="wrap">
-      <FormControlLabel
-        control={<Switch defaultChecked inputProps={{ id: 'publish-switch' }} />}
-        label="Publish"
-        sx={{ pl: 3, flexGrow: 1 }}
-      />
-
-      <LoadingButton type="submit" variant="contained" size="large" loading={isSubmitting}>
-        {!currentProduct ? 'Create product' : 'Save changes'}
-      </LoadingButton>
-    </Stack>
   );
 
   return (
     <Form methods={methods} onSubmit={onSubmit}>
       <Stack spacing={{ xs: 3, md: 5 }} sx={{ mx: 'auto', maxWidth: { xs: 720, xl: 880 } }}>
-
         {renderProperties}
-
-
-
-
-
       </Stack>
+
+      <Dialog open={openFolderDialog} onClose={handleCloseFolderDialog}>
+        <DialogTitle>Create New Folder</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="folderName"
+            label="Folder Name"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={folderName}
+            onChange={(e) => setFolderName(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseFolderDialog}>Cancel</Button>
+          <Button onClick={handleCreateFolder} variant="contained">Create</Button>
+        </DialogActions>
+      </Dialog>
     </Form>
   );
 }
+

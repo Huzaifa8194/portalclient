@@ -34,45 +34,24 @@ const URLS = [
   'https://www.cloud.com/s/c218bo6kjuqyv66/xl_david-blaine_component_tanzania_books.pdf',
 ];
 
-const SHARED_PERSONS = [...Array(20)].map((_, index) => ({
-  id: _mock.id(index),
-  name: _mock.fullName(index),
-  email: _mock.email(index),
-  avatarUrl: _mock.image.avatar(index),
-  permission: index % 2 ? 'view' : 'edit',
-}));
 
 export const FILE_TYPE_OPTIONS = [
   'folder',
-  'txt',
-  'zip',
-  'audio',
   'image',
-  'video',
   'word',
   'excel',
   'powerpoint',
   'pdf',
-  'photoshop',
-  'illustrator',
 ];
 
 // ----------------------------------------------------------------------
 
-const shared = (index) =>
-  (index === 0 && SHARED_PERSONS.slice(0, 5)) ||
-  (index === 1 && SHARED_PERSONS.slice(5, 9)) ||
-  (index === 2 && SHARED_PERSONS.slice(9, 11)) ||
-  (index === 3 && SHARED_PERSONS.slice(11, 12)) ||
-  [];
 
 export const _folders = FOLDERS.map((name, index) => ({
   id: `${_mock.id(index)}_folder`,
   name,
   type: 'folder',
   url: URLS[index],
-  shared: shared(index),
-  tags: _tags.slice(0, 5),
   size: GB / ((index + 1) * 10),
   totalFiles: (index + 1) * 100,
   createdAt: _mock.time(index),
@@ -84,8 +63,6 @@ export const _files = _fileNames.map((name, index) => ({
   id: `${_mock.id(index)}_file`,
   name,
   url: URLS[index],
-  shared: shared(index),
-  tags: _tags.slice(0, 5),
   size: GB / ((index + 1) * 500),
   createdAt: _mock.time(index),
   modifiedAt: _mock.time(index),
