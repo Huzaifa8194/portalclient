@@ -41,7 +41,7 @@ export function ApplicationChoice() {
           Welcome to Your Application Portal
         </Typography>
         <Typography variant="h5" component="h2" color="text.secondary" gutterBottom>
-          Application Status
+          Choose Authority to View Application Details
         </Typography>
       </Box>
 

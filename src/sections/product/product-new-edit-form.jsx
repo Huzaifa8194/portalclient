@@ -191,11 +191,7 @@ export function ProductNewEditForm({ currentProduct }) {
           <LoadingButton
             variant="contained"
             size="medium"
-<<<<<<< HEAD
-            onClick={() => console.info('Create Folder Clicked')}
-=======
             onClick={handleOpenFolderDialog}
->>>>>>> ba8430d2cea21ba17800a81b1730f026338fd59a
           >
             Create Folder
           </LoadingButton>
@@ -213,11 +209,7 @@ export function ProductNewEditForm({ currentProduct }) {
         >
           <Field.Text name="code" label="Document Type" />
           <Field.Text name="sku" label="Document Details" />
-<<<<<<< HEAD
   
-=======
-
->>>>>>> ba8430d2cea21ba17800a81b1730f026338fd59a
           <Field.Select native name="category" label="Who is the Document for" InputLabelProps={{ shrink: true }}>
             {FAMILY_CATEGORY_OPTIONS.map((category) => (
               <optgroup key={category.group} label={category.group}>
@@ -230,11 +222,8 @@ export function ProductNewEditForm({ currentProduct }) {
             ))}
           </Field.Select>
         </Box>
-<<<<<<< HEAD
   
-=======
 
->>>>>>> ba8430d2cea21ba17800a81b1730f026338fd59a
         <Stack spacing={1.5}>
           <Typography variant="subtitle2">Upload Documents</Typography>
           <Field.Upload
@@ -251,9 +240,6 @@ export function ProductNewEditForm({ currentProduct }) {
             <LoadingButton
               variant="contained"
               size="medium"
-<<<<<<< HEAD
-              onClick={() => console.info('Add Document Clicked')}
-=======
               onClick={() => {
                 const { code, sku, category, images } = methods.getValues();
                 if (!code || !sku || !category || images.length === 0) {
@@ -264,7 +250,6 @@ export function ProductNewEditForm({ currentProduct }) {
                   // Here you would typically handle the actual document addition logic
                 }
               }}
->>>>>>> ba8430d2cea21ba17800a81b1730f026338fd59a
             >
               Add Document
             </LoadingButton>

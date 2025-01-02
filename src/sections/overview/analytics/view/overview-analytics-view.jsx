@@ -108,7 +108,7 @@ export function OverviewAnalyticsView({ caseNo, authority, onBack }) {
 
         <Grid xs={12} md={6} lg={8}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6">Evaluate Yourself</Typography>
+            <Typography variant="h6">Comments</Typography>
             <Button variant="contained" onClick={handlePrintLogs}>
               Print Logs
             </Button>
