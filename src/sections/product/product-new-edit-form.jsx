@@ -157,10 +157,19 @@ export function ProductNewEditForm({ currentProduct }) {
         title="Document Details"
         subheader="Give details about the Document"
         sx={{ mb: 3 }}
+        action={
+          <LoadingButton
+            variant="contained"
+            size="medium"
+            onClick={() => console.info('Create Folder Clicked')}
+          >
+            Create Folder
+          </LoadingButton>
+        }
       />
-
+  
       <Divider />
-
+  
       <Stack spacing={3} sx={{ p: 3 }}>
         <Box
           columnGap={2}
@@ -169,11 +178,8 @@ export function ProductNewEditForm({ currentProduct }) {
           gridTemplateColumns={{ xs: 'repeat(1, 1fr)', md: 'repeat(2, 1fr)' }}
         >
           <Field.Text name="code" label="Document Type" />
-
           <Field.Text name="sku" label="Document Details" />
-
-
-
+  
           <Field.Select native name="category" label="Who is the Document for" InputLabelProps={{ shrink: true }}>
             {FAMILY_CATEGORY_OPTIONS.map((category) => (
               <optgroup key={category.group} label={category.group}>
@@ -185,13 +191,8 @@ export function ProductNewEditForm({ currentProduct }) {
               </optgroup>
             ))}
           </Field.Select>
-
-
-
-
         </Box>
-
-
+  
         <Stack spacing={1.5}>
           <Typography variant="subtitle2">Upload Documents</Typography>
           <Field.Upload
@@ -203,15 +204,22 @@ export function ProductNewEditForm({ currentProduct }) {
             onRemoveAll={handleRemoveAllFiles}
             onUpload={() => console.info('ON UPLOAD')}
           />
+          {/* Add Document Button */}
+          <Box sx={{ textAlign: 'right', mt: 1 }}>
+            <LoadingButton
+              variant="contained"
+              size="medium"
+              onClick={() => console.info('Add Document Clicked')}
+            >
+              Add Document
+            </LoadingButton>
+          </Box>
         </Stack>
-
-
-
-
-
       </Stack>
     </Card>
   );
+  
+  
 
   const renderPricing = (
     <Card>
