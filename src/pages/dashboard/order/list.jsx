@@ -2,11 +2,11 @@ import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
 
-import { OrderListView } from 'src/sections/order/view';
+import { FileManagerView } from 'src/sections/file-manager/view';
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `Order list | Dashboard - ${CONFIG.appName}` };
+const metadata = { title: `File manager | Dashboard - ${CONFIG.appName}` };
 
 export default function Page() {
   return (
@@ -15,7 +15,7 @@ export default function Page() {
         <title> {metadata.title}</title>
       </Helmet>
 
-      <OrderListView />
+      <FileManagerView />
     </>
   );
 }
