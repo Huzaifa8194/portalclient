@@ -10,7 +10,7 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import { applications } from 'src/_mock/_applications';
-import { OverviewAnalyticsView } from '.';
+import { OverviewAnalyticsView } from './overview-analytics-view'
 
 export function ApplicationTable({ authority }) {
   const [selectedApplication, setSelectedApplication] = useState(null);
