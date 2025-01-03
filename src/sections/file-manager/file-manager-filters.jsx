@@ -21,7 +21,6 @@ import { CustomDateRangePicker } from 'src/components/custom-date-range-picker';
 
 export function FileManagerFilters({
   filters,
-  options,
   dateError,
   onResetPage,
   openDateRange,
@@ -30,9 +29,6 @@ export function FileManagerFilters({
 }) {
   const popover = usePopover();
 
-  const renderLabel = filters.state.type.length
-    ? filters.state.type.slice(0, 2).join(',')
-    : 'All type';
 
   const handleFilterName = useCallback(
     (event) => {
@@ -89,85 +85,6 @@ export function FileManagerFilters({
     />
   );
 
-  const renderFilterType = (
-    <>
-      <Button
-        color="inherit"
-        onClick={popover.onOpen}
-        endIcon={
-          <Iconify
-            icon={popover.open ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
-            sx={{ ml: -0.5 }}
-          />
-        }
-      >
-        {renderLabel}
-        {filters.state.type.length > 2 && (
-          <Label color="info" sx={{ ml: 1 }}>
-            +{filters.state.type.length - 2}
-          </Label>
-        )}
-      </Button>
-
-      <CustomPopover
-        open={popover.open}
-        anchorEl={popover.anchorEl}
-        onClose={popover.onClose}
-        slotProps={{ paper: { sx: { p: 2.5 } } }}
-      >
-        <Stack spacing={2.5}>
-          <Box
-            gap={1}
-            display="grid"
-            gridTemplateColumns={{ xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' }}
-          >
-            {options.types.map((type) => {
-              const selected = filters.state.type.includes(type);
-
-              return (
-                <CardActionArea
-                  key={type}
-                  onClick={() => handleFilterType(type)}
-                  sx={{
-                    p: 1,
-                    borderRadius: 1,
-                    cursor: 'pointer',
-                    border: (theme) =>
-                      `solid 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.08)}`,
-                    ...(selected && { bgcolor: 'action.selected' }),
-                  }}
-                >
-                  <Stack
-                    spacing={1}
-                    direction="row"
-                    alignItems="center"
-                    sx={{
-                      typography: 'caption',
-                      textTransform: 'capitalize',
-                      ...(selected && { fontWeight: 'fontWeightSemiBold' }),
-                    }}
-                  >
-                    <FileThumbnail file={type} sx={{ width: 24, height: 24 }} />
-                    {type}
-                  </Stack>
-                </CardActionArea>
-              );
-            })}
-          </Box>
-
-          <Stack spacing={1.5} direction="row" alignItems="center" justifyContent="flex-end">
-            <Button variant="outlined" color="inherit" onClick={handleResetType}>
-              Clear
-            </Button>
-
-            <Button variant="contained" onClick={popover.onClose}>
-              Apply
-            </Button>
-          </Stack>
-        </Stack>
-      </CustomPopover>
-    </>
-  );
 
   const renderFilterDate = (
     <>
@@ -212,7 +129,6 @@ export function FileManagerFilters({
       <Stack spacing={1} direction="row" alignItems="center" justifyContent="flex-end" flexGrow={1}>
         {renderFilterDate}
 
-        {renderFilterType}
       </Stack>
     </Stack>
   );

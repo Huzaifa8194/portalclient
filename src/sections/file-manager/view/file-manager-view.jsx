@@ -8,6 +8,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useSetState } from 'src/hooks/use-set-state';
+import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 
 import { fIsAfter, fIsBetween } from 'src/utils/format-time';
 
@@ -52,28 +53,44 @@ export function FileManagerView() {
   useEffect(() => {
     // Fetch data from PRODUCT_MOCK_DATA and FOLDER_MOCK_DATA
     const fetchData = () => {
-      const folders = FOLDER_MOCK_DATA.map(folder => ({
-        id: folder.id,
-        name: folder.name,
-        type: 'folder',
-        size: 0,
-        modifiedAt: folder.createdAt,
-        shared: [],
-        isFavorited: false,
-      }));
+      const folderMap = new Map();
 
-      const files = PRODUCT_MOCK_DATA.map(product => ({
-        id: product.id,
-        name: product.name,
-        type: 'file',
-        size: Math.floor(Math.random() * 1000000), // Random file size
-        modifiedAt: new Date().toISOString(),
-        shared: [],
-        isFavorited: false,
-        folder: product.category,
-      }));
+      // Create folders based on categories
+      PRODUCT_MOCK_DATA.forEach(product => {
+        if (!folderMap.has(product.category)) {
+          folderMap.set(product.category, {
+            id: `folder-${product.category}`,
+            name: product.category,
+            type: 'folder',
+            size: 0,
+            modifiedAt: new Date().toISOString(),
+            shared: [],
+            isFavorited: false,
+            files: [],
+          });
+        }
+        
+        // Add files to the corresponding folder
+        const folder = folderMap.get(product.category);
+        product.images.forEach((image, index) => {
+          folder.files.push({
+            id: `${product.id}-image-${index}`,
+            name: image.name,
+            type: 'file',
+            size: image.size,
+            modifiedAt: new Date().toISOString(),
+            shared: [],
+            isFavorited: false,
+            folder: product.category,
+          });
+        });
+        folder.size += product.images.reduce((total, image) => total + image.size, 0);
+      });
 
-      setTableData([...folders, ...files]);
+      // Convert folder map to array
+      const folderData = Array.from(folderMap.values());
+
+      setTableData(folderData);
     };
 
     fetchData();
@@ -105,11 +122,20 @@ export function FileManagerView() {
 
   const handleDeleteItem = useCallback(
     (id) => {
-      const deleteRow = tableData.filter((row) => row.id !== id);
+      const updatedData = tableData.map(folder => {
+        if (folder.type === 'folder') {
+          return {
+            ...folder,
+            files: folder.files.filter(file => file.id !== id),
+            size: folder.files.filter(file => file.id !== id).reduce((total, file) => total + file.size, 0),
+          };
+        }
+        return folder;
+      }).filter(folder => folder.files.length > 0);
 
       toast.success('Delete success!');
 
-      setTableData(deleteRow);
+      setTableData(updatedData);
 
       table.onUpdatePageDeleteRow(dataInPage.length);
     },
@@ -117,11 +143,20 @@ export function FileManagerView() {
   );
 
   const handleDeleteItems = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
+    const updatedData = tableData.map(folder => {
+      if (folder.type === 'folder') {
+        return {
+          ...folder,
+          files: folder.files.filter(file => !table.selected.includes(file.id)),
+          size: folder.files.filter(file => !table.selected.includes(file.id)).reduce((total, file) => total + file.size, 0),
+        };
+      }
+      return folder;
+    }).filter(folder => folder.files.length > 0);
 
     toast.success('Delete success!');
 
-    setTableData(deleteRows);
+    setTableData(updatedData);
 
     table.onUpdatePageDeleteRows({
       totalRowsInPage: dataInPage.length,
@@ -178,8 +213,15 @@ export function FileManagerView() {
             Upload
           </Button>
         </Stack>
-
-        <Stack spacing={2.5} sx={{ my: { xs: 3, md: 5 } }}>
+ <CustomBreadcrumbs
+        links={[
+          { name: 'Dashboard'},
+          { name: 'Documents'},
+          { name: 'All Document' },
+        ]}
+        sx={{ my: { xs: 3, md: 2 } }}
+      />
+        <Stack spacing={2.5} sx={{ mb: { xs: 3, md: 5 } }}>
           {renderFilters}
 
           {canReset && renderResults}

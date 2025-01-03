@@ -31,7 +31,7 @@ import { FileManagerNewFolderDialog } from './file-manager-new-folder-dialog';
 
 // ----------------------------------------------------------------------
 
-export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete, ...other }) {
+export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete, onOpenFolder, ...other }) {
   const { copy } = useCopyToClipboard();
 
   const share = useBoolean();
@@ -65,6 +65,15 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
     copy(folder.url);
   }, [copy, folder.url]);
 
+  const handleClick = (event) => {
+    if (folder.type === 'folder') {
+      onOpenFolder(folder.id);
+    } else {
+      details.onTrue();
+    }
+    event.stopPropagation();
+  };
+
   const renderAction = (
     <Stack direction="row" alignItems="center" sx={{ top: 8, right: 8, position: 'absolute' }}>
       <Checkbox
@@ -94,7 +103,10 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
       {(checkbox.value || selected) && onSelect ? (
         <Checkbox
           checked={selected}
-          onClick={onSelect}
+          onClick={(event) => {
+            onSelect();
+            event.stopPropagation();
+          }}
           icon={<Iconify icon="eva:radio-button-off-fill" />}
           checkedIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
           sx={{ width: 1, height: 1 }}
@@ -102,15 +114,15 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
       ) : (
         <Box
           component="img"
-          src={`${CONFIG.assetsDir}/assets/icons/files/ic-folder.svg`}
+          src={`${CONFIG.assetsDir}/assets/icons/files/${folder.type === 'folder' ? 'ic-folder' : 'ic-file'}.svg`}
           sx={{ width: 1, height: 1 }}
         />
       )}
     </Box>
   );
+
   const renderText = (
     <ListItemText
-      onClick={details.onTrue}
       primary={folder.name}
       secondary={
         <>
@@ -125,7 +137,7 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
               bgcolor: 'currentColor',
             }}
           />
-          {folder.totalFiles} files
+          {folder.type === 'folder' ? `${folder.totalFiles} files` : folder.type}
         </>
       }
       primaryTypographyProps={{ noWrap: true, typography: 'subtitle1' }}
@@ -178,6 +190,7 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
           }),
           ...sx,
         }}
+        onClick={handleClick}
         {...other}
       >
         {renderIcon}
@@ -293,3 +306,4 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
     </>
   );
 }
+

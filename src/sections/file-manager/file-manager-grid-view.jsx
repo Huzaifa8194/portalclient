@@ -84,14 +84,7 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
 
         <Divider sx={{ my: 5, borderStyle: 'dashed' }} />
 
-        <FileManagerPanel
-          title="Files"
-          subtitle={`${dataFiltered.filter((item) => item.type !== 'folder').length} files`}
-          onOpen={upload.onTrue}
-          collapse={files.value}
-          onCollapse={files.onToggle}
-        />
-
+       
         <Collapse in={!files.value} unmountOnExit>
           <Box
             display="grid"

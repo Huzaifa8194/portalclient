@@ -195,8 +195,18 @@ export function ProductNewEditForm({ currentProduct }) {
       };
       PRODUCT_MOCK_DATA.push(newDocument);
 
-      // Create a folder with the name of the selected category
-      console.log(`Created folder: ${category}`);
+      // Create a folder with the name of the selected category if it doesn't exist
+      const existingFolder = FOLDER_MOCK_DATA.find(folder => folder.name === category);
+      if (!existingFolder) {
+        const newFolder = {
+          id: String(FOLDER_MOCK_DATA.length + 1),
+          name: category,
+          createdAt: new Date().toISOString(),
+        };
+        FOLDER_MOCK_DATA.push(newFolder);
+        console.log(`Created folder: ${category}`);
+      }
+
       console.log(`Added files to folder ${category}:`, images);
 
       toast.success('Document added successfully!');
