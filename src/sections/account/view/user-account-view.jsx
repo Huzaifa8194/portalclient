@@ -48,15 +48,15 @@ export function AccountView() {
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
-      {/* <Tabs value={tabs.value} onChange={tabs.onChange} sx={{ mb: { xs: 3, md: 5 } }}>
+      <Tabs value={tabs.value} onChange={tabs.onChange} sx={{ mb: { xs: 3, md: 5 } }}>
         {TABS.map((tab) => (
           <Tab key={tab.value} label={tab.label} icon={tab.icon} value={tab.value} />
         ))}
-      </Tabs> */}
+      </Tabs>
 
       {tabs.value === 'general' && <AccountGeneral />}
 
-      {/* {tabs.value === 'billing' && (
+      {tabs.value === 'billing' && (
         <AccountBilling
           plans={_userPlans}
           cards={_userPayment}
@@ -69,7 +69,7 @@ export function AccountView() {
 
       {tabs.value === 'social' && <AccountSocialLinks socialLinks={_userAbout.socialLinks} />}
 
-      {tabs.value === 'security' && <AccountChangePassword />} */}
+      {tabs.value === 'security' && <AccountChangePassword />}
     </DashboardContent>
   );
 }

@@ -1,15 +1,10 @@
 import { useCallback } from 'react';
-
 import Box from '@mui/material/Box';
 import Pagination, { paginationClasses } from '@mui/material/Pagination';
-
+import Typography from '@mui/material/Typography';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
-import Typography from '@mui/material/Typography';
-
 import { JobItem } from './job-item';
-
-// ----------------------------------------------------------------------
 
 export function JobList({ jobs }) {
   const router = useRouter();
@@ -42,16 +37,20 @@ export function JobList({ jobs }) {
           mx: 'auto',
           display: 'block',
           textAlign: 'left',
-          color: 'gray',
+          color: 'text.secondary',
         }}
       >
         Kindly add your family members here who are going to apply with you now or they are willing to apply in future.
       </Typography>
+      
       <Box
         gap={3}
         display="grid"
-        gridTemplateColumns={{ xs: 'repeat(1, 1fr)', sm: 'repeat(1, 1fr)', md: 'repeat(1, 1fr)' }}
-        backgroundColor="white"
+        gridTemplateColumns={{
+          xs: 'repeat(1, 1fr)',
+          sm: 'repeat(2, 1fr)',
+          md: 'repeat(3, 1fr)',
+        }}
       >
         {jobs.map((job) => (
           <JobItem
@@ -68,11 +67,14 @@ export function JobList({ jobs }) {
         <Pagination
           count={8}
           sx={{
-            mt: { xs: 8, md: 8 },
-            [`& .${paginationClasses.ul}`]: { justifyContent: 'center' },
+            mt: 8,
+            [`& .${paginationClasses.ul}`]: {
+              justifyContent: 'center',
+            },
           }}
         />
       )}
     </>
   );
 }
+
