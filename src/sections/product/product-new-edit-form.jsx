@@ -31,6 +31,8 @@ import {
   PRODUCT_COLOR_NAME_OPTIONS,
   PRODUCT_CATEGORY_GROUP_OPTIONS,
   FAMILY_CATEGORY_OPTIONS,
+  PRODUCT_MOCK_DATA,
+  FOLDER_MOCK_DATA,
 } from 'src/_mock';
 
 import { toast } from 'src/components/snackbar';
@@ -165,12 +167,40 @@ export function ProductNewEditForm({ currentProduct }) {
 
   const handleCreateFolder = () => {
     if (folderName.trim()) {
-      // Here you would typically handle the actual folder creation logic
-      console.info('Creating folder:', folderName);
+      const newFolder = {
+        id: String(FOLDER_MOCK_DATA.length + 1),
+        name: folderName.trim(),
+        createdAt: new Date().toISOString(),
+      };
+      FOLDER_MOCK_DATA.push(newFolder);
+      console.info('Creating folder:', newFolder);
       toast.success(`Folder "${folderName}" created successfully!`);
       handleCloseFolderDialog();
     } else {
       toast.error('Please enter a folder name.');
+    }
+  };
+
+  const handleAddDocument = () => {
+    const { code, sku, category, images } = methods.getValues();
+    if (!code || !sku || !category || images.length === 0) {
+      toast.error('Please fill in all fields and upload at least one document.');
+    } else {
+      const newDocument = {
+        id: String(PRODUCT_MOCK_DATA.length + 1),
+        name: code,
+        description: sku,
+        category,
+        images,
+      };
+      PRODUCT_MOCK_DATA.push(newDocument);
+
+      // Create a folder with the name of the selected category
+      console.log(`Created folder: ${category}`);
+      console.log(`Added files to folder ${category}:`, images);
+
+      toast.success('Document added successfully!');
+      console.info('Added Document:', newDocument);
     }
   };
 
@@ -223,7 +253,6 @@ export function ProductNewEditForm({ currentProduct }) {
           </Field.Select>
         </Box>
   
-
         <Stack spacing={1.5}>
           <Typography variant="subtitle2">Upload Documents</Typography>
           <Field.Upload
@@ -235,21 +264,11 @@ export function ProductNewEditForm({ currentProduct }) {
             onRemoveAll={handleRemoveAllFiles}
             onUpload={() => console.info('ON UPLOAD')}
           />
-          {/* Add Document Button */}
           <Box sx={{ textAlign: 'right', mt: 1 }}>
             <LoadingButton
               variant="contained"
               size="medium"
-              onClick={() => {
-                const { code, sku, category, images } = methods.getValues();
-                if (!code || !sku || !category || images.length === 0) {
-                  toast.error('Please fill in all fields and upload at least one document.');
-                } else {
-                  toast.success('Document added successfully!');
-                  console.info('Add Document Clicked');
-                  // Here you would typically handle the actual document addition logic
-                }
-              }}
+              onClick={handleAddDocument}
             >
               Add Document
             </LoadingButton>
@@ -258,8 +277,6 @@ export function ProductNewEditForm({ currentProduct }) {
       </Stack>
     </Card>
   );
-  
-  
 
   return (
     <Form methods={methods} onSubmit={onSubmit}>

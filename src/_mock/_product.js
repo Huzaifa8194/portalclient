@@ -85,7 +85,6 @@ export const APPOINTMENT_CATEGORY_OPTIONS = [
   { value: 'companyregistration', label: 'Company Registration - Sweden' },
   { value: 'familyreunificationdenmark', label: 'Family Reunification - Denmark' },
   { value: 'familyreunificationsweden', label: 'Family Reunification - Sweden' },
-
   { value: 'parentseupermitsweden', label: 'Parents EU Permit - Sweden' },
   { value: 'permanentresidencepermit', label: 'Permanent Residence Permit - Sweden' },
   { value: 'relocatetocanda', label: 'Relocate to Canada' },
@@ -141,3 +140,7 @@ export const FAMILY_CATEGORY_OPTIONS = [
 ];
 
 export const PRODUCT_CHECKOUT_STEPS = ['Cart', 'Billing & address', 'Payment'];
+
+export const PRODUCT_MOCK_DATA = [];
+
+export const FOLDER_MOCK_DATA = [];

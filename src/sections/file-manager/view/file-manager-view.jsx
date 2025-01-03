@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -12,7 +12,7 @@ import { useSetState } from 'src/hooks/use-set-state';
 import { fIsAfter, fIsBetween } from 'src/utils/format-time';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { _allFiles, FILE_TYPE_OPTIONS } from 'src/_mock';
+import { _allFiles, FILE_TYPE_OPTIONS, PRODUCT_MOCK_DATA, FOLDER_MOCK_DATA } from 'src/_mock';
 
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
@@ -40,7 +40,7 @@ export function FileManagerView() {
 
   const [view, setView] = useState('list');
 
-  const [tableData, setTableData] = useState(_allFiles);
+  const [tableData, setTableData] = useState([]);
 
   const filters = useSetState({
     name: '',
@@ -48,6 +48,36 @@ export function FileManagerView() {
     startDate: null,
     endDate: null,
   });
+
+  useEffect(() => {
+    // Fetch data from PRODUCT_MOCK_DATA and FOLDER_MOCK_DATA
+    const fetchData = () => {
+      const folders = FOLDER_MOCK_DATA.map(folder => ({
+        id: folder.id,
+        name: folder.name,
+        type: 'folder',
+        size: 0,
+        modifiedAt: folder.createdAt,
+        shared: [],
+        isFavorited: false,
+      }));
+
+      const files = PRODUCT_MOCK_DATA.map(product => ({
+        id: product.id,
+        name: product.name,
+        type: 'file',
+        size: Math.floor(Math.random() * 1000000), // Random file size
+        modifiedAt: new Date().toISOString(),
+        shared: [],
+        isFavorited: false,
+        folder: product.category,
+      }));
+
+      setTableData([...folders, ...files]);
+    };
+
+    fetchData();
+  }, []);
 
   const dateError = fIsAfter(filters.state.startDate, filters.state.endDate);
 
@@ -232,9 +262,10 @@ function applyFilter({ inputData, comparator, filters, dateError }) {
 
   if (!dateError) {
     if (startDate && endDate) {
-      inputData = inputData.filter((file) => fIsBetween(file.createdAt, startDate, endDate));
+      inputData = inputData.filter((file) => fIsBetween(file.modifiedAt, startDate, endDate));
     }
   }
 
   return inputData;
 }
+

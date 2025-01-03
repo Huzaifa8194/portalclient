@@ -6,6 +6,8 @@ import Box from '@mui/material/Box';
 
 import { CONFIG } from 'src/config-global';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
+
 import {
   _analyticTasks,
   _analyticOrderTimeline,
@@ -33,6 +35,7 @@ export function OverviewAnalyticsView({ caseNo, authority, onBack }) {
 
   return (
     <DashboardContent maxWidth="xl">
+      
       <Grid container sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Grid item>
           <Typography variant="h4">
@@ -45,6 +48,14 @@ export function OverviewAnalyticsView({ caseNo, authority, onBack }) {
           </Button>
         </Grid>
       </Grid>
+      <CustomBreadcrumbs
+                  links={[
+                    { name: 'Dashboard' },
+                    { name: 'Application Status' },
+                    { name: 'Application Detail  ' },
+                  ]}
+                  sx={{ mb: { xs: 3, md: 3 } }}
+                />
 
       <Grid container spacing={3}>
         <Grid xs={12} sm={6} md={3}>
