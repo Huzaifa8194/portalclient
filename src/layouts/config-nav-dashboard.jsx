@@ -42,6 +42,163 @@ const ICONS = {
 // ----------------------------------------------------------------------
 
 export const navData = [
+  /* Management
+  */
+ {
+   subheader: 'Management',
+   items: [
+
+     {
+       title: 'Profile',
+       path: paths.dashboard.user.root,
+       icon: ICONS.user,
+       children: [
+         { title: 'Profile', path: paths.dashboard.user.account },
+         { title: 'Co-Applicant', path: paths.dashboard.job.root },
+
+
+       ],
+     },
+
+     { title: 'Messages', path: paths.dashboard.chat, icon: ICONS.chat },
+     { title: 'Application Status', path: paths.dashboard.general.analytics, icon: ICONS.calendar },
+
+
+     {
+       title: 'Appointment',
+       path: paths.dashboard.post.root,
+       icon: ICONS.blog,
+       children: [
+
+
+         { title: 'Book An Appointment', path: paths.dashboard.post.new },
+         { title: 'Manage Appointments', path: paths.dashboard.user.list },
+       ],
+     },
+     {
+       title: 'Documents',
+       path: paths.dashboard.order.root,
+       icon: ICONS.order,
+       children: [
+         { title: 'All Documents', path: paths.dashboard.order.root },
+         { title: 'Upload Documents', path: paths.dashboard.product.new },
+       ],
+     },
+
+     { title: 'Assessments', path: paths.dashboard.assessment, icon: ICONS.calendar },
+     { title: 'Housing', path: paths.dashboard.housing, icon: ICONS.tour },
+
+     { title: 'Invoices (Faktura)', path: paths.dashboard.invoice.root, icon: ICONS.order },
+
+     {
+       title: 'Business',
+       path: paths.dashboard.user.root,
+       icon: ICONS.user,
+       children: [
+         { title: 'Entrepenaur', path: paths.dashboard.business.entrepenaur },
+         { title: 'Import-Export Services', path: paths.dashboard.business.importexport },
+         { title: 'Investors', path: paths.dashboard.business.investors },
+
+
+
+       ],
+     },
+
+     {
+       title: 'User',
+       path: paths.dashboard.user.root,
+       icon: ICONS.user,
+       children: [
+         { title: 'Profile', path: paths.dashboard.user.account },
+         { title: 'Co-Applicant', path: paths.dashboard.job.root },
+         { title: 'Profile_test', path: paths.dashboard.user.root },
+         { title: 'Cards', path: paths.dashboard.user.cards },
+         { title: 'List', path: paths.dashboard.user.list },
+         { title: 'Create', path: paths.dashboard.user.new },
+         { title: 'Edit', path: paths.dashboard.user.demo.edit },
+
+       ],
+     },
+     {
+       title: 'Product',
+       path: paths.dashboard.product.root,
+       icon: ICONS.product,
+       children: [
+         { title: 'List', path: paths.dashboard.product.root },
+         { title: 'Details', path: paths.dashboard.product.demo.details },
+         { title: 'Create', path: paths.dashboard.product.new },
+         { title: 'Edit', path: paths.dashboard.product.demo.edit },
+       ],
+     },
+     {
+       title: 'Order',
+       path: paths.dashboard.order.root,
+       icon: ICONS.order,
+       children: [
+         { title: 'List', path: paths.dashboard.order.root },
+         { title: 'Details', path: paths.dashboard.order.demo.details },
+       ],
+     },
+     {
+       title: 'Invoice',
+       path: paths.dashboard.invoice.root,
+       icon: ICONS.invoice,
+       children: [
+         { title: 'List', path: paths.dashboard.invoice.root },
+         { title: 'Details', path: paths.dashboard.invoice.demo.details },
+         { title: 'Create', path: paths.dashboard.invoice.new },
+         { title: 'Edit', path: paths.dashboard.invoice.demo.edit },
+       ],
+     },
+     {
+       title: 'Blog',
+       path: paths.dashboard.post.root,
+       icon: ICONS.blog,
+       children: [
+         { title: 'List', path: paths.dashboard.post.root },
+         { title: 'Details', path: paths.dashboard.post.demo.details },
+         { title: 'Create', path: paths.dashboard.post.new },
+         { title: 'Edit', path: paths.dashboard.post.demo.edit },
+       ],
+     },
+     {
+       title: 'Job',
+       path: paths.dashboard.job.root,
+       icon: ICONS.job,
+       children: [
+         { title: 'List', path: paths.dashboard.job.root },
+         { title: 'Details', path: paths.dashboard.job.demo.details },
+         { title: 'Create', path: paths.dashboard.job.new },
+         { title: 'Edit', path: paths.dashboard.job.demo.edit },
+       ],
+     },
+     {
+       title: 'Tour',
+       path: paths.dashboard.tour.root,
+       icon: ICONS.tour,
+       children: [
+         { title: 'List', path: paths.dashboard.tour.root },
+         { title: 'Details', path: paths.dashboard.tour.demo.details },
+         { title: 'Create', path: paths.dashboard.tour.new },
+         { title: 'Edit', path: paths.dashboard.tour.demo.edit },
+       ],
+     },
+     { title: 'File manager', path: paths.dashboard.fileManager, icon: ICONS.folder },
+     {
+       title: 'Mail',
+       path: paths.dashboard.mail,
+       icon: ICONS.mail,
+       info: (
+         <Label color="error" variant="inverted">
+           +32
+         </Label>
+       ),
+     },
+
+     { title: 'Calendar', path: paths.dashboard.calendar, icon: ICONS.calendar },
+     { title: 'Kanban', path: paths.dashboard.kanban, icon: ICONS.kanban },
+   ],
+ },
   /**
    * Overview
    */
@@ -58,163 +215,7 @@ export const navData = [
     ],
   },
   /**
-   * Management
-   */
-  {
-    subheader: 'Management',
-    items: [
-
-      {
-        title: 'Profile',
-        path: paths.dashboard.user.root,
-        icon: ICONS.user,
-        children: [
-          { title: 'Profile', path: paths.dashboard.user.account },
-          { title: 'Co-Applicant', path: paths.dashboard.job.root },
-
-
-        ],
-      },
-
-      { title: 'Messages', path: paths.dashboard.chat, icon: ICONS.chat },
-      { title: 'Application Status', path: paths.dashboard.general.analytics, icon: ICONS.calendar },
-
-
-      {
-        title: 'Appointment',
-        path: paths.dashboard.post.root,
-        icon: ICONS.blog,
-        children: [
-
-
-          { title: 'Book An Appointment', path: paths.dashboard.post.new },
-          { title: 'Manage Appointments', path: paths.dashboard.user.list },
-        ],
-      },
-      {
-        title: 'Documents',
-        path: paths.dashboard.order.root,
-        icon: ICONS.order,
-        children: [
-          { title: 'All Documents', path: paths.dashboard.order.root },
-          { title: 'Upload Documents', path: paths.dashboard.product.new },
-        ],
-      },
-
-      { title: 'Assessments', path: paths.dashboard.assessment, icon: ICONS.calendar },
-      { title: 'Housing', path: paths.dashboard.housing, icon: ICONS.tour },
-
-      { title: 'Invoices (Faktura)', path: paths.dashboard.invoice.root, icon: ICONS.order },
-
-      {
-        title: 'Business',
-        path: paths.dashboard.user.root,
-        icon: ICONS.user,
-        children: [
-          { title: 'Entrepenaur', path: paths.dashboard.business.entrepenaur },
-          { title: 'Import-Export Services', path: paths.dashboard.business.importexport },
-          { title: 'Investors', path: paths.dashboard.business.investors },
-
-
-
-        ],
-      },
-
-      {
-        title: 'User',
-        path: paths.dashboard.user.root,
-        icon: ICONS.user,
-        children: [
-          { title: 'Profile', path: paths.dashboard.user.account },
-          { title: 'Co-Applicant', path: paths.dashboard.job.root },
-          { title: 'Profile_test', path: paths.dashboard.user.root },
-          { title: 'Cards', path: paths.dashboard.user.cards },
-          { title: 'List', path: paths.dashboard.user.list },
-          { title: 'Create', path: paths.dashboard.user.new },
-          { title: 'Edit', path: paths.dashboard.user.demo.edit },
-
-        ],
-      },
-      {
-        title: 'Product',
-        path: paths.dashboard.product.root,
-        icon: ICONS.product,
-        children: [
-          { title: 'List', path: paths.dashboard.product.root },
-          { title: 'Details', path: paths.dashboard.product.demo.details },
-          { title: 'Create', path: paths.dashboard.product.new },
-          { title: 'Edit', path: paths.dashboard.product.demo.edit },
-        ],
-      },
-      {
-        title: 'Order',
-        path: paths.dashboard.order.root,
-        icon: ICONS.order,
-        children: [
-          { title: 'List', path: paths.dashboard.order.root },
-          { title: 'Details', path: paths.dashboard.order.demo.details },
-        ],
-      },
-      {
-        title: 'Invoice',
-        path: paths.dashboard.invoice.root,
-        icon: ICONS.invoice,
-        children: [
-          { title: 'List', path: paths.dashboard.invoice.root },
-          { title: 'Details', path: paths.dashboard.invoice.demo.details },
-          { title: 'Create', path: paths.dashboard.invoice.new },
-          { title: 'Edit', path: paths.dashboard.invoice.demo.edit },
-        ],
-      },
-      {
-        title: 'Blog',
-        path: paths.dashboard.post.root,
-        icon: ICONS.blog,
-        children: [
-          { title: 'List', path: paths.dashboard.post.root },
-          { title: 'Details', path: paths.dashboard.post.demo.details },
-          { title: 'Create', path: paths.dashboard.post.new },
-          { title: 'Edit', path: paths.dashboard.post.demo.edit },
-        ],
-      },
-      {
-        title: 'Job',
-        path: paths.dashboard.job.root,
-        icon: ICONS.job,
-        children: [
-          { title: 'List', path: paths.dashboard.job.root },
-          { title: 'Details', path: paths.dashboard.job.demo.details },
-          { title: 'Create', path: paths.dashboard.job.new },
-          { title: 'Edit', path: paths.dashboard.job.demo.edit },
-        ],
-      },
-      {
-        title: 'Tour',
-        path: paths.dashboard.tour.root,
-        icon: ICONS.tour,
-        children: [
-          { title: 'List', path: paths.dashboard.tour.root },
-          { title: 'Details', path: paths.dashboard.tour.demo.details },
-          { title: 'Create', path: paths.dashboard.tour.new },
-          { title: 'Edit', path: paths.dashboard.tour.demo.edit },
-        ],
-      },
-      { title: 'File manager', path: paths.dashboard.fileManager, icon: ICONS.folder },
-      {
-        title: 'Mail',
-        path: paths.dashboard.mail,
-        icon: ICONS.mail,
-        info: (
-          <Label color="error" variant="inverted">
-            +32
-          </Label>
-        ),
-      },
-
-      { title: 'Calendar', path: paths.dashboard.calendar, icon: ICONS.calendar },
-      { title: 'Kanban', path: paths.dashboard.kanban, icon: ICONS.kanban },
-    ],
-  },
+  
   /**
    * Item State
    */
