@@ -81,8 +81,6 @@ export function AnalyticsWidgetSummary({
     >
       <Box sx={{ width: 48, height: 48, mb: 3 }}>{icon}</Box>
 
-
-
       <Box
         sx={{
           display: 'flex',
@@ -95,8 +93,6 @@ export function AnalyticsWidgetSummary({
           <Box sx={{ mb: 1, typography: 'subtitle2' }}>{title}</Box>
           <Box sx={{ typography: 'h4' }}>{total}</Box>
         </Box>
-
-
       </Box>
 
       <SvgColor
@@ -115,3 +111,4 @@ export function AnalyticsWidgetSummary({
     </Card>
   );
 }
+
