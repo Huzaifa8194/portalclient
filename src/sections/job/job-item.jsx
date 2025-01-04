@@ -1,48 +1,56 @@
+import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
+import MenuList from '@mui/material/MenuList';
+import MenuItem from '@mui/material/MenuItem';
 
 import { varAlpha } from 'src/theme/styles';
 import { AvatarShape } from 'src/assets/illustrations';
 import { Image } from 'src/components/image';
 import { Iconify } from 'src/components/iconify';
 import { CustomPopover, usePopover } from 'src/components/custom-popover';
-import MenuList from '@mui/material/MenuList';
-import MenuItem from '@mui/material/MenuItem';
-import { useRouter } from 'src/routes/hooks';
 import { _mock } from 'src/_mock';
+import CoApplicantProfile from './co-applicant-profile';
 
 export function JobItem({ job, onView, onEdit, onDelete }) {
   const popover = usePopover();
-  const router = useRouter();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  const handleCardClick = () => {
-    router.push({
-      pathname: '/profile',
-      query: { 
-        name: job.company.name,
-        image: job.company.logo
-      }
-    });
+  const handleNameClick = (e) => {
+    e.stopPropagation();
+    setIsProfileOpen(true);
   };
+
+  const handleCloseProfile = () => {
+    setIsProfileOpen(false);
+  };
+
+  // Pass all data directly to CoApplicantProfile
+  const applicantData = {
+    name: job?.company?.name || 'N/A',
+    nic: job?.nic || '123',
+    dob: job?.dob || 'Feb,2004',
+    passport: job?.passport || 'SE-79823',
+    picture: job?.company?.logo || '',
+    relation: job?.relation || 'Brother',
+  };
+
 
   return (
     <>
       <Card 
         sx={{ 
           textAlign: 'center',
-          cursor: 'pointer',
           '&:hover': {
             transform: 'translateY(-4px)',
             transition: 'transform 0.2s ease-in-out',
           },
         }} 
-        onClick={handleCardClick}
       >
         <Box sx={{ position: 'relative' }}>
           <IconButton 
@@ -87,13 +95,12 @@ export function JobItem({ job, onView, onEdit, onDelete }) {
           />
 
           <Image
-         
             src={_mock.image.cover(1)}
             alt={job.company.name}
             ratio="16/9"
             slotProps={{
               overlay: {
-                bgcolor: (theme) => varAlpha(theme.vars.palette.common.blackChannel, 0.48),
+                bgcolor: (theme) => varAlpha(theme.palette.common.blackChannel, 0.48),
               },
             }}
           />
@@ -101,9 +108,22 @@ export function JobItem({ job, onView, onEdit, onDelete }) {
 
         <ListItemText
           sx={{ mt: 7, mb: 1 }}
-          primary={job.company.name || 'Name'}
+          primary={
+            <Typography
+              component="a"
+              variant="subtitle1"
+              sx={{
+                cursor: 'pointer',
+                '&:hover': {
+                  textDecoration: 'underline',
+                },
+              }}
+              onClick={handleNameClick}
+            >
+              {job.company.name || 'Name'}
+            </Typography>
+          }
           secondary={job.relation || 'Brother'}
-          primaryTypographyProps={{ typography: 'subtitle1' }}
           secondaryTypographyProps={{ component: 'span', mt: 0.5 }}
         />
 
@@ -135,50 +155,56 @@ export function JobItem({ job, onView, onEdit, onDelete }) {
             {job.passport || 'SE-79823'}
           </div>
         </Box>
+
+        <CustomPopover
+          open={popover.open}
+          anchorEl={popover.anchorEl}
+          onClose={popover.onClose}
+          slotProps={{ arrow: { placement: 'right-top' } }}
+        >
+          <MenuList>
+            <MenuItem 
+              onClick={(e) => { 
+                e.stopPropagation();
+                popover.onClose(); 
+                onView(); 
+              }}
+              sx={{ gap: 1 }}
+            >
+              <Iconify icon="solar:eye-bold" />
+              View
+            </MenuItem>
+            <MenuItem 
+              onClick={(e) => { 
+                e.stopPropagation();
+                popover.onClose(); 
+                onEdit(); 
+              }}
+              sx={{ gap: 1 }}
+            >
+              <Iconify icon="solar:pen-bold" />
+              Edit
+            </MenuItem>
+            <MenuItem 
+              onClick={(e) => { 
+                e.stopPropagation();
+                popover.onClose(); 
+                onDelete(); 
+              }}
+              sx={{ color: 'error.main', gap: 1 }}
+            >
+              <Iconify icon="solar:trash-bin-trash-bold" />
+              Delete
+            </MenuItem>
+          </MenuList>
+        </CustomPopover>
       </Card>
 
-      <CustomPopover
-        open={popover.open}
-        anchorEl={popover.anchorEl}
-        onClose={popover.onClose}
-        slotProps={{ arrow: { placement: 'right-top' } }}
-      >
-        <MenuList>
-          <MenuItem 
-            onClick={(e) => { 
-              e.stopPropagation();
-              popover.onClose(); 
-              onView(); 
-            }}
-            sx={{ gap: 1 }}
-          >
-            <Iconify icon="solar:eye-bold" />
-            View
-          </MenuItem>
-          <MenuItem 
-            onClick={(e) => { 
-              e.stopPropagation();
-              popover.onClose(); 
-              onEdit(); 
-            }}
-            sx={{ gap: 1 }}
-          >
-            <Iconify icon="solar:pen-bold" />
-            Edit
-          </MenuItem>
-          <MenuItem 
-            onClick={(e) => { 
-              e.stopPropagation();
-              popover.onClose(); 
-              onDelete(); 
-            }}
-            sx={{ color: 'error.main', gap: 1 }}
-          >
-            <Iconify icon="solar:trash-bin-trash-bold" />
-            Delete
-          </MenuItem>
-        </MenuList>
-      </CustomPopover>
+      <CoApplicantProfile
+        applicantData={applicantData}
+        open={isProfileOpen}
+        onClose={handleCloseProfile}
+      />
     </>
   );
 }
