@@ -16,9 +16,7 @@ import { FileManagerShareDialog } from './file-manager-share-dialog';
 import { FileManagerActionSelected } from './file-manager-action-selected';
 import { FileManagerNewFolderDialog } from './file-manager-new-folder-dialog';
 
-// ----------------------------------------------------------------------
-
-export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenConfirm }) {
+export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenConfirm, onFolderClick }) {
   const { selected, onSelectRow: onSelectItem, onSelectAllRows: onSelectAllItems } = table;
 
   const share = useBoolean();
@@ -76,6 +74,7 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
                   selected={selected.includes(folder.id)}
                   onSelect={() => onSelectItem(folder.id)}
                   onDelete={() => onDeleteItem(folder.id)}
+                  onFolderClick={onFolderClick}
                   sx={{ maxWidth: 'auto' }}
                 />
               ))}
@@ -84,7 +83,6 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
 
         <Divider sx={{ my: 5, borderStyle: 'dashed' }} />
 
-       
         <Collapse in={!files.value} unmountOnExit>
           <Box
             display="grid"
@@ -130,7 +128,6 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
                   variant="contained"
                   startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
                   onClick={onOpenConfirm}
-                  sx={{ mr: 1 }}
                 >
                   Delete
                 </Button>

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -26,53 +26,24 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import { usePopover, CustomPopover } from 'src/components/custom-popover';
 
 import { FileManagerShareDialog } from './file-manager-share-dialog';
-import { FileManagerFileDetails } from './file-manager-file-details';
-import { FileManagerNewFolderDialog } from './file-manager-new-folder-dialog';
 
-// ----------------------------------------------------------------------
-
-export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete, onOpenFolder, ...other }) {
+export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete, onFolderClick, ...other }) {
   const { copy } = useCopyToClipboard();
 
   const share = useBoolean();
-
   const popover = usePopover();
-
   const confirm = useBoolean();
-
-  const details = useBoolean();
-
   const checkbox = useBoolean();
-
-  const editFolder = useBoolean();
-
   const favorite = useBoolean(folder.isFavorited);
-
-  const [inviteEmail, setInviteEmail] = useState('');
-
-  const [folderName, setFolderName] = useState(folder.name);
-
-  const handleChangeInvite = useCallback((event) => {
-    setInviteEmail(event.target.value);
-  }, []);
-
-  const handleChangeFolderName = useCallback((event) => {
-    setFolderName(event.target.value);
-  }, []);
 
   const handleCopy = useCallback(() => {
     toast.success('Copied!');
     copy(folder.url);
   }, [copy, folder.url]);
 
-  const handleClick = (event) => {
-    if (folder.type === 'folder') {
-      onOpenFolder(folder.id);
-    } else {
-      details.onTrue();
-    }
-    event.stopPropagation();
-  };
+  const handleFolderClick = useCallback(() => {
+    onFolderClick(folder);
+  }, [onFolderClick, folder]);
 
   const renderAction = (
     <Stack direction="row" alignItems="center" sx={{ top: 8, right: 8, position: 'absolute' }}>
@@ -103,10 +74,7 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
       {(checkbox.value || selected) && onSelect ? (
         <Checkbox
           checked={selected}
-          onClick={(event) => {
-            onSelect();
-            event.stopPropagation();
-          }}
+          onClick={onSelect}
           icon={<Iconify icon="eva:radio-button-off-fill" />}
           checkedIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
           sx={{ width: 1, height: 1 }}
@@ -114,7 +82,7 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
       ) : (
         <Box
           component="img"
-          src={`${CONFIG.assetsDir}/assets/icons/files/${folder.type === 'folder' ? 'ic-folder' : 'ic-file'}.svg`}
+          src={`${CONFIG.assetsDir}/assets/icons/files/ic-folder.svg`}
           sx={{ width: 1, height: 1 }}
         />
       )}
@@ -123,6 +91,7 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
 
   const renderText = (
     <ListItemText
+      onClick={handleFolderClick}
       primary={folder.name}
       secondary={
         <>
@@ -137,7 +106,7 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
               bgcolor: 'currentColor',
             }}
           />
-          {folder.type === 'folder' ? `${folder.totalFiles} files` : folder.type}
+          {folder.totalFiles} files
         </>
       }
       primaryTypographyProps={{ noWrap: true, typography: 'subtitle1' }}
@@ -174,23 +143,17 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
       <Paper
         variant="outlined"
         sx={{
-          gap: 1,
           p: 2.5,
-          maxWidth: 222,
-          display: 'flex',
-          borderRadius: 2,
+          width: 1,
           cursor: 'pointer',
-          position: 'relative',
-          bgcolor: 'transparent',
-          flexDirection: 'column',
-          alignItems: 'flex-start',
+          bgcolor: 'background.paper',
           ...((checkbox.value || selected) && {
             bgcolor: 'background.paper',
             boxShadow: (theme) => theme.customShadows.z20,
           }),
           ...sx,
         }}
-        onClick={handleClick}
+        onClick={handleFolderClick}
         {...other}
       >
         {renderIcon}
@@ -229,16 +192,6 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
             Share
           </MenuItem>
 
-          <MenuItem
-            onClick={() => {
-              popover.onClose();
-              editFolder.onTrue();
-            }}
-          >
-            <Iconify icon="solar:pen-bold" />
-            Edit
-          </MenuItem>
-
           <Divider sx={{ borderStyle: 'dashed' }} />
 
           <MenuItem
@@ -254,42 +207,10 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
         </MenuList>
       </CustomPopover>
 
-      <FileManagerFileDetails
-        item={folder}
-        favorited={favorite.value}
-        onFavorite={favorite.onToggle}
-        onCopyLink={handleCopy}
-        open={details.value}
-        onClose={details.onFalse}
-        onDelete={() => {
-          details.onFalse();
-          onDelete();
-        }}
-      />
-
       <FileManagerShareDialog
         open={share.value}
         shared={folder.shared}
-        inviteEmail={inviteEmail}
-        onChangeInvite={handleChangeInvite}
-        onCopyLink={handleCopy}
-        onClose={() => {
-          share.onFalse();
-          setInviteEmail('');
-        }}
-      />
-
-      <FileManagerNewFolderDialog
-        open={editFolder.value}
-        onClose={editFolder.onFalse}
-        title="Edit Folder"
-        onUpdate={() => {
-          editFolder.onFalse();
-          setFolderName(folderName);
-          console.info('UPDATE FOLDER', folderName);
-        }}
-        folderName={folderName}
-        onChangeFolderName={handleChangeFolderName}
+        onClose={share.onFalse}
       />
 
       <ConfirmDialog
