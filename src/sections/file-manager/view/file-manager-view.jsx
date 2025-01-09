@@ -54,23 +54,12 @@ export function FileManagerView() {
             modifiedAt: new Date().toISOString(),
             shared: [],
             isFavorited: false,
-            files: [],
+            images: [],
           });
         }
         
         const folder = folderMap.get(product.category);
-        product.images.forEach((image, index) => {
-          folder.files.push({
-            id: `${product.id}-image-${index}`,
-            name: image.name,
-            type: 'file',
-            size: image.size,
-            modifiedAt: new Date().toISOString(),
-            shared: [],
-            isFavorited: false,
-            folder: product.category,
-          });
-        });
+        folder.images = [...folder.images, ...product.images];
         folder.size += product.images.reduce((total, image) => total + image.size, 0);
       });
 
@@ -105,47 +94,52 @@ export function FileManagerView() {
 
   const handleDeleteItem = useCallback(
     (id) => {
-      const updatedData = tableData.map(folder => {
-        if (folder.type === 'folder') {
-          return {
-            ...folder,
-            files: folder.files.filter(file => file.id !== id),
-            size: folder.files.filter(file => file.id !== id).reduce((total, file) => total + file.size, 0),
-          };
-        }
-        return folder;
-      }).filter(folder => folder.files.length > 0);
+      const updatedData = tableData.map(folder => ({
+        ...folder,
+        images: folder.images.filter(image => image.id !== id),
+        size: folder.images.filter(image => image.id !== id).reduce((total, image) => total + image.size, 0),
+      })).filter(folder => folder.images.length > 0);
 
       toast.success('Delete success!');
 
       setTableData(updatedData);
+      if (selectedFolder) {
+        setSelectedFolder(updatedData.find(folder => folder.id === selectedFolder.id) || null);
+      }
 
       table.onUpdatePageDeleteRow(dataFiltered.length);
     },
-    [dataFiltered.length, table, tableData]
+    [dataFiltered.length, table, tableData, selectedFolder]
   );
 
   const handleDeleteItems = useCallback(() => {
-    const updatedData = tableData.map(folder => {
-      if (folder.type === 'folder') {
-        return {
-          ...folder,
-          files: folder.files.filter(file => !table.selected.includes(file.id)),
-          size: folder.files.filter(file => !table.selected.includes(file.id)).reduce((total, file) => total + file.size, 0),
-        };
-      }
-      return folder;
-    }).filter(folder => folder.files.length > 0);
+    const updatedData = tableData.map(folder => ({
+      ...folder,
+      images: folder.images.filter(image => !table.selected.includes(image.id)),
+      size: folder.images.filter(image => !table.selected.includes(image.id)).reduce((total, image) => total + image.size, 0),
+    })).filter(folder => folder.images.length > 0);
 
     toast.success('Delete success!');
 
     setTableData(updatedData);
+    if (selectedFolder) {
+      setSelectedFolder(updatedData.find(folder => folder.id === selectedFolder.id) || null);
+    }
 
     table.onUpdatePageDeleteRows({
       totalRowsInPage: dataFiltered.length,
       totalRowsFiltered: dataFiltered.length,
     });
-  }, [dataFiltered.length, table, tableData]);
+  }, [dataFiltered.length, table, tableData, selectedFolder]);
+
+  const handleFolderUpdate = useCallback((updatedFolder) => {
+    setTableData(prevData => 
+      prevData.map(folder => 
+        folder.id === updatedFolder.id ? updatedFolder : folder
+      )
+    );
+    setSelectedFolder(updatedFolder);
+  }, []);
 
   const renderFilters = (
     <Stack
@@ -177,13 +171,13 @@ export function FileManagerView() {
       <DashboardContent>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Typography variant="h4">File manager</Typography>
-          <Button
-            variant="contained"
-            startIcon={<Iconify icon="eva:cloud-upload-fill" />}
-            onClick={upload.onTrue}
-          >
-            Upload
-          </Button>
+            <Button
+              variant="contained"
+              startIcon={<Iconify icon="eva:cloud-upload-contained" />}
+              onClick={upload.onTrue}
+            >
+              Upload
+            </Button>
         </Stack>
 
         <CustomBreadcrumbs
@@ -206,7 +200,11 @@ export function FileManagerView() {
         ) : (
           <>
             {selectedFolder ? (
-              <FileManagerFolderView folder={selectedFolder} />
+              <FileManagerFolderView 
+                folder={selectedFolder} 
+                onFileClick={(file) => console.log('File clicked:', file)}
+                onFolderUpdate={handleFolderUpdate}
+              />
             ) : (
               <FileManagerGridView
                 table={table}
