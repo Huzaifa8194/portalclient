@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
 
-import { OrderListView } from 'src/sections/appointmentlist/view';
+import { ApplicationChoice } from 'src/sections/appointmentlist/view/ApplicationChoice';
 
 // ----------------------------------------------------------------------
 
@@ -15,7 +15,7 @@ export default function Page() {
         <title> {metadata.title}</title>
       </Helmet>
 
-      <OrderListView />
+      <ApplicationChoice />
     </>
   );
 }
