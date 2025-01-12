@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
-import { ApplicationChoice } from 'src/sections/overview/analytics/view/ApplicationChoice';
+import { ApplicationTable } from 'src/sections/overview/analytics/view/ApplicationTable';
 
 const metadata = { title: `Analytics | Dashboard - ${CONFIG.appName}` };
 
@@ -11,7 +11,7 @@ export default function Page() {
       <Helmet>
         <title> {metadata.title}</title>
       </Helmet>
-<ApplicationChoice />
+     <ApplicationTable authority="Migrationsverket"/>
     </>
   );
 }

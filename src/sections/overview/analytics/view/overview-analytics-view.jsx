@@ -121,7 +121,7 @@ export function OverviewAnalyticsView({ caseNo, authority, onBack }) {
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">Comments</Typography>
             <Button variant="contained" onClick={handlePrintLogs}>
-              Print Logs
+              Print File
             </Button>
           </Box>
           <AnalyticsTasks
@@ -140,7 +140,7 @@ export function OverviewAnalyticsView({ caseNo, authority, onBack }) {
         </Grid>
 
         <Grid xs={12} md={6} lg={4}>
-          <AnalyticsOrderTimeline title="Assessment Timeline" list={_analyticOrderTimeline} />
+          <AnalyticsOrderTimeline title="Application Timeline" list={_analyticOrderTimeline} />
         </Grid>
       </Grid>
     </DashboardContent>

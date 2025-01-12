@@ -12,6 +12,7 @@ export function ApplicationChoice() {
 
   if (selectedOption) {
     return <ApplicationTable authority={selectedOption} />;
+    
   }
 
   const options = [

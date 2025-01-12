@@ -81,9 +81,9 @@ export const _analyticPosts = [...Array(5)].map((_, index) => ({
 
 export const _analyticOrderTimeline = [...Array(5)].map((_, index) => {
   const title = [
-    'Assessment Submitted',
-    'Assessment Recieved',
-    'Assessment Reviewed',
+    'Application Submitted',
+    'Application Recieved',
+    'Application Reviewed',
     'Results Delivered',
     'Queries Session',
   ][index];
