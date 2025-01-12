@@ -1,22 +1,18 @@
-import { useState, useCallback, useEffect } from 'react';
-
+import React, { useState, useCallback, useEffect } from 'react';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-
+import Box from '@mui/material/Box';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useSetState } from 'src/hooks/use-set-state';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
-
 import { DashboardContent } from 'src/layouts/dashboard';
 import { PRODUCT_MOCK_DATA } from 'src/_mock';
-
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
 import { EmptyContent } from 'src/components/empty-content';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useTable, getComparator } from 'src/components/table';
-
 import { FileManagerFilters } from '../file-manager-filters';
 import { FileManagerGridView } from '../file-manager-grid-view';
 import { FileManagerFiltersResult } from '../file-manager-filters-result';
@@ -25,13 +21,12 @@ import { FileManagerFolderView } from '../file-manager-folder-view';
 
 export function FileManagerView() {
   const table = useTable({ defaultRowsPerPage: 10 });
-
   const openDateRange = useBoolean();
   const confirm = useBoolean();
-  const upload = useBoolean();
-
+  const createFolder = useBoolean();
   const [tableData, setTableData] = useState([]);
   const [selectedFolder, setSelectedFolder] = useState(null);
+  const fileInputRef = React.useRef(null);
 
   const filters = useSetState({
     name: '',
@@ -141,6 +136,45 @@ export function FileManagerView() {
     setSelectedFolder(updatedFolder);
   }, []);
 
+  const handleCreateFolder = useCallback((folderName) => {
+    const newFolder = {
+      id: `folder-${Date.now()}`,
+      name: folderName,
+      type: 'folder',
+      size: 0,
+      modifiedAt: new Date().toISOString(),
+      shared: [],
+      isFavorited: false,
+      images: [],
+    };
+    setTableData(prevData => [...prevData, newFolder]);
+    createFolder.onFalse();
+    toast.success('Folder created successfully!');
+  }, [createFolder]);
+
+  const handleUploadFiles = useCallback((event) => {
+    if (selectedFolder) {
+      const files = Array.from(event.target.files);
+      const updatedFolder = {
+        ...selectedFolder,
+        images: [...selectedFolder.images, ...files],
+        size: selectedFolder.size + files.reduce((total, file) => total + file.size, 0),
+      };
+      handleFolderUpdate(updatedFolder);
+      toast.success('Files uploaded successfully!');
+    }
+  }, [selectedFolder, handleFolderUpdate]);
+
+  const handleDeleteFolder = useCallback(
+    (folderId) => {
+      const updatedData = tableData.filter(folder => folder.id !== folderId);
+      setTableData(updatedData);
+      toast.success('Folder deleted successfully!');
+      table.onUpdatePageDeleteRow(dataFiltered.length);
+    },
+    [dataFiltered.length, table, tableData]
+  );
+
   const renderFilters = (
     <Stack
       spacing={2}
@@ -171,13 +205,32 @@ export function FileManagerView() {
       <DashboardContent>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Typography variant="h4">File manager</Typography>
+          {selectedFolder ? (
+            <>
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+                onChange={handleUploadFiles}
+                multiple
+              />
+              <Button
+                variant="contained"
+                startIcon={<Iconify icon="eva:cloud-upload-fill" />}
+                onClick={() => fileInputRef.current.click()}
+              >
+                Upload Files
+              </Button>
+            </>
+          ) : (
             <Button
               variant="contained"
-              startIcon={<Iconify icon="eva:cloud-upload-contained" />}
-              onClick={upload.onTrue}
+              startIcon={<Iconify icon="eva:folder-add-fill" />}
+              onClick={createFolder.onTrue}
             >
-              Upload
+              Create Folder
             </Button>
+          )}
         </Stack>
 
         <CustomBreadcrumbs
@@ -204,12 +257,13 @@ export function FileManagerView() {
                 folder={selectedFolder} 
                 onFileClick={(file) => console.log('File clicked:', file)}
                 onFolderUpdate={handleFolderUpdate}
+                onBack={() => setSelectedFolder(null)}
               />
             ) : (
               <FileManagerGridView
                 table={table}
                 dataFiltered={dataFiltered}
-                onDeleteItem={handleDeleteItem}
+                onDeleteItem={handleDeleteFolder}
                 onOpenConfirm={confirm.onTrue}
                 onFolderClick={handleFolderClick}
               />
@@ -218,7 +272,11 @@ export function FileManagerView() {
         )}
       </DashboardContent>
 
-      <FileManagerNewFolderDialog open={upload.value} onClose={upload.onFalse} />
+      <FileManagerNewFolderDialog 
+        open={createFolder.value} 
+        onClose={createFolder.onFalse}
+        onCreateFolder={handleCreateFolder}
+      />
 
       <ConfirmDialog
         open={confirm.value}

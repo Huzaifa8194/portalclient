@@ -227,15 +227,6 @@ export function ProductNewEditForm({ currentProduct }) {
         title="Document Details"
         subheader="Give details about the Document"
         sx={{ mb: 3 }}
-        action={
-          <LoadingButton
-            variant="contained"
-            size="medium"
-            onClick={handleOpenFolderDialog}
-          >
-            Create Folder
-          </LoadingButton>
-        }
       />
   
       <Divider />

@@ -1,18 +1,19 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import ListItemText from '@mui/material/ListItemText';
+import Button from '@mui/material/Button';
 
 import { fData } from 'src/utils/format-number';
 import { FileThumbnail } from 'src/components/file-thumbnail';
+import { Iconify } from 'src/components/iconify';
 import { FileManagerFileDetails } from './file-manager-file-details';
 
-export function FileManagerFolderView({ folder, onFileClick, onFolderUpdate }) {
+export function FileManagerFolderView({ folder, onFileClick, onFolderUpdate, onBack }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [openDetails, setOpenDetails] = useState(false);
   const [folderContent, setFolderContent] = useState(folder);
-  const fileInputRef = useRef(null);
 
   useEffect(() => {
     setFolderContent(folder);
@@ -60,48 +61,19 @@ export function FileManagerFolderView({ folder, onFileClick, onFolderUpdate }) {
     return file.type;
   };
 
-  const handleUploadClick = () => {
-    fileInputRef.current.click();
-  };
-
-  const handleFileUpload = (event) => {
-    const newFiles = Array.from(event.target.files);
-    const updatedFolder = {
-      ...folderContent,
-      images: [...folderContent.images, ...newFiles],
-    };
-    setFolderContent(updatedFolder);
-    onFolderUpdate(updatedFolder);
-  };
-
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">
+      <Box >
+        <Button sx={{ mb: 3 }}
+          variant="outlined"
+          startIcon={<Iconify icon="eva:arrow-back-fill" />}
+          onClick={onBack}
+        >
+          Back
+        </Button>
+        <Typography variant="h4" sx={{ mb: 3 }}>
           {folderContent.name}
         </Typography>
-        <Box
-          component="label"
-          htmlFor="upload-file"
-          sx={{
-            p: 1,
-            border: '1px dashed',
-            borderColor: 'divider',
-            borderRadius: 1,
-            cursor: 'pointer',
-            '&:hover': { bgcolor: 'action.hover' },
-          }}
-        >
-          Upload
-          <input
-            id="upload-file"
-            type="file"
-            ref={fileInputRef}
-            style={{ display: 'none' }}
-            onChange={handleFileUpload}
-            multiple
-          />
-        </Box>
       </Box>
 
       <Box
@@ -111,7 +83,6 @@ export function FileManagerFolderView({ folder, onFileClick, onFolderUpdate }) {
           xs: 'repeat(1, 1fr)',
           sm: 'repeat(2, 1fr)',
           md: 'repeat(3, 1fr)',
-          lg: 'repeat(4, 1fr)',
         }}
       >
         {folderContent.images.map((file, index) => (

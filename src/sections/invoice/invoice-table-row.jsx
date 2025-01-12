@@ -1,7 +1,6 @@
 import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import MenuList from '@mui/material/MenuList';
 import MenuItem from '@mui/material/MenuItem';
@@ -9,13 +8,12 @@ import TableRow from '@mui/material/TableRow';
 import Checkbox from '@mui/material/Checkbox';
 import TableCell from '@mui/material/TableCell';
 import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
 import ListItemText from '@mui/material/ListItemText';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import { fCurrency, fData } from 'src/utils/format-number';
-import { fDate, fTime } from 'src/utils/format-time';
+import { fCurrency } from 'src/utils/format-number';
+import { fDate } from 'src/utils/format-time';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
@@ -26,8 +24,14 @@ import { usePopover, CustomPopover } from 'src/components/custom-popover';
 
 export function InvoiceTableRow({ row, selected, onSelectRow, onViewRow, onEditRow, onDeleteRow }) {
   const confirm = useBoolean();
-
   const popover = usePopover();
+
+  const getStatusColor = (status) => {
+    if (status === 'paid') return 'success';
+    if (status === 'pending') return 'warning';
+    if (status === 'overdue') return 'error';
+    return 'default';
+  };
 
   return (
     <>
@@ -36,144 +40,86 @@ export function InvoiceTableRow({ row, selected, onSelectRow, onViewRow, onEditR
           <Checkbox
             checked={selected}
             onClick={onSelectRow}
-            inputProps={{ id: `row-checkbox-${row.id}`, 'aria-label': `Row checkbox` }}
+            inputProps={{ 'aria-label': 'Select invoice' }}
           />
         </TableCell>
 
         <TableCell>
-          <Stack spacing={2} direction="row" alignItems="center">
-
-
-            <ListItemText
-              disableTypography
-              primary={
-                <Link
-                  noWrap
-                  variant="body2"
-                  onClick={onViewRow}
-                  sx={{ cursor: 'pointer' }}
-                >
-                  {row.invoiceNumber}
-                </Link>
-              }
-              secondary={
-                <></>
-
-              }
-            />
-          </Stack>
+          <Link
+            component="button"
+            color="inherit"
+            onClick={onViewRow}
+            sx={{ 
+              typography: 'body2',
+              cursor: 'pointer',
+              textDecoration: 'none',
+              color: 'primary.main'
+            }}
+          >
+            {row.invoiceNumber}
+          </Link>
         </TableCell>
 
         <TableCell>
           <ListItemText
-            primary={<>Create Date: {fDate(row.createDate)}</>}
-            secondary={<>Due Date: {fDate(row.createDate)}</>}
-            primaryTypographyProps={{ typography: 'body2', noWrap: true }}
-            secondaryTypographyProps={{ mt: 0.5, component: 'span', typography: 'caption' }}
+            primary={`Create Date: ${fDate(row.createDate)}`}
+            secondary={`Due Date: ${fDate(row.dueDate)}`}
+            primaryTypographyProps={{ 
+              typography: 'body2',
+              noWrap: true,
+              color: 'text.primary'
+            }}
+            secondaryTypographyProps={{
+              typography: 'caption',
+              mt: 0.5,
+              color: 'text.secondary'
+            }}
           />
         </TableCell>
 
         <TableCell>
-          <p>Cash</p>
+          <ListItemText 
+            primary="Cash"
+            primaryTypographyProps={{ 
+              typography: 'body2',
+              color: 'text.primary'
+            }}
+          />
         </TableCell>
-
-        <TableCell
-
-        >
-
-          <Label sx={{ display: 'block' }}
-            variant="soft"
-            color={
-              (row.status === 'paid' && 'success') ||
-              (row.status === 'pending' && 'warning') ||
-              (row.status === 'overdue' && 'error') ||
-              'default'
-            }
-          >
-            Amount: {fCurrency(row.totalAmount)}
-
-          </Label>
-
-          <Label
-            sx={{ display: 'inline-block' }}
-            variant="soft"
-            color={
-              (row.status === 'paid' && 'success') ||
-              (row.status === 'pending' && 'warning') ||
-              (row.status === 'overdue' && 'error') ||
-              'default'
-            }
-          >
-
-            VAT: {fCurrency(row.totalAmount)}
-          </Label>
-
-
-        </TableCell>
-
-        <TableCell
-          align="center"
-          sx={{
-            display: 'flex', // Enables Flexbox
-            flexDirection: 'column', // Stacks children in a column
-            alignItems: 'center', // Centers items horizontally
-            gap: 1, // Adds spacing between elements
-          }}
-        >
-          <Label
-            variant="soft"
-            color={
-              (row.status === 'paid' && 'success') ||
-              (row.status === 'pending' && 'warning') ||
-              (row.status === 'overdue' && 'error') ||
-              'default'
-            }
-          >
-            Payable: {fCurrency(row.totalAmount)}
-          </Label>
-
-          <Label
-            variant="soft"
-            color={
-              (row.status === 'paid' && 'success') ||
-              (row.status === 'pending' && 'warning') ||
-              (row.status === 'overdue' && 'error') ||
-              'default'
-            }
-          >
-            Recieved: {fCurrency(row.totalAmount)}
-          </Label>
-
-          <Label
-            variant="soft"
-            color={
-              (row.status === 'paid' && 'success') ||
-              (row.status === 'pending' && 'warning') ||
-              (row.status === 'overdue' && 'error') ||
-              'default'
-            }
-          >
-            Balance: {fCurrency(row.totalAmount)}
-          </Label>
-        </TableCell>
-
 
         <TableCell>
           <Label
             variant="soft"
-            color={
-              (row.status === 'paid' && 'success') ||
-              (row.status === 'pending' && 'warning') ||
-              (row.status === 'overdue' && 'error') ||
-              'default'
-            }
+            color={getStatusColor(row.status)}
+            sx={{ display: 'inline-block' }}
+          >
+            {`Amount: ${fCurrency(row.totalAmount)}`}
+          </Label>
+        </TableCell>
+
+        <TableCell align="center">
+          <Label
+            variant="soft"
+            color={getStatusColor(row.status)}
+          >
+            {`Payable: ${fCurrency(row.totalAmount)}`}
+          </Label>
+        </TableCell>
+
+        <TableCell>
+          <Label
+            variant="soft"
+            color={getStatusColor(row.status)}
           >
             {row.status}
           </Label>
         </TableCell>
 
         <TableCell align="right" sx={{ px: 1 }}>
-          <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
+          <IconButton 
+            color={popover.open ? 'inherit' : 'default'} 
+            onClick={popover.onOpen}
+          >
             <Iconify icon="eva:more-vertical-fill" />
           </IconButton>
         </TableCell>
@@ -183,26 +129,24 @@ export function InvoiceTableRow({ row, selected, onSelectRow, onViewRow, onEditR
         open={popover.open}
         anchorEl={popover.anchorEl}
         onClose={popover.onClose}
-        slotProps={{ arrow: { placement: 'right-top' } }}
+        slotProps={{
+          arrow: { placement: 'right-top' }
+        }}
       >
         <MenuList>
-          <MenuItem
-            onClick={() => {
-              onViewRow();
-              popover.onClose();
-            }}
-          >
-            <Iconify icon="solar:eye-bold" />
+          <MenuItem onClick={() => {
+            onViewRow();
+            popover.onClose();
+          }}>
+            <Iconify icon="solar:eye-bold" sx={{ mr: 2 }} />
             View
           </MenuItem>
 
-          <MenuItem
-            onClick={() => {
-              onEditRow();
-              popover.onClose();
-            }}
-          >
-            <Iconify icon="solar:pen-bold" />
+          <MenuItem onClick={() => {
+            onEditRow();
+            popover.onClose();
+          }}>
+            <Iconify icon="solar:pen-bold" sx={{ mr: 2 }} />
             Edit
           </MenuItem>
 
@@ -215,7 +159,7 @@ export function InvoiceTableRow({ row, selected, onSelectRow, onViewRow, onEditR
             }}
             sx={{ color: 'error.main' }}
           >
-            <Iconify icon="solar:trash-bin-trash-bold" />
+            <Iconify icon="solar:trash-bin-trash-bold" sx={{ mr: 2 }} />
             Delete
           </MenuItem>
         </MenuList>
@@ -235,3 +179,4 @@ export function InvoiceTableRow({ row, selected, onSelectRow, onViewRow, onEditR
     </>
   );
 }
+

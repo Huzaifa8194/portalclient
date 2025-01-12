@@ -4,6 +4,9 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Collapse from '@mui/material/Collapse';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import IconButton from '@mui/material/IconButton';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
@@ -35,6 +38,9 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
 
   const [inviteEmail, setInviteEmail] = useState('');
 
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedFolderId, setSelectedFolderId] = useState(null);
+
   const handleChangeInvite = useCallback((event) => {
     setInviteEmail(event.target.value);
   }, []);
@@ -42,6 +48,27 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
   const handleChangeFolderName = useCallback((event) => {
     setFolderName(event.target.value);
   }, []);
+
+  const handleMenuOpen = (event, folderId) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+    setSelectedFolderId(folderId);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedFolderId(null);
+  };
+
+  const handleShareFolder = () => {
+    share.onTrue();
+    handleMenuClose();
+  };
+
+  const handleDeleteFolder = () => {
+    onDeleteItem(selectedFolderId);
+    handleMenuClose();
+  };
 
   return (
     <>
@@ -76,6 +103,20 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
                   onDelete={() => onDeleteItem(folder.id)}
                   onFolderClick={onFolderClick}
                   sx={{ maxWidth: 'auto' }}
+                  action={
+                    <IconButton
+                      size="small"
+                      onClick={(event) => handleMenuOpen(event, folder.id)}
+                      sx={{
+                        position: 'absolute',
+                        top: 8,
+                        right: 8,
+                        zIndex: 9,
+                      }}
+                    >
+                      <Iconify icon="eva:more-vertical-fill" />
+                    </IconButton>
+                  }
                 />
               ))}
           </Box>
@@ -146,6 +187,15 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
           />
         )}
       </Box>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleShareFolder}>Share</MenuItem>
+        <MenuItem onClick={handleDeleteFolder}>Delete</MenuItem>
+      </Menu>
 
       <FileManagerShareDialog
         open={share.value}

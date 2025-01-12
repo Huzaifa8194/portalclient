@@ -143,6 +143,12 @@ export function InvoiceListView() {
       color: 'default',
       count: getInvoiceLength('draft'),
     },
+    {
+      value: 'Waved OFF',
+      label: 'Waved off',
+      color: 'default',
+      count: getInvoiceLength('Waved OFF'),
+    },
   ];
 
   const handleDeleteRow = useCallback(
@@ -260,15 +266,17 @@ export function InvoiceListView() {
                 color={theme.vars.palette.error.main}
               />
 
-              <InvoiceAnalytic
-                title="Draft"
-                total={getInvoiceLength('draft')}
-                percent={getPercentByStatus('draft')}
-                price={getTotalAmount('draft')}
+      <InvoiceAnalytic
+                title="Waved OFF"
+                total={getInvoiceLength('Waved OFF')}
+                percent={getPercentByStatus('Waved OFF')}
+                price={getTotalAmount('Waved OFF')}
                 icon="solar:file-corrupted-bold-duotone"
                 color={theme.vars.palette.text.secondary}
               />
             </Stack>
+
+            
           </Scrollbar>
         </Card>
 
