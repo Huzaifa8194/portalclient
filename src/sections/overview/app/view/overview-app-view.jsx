@@ -10,6 +10,8 @@ import { _appAuthors, _appRelated, _appFeatured, _appInvoices, _appInstalled } f
 import { svgColorClasses } from 'src/components/svg-color';
 
 import { useMockedUser } from 'src/auth/hooks';
+import { SeoIllustration } from 'src/assets/illustrations';
+import Button from '@mui/material/Button';
 
 import { AppWidget } from '../app-widget';
 import { AppWelcome } from '../app-welcome';
@@ -54,6 +56,19 @@ export function OverviewAppView() {
             />
 
       <Grid container spacing={3}>
+      <Grid xs={12} md={12}>
+          <AppWelcome
+            title={`Welcome back 👋 \n ${user?.displayName}`}
+            description="If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything."
+            img={<SeoIllustration hideBackground />}
+            action={
+              <Button variant="contained" color="primary">
+                Go now
+              </Button>
+            }
+          />
+        </Grid>
+
         {buttonHeadings.map((heading, index) => (
           <Grid xs={12} sm={6} md={4} key={index}>
             <AppWidgetHeading

@@ -1,6 +1,7 @@
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Checkbox from '@mui/material/Checkbox';
 import IconButton from '@mui/material/IconButton';
@@ -16,10 +17,8 @@ import { Iconify } from 'src/components/iconify';
 import { Markdown } from 'src/components/markdown';
 import { Lightbox, useLightBox } from 'src/components/lightbox';
 
-// ----------------------------------------------------------------------
-
-export function TourDetailsContent({ tour }) {
-  const slides = tour?.images.map((slide) => ({ src: slide })) || [];
+export function TourDetailsContent({ tour, onClose }) {
+  const slides = tour?.images?.map((slide) => ({ src: slide })) || [];
 
   const {
     selected: selectedImage,
@@ -36,18 +35,20 @@ export function TourDetailsContent({ tour }) {
         gridTemplateColumns={{ xs: 'repeat(1, 1fr)', md: 'repeat(2, 1fr)' }}
         sx={{ mb: { xs: 3, md: 5 } }}
       >
-        <Image
-          alt={slides[0].src}
-          src={slides[0].src}
-          ratio="1/1"
-          onClick={() => handleOpenLightbox(slides[0].src)}
-          sx={{
-            borderRadius: 2,
-            cursor: 'pointer',
-            transition: (theme) => theme.transitions.create('opacity'),
-            '&:hover': { opacity: 0.8 },
-          }}
-        />
+        {slides[0] && (
+          <Image
+            alt={slides[0].src}
+            src={slides[0].src}
+            ratio="1/1"
+            onClick={() => handleOpenLightbox(slides[0].src)}
+            sx={{
+              borderRadius: 2,
+              cursor: 'pointer',
+              transition: (theme) => theme.transitions.create('opacity'),
+              '&:hover': { opacity: 0.8 },
+            }}
+          />
+        )}
 
         <Box gap={1} display="grid" gridTemplateColumns="repeat(2, 1fr)">
           {slides.slice(1, 5).map((slide) => (
@@ -103,7 +104,7 @@ export function TourDetailsContent({ tour }) {
           <Box component="span" sx={{ typography: 'subtitle2' }}>
             {tour?.ratingNumber}
           </Box>
-          <Link sx={{ color: 'text.secondary' }}>(234 reviews)</Link>
+          <Link sx={{ color: 'text.secondary' }}>({tour?.totalViews} reviews)</Link>
         </Stack>
 
         <Stack direction="row" alignItems="center" spacing={0.5} sx={{ typography: 'body2' }}>
@@ -116,7 +117,7 @@ export function TourDetailsContent({ tour }) {
           <Box component="span" sx={{ typography: 'body2', color: 'text.secondary' }}>
             Guide by
           </Box>
-          {tour?.tourGuides.map((tourGuide) => tourGuide.name).join(', ')}
+          {tour?.tourGuides?.map((tourGuide) => tourGuide.name).join(', ')}
         </Stack>
       </Stack>
     </>
@@ -131,12 +132,12 @@ export function TourDetailsContent({ tour }) {
       {[
         {
           label: 'Available',
-          value: `${fDate(tour?.available.startDate)} - ${fDate(tour?.available.endDate)}`,
+          value: `${fDate(tour?.available?.startDate)} - ${fDate(tour?.available?.endDate)}`,
           icon: <Iconify icon="solar:calendar-date-bold" />,
         },
         {
           label: 'Contact name',
-          value: tour?.tourGuides.map((tourGuide) => tourGuide.phoneNumber).join(', '),
+          value: tour?.tourGuides?.map((tourGuide) => tourGuide.name).join(', '),
           icon: <Iconify icon="solar:user-rounded-bold" />,
         },
         {
@@ -146,7 +147,7 @@ export function TourDetailsContent({ tour }) {
         },
         {
           label: 'Contact phone',
-          value: tour?.tourGuides.map((tourGuide) => tourGuide.name).join(', '),
+          value: tour?.tourGuides?.map((tourGuide) => tourGuide.phoneNumber).join(', '),
           icon: <Iconify icon="solar:phone-bold" />,
         },
       ].map((item) => (
@@ -172,7 +173,7 @@ export function TourDetailsContent({ tour }) {
       <Markdown children={tour?.content} />
 
       <Stack spacing={2}>
-        <Typography variant="h6"> Services</Typography>
+        <Typography variant="h6">Services</Typography>
 
         <Box
           rowGap={2}
@@ -185,13 +186,13 @@ export function TourDetailsContent({ tour }) {
               spacing={1}
               direction="row"
               alignItems="center"
-              sx={{ ...(tour?.services.includes(service.label) && { color: 'text.disabled' }) }}
+              sx={{ ...(tour?.services?.includes(service.label) && { color: 'text.disabled' }) }}
             >
               <Iconify
                 icon="eva:checkmark-circle-2-outline"
                 sx={{
                   color: 'primary.main',
-                  ...(tour?.services.includes(service.label) && { color: 'text.disabled' }),
+                  ...(tour?.services?.includes(service.label) && { color: 'text.disabled' }),
                 }}
               />
               {service.label}
@@ -204,7 +205,7 @@ export function TourDetailsContent({ tour }) {
 
   return (
     <>
-      {renderGallery}
+      {slides.length > 0 && renderGallery}
 
       <Stack sx={{ maxWidth: 720, mx: 'auto' }}>
         {renderHead}
@@ -216,7 +217,15 @@ export function TourDetailsContent({ tour }) {
         <Divider sx={{ borderStyle: 'dashed', mt: 5, mb: 2 }} />
 
         {renderContent}
+
+        <Button onClick={onClose} variant="contained" sx={{ mt: 5 }}>
+          Close
+        </Button>
+        <Button onClick={onClose} variant="contained" sx={{ mt: 5 }}>
+          Back to List
+        </Button>
       </Stack>
     </>
   );
 }
+

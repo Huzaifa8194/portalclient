@@ -36,14 +36,6 @@ import { PostDetailsPreview } from './post-details-preview';
 
 // ----------------------------------------------------------------------
 
-
-
-
-
-
-
-
-
 export const NewPostSchema = zod.object({
   title: zod.string().min(1, { message: 'Title is required!' }),
   description: zod.string().min(1, { message: 'Description is required!' }),
@@ -115,63 +107,6 @@ export function PostNewEditForm({ currentPost }) {
     setValue('coverUrl', null);
   }, [setValue]);
 
-
-  const multiqs1 = [
-    { value: '', label: 'Choose Option' },
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-    { value: 'dontknow', label: 'Dont Know' },
-
-  ];
-
-
-  const multiqs2 = [
-    { value: '', label: 'Choose Option' },
-    { value: '1', label: '1' },
-    { value: '2', label: '2' },
-    { value: '3', label: '3' },
-    { value: '4', label: '4' },
-    { value: '5', label: '5' },
-    { value: '6', label: '6' },
-    { value: '7', label: '7' },
-    { value: '8', label: '8' },
-    { value: '9', label: '8' },
-    { value: '10', label: '8' },
-
-  ];
-
-  const multiqs3 = [
-    { value: '', label: 'Choose Option' },
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-  ];
-
-  const multiqs4 = [
-    { value: '', label: 'Choose Option' },
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-  ];
-
-  const multiqs5 = [
-    { value: '', label: 'Choose Option' },
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-  ];
-
-
-  const multiqs6 = [
-    { value: '', label: 'Choose Option' },
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-  ];
-
-
-
-  const multiqsyn = [
-    { value: '', label: 'Choose Option' },
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-  ];
   const renderDetails = (
     <Card>
       <CardHeader title="Details" subheader="Title, short description, image..." sx={{ mb: 3 }} />
@@ -303,14 +238,10 @@ export function PostNewEditForm({ currentPost }) {
 
   return (
     <Form methods={methods} onSubmit={onSubmit}>
-      <Grid spacing={3}>
-
-
-
-
-        <Grid xs={12} md={8}>
+      <Grid container spacing={3}>
+        <Grid xs={12} md={12}>
           <Card sx={{ p: 3 }}>
-            <Typography
+            {/* <Typography
               variant="caption"
               sx={{
                 mt: 3,
@@ -318,75 +249,96 @@ export function PostNewEditForm({ currentPost }) {
                 mx: 'auto',
                 display: 'block',
                 textAlign: 'left',
-                color: 'gray',
+                color: 'text.secondary',
               }}
             >
-
-              Fill this form and submit only if you want to import/export services for Europe. We even deal on behalf of your company and can be your legal representative in the region. This service is paid to avoid unnecessary queries.
-
-            </Typography>
+              Fill this form and submit only if you are an Entrepreneur or already have any Start-up. We will help you to expand your idea or business by providing you right investors. This service is paid to avoid unnecessary queries.
+            </Typography> */}
             <Box
               rowGap={3}
               columnGap={2}
               display="grid"
               gridTemplateColumns={{
                 xs: 'repeat(1, 1fr)',
-                sm: 'repeat(2, 1fr)',
+              }}
+              sx={{ 
+                '& .MuiFormControl-root': { 
+                  width: '100%'
+                },
+                '& .MuiInputBase-root': {
+                  minHeight: '56px',
+                  '& input': {
+                    textOverflow: 'ellipsis',
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap'
+                  }
+                },
+                '& .MuiInputLabel-root': {
+                  height: 'auto',
+                  lineHeight: '1.2',
+                  padding: '4px 0'
+                }
               }}
             >
-
-
-              <Field.Text name="question1" label="What products you want us to export from Europe? (Please Separate Products with comma or what products you want to export to Europe?)" />
-              <Field.Text name="question2" label="How long have you been in business?" />
-              <Field.Text name="question3" label="Can you share a few success stories about similar, yet non-competing products you have import?" />
-
-              <Field.Text name="question4" label="Are you coordinating with other foreign companies?" />
-
-              <Field.Text name="question5" label="How long has your relationship lasted with the top three companies you represent?" />
-
-              <Field.Text name="question6" label="Have you specifically imported products from Europe?" />
-
-              <Field.Text name="question7" label="What are your local customs and import duties on above mentioned product?" />
-
-              <Field.Text name="question8" label="Are you aware of any restrictions on this product? Or Is this a restricted product to export from Europe" />
-
-              <Field.Text name="question9" label="What documents will you need to import(fill in your product line) freely?" />
-
-              <Field.Text name="question10" label="How much lead time do you need before you can begin to import this product?" />
-
-              <Field.Text name="question11" label="Are you aware of any documents that will require authorization in advance from your consulate, government or embassy?" />
-
-              <Field.Text name="question12" label="Are there any special local regulations or restriction (e.g., carton markings, product labelling, special language requirements, cultural factors, numbering issues, etc.) that we need to know about in advance to fully comply?" />
-
-              <Field.Text name="question13" label="Are you knowledgeable about product registration requirements, if any" />
-
-              <Field.Text name="question14" label="Do you want us to export this product to any other place than yours?" />
-
-              <Field.Text name="question15" label="How will the temperature affect this product during importation, warehousing, distribution and the normal retail sales cycle?" />
-              <Field.Text name="question16" label="Do you know our job is done once we export the product from here, so you need to handle all the internal matters in your country?" />
-              <Field.Text name="question17" label="Do you have any sample of this products please upload on Documents portal?" />
-              <Field.Text name="question18" label="Did you already find the products you want us to visit and buy and send it to you on your behalf?" />
-              <Field.Text name="question19" label="Most of the heavy machines, products are manufacturing in Germany, so you want us to send a new product from there." />
-              <Field.Text name="question20" label="Attach catalogue, brochure and give us more specification of the product?" />
-              <Field.Text name="question21" label="Are you interested to launch your product in Europe?" />
-              <Field.Text name="question22" label="Are you looking for warehouse in Sweden or Europe?" />
-              <Field.Text name="question23" label="Are you looking for a marketing strategy for your product?" />
-
-
-
-
-
-
-
+              <Field.Text 
+                name="question1" 
+                label="What products you want us to export from Europe? (Please Separate Products with comma or what products you want to export to Europe?)"
+                placeholder="Enter products for export..."
+                multiline
+                rows={2}
+                sx={{ 
+                  '& .MuiInputBase-root': {
+                    height: '80px'
+                  }
+                }}
+              />
+              <Field.Text name="question2" label="How long have you been in business?" sx={{ width: '100%' }} />
+              <Field.Text name="question3" label="Can you share a few success stories about similar, yet non-competing products you have import?" sx={{ width: '100%' }} />
+              <Field.Text name="question4" label="Are you coordinating with other foreign companies?" sx={{ width: '100%' }} />
+              <Field.Text name="question5" label="How long has your relationship lasted with the top three companies you represent?" sx={{ width: '100%' }} />
+              <Field.Text name="question6" label="Have you specifically imported products from Europe?" sx={{ width: '100%' }} />
+              <Field.Text name="question7" label="What are your local customs and import duties on above mentioned product?" sx={{ width: '100%' }} />
+              <Field.Text name="question8" label="Are you aware of any restrictions on this product? Or Is this a restricted product to export from Europe" sx={{ width: '100%' }} />
+              <Field.Text name="question9" label="What documents will you need to import(fill in your product line) freely?" sx={{ width: '100%' }} />
+              <Field.Text name="question10" label="How much lead time do you need before you can begin to import this product?" sx={{ width: '100%' }} />
+              <Field.Text name="question11" label="Are you aware of any documents that will require authorization in advance from your consulate, government or embassy?" sx={{ width: '100%' }} />
+              <Field.Text 
+                name="question12" 
+                label="Are there any special local regulations or restriction (e.g., carton markings, product labelling, special language requirements, cultural factors, numbering issues, etc.) that we need to know about in advance to fully comply?" 
+                placeholder="Enter local regulations and restrictions..."
+                multiline
+                rows={2}
+                sx={{ 
+                  '& .MuiInputBase-root': {
+                    height: '80px'
+                  }
+                }} 
+              />
+              <Field.Text name="question13" label="Are you knowledgeable about product registration requirements, if any" sx={{ width: '100%' }} />
+              <Field.Text name="question14" label="Do you want us to export this product to any other place than yours?" sx={{ width: '100%' }} />
+              <Field.Text name="question15" label="How will the temperature affect this product during importation, warehousing, distribution and the normal retail sales cycle?" sx={{ width: '100%' }} />
+              <Field.Text 
+                name="question16" 
+                label="Do you know our job is done once we export the product from here, so you need to handle all the internal matters in your country?" 
+                placeholder="Confirm understanding of responsibilities..."
+                multiline
+                rows={2}
+                sx={{ 
+                  '& .MuiInputBase-root': {
+                    height: '80px'
+                  }
+                }} 
+              />
+              <Field.Text name="question17" label="Do you have any sample of this products please upload on Documents portal?" sx={{ width: '100%' }} />
+              <Field.Text name="question18" label="Did you already find the products you want us to visit and buy and send it to you on your behalf?" sx={{ width: '100%' }} />
+              <Field.Text name="question19" label="Most of the heavy machines, products are manufacturing in Germany, so you want us to send a new product from there." sx={{ width: '100%' }} />
+              <Field.Text name="question20" label="Attach catalogue, brochure and give us more specification of the product?" sx={{ width: '100%' }} />
+              <Field.Text name="question21" label="Are you interested to launch your product in Europe?" sx={{ width: '100%' }} />
+              <Field.Text name="question22" label="Are you looking for warehouse in Sweden or Europe?" sx={{ width: '100%' }} />
+              <Field.Text name="question23" label="Are you looking for a marketing strategy for your product?" sx={{ width: '100%' }} />
             </Box>
 
-
-
-
-
             <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>
-              {/* <Field.Text name="about" multiline rows={4} label="About" /> */}
-
               <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
                 Send Request
               </LoadingButton>
@@ -397,3 +349,4 @@ export function PostNewEditForm({ currentPost }) {
     </Form>
   );
 }
+

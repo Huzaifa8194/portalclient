@@ -297,13 +297,9 @@ export function PostNewEditForm({ currentPost }) {
   return (
     <Form methods={methods} onSubmit={onSubmit}>
       <Grid spacing={3}>
-
-
-
-
         <Grid xs={12} md={8}>
           <Card sx={{ p: 3 }}>
-            <Typography
+            {/* <Typography
               variant="caption"
               sx={{
                 mt: 3,
@@ -315,7 +311,7 @@ export function PostNewEditForm({ currentPost }) {
               }}
             >
               Fill this form and submit only if you are an Entrepreneur or already have any Start-up. We will help you to expand your idea or business by providing you right investors. This service is paid to avoid unnecessary queries.
-            </Typography>
+            </Typography> */}
             <Box
               rowGap={3}
               columnGap={2}
@@ -324,9 +320,24 @@ export function PostNewEditForm({ currentPost }) {
                 xs: 'repeat(1, 1fr)',
                 sm: 'repeat(2, 1fr)',
               }}
+              sx={{ 
+                '& .MuiFormControl-root': { 
+                  width: '100%'
+                },
+                '& .MuiInputBase-root': {
+                  minHeight: '56px'
+                },
+                '& .MuiInputLabel-root': {
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '100%'
+                },
+                '& .full-width': {
+                  gridColumn: '1 / -1'
+                }
+              }}
             >
-
-
               <Field.Text name="question1" label="What do you want out of this experience?" />
               <Field.Text name="question2" label="What is your dream job?" />
               <Field.Text name="question3" label="Where do you go on a night out?" />
@@ -343,13 +354,35 @@ export function PostNewEditForm({ currentPost }) {
 
               <Field.Text name="question9" label="What shares you want to offer an investor in a company?" />
 
-              <Field.Text name="question10" label="Are you looking for a sleeping investor or an active investor partner?" />
+              <Field.Text 
+                name="question10" 
+                label="Are you looking for a sleeping investor or an active investor partner?" 
+                className="full-width"
+                sx={{ 
+                  width: '100%',
+                  '& .MuiInputLabel-root': {
+                    whiteSpace: 'normal',
+                    maxWidth: 'none'
+                  }
+                }} 
+              />
 
               <Field.Text name="question11" label="How many languages you can speak?" />
 
               <Field.Text name="question12" label="Which country and city would you prefer for this business?" />
 
-              <Field.Text name="question13" label="Do you have ability to manage the business or did you run any business before?" />
+              <Field.Text 
+                name="question13" 
+                label="Do you have ability to manage the business or did you run any business before?" 
+                className="full-width"
+                sx={{ 
+                  width: '100%',
+                  '& .MuiInputLabel-root': {
+                    whiteSpace: 'normal',
+                    maxWidth: 'none'
+                  }
+                }} 
+              />
 
               <Field.Text name="question14" label="Did import export involve in this business?" />
 
@@ -376,7 +409,13 @@ export function PostNewEditForm({ currentPost }) {
 
 
 
-              <Field.Select native name="question18" label="How you will rate your confidence and communication level (1-10)?" InputLabelProps={{ shrink: true }}>
+              <Field.Select 
+                native 
+                name="question18" 
+                label="How you will rate your confidence and communication level (1-10)?" 
+                InputLabelProps={{ shrink: true }}
+                className="full-width"
+              >
                 {multiqs2.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -397,7 +436,13 @@ export function PostNewEditForm({ currentPost }) {
                 ))}
               </Field.Select>
 
-              <Field.Select native name="question21" label="Do you own a business and looking to start new branch with an investor?" InputLabelProps={{ shrink: true }}>
+              <Field.Select 
+                native 
+                name="question21" 
+                label="Do you own a business and looking to start new branch with an investor?" 
+                InputLabelProps={{ shrink: true }}
+                className="full-width"
+              >
                 {multiqs4.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -423,7 +468,23 @@ export function PostNewEditForm({ currentPost }) {
               </Field.Select>
 
 
-              <Field.Text name="question24" label="Tell us more about yourself business plan and upload the documents on our online portal" />
+              <Field.Text 
+                name="question24" 
+                label="Tell us more about yourself business plan and upload the documents on our online portal" 
+                multiline
+                rows={3}
+                className="full-width"
+                sx={{ 
+                  width: '100%',
+                  '& .MuiInputBase-root': {
+                    minHeight: '100px'
+                  },
+                  '& .MuiInputLabel-root': {
+                    whiteSpace: 'normal',
+                    maxWidth: 'none'
+                  }
+                }} 
+              />
 
 
 
@@ -448,3 +509,4 @@ export function PostNewEditForm({ currentPost }) {
     </Form>
   );
 }
+

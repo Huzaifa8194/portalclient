@@ -3,7 +3,7 @@ import { _mock } from './_mock';
 // ----------------------------------------------------------------------
 
 export const USER_STATUS_OPTIONS = [{ value: 'pending', label: 'Past' }];
-export const USER_STATUS_OPTIONS2 = [{ value: 'pending', label: 'I want to rent out my house' }];
+export const USER_STATUS_OPTIONS2 = [{ value: 'pending', label: 'My Properties' }];
 
 export const _userAbout = {
   id: _mock.id(1),

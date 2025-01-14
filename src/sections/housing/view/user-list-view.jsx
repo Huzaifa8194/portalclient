@@ -1,7 +1,4 @@
 import { useState, useCallback } from 'react';
-
-import Grid2 from '@mui/material/Unstable_Grid2';
-
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
@@ -12,22 +9,17 @@ import Tooltip from '@mui/material/Tooltip';
 import TableBody from '@mui/material/TableBody';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import { px } from 'framer-motion';
-
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 import { RouterLink } from 'src/routes/components';
 
 import { useBoolean } from 'src/hooks/use-boolean';
-import { useSetState } from 'src/hooks/use-set-state';
 
-import { varAlpha } from 'src/theme/styles';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { _roles, _userList, USER_STATUS_OPTIONS2 } from 'src/_mock';
+import { _roles, _userList, USER_STATUS_OPTIONS } from 'src/_mock';
 
 import { Label } from 'src/components/label';
-import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
@@ -35,7 +27,6 @@ import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 import {
   useTable,
   emptyRows,
-  rowInPage,
   TableNoData,
   getComparator,
   TableEmptyRows,
@@ -50,73 +41,55 @@ import { UserTableFiltersResult } from '../user-table-filters-result';
 
 // ----------------------------------------------------------------------
 
-const STATUS_OPTIONS = [{ value: 'active', label: 'I am Looking for Housing' }, ...USER_STATUS_OPTIONS2];
+const STATUS_OPTIONS = [{ value: 'active', label: 'Active' }, { value: 'pending', label: 'Pending' }];
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'House ID', width: 100 },
-  { id: 'phoneNumber', label: 'Form Type', width: 180 },
-  { id: 'company', label: 'Type', width: 100 },
-  { id: 'role', label: 'Created At', width: 180 },
-  { id: 'status', label: 'Rent', width: 100 },
-  { id: 'manage', label: 'Floor', width: 80 },
-  { id: 'city', label: 'City', width: 80 },
-  { id: 'status', label: 'Status', width: 80 },
-  { id: 'file', label: 'File', width: 80 },
-  { id: '', label: '', width: 80 },
-
+  { id: 'name', label: 'House ID' },
+  { id: 'phoneNumber', label: 'Form Type' },
+  { id: 'company', label: 'Type' },
+  { id: 'role', label: 'Created At' },
+  { id: 'status', label: 'Status' },
+  { id: 'rent', label: 'Rent' },
+  { id: 'floor', label: 'Floor' },
+  { id: 'city', label: 'City' },
+  { id: 'file', label: 'File' },
+  { id: '', label: '' },
 ];
 
 // ----------------------------------------------------------------------
 
 export function UserListView() {
   const table = useTable();
-
   const router = useRouter();
-
   const confirm = useBoolean();
-
   const [tableData, setTableData] = useState(_userList);
-
-  const filters = useSetState({ name: '', role: [], status: 'all' });
+  const [filters, setFilters] = useState({
+    name: '',
+    role: [],
+    status: 'active',
+  });
 
   const dataFiltered = applyFilter({
     inputData: tableData,
     comparator: getComparator(table.order, table.orderBy),
-    filters: filters.state,
+    filters,
   });
 
-  const dataInPage = rowInPage(dataFiltered, table.page, table.rowsPerPage);
-
-  const canReset =
-    !!filters.state.name || filters.state.role.length > 0 || filters.state.status !== 'all';
-
-  const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
+  const handleFilterStatus = useCallback((event, newValue) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      status: newValue,
+    }));
+  }, []);
 
   const handleDeleteRow = useCallback(
     (id) => {
       const deleteRow = tableData.filter((row) => row.id !== id);
-
-      toast.success('Delete success!');
-
       setTableData(deleteRow);
-
-      table.onUpdatePageDeleteRow(dataInPage.length);
+      table.onUpdatePageDeleteRow(dataFiltered.length);
     },
-    [dataInPage.length, table, tableData]
+    [dataFiltered.length, table, tableData]
   );
-
-  const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
-
-    toast.success('Delete success!');
-
-    setTableData(deleteRows);
-
-    table.onUpdatePageDeleteRows({
-      totalRowsInPage: dataInPage.length,
-      totalRowsFiltered: dataFiltered.length,
-    });
-  }, [dataFiltered.length, dataInPage.length, table, tableData]);
 
   const handleEditRow = useCallback(
     (id) => {
@@ -125,22 +98,26 @@ export function UserListView() {
     [router]
   );
 
-  const handleFilterStatus = useCallback(
-    (event, newValue) => {
-      table.onResetPage();
-      filters.setState({ status: newValue });
-    },
-    [filters, table]
-  );
+  const handleDeleteRows = useCallback(() => {
+    const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
+    setTableData(deleteRows);
+
+    table.onUpdatePageDeleteRows({
+      totalRows: tableData.length,
+      totalRowsInPage: dataFiltered.length,
+      totalRowsFiltered: dataFiltered.length,
+    });
+
+    table.onSelectAllRows(false);
+  }, [dataFiltered.length, table, tableData]);
 
   return (
     <>
       <DashboardContent>
         <CustomBreadcrumbs
-          heading="Manage Appointments"
+          heading="Manage Housing"
           links={[
             { name: 'Dashboard', href: paths.dashboard.root },
-
             { name: 'Housing' },
           ]}
           action={
@@ -158,87 +135,31 @@ export function UserListView() {
 
         <Card>
           <Tabs
-            value={filters.state.status}
+            value={filters.status}
             onChange={handleFilterStatus}
             sx={{
               px: 2.5,
-              boxShadow: (theme) =>
-                `inset 0 -2px 0 0 ${varAlpha(theme.vars.palette.grey['500Channel'], 0.08)}`,
+              boxShadow: (theme) => `inset 0 -2px 0 0 ${theme.palette.divider}`,
             }}
           >
             {STATUS_OPTIONS.map((tab) => (
               <Tab
                 key={tab.value}
-                iconPosition="end"
                 value={tab.value}
                 label={tab.label}
                 icon={
                   <Label
-                    variant={
-                      ((tab.value === 'all' || tab.value === filters.state.status) && 'filled') ||
-                      'soft'
-                    }
-                    color={
-                      (tab.value === 'active' && 'success') ||
-                      (tab.value === 'pending' && 'warning') ||
-                      (tab.value === 'banned' && 'error') ||
-                      'default'
-                    }
+                    variant={filters.status === tab.value ? 'filled' : 'soft'}
+                    color={(tab.value === 'active' && 'success') || (tab.value === 'pending' && 'warning') || 'default'}
                   >
-                    {['active', 'pending', 'banned', 'rejected'].includes(tab.value)
-                      ? tableData.filter((user) => user.status === tab.value).length
-                      : tableData.length}
+                    {tableData.filter((user) => user.status === tab.value).length}
                   </Label>
                 }
               />
             ))}
           </Tabs>
 
-          {/* <UserTableToolbar
-            filters={filters}
-            onResetPage={table.onResetPage}
-            options={{ roles: _roles }}
-          /> */}
-
-          {/* {canReset && (
-            <UserTableFiltersResult
-              filters={filters}
-              totalResults={dataFiltered.length}
-              onResetPage={table.onResetPage}
-              sx={{ p: 2.5, pt: 0 }}
-            />
-          )} */}
-
           <Box sx={{ position: 'relative' }}>
-            <Box
-              rowGap={3}
-              columnGap={2}
-              display="flex"
-
-            >
-
-              <Typography
-                variant="caption"
-                sx={{
-                  my: 3,
-                  mx: 'auto',
-                  display: 'block',
-                  textAlign: 'center',
-                  color: 'text.disabled',
-                }}
-              >
-                Here are the details which you have provided us on query Forms. Please make sure you are agreed with the pricing before send us your queries.
-              </Typography>
-              <Button
-                component={RouterLink}
-                href={paths.dashboard.user.new}
-                variant="contained"
-                sx={{ my: 2, mr: 3 }}
-                startIcon={<Iconify icon="house" />}
-              >
-                Send Request
-              </Button>
-            </Box>
             <TableSelectedAction
               dense={table.dense}
               numSelected={table.selected.length}
@@ -293,27 +214,27 @@ export function UserListView() {
                     ))}
 
                   <TableEmptyRows
-                    height={table.dense ? 56 : 56 + 20}
+                    height={table.dense ? 52 : 72}
                     emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
                   />
 
-                  <TableNoData notFound={notFound} />
+                  <TableNoData notFound={!dataFiltered.length} />
                 </TableBody>
               </Table>
             </Scrollbar>
           </Box>
 
           <TablePaginationCustom
-            page={table.page}
-            dense={table.dense}
             count={dataFiltered.length}
+            page={table.page}
             rowsPerPage={table.rowsPerPage}
             onPageChange={table.onChangePage}
-            onChangeDense={table.onChangeDense}
             onRowsPerPageChange={table.onChangeRowsPerPage}
+            dense={table.dense}
+            onChangeDense={table.onChangeDense}
           />
         </Card>
-      </DashboardContent >
+      </DashboardContent>
 
       <ConfirmDialog
         open={confirm.value}
@@ -340,6 +261,8 @@ export function UserListView() {
     </>
   );
 }
+
+// ----------------------------------------------------------------------
 
 function applyFilter({ inputData, comparator, filters }) {
   const { name, status, role } = filters;
@@ -370,3 +293,4 @@ function applyFilter({ inputData, comparator, filters }) {
 
   return inputData;
 }
+
