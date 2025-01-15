@@ -98,6 +98,7 @@ const PermissionDeniedPage = lazy(() => import('src/pages/dashboard/permission')
 // Blank page
 const ParamsPage = lazy(() => import('src/pages/dashboard/params'));
 const BlankPage = lazy(() => import('src/pages/dashboard/blank'));
+const VisaPermitPage = lazy(() => import('src/pages/dashboard/VisaPermits/new'));
 
 // ----------------------------------------------------------------------
 
@@ -206,7 +207,7 @@ export const dashboardRoutes = [
       { path: 'importexport', element: < ImportExportServices /> },
       { path: 'investors', element: < Investors /> },
 
-
+      { path: 'visa-permit', element: < VisaPermitPage />},
 
       { path: 'housing', element: <HousingPage /> },
 
