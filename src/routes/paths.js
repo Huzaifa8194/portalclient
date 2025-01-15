@@ -103,7 +103,7 @@ export const paths = {
     chat: `${ROOTS.DASHBOARD}/chat`,
     blank: `${ROOTS.DASHBOARD}/blank`,
     assessment: `${ROOTS.DASHBOARD}/assessments`,
-
+    visaPermit: `${ROOTS.DASHBOARD}/visa-permit`,
     housing: `${ROOTS.DASHBOARD}/housing`,
     kanban: `${ROOTS.DASHBOARD}/kanban`,
     calendar: `${ROOTS.DASHBOARD}/calendar`,

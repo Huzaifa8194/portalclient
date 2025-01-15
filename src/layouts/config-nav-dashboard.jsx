@@ -103,7 +103,7 @@ export const navData = [
 
        ],
      },
-     { title: 'Visa & Permits', path: ' ', icon: ICONS.calendar },
+     { title: 'Visa & Permits', path: paths.dashboard.visaPermit, icon: ICONS.calendar },
      { title: 'Service Charges', path: ' ', icon: ICONS.calendar },
      { title: 'Power of Attorney', path: ' ', icon: ICONS.calendar },
      { title: 'Pet Relocation', path: ' ', icon: ICONS.calendar },
