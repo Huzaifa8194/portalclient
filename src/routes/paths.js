@@ -103,14 +103,26 @@ export const paths = {
     chat: `${ROOTS.DASHBOARD}/chat`,
     blank: `${ROOTS.DASHBOARD}/blank`,
     assessment: `${ROOTS.DASHBOARD}/assessments`,
-    visaPermit: `${ROOTS.DASHBOARD}/visa-permit`,
     housing: `${ROOTS.DASHBOARD}/housing`,
     kanban: `${ROOTS.DASHBOARD}/kanban`,
     calendar: `${ROOTS.DASHBOARD}/calendar`,
     fileManager: `${ROOTS.DASHBOARD}/file-manager`,
     permission: `${ROOTS.DASHBOARD}/permission`,
+<<<<<<< HEAD
     faqs: `${ROOTS.DASHBOARD}/faqs`,
 
+=======
+    visaPermit: `${ROOTS.DASHBOARD}/visa-permit`,
+    serviceCharges: `${ROOTS.DASHBOARD}/service-charges`,
+    powerOfAttorney: `${ROOTS.DASHBOARD}/power-of-attorney`,
+    petRelocation: `${ROOTS.DASHBOARD}/pet-relocation`,
+    logisticsSolution: `${ROOTS.DASHBOARD}/logistics-solution`,
+    moneyManagement: `${ROOTS.DASHBOARD}/money-management`,
+    Assessment: `${ROOTS.DASHBOARD}/assessment`,
+    EOR: `${ROOTS.DASHBOARD}/eor`,
+    payrollServices: `${ROOTS.DASHBOARD}/payroll-services`,
+    lawyers: `${ROOTS.DASHBOARD}/lawyers`,
+>>>>>>> 9c8d738f5adce872ef703c36df3b47be60c00864
     business: {
       entrepenaur: `${ROOTS.DASHBOARD}/entrepenaur`,
       importexport: `${ROOTS.DASHBOARD}/importexport`,
