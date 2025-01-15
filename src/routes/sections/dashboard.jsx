@@ -25,7 +25,7 @@ const ProductCreatePage = lazy(() => import('src/pages/dashboard/product/new'));
 const ProductEditPage = lazy(() => import('src/pages/dashboard/product/edit'));
 
 // Assessment
-const AssessmentsPage = lazy(() => import('src/pages/dashboard/assessment/list'));
+const AssessmentsPage = lazy(() => import('src/pages/dashboard/assessment/new'));
 // Housing
 const HousingPage = lazy(() => import('src/pages/dashboard/housing/list'));
 
@@ -99,6 +99,16 @@ const PermissionDeniedPage = lazy(() => import('src/pages/dashboard/permission')
 const ParamsPage = lazy(() => import('src/pages/dashboard/params'));
 const BlankPage = lazy(() => import('src/pages/dashboard/blank'));
 const VisaPermitPage = lazy(() => import('src/pages/dashboard/VisaPermits/new'));
+const ServiceCharges = lazy(() => import('src/pages/dashboard/ServiceCharges/new'));
+const PowerOfAttorney = lazy(() => import('src/pages/dashboard/PowerOfAttorney/new'));
+const PetRelocation = lazy(() => import('src/pages/dashboard/PetRelocation/new'));
+const LogisticsSolution = lazy(() => import('src/pages/dashboard/LogisticsSolution/new'));
+const MoneyManagement = lazy(() => import('src/pages/dashboard/MoneyManagement/new'));
+const EOR = lazy(() => import('src/pages/dashboard/EOR/new'));
+const PayrollServices = lazy(() => import('src/pages/dashboard/PayrollServices/new'));
+const Lawyer = lazy(() => import('src/pages/dashboard/Lawyer/new'));
+
+
 
 // ----------------------------------------------------------------------
 
@@ -208,6 +218,16 @@ export const dashboardRoutes = [
       { path: 'investors', element: < Investors /> },
 
       { path: 'visa-permit', element: < VisaPermitPage />},
+      { path: 'pet-relocation', element: < PetRelocation />},
+      { path: 'service-charges', element: < ServiceCharges />},
+      { path: 'power-of-attorney', element: < PowerOfAttorney />},
+      { path: 'logistics-solution', element: < LogisticsSolution />},
+      { path: 'money-management', element: < MoneyManagement />},
+      { path: 'eor', element: < EOR />},
+      { path: 'payroll-services', element: < PayrollServices />},
+      { path: 'lawyer', element: < Lawyer />},
+
+
 
       { path: 'housing', element: <HousingPage /> },
 
