@@ -109,6 +109,7 @@ export const paths = {
     calendar: `${ROOTS.DASHBOARD}/calendar`,
     fileManager: `${ROOTS.DASHBOARD}/file-manager`,
     permission: `${ROOTS.DASHBOARD}/permission`,
+    faqs: `${ROOTS.DASHBOARD}/faqs`,
 
     business: {
       entrepenaur: `${ROOTS.DASHBOARD}/entrepenaur`,
