@@ -34,16 +34,6 @@ import { Form, Field, schemaHelper } from 'src/components/hook-form';
 
 import { PostDetailsPreview } from './post-details-preview';
 
-// ----------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
 export const NewPostSchema = zod.object({
   title: zod.string().min(1, { message: 'Title is required!' }),
   description: zod.string().min(1, { message: 'Description is required!' }),
@@ -51,16 +41,12 @@ export const NewPostSchema = zod.object({
   coverUrl: schemaHelper.file({ message: { required_error: 'Cover is required!' } }),
   tags: zod.string().array().min(2, { message: 'Must have at least 2 items!' }),
   metaKeywords: zod.string().array().nonempty({ message: 'Meta keywords is required!' }),
-  // Not required
   metaTitle: zod.string(),
   metaDescription: zod.string(),
 });
 
-// ----------------------------------------------------------------------
-
 export function PostNewEditForm({ currentPost }) {
   const router = useRouter();
-
   const preview = useBoolean();
 
   const defaultValues = useMemo(
@@ -82,6 +68,7 @@ export function PostNewEditForm({ currentPost }) {
     resolver: zodResolver(NewPostSchema),
     defaultValues,
   });
+
   const {
     reset,
     watch,
@@ -115,201 +102,20 @@ export function PostNewEditForm({ currentPost }) {
     setValue('coverUrl', null);
   }, [setValue]);
 
-
-  const multiqs1 = [
-    { value: '', label: 'Choose Option' },
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-    { value: 'dontknow', label: 'Dont Know' },
-
-  ];
-
-
-  const multiqs2 = [
-    { value: '', label: 'Choose Option' },
-    { value: '1', label: '1' },
-    { value: '2', label: '2' },
-    { value: '3', label: '3' },
-    { value: '4', label: '4' },
-    { value: '5', label: '5' },
-    { value: '6', label: '6' },
-    { value: '7', label: '7' },
-    { value: '8', label: '8' },
-    { value: '9', label: '8' },
-    { value: '10', label: '8' },
-
-  ];
-
-  const multiqs3 = [
-    { value: '', label: 'Choose Option' },
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-  ];
-
-  const multiqs4 = [
-    { value: '', label: 'Choose Option' },
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-  ];
-
-  const multiqs5 = [
-    { value: '', label: 'Choose Option' },
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-  ];
-
-
-  const multiqs6 = [
-    { value: '', label: 'Choose Option' },
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-  ];
-
   const multiqsyn = [
     { value: '', label: 'Choose Option' },
     { value: 'yes', label: 'Yes' },
     { value: 'no', label: 'No' },
   ];
 
-  const renderDetails = (
-    <Card>
-      <CardHeader title="Details" subheader="Title, short description, image..." sx={{ mb: 3 }} />
-
-      <Divider />
-
-      <Stack spacing={3} sx={{ p: 3 }}>
-        <Field.Text name="title" label="Post title" />
-
-        <Field.Text name="description" label="Description" multiline rows={3} />
-
-        <Stack spacing={1.5}>
-          <Typography variant="subtitle2">Content</Typography>
-          <Field.Editor name="content" sx={{ maxHeight: 480 }} />
-        </Stack>
-
-        <Stack spacing={1.5}>
-          <Typography variant="subtitle2">Cover</Typography>
-          <Field.Upload name="coverUrl" maxSize={3145728} onDelete={handleRemoveFile} />
-        </Stack>
-      </Stack>
-    </Card>
-  );
-
-  const renderProperties = (
-    <Card>
-      <CardHeader
-        title="Properties"
-        subheader="Additional functions and attributes..."
-        sx={{ mb: 3 }}
-      />
-
-      <Divider />
-
-      <Stack spacing={3} sx={{ p: 3 }}>
-        <Field.Autocomplete
-          name="tags"
-          label="Tags"
-          placeholder="+ Tags"
-          multiple
-          freeSolo
-          disableCloseOnSelect
-          options={_tags.map((option) => option)}
-          getOptionLabel={(option) => option}
-          renderOption={(props, option) => (
-            <li {...props} key={option}>
-              {option}
-            </li>
-          )}
-          renderTags={(selected, getTagProps) =>
-            selected.map((option, index) => (
-              <Chip
-                {...getTagProps({ index })}
-                key={option}
-                label={option}
-                size="small"
-                color="info"
-                variant="soft"
-              />
-            ))
-          }
-        />
-
-        <Field.Text name="metaTitle" label="Meta title" />
-
-        <Field.Text name="metaDescription" label="Meta description" fullWidth multiline rows={3} />
-
-        <Field.Autocomplete
-          name="metaKeywords"
-          label="Meta keywords"
-          placeholder="+ Keywords"
-          multiple
-          freeSolo
-          disableCloseOnSelect
-          options={_tags.map((option) => option)}
-          getOptionLabel={(option) => option}
-          renderOption={(props, option) => (
-            <li {...props} key={option}>
-              {option}
-            </li>
-          )}
-          renderTags={(selected, getTagProps) =>
-            selected.map((option, index) => (
-              <Chip
-                {...getTagProps({ index })}
-                key={option}
-                label={option}
-                size="small"
-                color="info"
-                variant="soft"
-              />
-            ))
-          }
-        />
-
-        <FormControlLabel
-          control={<Switch defaultChecked inputProps={{ id: 'comments-switch' }} />}
-          label="Enable comments"
-        />
-      </Stack>
-    </Card>
-  );
-
-  const renderActions = (
-    <Box display="flex" alignItems="center" flexWrap="wrap" justifyContent="flex-end">
-      <FormControlLabel
-        control={<Switch defaultChecked inputProps={{ id: 'publish-switch' }} />}
-        label="Publish"
-        sx={{ pl: 3, flexGrow: 1 }}
-      />
-
-      <div>
-        <Button color="inherit" variant="outlined" size="large" onClick={preview.onTrue}>
-          Preview
-        </Button>
-
-        <LoadingButton
-          type="submit"
-          variant="contained"
-          size="large"
-          loading={isSubmitting}
-          sx={{ ml: 2 }}
-        >
-          {!currentPost ? 'Create post' : 'Save changes'}
-        </LoadingButton>
-      </div>
-    </Box>
-  );
+  const isLongQuestion = (label) => label.split(' ').length > 12;
 
   return (
     <Form methods={methods} onSubmit={onSubmit}>
       <Grid spacing={3}>
-
-
-
-
         <Grid xs={12} md={8}>
           <Card sx={{ p: 3 }}>
-            <Typography
+            {/* <Typography
               variant="caption"
               sx={{
                 mt: 3,
@@ -321,8 +127,7 @@ export function PostNewEditForm({ currentPost }) {
               }}
             >
               Fill this form and submit only if you are an investor who want to be part of an active business or wants to invest on Entreprenuer ideas. We can help you to find the right properties to invest in. This service is paid to avoid unnecessary queries.
-
-            </Typography>
+            </Typography> */}
             <Box
               rowGap={3}
               columnGap={2}
@@ -331,135 +136,78 @@ export function PostNewEditForm({ currentPost }) {
                 xs: 'repeat(1, 1fr)',
                 sm: 'repeat(2, 1fr)',
               }}
+              sx={{ 
+                '& .MuiFormControl-root': { 
+                  width: '100%'
+                },
+                '& .MuiInputBase-root': {
+                  minHeight: '56px',
+                },
+                '& .MuiInputLabel-root': {
+                  height: 'auto',
+                  lineHeight: '1.2',
+                  padding: '4px 0'
+                }
+              }}
             >
-
-
-
-
-
-
-              {/* APPOINTMENT_TYPE_OPTIONS,
-  APPOINTMENT_CATEGORY_OPTIONS,
-  APPOINTMENT_COUNTRY_OPTIONS,
-  APPOINTMENT_TIME_OPTIONS, */}
-
-
-
-              <Field.Select native name="question1" label="Are you interested to invest in more than 50% shares?" InputLabelProps={{ shrink: true }}>
-                {multiqsyn.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-
-              <Field.Select native name="question2" label="Are you planning to invest in new business idea?" InputLabelProps={{ shrink: true }}>
-                {multiqsyn.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-              <Field.Select native name="question3" label="Are you interested to invest in property, housing, apartment, villas, which you can rent it out later?" InputLabelProps={{ shrink: true }}>
-                {multiqsyn.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-              <Field.Select native name="question4" label="Are you interested to invest in running business?" InputLabelProps={{ shrink: true }}>
-                {multiqsyn.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-              <Field.Select native name="question5" label="Are you interested to invest or buy Hotel, Motel, Franchises, grocery store etc?" InputLabelProps={{ shrink: true }}>
-                {multiqsyn.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-              <Field.Text name="question9" label="Are you planning to move to sweden with this investment?" />
-
-
-              <Field.Select native name="question6" label="Are you planning to invest for the profit?" InputLabelProps={{ shrink: true }}>
-                {multiqsyn.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-              <Field.Select native name="question7" label="Do you want to work as active partner?" InputLabelProps={{ shrink: true }}>
-                {multiqsyn.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-              <Field.Select native name="question8" label="Do you want to invest as sleeping partner?" InputLabelProps={{ shrink: true }}>
-                {multiqsyn.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-
-
-
-              <Field.Text name="question10" label="How often should you expect to meet after funding?" />
-
-              <Field.Text name="question11" label="What do you expect this investment to do for your portfolio?" />
-
-              <Field.Text name="question12" label="What’s your timeline, How quickly you can invest?" />
-
-              <Field.Text name="question13" label="How much are you going to invest, give us any numbers?" />
-
-              <Field.Text name="question14" label="What is your top concern?" />
-
-              <Field.Text name="question15" label="What’s the first thing You’d want us to do as investor?" />
-
-              <Field.Text name="question16" label="Did someone else need to approve your investment or you are the one who can approve this?" />
-
-              <Field.Text name="question17" label="Would you like to tell us about your current investments?" />
-
-              <Field.Text name="question18" label="Are you in EU citizen? If not, please do write you current country of residence and status in the country." />
-
-              <Field.Text name="question19" label="Are you currently running a good business and looking to open a branch office in Sweden?" />
-
-              <Field.Text name="question20" label="Tell us more about yourself business plan and upload the documents on our online portal" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+              {[
+                { name: "question1", label: "Are you interested to invest in more than 50% shares?", type: "select" },
+                { name: "question2", label: "Are you planning to invest in new business idea?", type: "select" },
+                { name: "question3", label: "Are you interested to invest in property, housing, apartment, villas, which you can rent it out later?", type: "select" },
+                { name: "question4", label: "Are you interested to invest in running business?", type: "select" },
+                { name: "question5", label: "Are you interested to invest or buy Hotel, Motel, Franchises, grocery store etc?", type: "select" },
+                { name: "question6", label: "Are you planning to invest for the profit?", type: "select" },
+                { name: "question7", label: "Do you want to work as active partner?", type: "select" },
+                { name: "question8", label: "Do you want to invest as sleeping partner?", type: "select" },
+                { name: "question9", label: "Are you planning to move to sweden with this investment?", type: "text" },
+                { name: "question10", label: "How often should you expect to meet after funding?", type: "text" },
+                { name: "question11", label: "What do you expect this investment to do for your portfolio?", type: "text" },
+                { name: "question12", label: "What's your timeline, How quickly you can invest?", type: "text" },
+                { name: "question13", label: "How much are you going to invest, give us any numbers?", type: "text" },
+                { name: "question14", label: "What is your top concern?", type: "text" },
+                { name: "question15", label: "What's the first thing You'd want us to do as investor?", type: "text" },
+                { name: "question16", label: "Did someone else need to approve your investment or you are the one who can approve this?", type: "text" },
+                { name: "question17", label: "Would you like to tell us about your current investments?", type: "text" },
+                { name: "question18", label: "Are you in EU citizen? If not, please do write you current country of residence and status in the country.", type: "text" },
+                { name: "question19", label: "Are you currently running a good business and looking to open a branch office in Sweden?", type: "text" },
+                { name: "question20", label: "Tell us more about yourself business plan and upload the documents on our online portal", type: "text" },
+              ].map((question) => (
+                question.type === "select" ? (
+                  <Field.Select
+                    key={question.name}
+                    native
+                    name={question.name}
+                    label={question.label}
+                    InputLabelProps={{ shrink: true }}
+                    sx={{ 
+                      gridColumn: isLongQuestion(question.label) ? '1 / -1' : 'auto',
+                    }}
+                  >
+                    {multiqsyn.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </Field.Select>
+                ) : (
+                  <Field.Text
+                    key={question.name}
+                    name={question.name}
+                    label={question.label}
+                    multiline={isLongQuestion(question.label)}
+                    rows={isLongQuestion(question.label) ? 2 : 1}
+                    sx={{ 
+                      gridColumn: isLongQuestion(question.label) ? '1 / -1' : 'auto',
+                      '& .MuiInputBase-root': {
+                        height: isLongQuestion(question.label) ? '80px' : 'auto'
+                      }
+                    }}
+                  />
+                )
+              ))}
             </Box>
 
-
-
-
-
             <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>
-              {/* <Field.Text name="about" multiline rows={4} label="About" /> */}
-
               <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
                 Send Request
               </LoadingButton>
@@ -470,3 +218,4 @@ export function PostNewEditForm({ currentPost }) {
     </Form>
   );
 }
+

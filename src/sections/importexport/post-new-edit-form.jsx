@@ -236,30 +236,20 @@ export function PostNewEditForm({ currentPost }) {
     </Box>
   );
 
+  const isLongQuestion = (label) => label.split(' ').length > 12;
+
   return (
     <Form methods={methods} onSubmit={onSubmit}>
       <Grid container spacing={3}>
         <Grid xs={12} md={12}>
           <Card sx={{ p: 3 }}>
-            {/* <Typography
-              variant="caption"
-              sx={{
-                mt: 3,
-                mb: 5,
-                mx: 'auto',
-                display: 'block',
-                textAlign: 'left',
-                color: 'text.secondary',
-              }}
-            >
-              Fill this form and submit only if you are an Entrepreneur or already have any Start-up. We will help you to expand your idea or business by providing you right investors. This service is paid to avoid unnecessary queries.
-            </Typography> */}
             <Box
               rowGap={3}
               columnGap={2}
               display="grid"
               gridTemplateColumns={{
                 xs: 'repeat(1, 1fr)',
+                sm: 'repeat(2, 1fr)',
               }}
               sx={{ 
                 '& .MuiFormControl-root': { 
@@ -280,62 +270,45 @@ export function PostNewEditForm({ currentPost }) {
                 }
               }}
             >
-              <Field.Text 
-                name="question1" 
-                label="What products you want us to export from Europe? (Please Separate Products with comma or what products you want to export to Europe?)"
-                placeholder="Enter products for export..."
-                multiline
-                rows={2}
-                sx={{ 
-                  '& .MuiInputBase-root': {
-                    height: '80px'
-                  }
-                }}
-              />
-              <Field.Text name="question2" label="How long have you been in business?" sx={{ width: '100%' }} />
-              <Field.Text name="question3" label="Can you share a few success stories about similar, yet non-competing products you have import?" sx={{ width: '100%' }} />
-              <Field.Text name="question4" label="Are you coordinating with other foreign companies?" sx={{ width: '100%' }} />
-              <Field.Text name="question5" label="How long has your relationship lasted with the top three companies you represent?" sx={{ width: '100%' }} />
-              <Field.Text name="question6" label="Have you specifically imported products from Europe?" sx={{ width: '100%' }} />
-              <Field.Text name="question7" label="What are your local customs and import duties on above mentioned product?" sx={{ width: '100%' }} />
-              <Field.Text name="question8" label="Are you aware of any restrictions on this product? Or Is this a restricted product to export from Europe" sx={{ width: '100%' }} />
-              <Field.Text name="question9" label="What documents will you need to import(fill in your product line) freely?" sx={{ width: '100%' }} />
-              <Field.Text name="question10" label="How much lead time do you need before you can begin to import this product?" sx={{ width: '100%' }} />
-              <Field.Text name="question11" label="Are you aware of any documents that will require authorization in advance from your consulate, government or embassy?" sx={{ width: '100%' }} />
-              <Field.Text 
-                name="question12" 
-                label="Are there any special local regulations or restriction (e.g., carton markings, product labelling, special language requirements, cultural factors, numbering issues, etc.) that we need to know about in advance to fully comply?" 
-                placeholder="Enter local regulations and restrictions..."
-                multiline
-                rows={2}
-                sx={{ 
-                  '& .MuiInputBase-root': {
-                    height: '80px'
-                  }
-                }} 
-              />
-              <Field.Text name="question13" label="Are you knowledgeable about product registration requirements, if any" sx={{ width: '100%' }} />
-              <Field.Text name="question14" label="Do you want us to export this product to any other place than yours?" sx={{ width: '100%' }} />
-              <Field.Text name="question15" label="How will the temperature affect this product during importation, warehousing, distribution and the normal retail sales cycle?" sx={{ width: '100%' }} />
-              <Field.Text 
-                name="question16" 
-                label="Do you know our job is done once we export the product from here, so you need to handle all the internal matters in your country?" 
-                placeholder="Confirm understanding of responsibilities..."
-                multiline
-                rows={2}
-                sx={{ 
-                  '& .MuiInputBase-root': {
-                    height: '80px'
-                  }
-                }} 
-              />
-              <Field.Text name="question17" label="Do you have any sample of this products please upload on Documents portal?" sx={{ width: '100%' }} />
-              <Field.Text name="question18" label="Did you already find the products you want us to visit and buy and send it to you on your behalf?" sx={{ width: '100%' }} />
-              <Field.Text name="question19" label="Most of the heavy machines, products are manufacturing in Germany, so you want us to send a new product from there." sx={{ width: '100%' }} />
-              <Field.Text name="question20" label="Attach catalogue, brochure and give us more specification of the product?" sx={{ width: '100%' }} />
-              <Field.Text name="question21" label="Are you interested to launch your product in Europe?" sx={{ width: '100%' }} />
-              <Field.Text name="question22" label="Are you looking for warehouse in Sweden or Europe?" sx={{ width: '100%' }} />
-              <Field.Text name="question23" label="Are you looking for a marketing strategy for your product?" sx={{ width: '100%' }} />
+              {[
+                { name: "question1", label: "What products you want us to export from Europe? (Please Separate Products with comma or what products you want to export to Europe?)" },
+                { name: "question2", label: "How long have you been in business?" },
+                { name: "question3", label: "Can you share a few success stories about similar, yet non-competing products you have import?" },
+                { name: "question4", label: "Are you coordinating with other foreign companies?" },
+                { name: "question5", label: "How long has your relationship lasted with the top three companies you represent?" },
+                { name: "question6", label: "Have you specifically imported products from Europe?" },
+                { name: "question7", label: "What are your local customs and import duties on above mentioned product?" },
+                { name: "question8", label: "Are you aware of any restrictions on this product? Or Is this a restricted product to export from Europe" },
+                { name: "question9", label: "What documents will you need to import(fill in your product line) freely?" },
+                { name: "question10", label: "How much lead time do you need before you can begin to import this product?" },
+                { name: "question11", label: "Are you aware of any documents that will require authorization in advance from your consulate, government or embassy?" },
+                { name: "question12", label: "Are there any special local regulations or restriction (e.g., carton markings, product labelling, special language requirements, cultural factors, numbering issues, etc.) that we need to know about in advance to fully comply?" },
+                { name: "question13", label: "Are you knowledgeable about product registration requirements, if any" },
+                { name: "question14", label: "Do you want us to export this product to any other place than yours?" },
+                { name: "question15", label: "How will the temperature affect this product during importation, warehousing, distribution and the normal retail sales cycle?" },
+                { name: "question16", label: "Do you know our job is done once we export the product from here, so you need to handle all the internal matters in your country?" },
+                { name: "question17", label: "Do you have any sample of this products please upload on Documents portal?" },
+                { name: "question18", label: "Did you already find the products you want us to visit and buy and send it to you on your behalf?" },
+                { name: "question19", label: "Most of the heavy machines, products are manufacturing in Germany, so you want us to send a new product from there." },
+                { name: "question20", label: "Attach catalogue, brochure and give us more specification of the product?" },
+                { name: "question21", label: "Are you interested to launch your product in Europe?" },
+                { name: "question22", label: "Are you looking for warehouse in Sweden or Europe?" },
+                { name: "question23", label: "Are you looking for a marketing strategy for your product?" },
+              ].map((question, index) => (
+                <Field.Text
+                  key={question.name}
+                  name={question.name}
+                  label={question.label}
+                  multiline={isLongQuestion(question.label)}
+                  rows={isLongQuestion(question.label) ? 2 : 1}
+                  sx={{ 
+                    gridColumn: isLongQuestion(question.label) ? '1 / -1' : 'auto',
+                    '& .MuiInputBase-root': {
+                      height: isLongQuestion(question.label) ? '80px' : 'auto'
+                    }
+                  }}
+                />
+              ))}
             </Box>
 
             <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>
