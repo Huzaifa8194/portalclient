@@ -129,7 +129,7 @@ export const paths = {
       businessInquiry : `${ROOTS.DASHBOARD}/business-inquiry`,
     },
     feedback: `${ROOTS.DASHBOARD}/feedback`,
-    
+    auPair:`${ROOTS.DASHBOARD}/au-pair`,
     general: {
       app: `${ROOTS.DASHBOARD}/app`,
       ecommerce: `${ROOTS.DASHBOARD}/ecommerce`,

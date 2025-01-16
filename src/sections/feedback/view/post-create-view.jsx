@@ -31,10 +31,10 @@ export function PostCreateView() {
   return (
     <DashboardContent>
       <CustomBreadcrumbs
-        heading="Feedback"
+        heading="Logistics Solution"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'Feedback' },
+          { name: 'Logistics Solution' },
         ]}
         sx={{ mb: { xs: 3, md: 3 } }}
       />
@@ -124,10 +124,10 @@ export function PostCreateView() {
         <Grid xs={12}>
           <Box sx={{ mt: 3 }}>
             <Stack direction="row" spacing={2} justifyContent="center">
-              <Button variant="contained"  onClick={handleComplaintClick}>
+              <Button variant="contained" color="primary" onClick={handleComplaintClick}>
                 Submit a Complaint
               </Button>
-              <Button variant="outlined" onClick={handleExperienceClick}>
+              <Button variant="outlined" color="primary" onClick={handleExperienceClick}>
                 Share Your Experience
               </Button>
             </Stack>

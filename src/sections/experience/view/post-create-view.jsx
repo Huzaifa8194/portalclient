@@ -18,10 +18,12 @@ export function PostCreateView() {
   return (
     <DashboardContent>
       <CustomBreadcrumbs
-        heading="Lawyer"
+        heading="Experience"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'Lawyer' },
+          { name: 'Feedback', href: paths.dashboard.feedback },
+
+          { name: 'Experience' },
         ]}
         sx={{ mb: { xs: 3, md: 3 } }}
       />

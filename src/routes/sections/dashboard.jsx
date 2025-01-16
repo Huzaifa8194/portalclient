@@ -111,6 +111,7 @@ const Complaint = lazy(() => import('src/pages/dashboard/complaint/new'));
 const Experience = lazy(() => import('src/pages/dashboard/experience/new'));
 const Feedback= lazy(() => import('src/pages/dashboard/feedback/new'));
 const Business= lazy(() => import('src/pages/dashboard/businessInquiry/list'));
+const AuPair= lazy(() => import('src/pages/dashboard/AuPair/new'));
 
 
 
@@ -234,6 +235,8 @@ export const dashboardRoutes = [
       { path: 'lawyers', element: < Lawyer />},
       { path: 'complaint', element: < Complaint />},
       { path: 'feedback', element: < Feedback />},
+      { path: 'au-pair', element: < AuPair /> },
+
       { path: 'business-inquiry', element: < Business />},
       { path: 'experience', element: < Experience />},
       { path: 'housing', element: <HousingPage /> },

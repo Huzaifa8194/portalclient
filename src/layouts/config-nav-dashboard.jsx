@@ -120,7 +120,7 @@ export const navData = [
 
       { title: 'Pet Relocation', path: paths.dashboard.petRelocation, icon: ICONS.calendar },
       { title: 'Logistics Solution', path: paths.dashboard.logisticsSolution, icon: ICONS.calendar },
-      { title: 'Au Pair', path: ' ', icon: ICONS.calendar },
+      { title: 'Au Pair', path:paths.dashboard.auPair, icon: ICONS.calendar },
       { title: 'Payroll Services', path: paths.dashboard.payrollServices, icon: ICONS.calendar },
       { title: 'EOR', path: paths.dashboard.EOR, icon: ICONS.calendar },
 
@@ -142,6 +142,7 @@ export const navData = [
       { title: 'Terms & Conditions', path: ' ', icon: ICONS.calendar },
       { title: 'FAQ', path: ' ', icon: ICONS.calendar },
       { title: 'Feedback', path: paths.dashboard.feedback, icon: ICONS.calendar },
+      { title: 'Course', path: paths.dashboard.general.course, icon: ICONS.calendar },
 
     ],
   },
