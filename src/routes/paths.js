@@ -1,6 +1,7 @@
 import { paramCase } from 'src/utils/change-case';
 
 import { _id, _postTitles } from 'src/_mock/assets';
+import { Root } from 'yet-another-react-lightbox';
 
 // ----------------------------------------------------------------------
 
@@ -118,11 +119,17 @@ export const paths = {
     EOR: `${ROOTS.DASHBOARD}/eor`,
     payrollServices: `${ROOTS.DASHBOARD}/payroll-services`,
     lawyers: `${ROOTS.DASHBOARD}/lawyers`,
+    complaint: `${ROOTS.DASHBOARD}/complaint`,
+    experience: `${ROOTS.DASHBOARD}/experience`,
+
     business: {
       entrepenaur: `${ROOTS.DASHBOARD}/entrepenaur`,
       importexport: `${ROOTS.DASHBOARD}/importexport`,
       investors: `${ROOTS.DASHBOARD}/investors`,
+      businessInquiry : `${ROOTS.DASHBOARD}/business-inquiry`,
     },
+    feedback: `${ROOTS.DASHBOARD}/feedback`,
+    
     general: {
       app: `${ROOTS.DASHBOARD}/app`,
       ecommerce: `${ROOTS.DASHBOARD}/ecommerce`,

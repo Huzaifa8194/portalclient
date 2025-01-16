@@ -107,6 +107,12 @@ const MoneyManagement = lazy(() => import('src/pages/dashboard/MoneyManagement/n
 const EOR = lazy(() => import('src/pages/dashboard/EOR/new'));
 const PayrollServices = lazy(() => import('src/pages/dashboard/PayrollServices/new'));
 const Lawyer = lazy(() => import('src/pages/dashboard/Lawyer/new'));
+const Complaint = lazy(() => import('src/pages/dashboard/complaint/new'));
+const Experience = lazy(() => import('src/pages/dashboard/experience/new'));
+const Feedback= lazy(() => import('src/pages/dashboard/feedback/new'));
+const Business= lazy(() => import('src/pages/dashboard/businessInquiry/list'));
+
+
 
 
 
@@ -226,11 +232,11 @@ export const dashboardRoutes = [
       { path: 'eor', element: < EOR />},
       { path: 'payroll-services', element: < PayrollServices />},
       { path: 'lawyers', element: < Lawyer />},
-
-
-
+      { path: 'complaint', element: < Complaint />},
+      { path: 'feedback', element: < Feedback />},
+      { path: 'business-inquiry', element: < Business />},
+      { path: 'experience', element: < Experience />},
       { path: 'housing', element: <HousingPage /> },
-
       { path: 'mail', element: <MailPage /> },
       { path: 'chat', element: <ChatPage /> },
       { path: 'calendar', element: <CalendarPage /> },
