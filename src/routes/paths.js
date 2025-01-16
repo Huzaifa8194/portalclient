@@ -108,10 +108,6 @@ export const paths = {
     calendar: `${ROOTS.DASHBOARD}/calendar`,
     fileManager: `${ROOTS.DASHBOARD}/file-manager`,
     permission: `${ROOTS.DASHBOARD}/permission`,
-<<<<<<< HEAD
-    faqs: `${ROOTS.DASHBOARD}/faqs`,
-
-=======
     visaPermit: `${ROOTS.DASHBOARD}/visa-permit`,
     serviceCharges: `${ROOTS.DASHBOARD}/service-charges`,
     powerOfAttorney: `${ROOTS.DASHBOARD}/power-of-attorney`,
@@ -122,7 +118,6 @@ export const paths = {
     EOR: `${ROOTS.DASHBOARD}/eor`,
     payrollServices: `${ROOTS.DASHBOARD}/payroll-services`,
     lawyers: `${ROOTS.DASHBOARD}/lawyers`,
->>>>>>> 9c8d738f5adce872ef703c36df3b47be60c00864
     business: {
       entrepenaur: `${ROOTS.DASHBOARD}/entrepenaur`,
       importexport: `${ROOTS.DASHBOARD}/importexport`,

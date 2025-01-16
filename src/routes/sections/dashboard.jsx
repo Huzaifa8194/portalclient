@@ -225,7 +225,7 @@ export const dashboardRoutes = [
       { path: 'money-management', element: < MoneyManagement />},
       { path: 'eor', element: < EOR />},
       { path: 'payroll-services', element: < PayrollServices />},
-      { path: 'lawyer', element: < Lawyer />},
+      { path: 'lawyers', element: < Lawyer />},
 
 
 
