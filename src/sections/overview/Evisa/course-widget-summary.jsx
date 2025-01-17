@@ -14,9 +14,9 @@ export function CourseWidgetSummary({ sx, icon, title, total, color = 'warning',
   return (
     <Card sx={{ py: 3, pl: 3, pr: 2.5, ...sx }} {...other}>
       <Box sx={{ flexGrow: 1 }}>
-        <Box sx={{ typography: 'h5' }}>{title}</Box>
+        <Box sx={{ fontWeight:"bold" }}>{title}</Box>
         <Typography noWrap variant="subtitle2" component="div" sx={{ color: 'text.secondary' }}>
-          {/* {title} */}
+          {title}
         </Typography>
       </Box>
 

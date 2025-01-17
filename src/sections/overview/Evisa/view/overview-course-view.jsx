@@ -2,7 +2,6 @@ import Box from '@mui/material/Box';
 import { cardClasses } from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
 
-import { CONFIG } from 'src/config-global';
 import { varAlpha } from 'src/theme/styles';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { _coursesContinue, _coursesFeatured, _coursesReminder } from 'src/_mock';
@@ -16,9 +15,28 @@ import { CourseHoursSpent } from '../course-hours-spent';
 import { CourseMyStrength } from '../course-my-strength';
 import { CourseWidgetSummary } from '../course-widget-summary';
 
-// ----------------------------------------------------------------------
-
 export function OverviewCourseView() {
+  const eVisaData = [
+    {
+      id: 'EV123456',
+      country: 'United States',
+      status: 'APPROVED',
+      files: 'File'
+    },
+    {
+      id: 'EV789012',
+      country: 'Canada',
+      status: 'PENDING',
+      files: 'File'
+    },
+    {
+      id: 'EV345678',
+      country: 'Australia',
+      status: 'DISAPPROVED',
+      files: 'File'
+    }
+  ];
+
   return (
     <DashboardContent
       maxWidth={false}
@@ -52,93 +70,54 @@ export function OverviewCourseView() {
         >
           <Box sx={{ mb: 2 }}>
             <Typography variant="h4" sx={{ mb: 1 }}>
-              Hi, Frankie 👋
+              E-Visa Status
             </Typography>
-            <Typography
-              sx={{ color: 'text.secondary' }}
-            >{`Let's learn something new today!`}</Typography>
+            <Typography sx={{ color: 'text.secondary' }}>
+              View your E-Visa applications and their current status
+            </Typography>
           </Box>
 
           <Box
             sx={{
-              gap: 3,
               display: 'grid',
-              gridTemplateColumns: {
-                xs: 'repeat(1, 1fr)',
-                md: 'repeat(3, 1fr)',
-              },
+              gap: 2,
             }}
           >
-            <CourseWidgetSummary
-              title="Courses in progress"
-              total={6}
-              icon={`${CONFIG.assetsDir}/assets/icons/courses/ic-courses-progress.svg`}
-            />
-
-            <CourseWidgetSummary
-              title="Courses completed"
-              total={3}
-              color="success"
-              icon={`${CONFIG.assetsDir}/assets/icons/courses/ic-courses-completed.svg`}
-            />
-
-            <CourseWidgetSummary
-              title="Certificates"
-              total={2}
-              color="secondary"
-              icon={`${CONFIG.assetsDir}/assets/icons/courses/ic-courses-certificates.svg`}
-            />
+            {eVisaData.map((visa, index) => (
+              <Box
+                key={visa.id}
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gap: 2,
+                  p: 2,
+                  bgcolor: 'background.neutral',
+                  borderRadius: 1,
+                }}
+              >
+                <CourseWidgetSummary
+                  title="eVisa ID"
+                  total={visa.id}
+                  color="primary"
+                />
+                <CourseWidgetSummary
+                  title="Visa Country"
+                  total={visa.country}
+                  color="info"
+                />
+                <CourseWidgetSummary
+                  title="Status"
+                  total={visa.status}
+                  color={visa.status === 'APPROVED' ? 'success' : visa.status === 'PENDING' ? 'warning' : 'error'}
+                />
+                <CourseWidgetSummary
+                  title="Files"
+                  total={visa.files}
+                  color="secondary"
+                />
+              </Box>
+            ))}
           </Box>
-
-          <CourseHoursSpent
-            title="Hours spent"
-            chart={{
-              series: [
-                {
-                  name: 'Weekly',
-                  categories: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'],
-                  data: [{ data: [10, 41, 35, 151, 49] }],
-                },
-                {
-                  name: 'Monthly',
-                  categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-                  data: [{ data: [83, 112, 119, 88, 103, 112, 114, 108, 93] }],
-                },
-                {
-                  name: 'Yearly',
-                  categories: ['2018', '2019', '2020', '2021', '2022', '2023'],
-                  data: [{ data: [24, 72, 64, 96, 76, 41] }],
-                },
-              ],
-            }}
-          />
-
-          <Box
-            sx={{
-              gap: 3,
-              display: 'grid',
-              alignItems: 'flex-start',
-              gridTemplateColumns: {
-                xs: 'repeat(1, 1fr)',
-                md: 'repeat(2, 1fr)',
-              },
-            }}
-          >
-            <CourseProgress
-              title="Course progress"
-              chart={{
-                series: [
-                  { label: 'To start', value: 45 },
-                  { label: 'In progress', value: 25 },
-                  { label: 'Completed', value: 20 },
-                ],
-              }}
-            />
-
-            <CourseContinue title="Continue course" list={_coursesContinue} />
-          </Box>
-
-          <CourseFeatured title="Featured course" list={_coursesFeatured} />
         </Box>
 
         <Box
@@ -163,16 +142,20 @@ export function OverviewCourseView() {
           <CourseMyAccount />
 
           <CourseMyStrength
-            title="Strength"
+            title="Application Status"
             chart={{
-              categories: ['English', 'History', 'Physics', 'Geography', 'Chinese', 'Math'],
-              series: [{ data: [80, 50, 30, 40, 100, 20] }],
+              categories: ['Submitted', 'Processing', 'Approved', 'Completed'],
+              series: [{ data: [100, 80, 60, 40] }],
             }}
           />
 
-          <CourseReminders title="Reminders" list={_coursesReminder} />
+          <CourseReminders 
+            title="Recent Updates" 
+            list={_coursesReminder} 
+          />
         </Box>
       </Box>
     </DashboardContent>
   );
 }
+

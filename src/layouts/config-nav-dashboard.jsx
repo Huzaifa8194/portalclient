@@ -151,7 +151,7 @@ export const navData = [
  
     
       { title: 'Terms & Conditions', path: ' ', icon: ICONS.calendar },
-      { title: 'FAQ', path: ' ', icon: ICONS.calendar },
+      { title: 'FAQ', path:paths.dashboard.faq, icon: ICONS.calendar },
       { title: 'Feedback', path: paths.dashboard.feedback, icon: ICONS.calendar },
       { title: 'Course', path: paths.dashboard.general.course, icon: ICONS.calendar },
 

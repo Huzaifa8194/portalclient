@@ -138,6 +138,8 @@ export const paths = {
     },
     feedback: `${ROOTS.DASHBOARD}/feedback`,
     auPair:`${ROOTS.DASHBOARD}/au-pair`,
+    faq:`${ROOTS.DASHBOARD}/faq`,
+
     general: {
       app: `${ROOTS.DASHBOARD}/app`,
       ecommerce: `${ROOTS.DASHBOARD}/ecommerce`,

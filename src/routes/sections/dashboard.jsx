@@ -117,7 +117,7 @@ const IamAuPair= lazy(() => import('src/pages/dashboard/IamAuPair/new'));
 const EVisa= lazy(() => import('src/pages/dashboard/E-Visa/index'));
 const EmbassyFile= lazy(() => import('src/pages/dashboard/EmbassyFiles/index'));
 const GlobalVisa= lazy(() => import('src/pages/dashboard/GlobalVisa/index'));
-
+const FAQ= lazy(() => import('src/pages/dashboard/faqs'));
 
 
 
@@ -246,7 +246,7 @@ export const dashboardRoutes = [
       { path: 'au-pair', element: < AuPair /> },
       { path: 'host-family', element: < HostFamily /> },
       { path: 'AuPair', element: < IamAuPair /> },
-
+      { path: 'faq', element: < FAQ /> },
       { path: 'business-inquiry', element: < Business />},
       { path: 'experience', element: < Experience />},
       { path: 'housing', element: <HousingPage /> },
