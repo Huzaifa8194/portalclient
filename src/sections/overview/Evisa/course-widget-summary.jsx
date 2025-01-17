@@ -1,55 +1,73 @@
+import React from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
-
-import { fNumber } from 'src/utils/format-number';
-
-import { varAlpha } from 'src/theme/styles';
-
+import { styled } from '@mui/material/styles';
 import { SvgColor } from 'src/components/svg-color';
 
-// ----------------------------------------------------------------------
+const StyledCard = styled(Card)(({ theme }) => ({
+  backgroundColor: theme.palette.background.paper,
+  borderRadius: theme.shape.borderRadius * 2,
+  boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.08)',
+  position: 'relative',
+  overflow: 'hidden',
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    top: -40,
+    right: -40,
+    width: 120,
+    height: 120,
+    borderRadius: '50%',
+    background: 'currentColor',
+    opacity: 0.1,
+  }
+}));
 
-export function CourseWidgetSummary({ sx, icon, title, total, color = 'warning', ...other }) {
+const StyledIcon = styled(SvgColor, {
+  shouldForwardProp: (prop) => prop !== 'color',
+})(({ theme, color = 'primary' }) => ({
+  width: 48,
+  height: 48,
+  position: 'absolute',
+  right: 24,
+  top: 24,
+  padding: 8,
+  borderRadius: theme.shape.borderRadius,
+  background: `linear-gradient(135deg, ${theme.palette[color].main} 0%, ${theme.palette[color].dark} 100%)`,
+  '& svg': {
+    display: 'block',
+    width: '100%',
+    height: '100%',
+    color: theme.palette.common.white,
+  }
+}));
+
+export function CourseWidgetSummary({ 
+  sx, 
+  icon, 
+  title, 
+  total, 
+  color = 'primary', 
+  ...other 
+}) {
   return (
-    <Card sx={{ py: 3, pl: 3, pr: 2.5, ...sx }} {...other}>
-      <Box sx={{ flexGrow: 1 }}>
-        <Box sx={{ fontWeight:"bold" }}>{title}</Box>
-        <Typography noWrap variant="subtitle2" component="div" sx={{ color: 'text.secondary' }}>
+    <StyledCard sx={{ p: 3, ...sx }} {...other}>
+      <Box sx={{ flexGrow: 1, pr: 7 }}>
+        <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 1 }}>
           {title}
+        </Typography>
+        <Typography variant="h4" sx={{ color: `${color}.main`, fontWeight: 'bold' }}>
+          {total}
         </Typography>
       </Box>
 
-      <SvgColor
-        src={icon}
-        sx={{
-          top: 24,
-          right: 20,
-          width: 36,
-          height: 36,
-          position: 'absolute',
-          background: (theme) =>
-            `linear-gradient(135deg, ${theme.vars.palette[color].main} 0%, ${theme.vars.palette[color].dark} 100%)`,
-        }}
-      />
-
-      <Box
-        sx={{
-          top: -44,
-          width: 160,
-          zIndex: -1,
-          height: 160,
-          right: -104,
-          opacity: 0.12,
-          borderRadius: 3,
-          position: 'absolute',
-          transform: 'rotate(40deg)',
-          background: (theme) =>
-            `linear-gradient(to right, ${
-              theme.vars.palette[color].main
-            } 0%, ${varAlpha(theme.vars.palette[color].mainChannel, 0)} 100%)`,
-        }}
-      />
-    </Card>
+      {icon && (
+        <StyledIcon
+          src={icon}
+          color={color}
+        />
+      )}
+    </StyledCard>
   );
 }

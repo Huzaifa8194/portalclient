@@ -1,19 +1,29 @@
-import Box from '@mui/material/Box';
-import { cardClasses } from '@mui/material/Card';
-import Typography from '@mui/material/Typography';
-
-import { varAlpha } from 'src/theme/styles';
+import React from 'react';
+import { Box, Typography, Grid, Card, CardContent } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import { CONFIG } from 'src/config-global';
+import { paths } from 'src/routes/paths';
+import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { _coursesContinue, _coursesFeatured, _coursesReminder } from 'src/_mock';
-
-import { CourseProgress } from '../course-progress';
-import { CourseContinue } from '../course-continue';
-import { CourseFeatured } from '../course-featured';
-import { CourseReminders } from '../course-reminders';
+import EVisaCard from './EVisaCard';
 import { CourseMyAccount } from '../course-my-account';
-import { CourseHoursSpent } from '../course-hours-spent';
-import { CourseMyStrength } from '../course-my-strength';
+import { CourseReminders } from '../course-reminders';
 import { CourseWidgetSummary } from '../course-widget-summary';
+
+const StyledCard = styled(Card)(({ theme }) => ({
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'space-between',
+  backgroundColor: theme.palette.background.paper,
+  borderRadius: theme.shape.borderRadius * 2,
+  boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.08)',
+  transition: 'transform 0.2s ease-in-out',
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: '0px 6px 25px rgba(0, 0, 0, 0.12)',
+  }
+}));
 
 export function OverviewCourseView() {
   const eVisaData = [
@@ -21,140 +31,112 @@ export function OverviewCourseView() {
       id: 'EV123456',
       country: 'United States',
       status: 'APPROVED',
-      files: 'File'
+      files: ['application.pdf', 'passport.jpg', 'photo.jpg'],
     },
     {
       id: 'EV789012',
       country: 'Canada',
       status: 'PENDING',
-      files: 'File'
+      files: ['application.pdf', 'travel_history.docx'],
     },
     {
       id: 'EV345678',
       country: 'Australia',
       status: 'DISAPPROVED',
-      files: 'File'
-    }
+      files: ['application.pdf', 'rejection_letter.pdf'],
+    },
+    {
+      id: 'EV901234',
+      country: 'United Kingdom',
+      status: 'APPROVED',
+      files: ['application.pdf', 'visa.pdf'],
+    },
   ];
 
   return (
-    <DashboardContent
-      maxWidth={false}
-      disablePadding
-      sx={{
-        borderTop: (theme) => ({
-          lg: `solid 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.12)}`,
-        }),
-      }}
-    >
-      <Box
-        sx={{
-          display: 'flex',
-          flex: '1 1 auto',
-          flexDirection: { xs: 'column', lg: 'row' },
-        }}
-      >
-        <Box
-          sx={{
-            gap: 3,
-            display: 'flex',
-            minWidth: { lg: 0 },
-            py: { lg: 3, xl: 5 },
-            flexDirection: 'column',
-            flex: { lg: '1 1 auto' },
-            px: { xs: 2, sm: 3, xl: 5 },
-            borderRight: (theme) => ({
-              lg: `solid 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.12)}`,
-            }),
-          }}
-        >
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="h4" sx={{ mb: 1 }}>
-              E-Visa Status
-            </Typography>
-            <Typography sx={{ color: 'text.secondary' }}>
-              View your E-Visa applications and their current status
-            </Typography>
-          </Box>
-
-          <Box
-            sx={{
-              display: 'grid',
-              gap: 2,
-            }}
-          >
-            {eVisaData.map((visa, index) => (
-              <Box
-                key={visa.id}
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(4, 1fr)',
-                  gap: 2,
-                  p: 2,
-                  bgcolor: 'background.neutral',
-                  borderRadius: 1,
-                }}
-              >
-                <CourseWidgetSummary
-                  title="eVisa ID"
-                  total={visa.id}
-                  color="primary"
-                />
-                <CourseWidgetSummary
-                  title="Visa Country"
-                  total={visa.country}
-                  color="info"
-                />
-                <CourseWidgetSummary
-                  title="Status"
-                  total={visa.status}
-                  color={visa.status === 'APPROVED' ? 'success' : visa.status === 'PENDING' ? 'warning' : 'error'}
-                />
-                <CourseWidgetSummary
-                  title="Files"
-                  total={visa.files}
-                  color="secondary"
-                />
-              </Box>
-            ))}
-          </Box>
-        </Box>
-
-        <Box
-          sx={{
-            width: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            px: { xs: 2, sm: 3, xl: 5 },
-            pt: { lg: 8, xl: 10 },
-            pb: { xs: 8, xl: 10 },
-            flexShrink: { lg: 0 },
-            gap: { xs: 3, lg: 5, xl: 8 },
-            maxWidth: { lg: 320, xl: 360 },
-            bgcolor: { lg: 'background.neutral' },
-            [`& .${cardClasses.root}`]: {
-              p: { xs: 3, lg: 0 },
-              boxShadow: { lg: 'none' },
-              bgcolor: { lg: 'transparent' },
-            },
-          }}
-        >
-          <CourseMyAccount />
-
-          <CourseMyStrength
-            title="Application Status"
-            chart={{
-              categories: ['Submitted', 'Processing', 'Approved', 'Completed'],
-              series: [{ data: [100, 80, 60, 40] }],
-            }}
-          />
-
-          <CourseReminders 
-            title="Recent Updates" 
-            list={_coursesReminder} 
-          />
-        </Box>
+    <DashboardContent>
+       <CustomBreadcrumbs
+              heading="E Visa"
+              links={[
+                { name: 'Dashboard', href: paths.dashboard.root },
+                { name: 'E-Visa' },
+              ]}
+              sx={{ mb: { xs: 3, md: 3 } }}
+            />
+      <Box sx={{ mb: 5 }}>
+        {/* <Typography variant="h4" gutterBottom>
+          E-Visa Dashboard
+        </Typography> */}
+        <Typography color="text.secondary">
+          View and manage your E-Visa applications
+        </Typography>
       </Box>
+
+      <Grid container spacing={3} mb={3}>
+        <Grid item xs={12} sm={6} md={3}>
+          <CourseWidgetSummary title="Total Applications" total="12" icon={`${CONFIG.assetsDir}/assets/icons/courses/ic-courses-progress.svg`}/>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <CourseWidgetSummary title="Approved" total="8" color="success" icon={`${CONFIG.assetsDir}/assets/icons/courses/ic-courses-progress.svg`}/>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <CourseWidgetSummary title="Pending" total="3" color="warning" icon={`${CONFIG.assetsDir}/assets/icons/courses/ic-courses-progress.svg`}/>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <CourseWidgetSummary title="Rejected" total="1" color="error" icon={`${CONFIG.assetsDir}/assets/icons/courses/ic-courses-progress.svg`}/>
+        </Grid>
+      </Grid>
+
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={8}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom sx={{mb:3}}>
+                Your E-Visa Applications
+              </Typography>
+              {eVisaData.map((visa) => (
+                <EVisaCard key={visa.id} visa={visa} />
+              ))}
+            </CardContent>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <StyledCard>
+                  <CourseMyAccount sx={{mt:5, py:2}} />
+              </StyledCard>
+            </Grid>
+    
+            <Grid item xs={12}>
+              <StyledCard>
+                  <CourseReminders sx={{p:3}}
+                    title="Recent Updates"
+                    list={[
+                      {
+                        id: '1',
+                        title: 'USA Visa Approved',
+                        description: 'Your USA visa application has been approved.',
+                        time: '2 hours ago',
+                      },
+                      {
+                        id: '2',
+                        title: 'Canada Visa Processing',
+                        description: 'Your Canada visa application is being processed.',
+                        time: '1 day ago',
+                      },
+                      {
+                        id: '3',
+                        title: 'Australia Visa Rejected',
+                        description: 'Your Australia visa application was not approved.',
+                        time: '3 days ago',
+                      },
+                    ]}
+                  />
+              </StyledCard>
+            </Grid>
+          </Grid>
+        </Grid>
+      </Grid>
     </DashboardContent>
   );
 }
