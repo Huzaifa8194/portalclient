@@ -112,6 +112,11 @@ const Experience = lazy(() => import('src/pages/dashboard/experience/new'));
 const Feedback= lazy(() => import('src/pages/dashboard/feedback/new'));
 const Business= lazy(() => import('src/pages/dashboard/businessInquiry/list'));
 const AuPair= lazy(() => import('src/pages/dashboard/AuPair/new'));
+const HostFamily= lazy(() => import('src/pages/dashboard/HostFamily/new'));
+const IamAuPair= lazy(() => import('src/pages/dashboard/IamAuPair/new'));
+const EVisa= lazy(() => import('src/pages/dashboard/E-Visa/index'));
+const EmbassyFile= lazy(() => import('src/pages/dashboard/EmbassyFiles/index'));
+const GlobalVisa= lazy(() => import('src/pages/dashboard/GlobalVisa/index'));
 
 
 
@@ -224,7 +229,10 @@ export const dashboardRoutes = [
       { path: 'importexport', element: < ImportExportServices /> },
       { path: 'investors', element: < Investors /> },
 
-      { path: 'visa-permit', element: < VisaPermitPage />},
+      { path: 'e-visa', element: < EVisa />},
+      { path: 'embassy-files', element: < EmbassyFile />},
+      { path: 'global-visa', element: < GlobalVisa />},
+
       { path: 'pet-relocation', element: < PetRelocation />},
       { path: 'service-charges', element: < ServiceCharges />},
       { path: 'power-of-attorney', element: < PowerOfAttorney />},
@@ -236,6 +244,8 @@ export const dashboardRoutes = [
       { path: 'complaint', element: < Complaint />},
       { path: 'feedback', element: < Feedback />},
       { path: 'au-pair', element: < AuPair /> },
+      { path: 'host-family', element: < HostFamily /> },
+      { path: 'AuPair', element: < IamAuPair /> },
 
       { path: 'business-inquiry', element: < Business />},
       { path: 'experience', element: < Experience />},

@@ -135,8 +135,19 @@ export const navData = [
     subheader: 'Additional Features',
     items: [
       { title: 'Service Charges', path: paths.dashboard.serviceCharges, icon: ICONS.calendar },
-      { title: 'Visa & Permits', path: paths.dashboard.visaPermit, icon: ICONS.calendar },
-      { title: 'Power of Attorney', path: paths.dashboard.powerOfAttorney, icon: ICONS.calendar },
+      {
+        title: 'Visa & Permits',
+        path: paths.dashboard.user.root,
+        icon: ICONS.user,
+        children: [
+          { title: 'E-Visa', path: paths.dashboard.visaPermit.eVisa },
+          { title: 'Embassy Files', path: paths.dashboard.visaPermit.embassyFiles },
+          { title: 'Global Visa', path: paths.dashboard.visaPermit.globalVisa },
+
+ 
+ 
+        ],
+      },      { title: 'Power of Attorney', path: paths.dashboard.powerOfAttorney, icon: ICONS.calendar },
  
     
       { title: 'Terms & Conditions', path: ' ', icon: ICONS.calendar },

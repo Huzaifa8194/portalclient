@@ -9,6 +9,7 @@ import { SeoIllustration } from 'src/assets/illustrations';
 import Grid from '@mui/material/Unstable_Grid2';
 import { CONFIG } from 'src/config-global';
 import { CourseWidgetSummary } from 'src/sections/overview/course/course-widget-summary';
+import { useRouter } from 'src/routes/hooks';
 
 import { AppWelcome } from '../app-welcome';
 
@@ -18,6 +19,15 @@ import { PostNewEditForm } from '../post-new-edit-form';
 // ----------------------------------------------------------------------
 
 export function PostCreateView() {
+    const router = useRouter();
+  
+    const handleHostFamilyClick = () => {
+      router.push(paths.dashboard.hostFamily);
+    };
+  
+    const handleIAmAuPairClick = () => {
+      router.push(paths.dashboard.iAmAuPair);
+    };
   return (
     <DashboardContent>
       <CustomBreadcrumbs
@@ -56,13 +66,11 @@ export function PostCreateView() {
       backgroundColor: "lightgrey", // Changes background to light grey on hover
     },
   }}
-  onClick={() => {
-    console.log("Host Family clicked!");
-  }}
+  onClick= {handleHostFamilyClick}
 />
 
 <CourseWidgetSummary
-  title="Courses Completed"
+  title="I am Au Pair"
   color="success"
   icon={`${CONFIG.assetsDir}/assets/icons/courses/ic-courses-completed.svg`}
   sx={{
@@ -73,9 +81,8 @@ export function PostCreateView() {
       backgroundColor: "lightgrey", // Changes background to light grey on hover
     },
   }}
-  onClick={() => {
-    console.log("Courses Completed clicked!");
-  }}
+  onClick={handleIAmAuPairClick}
+
 />
 
           </Box>
