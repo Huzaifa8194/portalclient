@@ -486,15 +486,7 @@ export function PostNewEditForm({ currentPost }) {
                 }} 
               />
 
-
-
-
-
             </Box>
-
-
-
-
 
             <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>
               {/* <Field.Text name="about" multiline rows={4} label="About" /> */}
