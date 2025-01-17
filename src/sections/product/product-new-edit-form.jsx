@@ -80,16 +80,15 @@ export function ProductNewEditForm({ currentProduct }) {
       description: currentProduct?.description || '',
       subDescription: currentProduct?.subDescription || '',
       images: currentProduct?.images || [],
-      //
-      code: currentProduct?.code || '',
-      sku: currentProduct?.sku || '',
+      code: currentProduct?.code || DOCUMENT_TYPE_MOCK_DATA[0]?.items[0]?.value, // Default to first item in Document Type
+      sku: currentProduct?.sku || DOCUMENT_DETAILS_MOCK_DATA[0]?.items[0]?.value, // Default to first item in Document Details
+      category: currentProduct?.category || FAMILY_CATEGORY_OPTIONS[0]?.classify[0], // Default to first option in Who is the Document for
       price: currentProduct?.price || 0,
       quantity: currentProduct?.quantity || 0,
       priceSale: currentProduct?.priceSale || 0,
       tags: currentProduct?.tags || [],
       taxes: currentProduct?.taxes || 0,
       gender: currentProduct?.gender || [],
-      category: currentProduct?.category || PRODUCT_CATEGORY_GROUP_OPTIONS[0].classify[1],
       colors: currentProduct?.colors || [],
       sizes: currentProduct?.sizes || [],
       newLabel: currentProduct?.newLabel || { enabled: false, content: '' },
@@ -97,6 +96,7 @@ export function ProductNewEditForm({ currentProduct }) {
     }),
     [currentProduct]
   );
+  
 
   const methods = useForm({
     resolver: zodResolver(NewProductSchema),
@@ -190,40 +190,41 @@ export function ProductNewEditForm({ currentProduct }) {
     fileInput.type = 'file';
     fileInput.accept = '*'; // Accept all file types (adjust as needed)
     fileInput.multiple = true; // Allow multiple files to be fetched
-
+  
     fileInput.onchange = (event) => {
-      const selectedFiles = Array.from(event.target.files);
-      if (selectedFiles.length === 0) return;
-
+      const selectedFiles = Array.from(event.target.files); // Convert FileList to Array
+      if (selectedFiles.length === 0) return; // Exit if no files are selected
+  
       const currentFiles = methods.getValues('images') || [];
       
       // Check for duplicate files based on file name and type
-      const newFiles = selectedFiles.filter(newFile =>
-        !currentFiles.some(existingFile =>
+      const duplicates = selectedFiles.filter(newFile =>
+        currentFiles.some(existingFile =>
           existingFile.name === newFile.name && existingFile.type === newFile.type
         )
       );
-
-      if (newFiles.length === 0) {
-        toast.error('All selected documents are already added.');
-        return;
+  
+      if (duplicates.length > 0) {
+        toast.error('This document is already added.');
+        return; // Exit the function if duplicates are found
       }
-
-      const updatedFiles = [...currentFiles, ...newFiles];
-
+  
+      // If no duplicates, proceed with adding the file
+      const updatedFiles = [...currentFiles, ...selectedFiles];
+  
       if (updatedFiles.length > 5) {
         toast.error('You can only add up to 5 documents.');
         return;
       }
-
-      // Update the form with the new files
+  
+      // Update the form with the selected files
       methods.setValue('images', updatedFiles);
-
-      toast.success(`${newFiles.length} new document(s) added successfully!`);
-      console.info('Added Documents:', newFiles);
+  
+      toast.success(`${selectedFiles.length} document(s) fetched successfully!`);
+      console.info('Fetched Documents:', updatedFiles);
     };
-
-    fileInput.click();
+  
+    fileInput.click(); // Trigger the file picker dialog
   };
   
   
@@ -232,7 +233,7 @@ export function ProductNewEditForm({ currentProduct }) {
     const { code, sku, category, images } = methods.getValues();
   
     // Ensure there's at least one document uploaded
-    if (images.length < 1) {
+    if (!images || images.length < 1) {
       toast.error('Please upload at least one document.');
       return; // Exit the function early
     }
@@ -244,8 +245,8 @@ export function ProductNewEditForm({ currentProduct }) {
     }
   
     // Validate the required fields
-    if (!code || !sku || !category || images.length === 0) {
-      toast.error('Please fill in all fields and upload at least one document.');
+    if (!code || !sku || !category) {
+      toast.error('Please fill in all fields.');
     } else {
       // Process each document for upload
       images.forEach((image, index) => {
@@ -278,6 +279,7 @@ export function ProductNewEditForm({ currentProduct }) {
       console.info('All Documents Uploaded:', images);
     }
   };
+  
   
 
 
@@ -431,7 +433,7 @@ export function ProductNewEditForm({ currentProduct }) {
                       }}
                     >
                       <img
-                        src={URL.createObjectURL(file) || "/placeholder.svg"} // Create an image preview
+                        src={URL.createObjectURL(file)} // Create an image preview
                         alt={file.name}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
@@ -459,34 +461,7 @@ export function ProductNewEditForm({ currentProduct }) {
               maxSize={3145728}
               onRemove={handleRemoveFile}
               onRemoveAll={handleRemoveAllFiles}
-              onUpload={(files) => {
-                const currentFiles = methods.getValues('images') || [];
-                
-                // Check for duplicate files based on file name and type
-                const newFiles = files.filter(newFile =>
-                  !currentFiles.some(existingFile =>
-                    existingFile.name === newFile.name && existingFile.type === newFile.type
-                  )
-                );
-
-                if (newFiles.length === 0) {
-                  toast.error('All selected documents are already added.');
-                  return;
-                }
-
-                const updatedFiles = [...currentFiles, ...newFiles];
-
-                if (updatedFiles.length > 5) {
-                  toast.error('You can only add up to 5 documents.');
-                  return;
-                }
-
-                // Update the form with the new files
-                methods.setValue('images', updatedFiles);
-
-                toast.success(`${newFiles.length} new document(s) added successfully!`);
-                console.info('Added Documents:', newFiles);
-              }}
+              onUpload={() => console.info('ON UPLOAD')}
               sx={{ width: '100%' }} // Make upload span the full width
             />
             <Box sx={{ textAlign: 'right', mt: 1 }}>
@@ -541,5 +516,4 @@ export function ProductNewEditForm({ currentProduct }) {
       </Dialog>
     </Form>
   );
-}
-
+}  
