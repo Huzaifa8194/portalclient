@@ -20,6 +20,7 @@ export const schemaHelper = {
       .refine((data) => props?.isValidPhoneNumber?.(data), {
         message: props?.message?.invalid_type_error ?? 'Invalid phone number!',
       }),
+  
   /**
    * Date
    * defaultValue === null
@@ -51,6 +52,7 @@ export const schemaHelper = {
         return date;
       })
       .pipe(zod.union([zod.number(), zod.string(), zod.date(), zod.null()])),
+  
   /**
    * Editor
    * defaultValue === '' | <p></p>
@@ -59,6 +61,7 @@ export const schemaHelper = {
     zod.string().min(8, {
       message: props?.message?.required_error ?? 'Editor is required!',
     }),
+
   /**
    * Object
    * defaultValue === null
@@ -67,6 +70,7 @@ export const schemaHelper = {
     zod.custom().refine((data) => data !== null && data !== '', {
       message: props?.message?.required_error ?? 'Field is required!',
     }),
+
   /**
    * Boolean
    * defaultValue === false
@@ -75,6 +79,7 @@ export const schemaHelper = {
     zod.coerce.boolean().refine((bool) => bool === true, {
       message: props?.message?.required_error ?? 'Switch is required!',
     }),
+
   /**
    * File
    * defaultValue === '' || null
@@ -93,26 +98,56 @@ export const schemaHelper = {
 
       return data;
     }),
+
   /**
    * Files
    * defaultValue === []
    */
   files: (props) =>
-    zod.array(zod.custom()).transform((data, ctx) => {
-      const minFiles = props?.minFiles ?? 2;
-
-      if (!data.length) {
-        ctx.addIssue({
-          code: zod.ZodIssueCode.custom,
-          message: props?.message?.required_error ?? 'Files is required!',
+    zod
+      .array(zod.custom())
+      .transform((data, ctx) => {
+        const minFiles = props?.minFiles ?? 1;
+  
+        if (!data.length) {
+          ctx.addIssue({
+            code: zod.ZodIssueCode.custom,
+            message: props?.message?.required_error ?? 'Files is required!',
+          });
+        } else if (data.length < minFiles) {
+          ctx.addIssue({
+            code: zod.ZodIssueCode.custom,
+            message: `Must have at least ${minFiles} items!`,
+          });
+        }
+  
+        // Check for duplicates based on name and type
+        const uniqueFiles = [];
+        const duplicates = [];
+  
+        data.forEach((newFile, index) => {
+          // Check if the file already exists in uniqueFiles based on name and type
+          const isDuplicate = uniqueFiles.some(
+            (existingFile) => existingFile.name === newFile.name && existingFile.type === newFile.type
+          );
+          
+          if (isDuplicate) {
+            duplicates.push(newFile);
+          } else {
+            uniqueFiles.push(newFile);
+          }
         });
-      } else if (data.length < minFiles) {
-        ctx.addIssue({
-          code: zod.ZodIssueCode.custom,
-          message: `Must have at least ${minFiles} items!`,
-        });
-      }
-
-      return data;
-    }),
-};
+  
+        // If there are any duplicates, show an error and prevent the files from being added
+        if (duplicates.length > 0) {
+          ctx.addIssue({
+            code: zod.ZodIssueCode.custom,
+            message: props?.message?.duplicate_error ?? 'This document is already added!',
+          });
+          // Return the unique files only (excluding duplicates)
+          return uniqueFiles;
+        }
+  
+        return data; // Return all files if no duplicates are found
+      }),
+    };  

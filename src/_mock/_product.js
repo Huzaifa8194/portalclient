@@ -144,3 +144,45 @@ export const PRODUCT_CHECKOUT_STEPS = ['Cart', 'Billing & address', 'Payment'];
 export const PRODUCT_MOCK_DATA = [];
 
 export const FOLDER_MOCK_DATA = [];
+
+export const DOCUMENT_TYPE_MOCK_DATA = [
+  {
+    group: "Text Documents",
+    items: [
+      { value: "pdf", label: "PDF Document (.pdf)" },
+      { value: "docx", label: "Word Document (.docx)" },
+      { value: "txt", label: "Text File (.txt)" },
+    ],
+  },
+  {
+    group: "Spreadsheets",
+    items: [
+      { value: "xlsx", label: "Excel Spreadsheet (.xlsx)" },
+    ],
+  },
+  {
+    group: "Presentations",
+    items: [
+      { value: "pptx", label: "PowerPoint Presentation (.pptx)" },
+    ],
+  },
+];
+
+// Mock data for Document Details Dropdown
+export const DOCUMENT_DETAILS_MOCK_DATA = [
+  {
+    group: "Business Documents",
+    items: [
+      { value: "contract", label: "contract-agreement.pdf" },
+      { value: "invoice", label: "invoice-2025.xlsx" },
+      { value: "report", label: "annual-report-2025.docx" },
+    ],
+  },
+  {
+    group: "Project Files",
+    items: [
+      { value: "presentation", label: "project-presentation.pptx" },
+      { value: "notes", label: "meeting-notes.txt" },
+    ],
+  },
+];
