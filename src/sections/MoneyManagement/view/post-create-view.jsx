@@ -9,7 +9,7 @@ import Grid from '@mui/material/Unstable_Grid2';
 
 import { AppWelcome } from '../app-welcome';
 
-import { PostNewEditForm } from '../post-new-edit-form';
+import PostNewEditForm from '../post-new-edit-form';
 
 
 // ----------------------------------------------------------------------
@@ -29,7 +29,7 @@ export function PostCreateView() {
   <Grid xs={12} md={12}>
           <AppWelcome sx={{ mb: 3 }}
             title="Welcome back 👋 User"
-            description="Fill this form and submit only if you are an Entrepreneur or already have any Start-up. We will help you to expand your idea or business by providing you right investors. This service is paid to avoid unnecessary queries."
+            description="Fill in the form below to manage your money.We forward your inquiry to multiple partner companies, and you will receive quotes directly from them based on your request. To prevent unnecessary inquiries and ensure efficient processing, a €100 handling fee is charged at the end of the form."
             img={<SeoIllustration hideBackground />}
           />
         </Grid>

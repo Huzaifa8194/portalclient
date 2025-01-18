@@ -1,504 +1,435 @@
-import { z as zod } from 'zod';
-import { useForm } from 'react-hook-form';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMemo, useEffect, useCallback } from 'react';
-import Grid from '@mui/material/Unstable_Grid2';
-
-import Box from '@mui/material/Box';
-import Chip from '@mui/material/Chip';
-import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
-import Switch from '@mui/material/Switch';
-import Divider from '@mui/material/Divider';
-import CardHeader from '@mui/material/CardHeader';
-import Typography from '@mui/material/Typography';
-import LoadingButton from '@mui/lab/LoadingButton';
-import FormControlLabel from '@mui/material/FormControlLabel';
-
-import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hooks';
-
-import { useBoolean } from 'src/hooks/use-boolean';
-
+import * as z from 'zod';
 import {
-  _tags,
-  APPOINTMENT_TYPE_OPTIONS,
-  APPOINTMENT_CATEGORY_OPTIONS,
-  APPOINTMENT_COUNTRY_OPTIONS,
-  APPOINTMENT_TIME_OPTIONS,
-} from 'src/_mock';
+  Box,
+  Card,
+  Stack,
+  Alert,
+  MenuItem,
+  Typography,
+  TextField,
+  Button,
+  Container,
+} from '@mui/material';
+import { LoadingButton } from '@mui/lab';
 
-import { toast } from 'src/components/snackbar';
-import { Form, Field, schemaHelper } from 'src/components/hook-form';
+// Sample data (replace with actual data in a real application)
+const highRiskCountries = ['Country1', 'Country2', 'Country3', 'Country4', 'Country5'];
+const bannedCountries = ['BannedCountry1', 'BannedCountry2', 'BannedCountry3'];
+const allCountries = ['USA', 'UK', 'Germany', 'France', 'Japan', 'Australia', 'Canada', 'Italy', 'Spain', 'Netherlands'];
+const currencies = ['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'CNY', 'SEK', 'NZD'];
 
-import { PostDetailsPreview } from './post-details-preview';
-
-// ----------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-export const NewPostSchema = zod.object({
-  title: zod.string().min(1, { message: 'Title is required!' }),
-  description: zod.string().min(1, { message: 'Description is required!' }),
-  content: schemaHelper.editor().min(100, { message: 'Content must be at least 100 characters' }),
-  coverUrl: schemaHelper.file({ message: { required_error: 'Cover is required!' } }),
-  tags: zod.string().array().min(2, { message: 'Must have at least 2 items!' }),
-  metaKeywords: zod.string().array().nonempty({ message: 'Meta keywords is required!' }),
-  // Not required
-  metaTitle: zod.string(),
-  metaDescription: zod.string(),
+const schema = z.object({
+  fromCountry: z.string().min(1, 'From Country is required'),
+  toCountry: z.string().min(1, 'To Country is required'),
+  isHomeCountry: z.string().min(1, 'This field is required'),
+  fromCurrency: z.string().min(1, 'From Currency is required'),
+  toCurrency: z.string().min(1, 'To Currency is required'),
+  hasDocuments: z.string().min(1, 'This field is required'),
+  canVerifySavings: z.string().min(1, 'This field is required'),
+  isEmployed: z.string().min(1, 'This field is required'),
+  monthlyIncome: z.string().min(1, 'Monthly income range is required'),
+  soldProperty: z.string().min(1, 'This field is required'),
+  transferTimeframe: z.string().min(1, 'Transfer timeframe is required'),
+  hasBankAccount: z.string().min(1, 'This field is required'),
+  transferAmount: z.string().min(1, 'Transfer amount is required'),
+  savingsOwnership: z.string().min(1, 'Savings ownership information is required'),
 });
 
-// ----------------------------------------------------------------------
-
-export function PostNewEditForm({ currentPost }) {
-  const router = useRouter();
-
-  const preview = useBoolean();
+export default function PostNewEditForm() {
+  const [showHighRiskWarning, setShowHighRiskWarning] = useState(false);
+  const [showBannedWarning, setShowBannedWarning] = useState(false);
 
   const defaultValues = useMemo(
     () => ({
-      title: currentPost?.title || '',
-      description: currentPost?.description || '',
-      content: currentPost?.content || '',
-      coverUrl: currentPost?.coverUrl || null,
-      tags: currentPost?.tags || [],
-      metaKeywords: currentPost?.metaKeywords || [],
-      metaTitle: currentPost?.metaTitle || '',
-      metaDescription: currentPost?.metaDescription || '',
+      fromCountry: '',
+      toCountry: '',
+      isHomeCountry: '',
+      fromCurrency: '',
+      toCurrency: '',
+      hasDocuments: '',
+      canVerifySavings: '',
+      isEmployed: '',
+      monthlyIncome: '',
+      soldProperty: '',
+      transferTimeframe: '',
+      hasBankAccount: '',
+      transferAmount: '',
+      savingsOwnership: '',
     }),
-    [currentPost]
+    []
   );
 
-  const methods = useForm({
-    mode: 'all',
-    resolver: zodResolver(NewPostSchema),
-    defaultValues,
-  });
   const {
-    reset,
-    watch,
-    setValue,
+    control,
     handleSubmit,
-    formState: { isSubmitting, isValid },
-  } = methods;
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues,
+    resolver: zodResolver(schema),
+  });
 
-  const values = watch();
+  const watchedFields = watch(['fromCountry', 'toCountry']);
 
   useEffect(() => {
-    if (currentPost) {
-      reset(defaultValues);
-    }
-  }, [currentPost, defaultValues, reset]);
+    const [fromCountry, toCountry] = watchedFields;
+    const isHighRisk = highRiskCountries.includes(fromCountry) || highRiskCountries.includes(toCountry);
+    const isBanned = bannedCountries.includes(fromCountry) || bannedCountries.includes(toCountry);
+    setShowHighRiskWarning(isHighRisk);
+    setShowBannedWarning(isBanned);
+  }, [watchedFields]);
 
-  const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = async (data) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      reset();
-      preview.onFalse();
-      toast.success(currentPost ? 'Update success!' : 'Create success!');
-      router.push(paths.dashboard.post.root);
-      console.info('DATA', data);
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      console.log('Form data submitted:', data);
+      alert('Form submitted successfully!');
     } catch (error) {
-      console.error(error);
+      console.error('Error submitting form:', error);
+      alert('An error occurred while submitting the form. Please try again.');
     }
-  });
-
-  const handleRemoveFile = useCallback(() => {
-    setValue('coverUrl', null);
-  }, [setValue]);
-
-
-  const multiqs1 = [
-    { value: '', label: 'Choose Option' },
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-    { value: 'dontknow', label: 'Dont Know' },
-
-  ];
-
-
-  const multiqs2 = [
-    { value: '', label: 'Choose Option' },
-    { value: '1', label: '1' },
-    { value: '2', label: '2' },
-    { value: '3', label: '3' },
-    { value: '4', label: '4' },
-    { value: '5', label: '5' },
-    { value: '6', label: '6' },
-    { value: '7', label: '7' },
-    { value: '8', label: '8' },
-    { value: '9', label: '8' },
-    { value: '10', label: '8' },
-
-  ];
-
-  const multiqs3 = [
-    { value: '', label: 'Choose Option' },
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-  ];
-
-  const multiqs4 = [
-    { value: '', label: 'Choose Option' },
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-  ];
-
-  const multiqs5 = [
-    { value: '', label: 'Choose Option' },
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-  ];
-
-
-  const multiqs6 = [
-    { value: '', label: 'Choose Option' },
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-  ];
-
-  const renderDetails = (
-    <Card>
-      <CardHeader title="Details" subheader="Title, short description, image..." sx={{ mb: 3 }} />
-
-      <Divider />
-
-      <Stack spacing={3} sx={{ p: 3 }}>
-        <Field.Text name="title" label="Post title" />
-
-        <Field.Text name="description" label="Description" multiline rows={3} />
-
-        <Stack spacing={1.5}>
-          <Typography variant="subtitle2">Content</Typography>
-          <Field.Editor name="content" sx={{ maxHeight: 480 }} />
-        </Stack>
-
-        <Stack spacing={1.5}>
-          <Typography variant="subtitle2">Cover</Typography>
-          <Field.Upload name="coverUrl" maxSize={3145728} onDelete={handleRemoveFile} />
-        </Stack>
-      </Stack>
-    </Card>
-  );
-
-  const renderProperties = (
-    <Card>
-      <CardHeader
-        title="Properties"
-        subheader="Additional functions and attributes..."
-        sx={{ mb: 3 }}
-      />
-
-      <Divider />
-
-      <Stack spacing={3} sx={{ p: 3 }}>
-        <Field.Autocomplete
-          name="tags"
-          label="Tags"
-          placeholder="+ Tags"
-          multiple
-          freeSolo
-          disableCloseOnSelect
-          options={_tags.map((option) => option)}
-          getOptionLabel={(option) => option}
-          renderOption={(props, option) => (
-            <li {...props} key={option}>
-              {option}
-            </li>
-          )}
-          renderTags={(selected, getTagProps) =>
-            selected.map((option, index) => (
-              <Chip
-                {...getTagProps({ index })}
-                key={option}
-                label={option}
-                size="small"
-                color="info"
-                variant="soft"
-              />
-            ))
-          }
-        />
-
-        <Field.Text name="metaTitle" label="Meta title" />
-
-        <Field.Text name="metaDescription" label="Meta description" fullWidth multiline rows={3} />
-
-        <Field.Autocomplete
-          name="metaKeywords"
-          label="Meta keywords"
-          placeholder="+ Keywords"
-          multiple
-          freeSolo
-          disableCloseOnSelect
-          options={_tags.map((option) => option)}
-          getOptionLabel={(option) => option}
-          renderOption={(props, option) => (
-            <li {...props} key={option}>
-              {option}
-            </li>
-          )}
-          renderTags={(selected, getTagProps) =>
-            selected.map((option, index) => (
-              <Chip
-                {...getTagProps({ index })}
-                key={option}
-                label={option}
-                size="small"
-                color="info"
-                variant="soft"
-              />
-            ))
-          }
-        />
-
-        <FormControlLabel
-          control={<Switch defaultChecked inputProps={{ id: 'comments-switch' }} />}
-          label="Enable comments"
-        />
-      </Stack>
-    </Card>
-  );
-
-  const renderActions = (
-    <Box display="flex" alignItems="center" flexWrap="wrap" justifyContent="flex-end">
-      <FormControlLabel
-        control={<Switch defaultChecked inputProps={{ id: 'publish-switch' }} />}
-        label="Publish"
-        sx={{ pl: 3, flexGrow: 1 }}
-      />
-
-      <div>
-        <Button color="inherit" variant="outlined" size="large" onClick={preview.onTrue}>
-          Preview
-        </Button>
-
-        <LoadingButton
-          type="submit"
-          variant="contained"
-          size="large"
-          loading={isSubmitting}
-          sx={{ ml: 2 }}
-        >
-          {!currentPost ? 'Create post' : 'Save changes'}
-        </LoadingButton>
-      </div>
-    </Box>
-  );
+  };
 
   return (
-    <Form methods={methods} onSubmit={onSubmit}>
-      <Grid spacing={3}>
-        <Grid xs={12} md={8}>
-          <Card sx={{ p: 3 }}>
-            {/* <Typography
-              variant="caption"
-              sx={{
-                mt: 3,
-                mb: 5,
-                mx: 'auto',
-                display: 'block',
-                textAlign: 'left',
-                color: 'gray',
-              }}
+    <Container maxWidth="lg">
+      <Card sx={{ p: 4, my: 4 }}>
+        <Typography variant="h4" gutterBottom sx={{ mb: 4 }}>
+          Money Transfer Form
+        </Typography>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Box
+            sx={{
+              display: 'grid',
+              gap: 4,
+              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+            }}
+          >
+            {showHighRiskWarning && (
+              <Alert severity="warning" sx={{ gridColumn: '1 / -1', mb: 2 }}>
+                You are either transferring to or from a high-risk country according to the list provided by our partner, which could potentially result in extended processing times for transferring money to your intended destination.
+              </Alert>
+            )}
+
+            {showBannedWarning && (
+              <Alert severity="error" sx={{ gridColumn: '1 / -1', mb: 2 }}>
+                Unfortunately, you are either transferring to or from a country that is currently banned, and our partner may not be able to assist you at this time.
+              </Alert>
+            )}
+
+            <Controller
+              name="fromCountry"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="From Country"
+                  select
+                  error={!!errors.fromCountry}
+                  helperText={errors.fromCountry?.message}
+                  fullWidth
+                  sx={{ '& .MuiInputBase-root': { height: '56px' } }}
+                >
+                  {allCountries.map((country) => (
+                    <MenuItem key={country} value={country}>
+                      {country}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+            />
+
+            <Controller
+              name="toCountry"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="To Country"
+                  select
+                  error={!!errors.toCountry}
+                  helperText={errors.toCountry?.message}
+                  fullWidth
+                  sx={{ '& .MuiInputBase-root': { height: '56px' } }}
+                >
+                  {allCountries.map((country) => (
+                    <MenuItem key={country} value={country}>
+                      {country}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+            />
+
+            <Controller
+              name="isHomeCountry"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Is the first country your home country and the other country where you are relocating?"
+                  select
+                  error={!!errors.isHomeCountry}
+                  helperText={errors.isHomeCountry?.message}
+                  fullWidth
+                  sx={{ '& .MuiInputBase-root': { height: '56px' } }}
+                >
+                  <MenuItem value="yes">Yes</MenuItem>
+                  <MenuItem value="no">No</MenuItem>
+                </TextField>
+              )}
+            />
+
+            <Controller
+              name="fromCurrency"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="From Currency"
+                  select
+                  error={!!errors.fromCurrency}
+                  helperText={errors.fromCurrency?.message}
+                  fullWidth
+                  sx={{ '& .MuiInputBase-root': { height: '56px' } }}
+                >
+                  {currencies.map((currency) => (
+                    <MenuItem key={currency} value={currency}>
+                      {currency}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+            />
+
+            <Controller
+              name="toCurrency"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="To Currency"
+                  select
+                  error={!!errors.toCurrency}
+                  helperText={errors.toCurrency?.message}
+                  fullWidth
+                  sx={{ '& .MuiInputBase-root': { height: '56px' } }}
+                >
+                  {currencies.map((currency) => (
+                    <MenuItem key={currency} value={currency}>
+                      {currency}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+            />
+
+            <Controller
+              name="hasDocuments"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Do you have all the necessary documents to prove that the available money is declared in your home country?"
+                  select
+                  error={!!errors.hasDocuments}
+                  helperText={errors.hasDocuments?.message}
+                  fullWidth
+                  sx={{ '& .MuiInputBase-root': { height: '56px' } }}
+                >
+                  <MenuItem value="yes">Yes</MenuItem>
+                  <MenuItem value="no">No</MenuItem>
+                </TextField>
+              )}
+            />
+
+            <Controller
+              name="canVerifySavings"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Can you provide evidence to verify the source of your savings?"
+                  select
+                  error={!!errors.canVerifySavings}
+                  helperText={errors.canVerifySavings?.message}
+                  fullWidth
+                  sx={{ '& .MuiInputBase-root': { height: '56px' } }}
+                >
+                  <MenuItem value="yes">Yes</MenuItem>
+                  <MenuItem value="no">No</MenuItem>
+                </TextField>
+              )}
+            />
+
+            <Controller
+              name="isEmployed"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Are you currently employed?"
+                  select
+                  error={!!errors.isEmployed}
+                  helperText={errors.isEmployed?.message}
+                  fullWidth
+                  sx={{ '& .MuiInputBase-root': { height: '56px' } }}
+                >
+                  <MenuItem value="yes">Yes</MenuItem>
+                  <MenuItem value="no">No</MenuItem>
+                </TextField>
+              )}
+            />
+
+            <Controller
+              name="monthlyIncome"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="What is your monthly income range?"
+                  select
+                  error={!!errors.monthlyIncome}
+                  helperText={errors.monthlyIncome?.message}
+                  fullWidth
+                  sx={{ '& .MuiInputBase-root': { height: '56px' } }}
+                >
+                  <MenuItem value="0-1000">0-1000 EUR</MenuItem>
+                  <MenuItem value="1000-50000">1000-50000 EUR</MenuItem>
+                </TextField>
+              )}
+            />
+
+            <Controller
+              name="soldProperty"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Other than your savings, have you recently sold any house/property for this relocation?"
+                  select
+                  error={!!errors.soldProperty}
+                  helperText={errors.soldProperty?.message}
+                  fullWidth
+                  sx={{ '& .MuiInputBase-root': { height: '56px' } }}
+                >
+                  <MenuItem value="yes">Yes</MenuItem>
+                  <MenuItem value="no">No</MenuItem>
+                </TextField>
+              )}
+            />
+
+            <Controller
+              name="transferTimeframe"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="How soon do you need this money transferred to your desired country?"
+                  select
+                  error={!!errors.transferTimeframe}
+                  helperText={errors.transferTimeframe?.message}
+                  fullWidth
+                  sx={{ '& .MuiInputBase-root': { height: '56px' } }}
+                >
+                  <MenuItem value="asap">As soon as possible</MenuItem>
+                  <MenuItem value="1-3">1-3 Months</MenuItem>
+                  <MenuItem value="3-6">3-6 Months</MenuItem>
+                </TextField>
+              )}
+            />
+
+            <Controller
+              name="hasBankAccount"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Do you already have an active bank account in the country you plan to relocate to?"
+                  select
+                  error={!!errors.hasBankAccount}
+                  helperText={errors.hasBankAccount?.message}
+                  fullWidth
+                  sx={{ '& .MuiInputBase-root': { height: '56px' } }}
+                >
+                  <MenuItem value="yes">Yes</MenuItem>
+                  <MenuItem value="no">No</MenuItem>
+                </TextField>
+              )}
+            />
+
+            <Controller
+              name="transferAmount"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="What amount do you wish to transfer?"
+                  select
+                  error={!!errors.transferAmount}
+                  helperText={errors.transferAmount?.message}
+                  fullWidth
+                  sx={{ '& .MuiInputBase-root': { height: '56px' } }}
+                >
+                  <MenuItem value="0-1000">0-1000 EUR</MenuItem>
+                  <MenuItem value="1000000+">1 million EUR or more</MenuItem>
+                </TextField>
+              )}
+            />
+
+            <Controller
+              name="savingsOwnership"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Is this money from your savings alone, or does it include savings from other family members?"
+                  select
+                  error={!!errors.savingsOwnership}
+                  helperText={errors.savingsOwnership?.message}
+                  fullWidth
+                  sx={{ '& .MuiInputBase-root': { height: '56px' } }}
+                >
+                  <MenuItem value="myself">Myself</MenuItem>
+                  <MenuItem value="myself-partner">Myself and Partner</MenuItem>
+                  <MenuItem value="myself-parents">Myself and Parents</MenuItem>
+                  <MenuItem value="myself-family">Myself and other Family member</MenuItem>
+                </TextField>
+              )}
+            />
+          </Box>
+
+          <Stack 
+            direction="row" 
+            justifyContent="flex-end" 
+            sx={{ 
+              mt: 4,
+              gap: 2 
+            }}
+          >
+            <Button
+              type="button"
+              color="inherit"
+              variant="outlined"
+              size="large"
             >
-              Fill this form and submit only if you are an Entrepreneur or already have any Start-up. We will help you to expand your idea or business by providing you right investors. This service is paid to avoid unnecessary queries.
-            </Typography> */}
-            <Box
-              rowGap={3}
-              columnGap={2}
-              display="grid"
-              gridTemplateColumns={{
-                xs: 'repeat(1, 1fr)',
-                sm: 'repeat(2, 1fr)',
-              }}
-              sx={{ 
-                '& .MuiFormControl-root': { 
-                  width: '100%'
-                },
-                '& .MuiInputBase-root': {
-                  minHeight: '56px'
-                },
-                '& .MuiInputLabel-root': {
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  maxWidth: '100%'
-                },
-                '& .full-width': {
-                  gridColumn: '1 / -1'
-                }
-              }}
+              Cancel
+            </Button>
+            <LoadingButton
+              type="submit"
+              variant="contained"
+              loading={isSubmitting}
+              size="large"
             >
-              <Field.Text name="question1" label="What do you want out of this experience?" />
-              <Field.Text name="question2" label="What is your dream job?" />
-              <Field.Text name="question3" label="Where do you go on a night out?" />
-
-              <Field.Text name="question4" label="How can you make the company better?" />
-
-              <Field.Text name="question5" label="Which three adjectives, Describe your strengths?" />
-
-              <Field.Text name="question6" label="What do you want on your resume in next Two Years?" />
-
-              <Field.Text name="question7" label="What Would You Do with unlimited resources?" />
-
-              <Field.Text name="question8" label="Why an investor should invest on you?" />
-
-              <Field.Text name="question9" label="What shares you want to offer an investor in a company?" />
-
-              <Field.Text 
-                name="question10" 
-                label="Are you looking for a sleeping investor or an active investor partner?" 
-                className="full-width"
-                sx={{ 
-                  width: '100%',
-                  '& .MuiInputLabel-root': {
-                    whiteSpace: 'normal',
-                    maxWidth: 'none'
-                  }
-                }} 
-              />
-
-              <Field.Text name="question11" label="How many languages you can speak?" />
-
-              <Field.Text name="question12" label="Which country and city would you prefer for this business?" />
-
-              <Field.Text 
-                name="question13" 
-                label="Do you have ability to manage the business or did you run any business before?" 
-                className="full-width"
-                sx={{ 
-                  width: '100%',
-                  '& .MuiInputLabel-root': {
-                    whiteSpace: 'normal',
-                    maxWidth: 'none'
-                  }
-                }} 
-              />
-
-              <Field.Text name="question14" label="Did import export involve in this business?" />
-
-              <Field.Text name="question15" label="Do you own a house, apartment or living in rental apartment?" />
-              <Field.Text name="question16" label="What are you doing for living?" />
-
-
-
-
-              {/* APPOINTMENT_TYPE_OPTIONS,
-  APPOINTMENT_CATEGORY_OPTIONS,
-  APPOINTMENT_COUNTRY_OPTIONS,
-  APPOINTMENT_TIME_OPTIONS, */}
-
-
-
-              <Field.Select native name="question17" label="Are you friends happy with your business idea?" InputLabelProps={{ shrink: true }}>
-                {multiqs1.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-
-
-              <Field.Select 
-                native 
-                name="question18" 
-                label="How you will rate your confidence and communication level (1-10)?" 
-                InputLabelProps={{ shrink: true }}
-                className="full-width"
-              >
-                {multiqs2.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-
-              <Field.Text name="question19" label="What amount would be enough to start this business?" />
-
-
-
-              <Field.Select native name="question20" label="Are you currently in Europe on study or on work permit?" InputLabelProps={{ shrink: true }}>
-                {multiqs3.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-              <Field.Select 
-                native 
-                name="question21" 
-                label="Do you own a business and looking to start new branch with an investor?" 
-                InputLabelProps={{ shrink: true }}
-                className="full-width"
-              >
-                {multiqs4.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-
-              <Field.Select native name="question22" label="Did your business base outside of Europe?" InputLabelProps={{ shrink: true }}>
-                {multiqs5.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-              <Field.Select native name="question23" label="Do you have an E-Commerce business idea?" InputLabelProps={{ shrink: true }}>
-                {multiqs6.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-
-              <Field.Text 
-                name="question24" 
-                label="Tell us more about yourself business plan and upload the documents on our online portal" 
-                multiline
-                rows={3}
-                className="full-width"
-                sx={{ 
-                  width: '100%',
-                  '& .MuiInputBase-root': {
-                    minHeight: '100px'
-                  },
-                  '& .MuiInputLabel-root': {
-                    whiteSpace: 'normal',
-                    maxWidth: 'none'
-                  }
-                }} 
-              />
-
-            </Box>
-
-            <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>
-              {/* <Field.Text name="about" multiline rows={4} label="About" /> */}
-
-              <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
-                Send Request
-              </LoadingButton>
-            </Stack>
-          </Card>
-        </Grid>
-      </Grid>
-    </Form>
+              Submit
+            </LoadingButton>
+          </Stack>
+        </form>
+      </Card>
+    </Container>
   );
 }
 
