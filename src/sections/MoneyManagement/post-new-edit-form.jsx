@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { CONFIG } from 'src/config-global';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -7,6 +8,7 @@ import {
   Card,
   Stack,
   Alert,
+  Grid,
   MenuItem,
   Typography,
   TextField,
@@ -14,6 +16,21 @@ import {
   Container,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
+import { DashboardContent } from 'src/layouts/dashboard';
+import { _bankingContacts, _bankingCreditCard, _bankingRecentTransitions } from 'src/_mock';
+
+import { Iconify } from 'src/components/iconify/iconify';
+
+import { BankingContacts } from './banking-contacts';
+import { BankingOverview } from './banking-overview';
+import { BankingQuickTransfer } from './banking-quick-transfer';
+import { BankingInviteFriends } from './banking-invite-friends';
+import { BankingCurrentBalance } from './banking-current-balance';
+import { BankingBalanceStatistics } from './banking-balance-statistics';
+import { BankingRecentTransitions } from './banking-recent-transitions';
+import { BankingExpensesCategories } from './banking-expenses-categories';
+
+
 
 // Sample data (replace with actual data in a real application)
 const highRiskCountries = ['Country1', 'Country2', 'Country3', 'Country4', 'Country5'];
@@ -95,8 +112,32 @@ export default function PostNewEditForm() {
   };
 
   return (
-    <Container maxWidth="lg">
-      <Card sx={{ p: 4, my: 4 }}>
+<DashboardContent maxWidth="xl">
+   <Grid container spacing={1}>
+
+   <Grid xs={12} md={7} lg={12}>
+          <Box sx={{ gap: 3, display: 'flex', flexDirection: 'column' }}>
+            <BankingCurrentBalance list={_bankingCreditCard} />
+
+            {/* <BankingQuickTransfer title="Quick transfer" list={_bankingContacts} /> */}
+
+            {/* <BankingContacts
+              title="Contacts"
+              subheader="You have 122 contacts"
+              list={_bankingContacts.slice(-5)}
+            />
+
+            <BankingInviteFriends
+              price="$50"
+              title={`Invite friends \n and earn`}
+              description="Praesent egestas tristique nibh. Duis lobortis massa imperdiet quam."
+              imgUrl={`${CONFIG.assetsDir}/assets/illustrations/illustration-receipt.webp`}
+            /> */}
+          </Box>
+        </Grid>
+      <Grid xs={12} md={7} lg={12}>
+    <Container maxWidth="xl">
+      <Card sx={{ p: 4, my: 2 }}>
         <Typography variant="h4" gutterBottom sx={{ mb: 4 }}>
           Money Transfer Form
         </Typography>
@@ -430,6 +471,16 @@ export default function PostNewEditForm() {
         </form>
       </Card>
     </Container>
+         </Grid>
+
+     
+  
+  </Grid>
+</DashboardContent>
+ 
+   
+    
+   
   );
 }
 

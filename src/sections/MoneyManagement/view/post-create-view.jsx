@@ -26,13 +26,14 @@ export function PostCreateView() {
         ]}
         sx={{ mb: { xs: 3, md: 3 } }}
       />
-  <Grid xs={12} md={12}>
+  {/* <Grid xs={12} md={12}>
           <AppWelcome sx={{ mb: 3 }}
             title="Welcome back 👋 User"
             description="Fill in the form below to manage your money.We forward your inquiry to multiple partner companies, and you will receive quotes directly from them based on your request. To prevent unnecessary inquiries and ensure efficient processing, a €100 handling fee is charged at the end of the form."
             img={<SeoIllustration hideBackground />}
           />
-        </Grid>
+        </Grid> */}
+        
       <PostNewEditForm />
     </DashboardContent>
   );
