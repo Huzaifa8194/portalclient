@@ -1,178 +1,116 @@
-import Box from '@mui/material/Box';
-import { cardClasses } from '@mui/material/Card';
-import Typography from '@mui/material/Typography';
-
-import { CONFIG } from 'src/config-global';
-import { varAlpha } from 'src/theme/styles';
+import React from 'react';
+import { Box, Typography, Grid, Card, CardContent } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import { SeoIllustration } from 'src/assets/illustrations';
+import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { _coursesContinue, _coursesFeatured, _coursesReminder } from 'src/_mock';
+import { paths } from 'src/routes/paths';
+import { AppWelcome } from './app-welcome';
 
-import { CourseProgress } from '../course-progress';
-import { CourseContinue } from '../course-continue';
-import { CourseFeatured } from '../course-featured';
-import { CourseReminders } from '../course-reminders';
-import { CourseMyAccount } from '../course-my-account';
-import { CourseHoursSpent } from '../course-hours-spent';
-import { CourseMyStrength } from '../course-my-strength';
-import { CourseWidgetSummary } from '../course-widget-summary';
+const StyledCard = styled(Card)(({ theme }) => ({
+  backgroundColor: theme.palette.background.paper,
+  borderRadius: theme.shape.borderRadius * 2,
+  boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.08)',
+  marginBottom: theme.spacing(2),
+  overflow: 'visible',
+}));
 
-// ----------------------------------------------------------------------
+const eVisaData = [
+  {
+    id: '1',
+    country: 'United States',
+    visaType: 'Tourist Visa',
+    applicationDate: '2024-01-20 14:30',
+    location: 'New York Visa Center, 123 Broadway St'
+  },
+  {
+    id: '2',
+    country: 'United Kingdom',
+    visaType: 'Student Visa',
+    applicationDate: '2024-02-15 10:45',
+    location: 'London Application Centre, 45 Oxford Street'
+  },
+  {
+    id: '3',
+    country: 'Canada',
+    visaType: 'Work Permit',
+    applicationDate: '2024-03-01 09:15',
+    location: 'Toronto Immigration Office, 789 Yonge St'
+  }
+];
+
+const EVisaCard = ({ visa }) => (
+  <StyledCard>
+    <CardContent>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={3}>
+          <Typography color="text.secondary" variant="subtitle2" gutterBottom>
+            Visa Country
+          </Typography>
+          <Typography variant="body2">
+            {visa.country}
+          </Typography>
+        </Grid>
+        
+        <Grid item xs={12} sm={3}>
+          <Typography color="text.secondary" variant="subtitle2" gutterBottom>
+            Visa Type
+          </Typography>
+          <Typography variant="body2">
+            {visa.visaType}
+          </Typography>
+        </Grid>
+        
+        <Grid item xs={12} sm={3}>
+          <Typography color="text.secondary" variant="subtitle2" gutterBottom>
+            App. Date/Time
+          </Typography>
+          <Typography variant="body2">
+            {visa.applicationDate}
+          </Typography>
+        </Grid>
+        
+        <Grid item xs={12} sm={3}>
+          <Typography color="text.secondary" variant="subtitle2" gutterBottom>
+            App. Location
+          </Typography>
+          <Typography variant="body2">
+            {visa.location}
+          </Typography>
+        </Grid>
+      </Grid>
+    </CardContent>
+  </StyledCard>
+);
 
 export function OverviewCourseView() {
   return (
-    <DashboardContent
-      maxWidth={false}
-      disablePadding
-      sx={{
-        borderTop: (theme) => ({
-          lg: `solid 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.12)}`,
-        }),
-      }}
-    >
-      <Box
-        sx={{
-          display: 'flex',
-          flex: '1 1 auto',
-          flexDirection: { xs: 'column', lg: 'row' },
-        }}
-      >
-        <Box
-          sx={{
-            gap: 3,
-            display: 'flex',
-            minWidth: { lg: 0 },
-            py: { lg: 3, xl: 5 },
-            flexDirection: 'column',
-            flex: { lg: '1 1 auto' },
-            px: { xs: 2, sm: 3, xl: 5 },
-            borderRight: (theme) => ({
-              lg: `solid 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.12)}`,
-            }),
-          }}
-        >
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="h4" sx={{ mb: 1 }}>
-              Hi, Frankie 👋
-            </Typography>
-            <Typography
-              sx={{ color: 'text.secondary' }}
-            >{`Let's learn something new today!`}</Typography>
-          </Box>
-
-          <Box
-            sx={{
-              gap: 3,
-              display: 'grid',
-              gridTemplateColumns: {
-                xs: 'repeat(1, 1fr)',
-                md: 'repeat(3, 1fr)',
-              },
-            }}
-          >
-            <CourseWidgetSummary
-              title="Courses in progress"
-              total={6}
-              icon={`${CONFIG.assetsDir}/assets/icons/courses/ic-courses-progress.svg`}
-            />
-
-            <CourseWidgetSummary
-              title="Courses completed"
-              total={3}
-              color="success"
-              icon={`${CONFIG.assetsDir}/assets/icons/courses/ic-courses-completed.svg`}
-            />
-
-            <CourseWidgetSummary
-              title="Certificates"
-              total={2}
-              color="secondary"
-              icon={`${CONFIG.assetsDir}/assets/icons/courses/ic-courses-certificates.svg`}
-            />
-          </Box>
-
-          <CourseHoursSpent
-            title="Hours spent"
-            chart={{
-              series: [
-                {
-                  name: 'Weekly',
-                  categories: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'],
-                  data: [{ data: [10, 41, 35, 151, 49] }],
-                },
-                {
-                  name: 'Monthly',
-                  categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-                  data: [{ data: [83, 112, 119, 88, 103, 112, 114, 108, 93] }],
-                },
-                {
-                  name: 'Yearly',
-                  categories: ['2018', '2019', '2020', '2021', '2022', '2023'],
-                  data: [{ data: [24, 72, 64, 96, 76, 41] }],
-                },
-              ],
-            }}
+    <DashboardContent>
+      <CustomBreadcrumbs
+        heading="E Visa"
+        links={[
+          { name: 'Dashboard', href: paths.dashboard.root },
+          { name: 'E-Visa' },
+        ]}
+        sx={{ mb: { xs: 3, md: 3 } }}
+      />
+      <Grid xs={8} md={8}>
+          <AppWelcome sx={{ mb: 3 }}
+            title="Welcome back 👋 User"
+            description="You can download your Visa file once it's complete from the backend. We book an appointment with FedEx/Gerrys/Embassy and update the Time and Location. All you have to do is to download and submit with your original passport. If you choose the DHL service then you will receive the file in 3 to 5 working days at your provided address."
+            img={<SeoIllustration hideBackground />}
           />
+        </Grid>
+    
 
-          <Box
-            sx={{
-              gap: 3,
-              display: 'grid',
-              alignItems: 'flex-start',
-              gridTemplateColumns: {
-                xs: 'repeat(1, 1fr)',
-                md: 'repeat(2, 1fr)',
-              },
-            }}
-          >
-            <CourseProgress
-              title="Course progress"
-              chart={{
-                series: [
-                  { label: 'To start', value: 45 },
-                  { label: 'In progress', value: 25 },
-                  { label: 'Completed', value: 20 },
-                ],
-              }}
-            />
-
-            <CourseContinue title="Continue course" list={_coursesContinue} />
-          </Box>
-
-          <CourseFeatured title="Featured course" list={_coursesFeatured} />
-        </Box>
-
-        <Box
-          sx={{
-            width: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            px: { xs: 2, sm: 3, xl: 5 },
-            pt: { lg: 8, xl: 10 },
-            pb: { xs: 8, xl: 10 },
-            flexShrink: { lg: 0 },
-            gap: { xs: 3, lg: 5, xl: 8 },
-            maxWidth: { lg: 320, xl: 360 },
-            bgcolor: { lg: 'background.neutral' },
-            [`& .${cardClasses.root}`]: {
-              p: { xs: 3, lg: 0 },
-              boxShadow: { lg: 'none' },
-              bgcolor: { lg: 'transparent' },
-            },
-          }}
-        >
-          <CourseMyAccount />
-
-          <CourseMyStrength
-            title="Strength"
-            chart={{
-              categories: ['English', 'History', 'Physics', 'Geography', 'Chinese', 'Math'],
-              series: [{ data: [80, 50, 30, 40, 100, 20] }],
-            }}
-          />
-
-          <CourseReminders title="Reminders" list={_coursesReminder} />
-        </Box>
-      </Box>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={12}>
+          {eVisaData.map((visa) => (
+            <EVisaCard key={visa.id} visa={visa} />
+          ))}
+        </Grid>
+      </Grid>
     </DashboardContent>
   );
 }
+

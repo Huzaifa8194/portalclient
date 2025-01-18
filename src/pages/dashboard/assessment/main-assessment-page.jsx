@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
 import { paths } from 'src/routes/paths';
@@ -8,8 +9,7 @@ import { CONFIG } from 'src/config-global';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useMockedUser } from 'src/auth/hooks';
 import { SeoIllustration } from 'src/assets/illustrations';
-import Button from '@mui/material/Button';
-import { AppWelcome } from 'src/sections/assessment/app-welcome'
+import { AppWelcome } from 'src/sections/assessment/app-welcome';
 
 import { AppWidgetHeading } from './app-widget-heading';
 
@@ -17,6 +17,7 @@ import { AppWidgetHeading } from './app-widget-heading';
 
 export function OverviewAppView() {
   const { user } = useMockedUser();
+  const navigate = useNavigate();
 
   const buttonHeadings = [
     { title: 'Business Visa', color: 'primary', icon: `${CONFIG.assetsDir}/assets/icons/courses/ic-courses-certificates.svg` },
@@ -27,6 +28,19 @@ export function OverviewAppView() {
     { title: 'Work Permit', color: 'secondary', icon: `${CONFIG.assetsDir}/assets/icons/courses/ic-courses-certificates.svg` },
     { title: 'All Assessment', color: 'info', icon: `${CONFIG.assetsDir}/assets/icons/courses/ic-courses-certificates.svg` },
   ];
+  const toCamelCase = (str) =>
+    str
+      .split(' ')
+      .map((word, index) =>
+        index === 0 ? word.toLowerCase() : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+      )
+      .join('');
+  
+  const handleButtonClick = (title) => {
+    const route = `${paths.dashboard[toCamelCase(title)]}`;
+    navigate(route);
+  };
+  
 
   return (
     <DashboardContent maxWidth="xl">
@@ -45,24 +59,32 @@ export function OverviewAppView() {
             title={`Welcome back 👋 \n ${user?.displayName}`}
             description="If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything."
             img={<SeoIllustration hideBackground />}
-            action={
-              <Button variant="contained" color="primary">
-                Go now
-              </Button>
-            }
           />
         </Grid>
 
         {buttonHeadings.map((heading, index) => (
           <Grid xs={12} sm={6} md={4} key={index}>
-            <AppWidgetHeading
-              title={heading.title}
-              color={heading.color}
-              icon={heading.icon}
+            <Box
+              component="button"
+              onClick={() => handleButtonClick(heading.title)}
               sx={{
+                width: '100%',
                 height: '100%',
+                padding: 0,
+                border: 'none',
+                background: 'none',
+                textAlign: 'inherit',
               }}
-            />
+            >
+              <AppWidgetHeading
+                title={heading.title}
+                color={heading.color}
+                icon={heading.icon}
+                sx={{
+                  height: '100%',
+                }}
+              />
+            </Box>
           </Grid>
         ))}
       </Grid>

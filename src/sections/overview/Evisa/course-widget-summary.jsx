@@ -52,7 +52,7 @@ export function CourseWidgetSummary({
   ...other 
 }) {
   return (
-    <StyledCard sx={{ p: 3, ...sx }} {...other}>
+    <StyledCard sx={{ p: 2, ...sx }} {...other}>
       <Box sx={{ flexGrow: 1, pr: 7 }}>
         <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 1 }}>
           {title}

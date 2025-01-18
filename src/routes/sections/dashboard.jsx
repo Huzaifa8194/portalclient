@@ -118,6 +118,10 @@ const EVisa= lazy(() => import('src/pages/dashboard/E-Visa/index'));
 const EmbassyFile= lazy(() => import('src/pages/dashboard/EmbassyFiles/index'));
 const GlobalVisa= lazy(() => import('src/pages/dashboard/GlobalVisa/index'));
 const FAQ= lazy(() => import('src/pages/dashboard/faqs'));
+const BusinessVisa= lazy(() => import('src/pages/dashboard/businessVisa/new'));
+const FamilyReunification= lazy(() => import('src/pages/dashboard/familyReunification/new'));
+const LongTermEU= lazy(() => import('src/pages/dashboard/LongTermEUStatus/new'));
+
 
 
 
@@ -232,6 +236,7 @@ export const dashboardRoutes = [
       { path: 'e-visa', element: < EVisa />},
       { path: 'embassy-files', element: < EmbassyFile />},
       { path: 'global-visa', element: < GlobalVisa />},
+      { path: 'business-visa', element: < BusinessVisa />},
 
       { path: 'pet-relocation', element: < PetRelocation />},
       { path: 'service-charges', element: < ServiceCharges />},
@@ -244,6 +249,8 @@ export const dashboardRoutes = [
       { path: 'complaint', element: < Complaint />},
       { path: 'feedback', element: < Feedback />},
       { path: 'au-pair', element: < AuPair /> },
+      { path: 'family-reunification', element: < FamilyReunification /> },
+      { path: 'long-term-eu-status', element: < LongTermEU /> },
       { path: 'host-family', element: < HostFamily /> },
       { path: 'AuPair', element: < IamAuPair /> },
       { path: 'faq', element: < FAQ /> },

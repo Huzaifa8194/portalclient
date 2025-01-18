@@ -111,6 +111,10 @@ export const paths = {
     permission: `${ROOTS.DASHBOARD}/permission`,
     serviceCharges: `${ROOTS.DASHBOARD}/service-charges`,
     powerOfAttorney: `${ROOTS.DASHBOARD}/power-of-attorney`,
+    businessVisa: `${ROOTS.DASHBOARD}/business-visa`,
+    familyReunification: `${ROOTS.DASHBOARD}/family-reunification`,
+    longTermEuStatus: `${ROOTS.DASHBOARD}/long-term-eu-status`,
+
     petRelocation: `${ROOTS.DASHBOARD}/pet-relocation`,
     logisticsSolution: `${ROOTS.DASHBOARD}/logistics-solution`,
     moneyManagement: `${ROOTS.DASHBOARD}/money-management`,

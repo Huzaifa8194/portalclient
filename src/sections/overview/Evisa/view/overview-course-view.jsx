@@ -74,7 +74,7 @@ export function OverviewCourseView() {
 
       <Grid container spacing={3} mb={3}>
         <Grid item xs={12} sm={6} md={3}>
-          <CourseWidgetSummary title="Total Applications" total="12" icon={`${CONFIG.assetsDir}/assets/icons/courses/ic-courses-progress.svg`}/>
+          <CourseWidgetSummary title="Total Application" total="12" icon={`${CONFIG.assetsDir}/assets/icons/courses/ic-courses-progress.svg`}/>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <CourseWidgetSummary title="Approved" total="8" color="success" icon={`${CONFIG.assetsDir}/assets/icons/courses/ic-courses-progress.svg`}/>
