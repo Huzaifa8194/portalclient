@@ -121,6 +121,9 @@ const FAQ= lazy(() => import('src/pages/dashboard/faqs'));
 const BusinessVisa= lazy(() => import('src/pages/dashboard/businessVisa/new'));
 const FamilyReunification= lazy(() => import('src/pages/dashboard/familyReunification/new'));
 const LongTermEU= lazy(() => import('src/pages/dashboard/LongTermEUStatus/new'));
+const StudentVisa= lazy(() => import('src/pages/dashboard/StudentVisa/new'));
+const VisitVisa= lazy(() => import('src/pages/dashboard/VisitVisa/new'));
+const WorkPermit= lazy(() => import('src/pages/dashboard/WorkPermit/new'));
 
 
 
@@ -237,6 +240,9 @@ export const dashboardRoutes = [
       { path: 'embassy-files', element: < EmbassyFile />},
       { path: 'global-visa', element: < GlobalVisa />},
       { path: 'business-visa', element: < BusinessVisa />},
+      { path: 'student-visa', element: < StudentVisa />},
+      { path: 'visit-visa', element: < VisitVisa />},
+      { path: 'work-visa', element: < WorkPermit />},
 
       { path: 'pet-relocation', element: < PetRelocation />},
       { path: 'service-charges', element: < ServiceCharges />},

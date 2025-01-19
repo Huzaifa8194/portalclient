@@ -114,6 +114,9 @@ export const paths = {
     businessVisa: `${ROOTS.DASHBOARD}/business-visa`,
     familyReunification: `${ROOTS.DASHBOARD}/family-reunification`,
     longTermEuStatus: `${ROOTS.DASHBOARD}/long-term-eu-status`,
+    studentVisa:`${ROOTS.DASHBOARD}/student-visa`,
+    vistVisa:`${ROOTS.DASHBOARD}/visit-visa`,
+    workVisa:`${ROOTS.DASHBOARD}/work-visa`,
 
     petRelocation: `${ROOTS.DASHBOARD}/pet-relocation`,
     logisticsSolution: `${ROOTS.DASHBOARD}/logistics-solution`,
