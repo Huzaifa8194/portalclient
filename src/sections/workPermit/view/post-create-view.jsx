@@ -17,11 +17,11 @@ export function PostCreateView() {
   return (
     <DashboardContent>
       <CustomBreadcrumbs
-        heading="Long Term EU Status"
+        heading="Work Permit"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
           { name: 'Assessment',href: paths.dashboard.assessment },
-          { name: 'Long Term EU Status'},
+          { name: 'Work Permit'},
 
         ]}
         sx={{ mb: { xs: 3, md: 3 } }}

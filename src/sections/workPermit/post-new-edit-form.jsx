@@ -18,7 +18,6 @@ const FormSchema = z.object({
   fullName: z.string().min(1, { message: "Full name is required" }),
   email: z.string().email({ message: "Valid email is required" }),
   phone: z.string().min(1, { message: "Phone number is required" }),
-  address: z.string().min(1, { message: "Address is required" }),
 
   // Work Permit Categories & Educational Background
   category: z.string().min(1, { message: "Category is required" }),
@@ -59,7 +58,7 @@ const FormSchema = z.object({
   "100k": z.boolean().optional(),
   "50k": z.boolean().optional(),
 
-  // Other category fields (preserved from original)
+  // Other category fields
   workedInSweden: z.string().optional(),
   studyingInSweden: z.string().optional(),
   isSingle: z.string().optional(),
@@ -90,6 +89,21 @@ const FormSchema = z.object({
   startBusiness: z.string().optional(),
   jobOfferSweden: z.string().optional(),
   assets: z.string().optional(),
+  worth: z.string().optional(),
+  completeDegreeStatus: z.string().optional(),
+  jobContract: z.string().optional(),
+  personNumber: z.string().optional(),
+  startWork: z.string().optional(),
+  workPermitIssuedDate: z.string().optional(),
+  workPermitEndDate: z.string().optional(),
+  currentJobinSweden: z.string().optional(),
+  looseJob: z.string().optional(),
+  noticeTermination: z.string().optional(),
+  anotherJobOffer: z.string().optional(),
+  selfEmployedStatus: z.string().optional(),
+  moreDetail: z.string().optional(),
+  accompanyFamily: z.string().optional(),
+  yourDesignation: z.string().optional(),
 })
 
 export default function WorkPermitForm() {
@@ -98,7 +112,56 @@ export default function WorkPermitForm() {
 
   const [currentSection, setCurrentSection] = useState("personal")
   const [jobExperience, setJobExperience] = useState("")
+  const [outsideSweden, setOutsideSweden] = useState("")
+  const [workinSweden, setWorkinSweden] = useState("")
+  const [sufficientSalary, setSufficientSalary] = useState("")
+  const [appliedForVisa, setAppliedForVisa] = useState("")
+  const [single, setSingleStatus] = useState("")
+  const [permission, setPermissionStatus] = useState("")
+  const [completeDegree, setCompleteDegree] = useState("")
+  const [studyingSweden, setStudyingSweden] = useState("")
+  const [workingSweden, setWorkingSweden] = useState("")
+  const [firstPermit, setFirstPermit] = useState("")
+  const [assetStatus, setAssetStatus] = useState("")
+  const [AyslumWorkedInSweden, setAyslumWorkedInSweden] = useState("")
 
+
+  const handleAyslumWorkedInSweden = (e) => {
+    setAyslumWorkedInSweden(e.target.value)
+  }
+  const handleAssetStatus = (e) => {
+    setAssetStatus(e.target.value)
+  }
+  const handleFirstPermit = (e) => {
+    setFirstPermit(e.target.value)
+  }
+  const handleWorkingSweden = (e) => {
+    setWorkingSweden(e.target.value)
+  }
+  const handleStudyingSweden = (e) => {
+    setStudyingSweden(e.target.value)
+  }
+  const handleCompleteDegreeStatus = (e) => {
+    setCompleteDegree(e.target.value)
+  }
+  const handlePermissionStatus = (e) => {
+    setPermissionStatus(e.target.value)
+  }
+  const handleSingleStatus = (e) => {
+    setSingleStatus(e.target.value)
+  }
+  const handleAppliedForVisa = (e) => {
+    setAppliedForVisa(e.target.value)
+  }
+  const handleSufficientSalary = (e) => {
+    setSufficientSalary(e.target.value)
+  }
+  const handleWorkinSweden = (e) => {
+    setWorkinSweden(e.target.value)
+  }
+  const handleOutsideSwedenChange = (e) => {
+    setOutsideSweden(e.target.value)
+  }
   const handleJobExperienceChange = (e) => {
     setJobExperience(e.target.value)
   }
@@ -108,8 +171,12 @@ export default function WorkPermitForm() {
       fullName: "",
       email: "",
       phone: "",
-      address: "",
       category: "",
+      educationLevel: "",
+      educationalCertificate: "",
+      jobExperience: "",
+      totalExperience: "",
+      experienceCertificate: "",
       workedInSweden: "",
       studyingInSweden: "",
       minimumSalary: "",
@@ -137,6 +204,48 @@ export default function WorkPermitForm() {
       "200k": false,
       "100k": false,
       "50k": false,
+      isSingle: "",
+      ageBetween: "",
+      healthInsurance: "",
+      swedishLanguage: "",
+      admissionCertificate: "",
+      hostFamilyInvitation: "",
+      studyHours: "",
+      supportMoney: "",
+      returnTicket: "",
+      comprehensiveInsurance: "",
+      asylumRefused: "",
+      workPermission: "",
+      workedFourMonths: "",
+      negativeDecisionDate: "",
+      permanentContract: "",
+      degreeCompleted: "",
+      jobOffer: "",
+      currentlyWorking: "",
+      designation: "",
+      firstPermit: "",
+      companyTwoYears: "",
+      ictTransfer: "",
+      EUcitizenship: "",
+      permanentResidence: "",
+      startBusiness: "",
+      jobOfferSweden: "",
+      assets: "",
+      worth: "",
+      completeDegreeStatus: "",
+      jobContract: "",
+      personNumber: "",
+      startWork: "",
+      workPermitIssuedDate: "",
+      workPermitEndDate: "",
+      currentJobinSweden: "",
+      looseJob: "",
+      noticeTermination: "",
+      anotherJobOffer: "",
+      selfEmployedStatus: "",
+      moreDetail: "",
+      accompanyFamily: "",
+      yourDesignation: "",
     }),
     [],
   )
@@ -153,8 +262,6 @@ export default function WorkPermitForm() {
   } = methods
 
   const category = watch("category")
-  const workedInSweden = watch("workedInSweden")
-  const studyingInSweden = watch("studyingInSweden")
 
   const onSubmit = handleSubmit(async (data) => {
     try {
@@ -171,8 +278,6 @@ export default function WorkPermitForm() {
         return "Personal Details"
       case "categories":
         return "Work Permit Categories"
-      case "experience":
-        return "Work Experience in your field"
       case "residence":
         return "Residence and Work Permit"
       case "family":
@@ -195,7 +300,6 @@ export default function WorkPermitForm() {
       <Field.Text name="fullName" label="Full Name" required />
       <Field.Text name="email" label="Email" required />
       <Field.Text name="phone" label="Phone Number" required />
-      <Field.Text name="address" label="Address" required />
     </Box>
   )
 
@@ -227,157 +331,816 @@ export default function WorkPermitForm() {
         <option value="EU_LONG_TERM">EU Long Term Residence</option>
       </Field.Select>
 
-      <Typography variant="subtitle1" sx={{ gridColumn: "1/-1", mt: 2 }}>
-        Educational Background
-      </Typography>
+      {category === "WORK_PERMIT_OUTSIDE" && (
+        <>
+          <Typography variant="subtitle1" sx={{ gridColumn: "1/-1", mt: 2 }}>
+            Educational Background
+          </Typography>
 
-      <Field.Select
-        name="educationLevel"
-        label="Education Level"
-        select
-        native
-        required
-        InputLabelProps={{ shrink: true }}
-      >
-        <option value="">Choose an Option</option>
-        <option value="bachelor">Bachelors Degree</option>
-        <option value="master">Masters Degree</option>
-        <option value="phd">PhD</option>
-      </Field.Select>
+          <Field.Select
+            name="educationLevel"
+            label="Education Level"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="bachelor">Bachelors Degree</option>
+            <option value="master">Masters Degree</option>
+            <option value="phd">PhD</option>
+          </Field.Select>
 
-      <Field.Select
-        name="educationalCertificate"
-        label="Educational Certificate available"
-        select
-        native
-        required
-        InputLabelProps={{ shrink: true }}
-      >
-        <option value="">Choose an Option</option>
-        <option value="yes">Yes</option>
-        <option value="no">No</option>
-      </Field.Select>
+          <Field.Select
+            name="educationalCertificate"
+            label="Educational Certificate available"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
 
+          <Typography variant="subtitle1" sx={{ gridColumn: "1/-1", mt: 2 }}>
+            Work Experience in your field
+          </Typography>
+          <Field.Select
+            value={jobExperience}
+            onChange={handleJobExperienceChange}
+            name="jobExperience"
+            label="Did you have a job experience?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
 
-      <Typography variant="subtitle1" sx={{ gridColumn: "1/-1", mt: 2 }}>
-      Work Experience in your field
-      </Typography>
-      <Field.Select
-        value={jobExperience}
-        onChange={handleJobExperienceChange}
-        name="jobExperience"
-        label="Did you have a job experience?"
-        select
-        native
-        required
-        InputLabelProps={{ shrink: true }}
-      >
-        <option value="">Choose an Option</option>
-        <option value="yes">Yes</option>
-        <option value="no">No</option>
-      </Field.Select>
+          {jobExperience === "yes" && (
+            <Field.Select
+              name="totalExperience"
+              label="Total Experience"
+              select
+              native
+              required
+              InputLabelProps={{ shrink: true }}
+            >
+              <option value="">Choose an Option</option>
+              <option value="1-2">1-2 years</option>
+              <option value="3-5">3-5 years</option>
+              <option value="5+">5+ years</option>
+            </Field.Select>
+          )}
 
-      {jobExperience === "yes" && (
-        <Field.Select
-          name="totalExperience"
-          label="Total Experience"
-          select
-          native
-          required
-          InputLabelProps={{ shrink: true }}
-        >
-          <option value="">Choose an Option</option>
-          <option value="1-2">1-2 years</option>
-          <option value="3-5">3-5 years</option>
-          <option value="5+">5+ years</option>
-        </Field.Select>
+          <Field.Select
+            name="experienceCertificate"
+            label="Experience Certificate available"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+        </>
+      )}
+      {category === "AU_PAIR" && (
+        <>
+          <Typography variant="subtitle1" sx={{ gridColumn: "1/-1", mt: 2 }}>
+            AU Pair
+          </Typography>
+          <Field.Select
+            name="isSingle"
+            label="Are you single?"
+            select
+            native
+            required
+            value={single}
+            onChange={handleSingleStatus}
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+          {single === "no" && (
+            <Field.Select
+              name="accompanyFamily"
+              label="Do you have any accompanying family members, like partner, childrens?"
+              select
+              sx={{ gridColumn: "1/-1" }}
+              native
+              required
+              InputLabelProps={{ shrink: true }}
+            >
+              <option value="">Choose an Option</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </Field.Select>
+          )}
+          <Field.Select
+            name="ageBetween"
+            label="Are you between 18 and 30 years?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+
+          <Field.Select
+            name="healthInsurance"
+            label="Do you have a Proof that you have signed or applied for a health insurance policy?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+            sx={{ gridColumn: "1/-1" }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+
+          <Field.Select
+            name="swedishLanguage"
+            label="Are you able to show that you have a distinct interest in or use for Swedish language studies?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+            sx={{ gridColumn: "1/-1" }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+
+          <Field.Select
+            name="admissionCertificate"
+            label="Do you have a certificate of admission/Offer Letter to the course of study concerned?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+            sx={{ gridColumn: "1/-1" }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+
+          <Field.Select
+            name="hostFamilyInvitation"
+            label="Do you have a written invitation from your host family in Sweden stating the terms and Terms and Conditions of your employment as an Au-Pair?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+            sx={{ gridColumn: "1/-1" }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+
+          <Field.Select
+            name="studyHours"
+            label="Will you Study for 15 hours a week or the time for housework and studies will not exceed 40 hours per week?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+            sx={{ gridColumn: "1/-1" }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+        </>
       )}
 
-      <Field.Select
-        name="experienceCertificate"
-        label="Experience Certificate available"
-        select
-        native
-        required
-        InputLabelProps={{ shrink: true }}
-      >
-        <option value="">Choose an Option</option>
-        <option value="yes">Yes</option>
-        <option value="no">No</option>
-      </Field.Select>
-    </Box>
-  )
+      {category === "WORKING_HOLIDAYS" && (
+        <>
+          <Typography variant="subtitle1" sx={{ gridColumn: "1/-1", mt: 2 }}>
+            Working Holidays
+          </Typography>
+          <Field.Select
+            name="isSingle"
+            label="Are you single?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
 
-  const renderExperience = () => (
-    <Box
-      rowGap={3}
-      columnGap={2}
-      display="grid"
-      gridTemplateColumns={{
-        xs: "repeat(1, 1fr)",
-        sm: "repeat(2, 1fr)",
-      }}
-    >
+          <Field.Select
+            name="citizenship"
+            label="Are you citizens of Argentina, Australia, Chile, Hong Kong, Canada, New Zealand, South Korea or Uruguay?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+            sx={{ gridColumn: "1/-1" }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
 
-      <Field.Select
-        name="outsideSweden"
-        label="Are you outside of Sweden?"
-        select
-        native
-        required
-        InputLabelProps={{ shrink: true }}
-      >
-        <option value="">Choose an Option</option>
-        <option value="yes">Yes</option>
-        <option value="no">No</option>
-      </Field.Select>
+          <Field.Select
+            name="supportMoney"
+            label="Do you have money so that you can support yourself during the first year in Sweden (atleast 15000 SEK) ?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+            sx={{ gridColumn: "1/-1" }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
 
-      <Field.Select name="citizenship" label="Citizenship" select native required InputLabelProps={{ shrink: true }}>
-        <option value="">Choose an Option</option>
-        <option value="uae">UAE</option>
-        <option value="USA">USA</option>
-      </Field.Select>
+          <Field.Select
+            name="returnTicket"
+            label="Do you Have a return ticket or enough money to buy one?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
 
-      <Field.Select
-        name="residence"
-        label="Country of Residence"
-        select
-        native
-        required
-        InputLabelProps={{ shrink: true }}
-      >
-        <option value="">Choose an Option</option>
-        <option value="uae">UAE</option>
-        <option value="USA">USA</option>
-      </Field.Select>
+          <Field.Select
+            name="comprehensiveInsurance"
+            label="Do you have a comprehensive health insurance that applies to care in Sweden? (Does not apply to citizens of Australia)"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+            sx={{ gridColumn: "1/-1" }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+        </>
+      )}
 
-      <Field.Select
-        name="sameCompany"
-        label="Are you working for the same company branch office in your country of residence?"
-        select
-        native
-        required
-        InputLabelProps={{ shrink: true }}
-        sx={{ gridColumn: "1/-1" }}
-      >
-        <option value="">Choose an Option</option>
-        <option value="yes">Yes</option>
-        <option value="no">No</option>
-      </Field.Select>
+      {category === "ASYLUM_WORK_PERMIT" && (
+        <>
+          <Typography variant="subtitle1" sx={{ gridColumn: "1/-1", mt: 2 }}>
+            Ayslum Work Permit
+          </Typography>
+          <Field.Select
+            name="workedInSweden"
+            label="Did you already worked in Sweden before applying the asylum?"
+            select
+            value={AyslumWorkedInSweden}
+            onChange={handleAyslumWorkedInSweden}
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+{AyslumWorkedInSweden === "no" && (
+  <>
+  <Field.Select
+            name="asylumRefused"
+            label="Did Your asylum case has been refused and you want to apply for work permit?"
+            select
+            native
+            required
+            sx={{ gridColumn: "1/-1" }}
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
 
-      <Field.Select
-        name="workinSweden"
-        label="Did you work in Sweden before?"
-        select
-        native
-        required
-        InputLabelProps={{ shrink: true }}
-        sx={{ gridColumn: "1/-1" }}
-      >
-        <option value="">Choose an Option</option>
-        <option value="yes">Yes</option>
-        <option value="no">No</option>
-      </Field.Select>
+          <Field.Select
+            name="workPermission"
+            label="Did you get the permission of work in Sweden?"
+            select
+            value={permission}
+            onChange={handlePermissionStatus}
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+          {permission === "yes" && (
+            <>
+              <Field.Text
+                name="negativeDecisionDate"
+                label="Date of Permission?"
+                type="date"
+                required
+                InputLabelProps={{ shrink: true }}
+              />
+            </>
+          )}
+          <Field.Select
+            name="workedFourMonths"
+            label="Did you work for 4 months after the permission?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+
+          <Field.Text
+            name="negativeDecisionDate"
+            label="When did you got the negative decision?"
+            type="date"
+            required
+            InputLabelProps={{ shrink: true }}
+          />
+
+          <Field.Select
+            name="sameCompany"
+            label="Are you still working in the same company for the last 4 months"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+
+          <Field.Select
+            name="permanentContract"
+            label="Do you have permanent job contract?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+
+          <Field.Select
+            name="minimumSalary"
+            label="Is minimum offered salary more than 26560 SEK?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+
+          <Field.Select
+            name="moreThanFiveEmployees"
+            label="Does company have more than 5 employees?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+
+          <Field.Select
+            name="validInsurance"
+            label="Did your company have valid insurance for employees?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+  </>
+) }
+          
+        </>
+      )}
+
+      {category === "STUDENT_WORK_PERMIT" && (
+        <>
+          <Typography variant="subtitle1" sx={{ gridColumn: "1/-1", mt: 2 }}>
+            Student Work Permit
+          </Typography>
+          <Field.Select
+            name="studyingInSweden"
+            label="Are you studying in Sweden and have gotten a job offer?"
+            select
+            value={studyingSweden}
+            onChange={handleStudyingSweden}
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+          {studyingSweden === "yes" && (
+            <>
+              <Field.Select
+                name="degreeCompleted"
+                label="Did you complete your Degree in Sweden?"
+                select
+                native
+                value={completeDegree}
+                onChange={handleCompleteDegreeStatus}
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
+
+              {completeDegree === "no" && (
+                <>
+                  <Field.Select
+                    name="completeDegreeStatus"
+                    label="Did you complete 30 Credits Hours?"
+                    select
+                    native
+                    sx={{ gridColumn: "1/-1" }}
+                    required
+                    InputLabelProps={{ shrink: true }}
+                  >
+                    <option value="">Choose an Option</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                  </Field.Select>
+                </>
+              )}
+              <Field.Select
+                name="jobOffer"
+                label="Did you get the job offer from the company where you are currently working?"
+                select
+                native
+                sx={{ gridColumn: "1/-1" }}
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
+
+              <Field.Select
+                name="minimumSalary"
+                label="Did you get the job offer by a swedish company with minimum salary of 26560 SEK?"
+                select
+                native
+                sx={{ gridColumn: "1/-1" }}
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
+
+              <Field.Select
+                name="jobContract"
+                label="Do you have permanent job contract?"
+                select
+                native
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
+              <Field.Select
+                name="moreThanFiveEmployees"
+                label="Did your company have more than 5 employees?"
+                select
+                native
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
+
+              <Field.Select
+                name="validInsurance"
+                label="Did your company have valid insurance for employees?"
+                select
+                native
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
+
+              <Field.Select
+                name="personNumber"
+                label="Do you have Personnummer or co-ordination number?"
+                select
+                native
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
+            </>
+          )}
+
+          <Field.Select
+            name="inSweden"
+            label="Are you currently working in Sweden?"
+            select
+            value={workingSweden}
+            onChange={handleWorkingSweden}
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+
+          {workingSweden === "yes" && (
+            <>
+              <Field.Text name="companyName" label="Company Name" required />
+              <Field.Text name="yourDesignation" label="Your Designation" required />
+
+              <Field.Text
+                name="startWork"
+                label="Date you start your work"
+                type="date"
+                required
+                InputLabelProps={{ shrink: true }}
+              />
+              <Field.Text
+                name="workPermitIssuedDate"
+                label="Work Permit Issued Date"
+                type="date"
+                required
+                InputLabelProps={{ shrink: true }}
+              />
+              <Field.Text
+                name="workPermitEndDate"
+                label="Work Permit Expiry Date"
+                type="date"
+                required
+                InputLabelProps={{ shrink: true }}
+              />
+            </>
+          )}
+
+          <Field.Select
+            name="firstPermit"
+            label="Is this your first work permit in Sweden?"
+            select
+            value={firstPermit}
+            onChange={handleFirstPermit}
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+          {firstPermit === "no" && (
+            <>
+              <Field.Select
+                name="companyTwoYears"
+                label="Did you work in the same company for first 2 years?"
+                select
+                native
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
+
+              <Field.Select
+                name="ictTransfer"
+                label="Did you permit was ICT(Intra-Corporate Transfer)?"
+                select
+                native
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
+              <Field.Select
+                name="currentJobinSweden"
+                label="Do you currently have job offer in Sweden?"
+                select
+                native
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
+
+              <Field.Select
+                name="looseJob"
+                label="Did you already lose your job?"
+                select
+                native
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
+
+              <Field.Select
+                name="noticeTermination"
+                label="Did you get the notice of termination?"
+                select
+                native
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
+
+              <Field.Select
+                name="anotherJobOffer"
+                label="Do you currently have any other job offer?"
+                select
+                native
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
+
+              <Field.Select
+                name="selfEmployedStatus"
+                label="Are you looking to switch to Self-Employed?"
+                select
+                native
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
+              <Field.Text
+                name="moreDetail"
+                label=" Provide us more Details here"
+                required
+                sx={{ gridColumn: "1/-1" }}
+              />
+            </>
+          )}
+        </>
+      )}
+
+      {category === "EU_LONG_TERM" && (
+        <>
+          <Typography variant="subtitle1" sx={{ gridColumn: "1/-1", mt: 2 }}>
+            EU Long Term Visa
+          </Typography>
+          <Field.Select
+            name="EUcitizenship"
+            label="Citizenship"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="australia">Australia</option>
+            <option value="other">Other</option>
+          </Field.Select>
+
+          <Field.Select
+            name="permanentResidence"
+            label="Do you have permanent Residence permit from below mentioned countries?"
+            select
+            native
+            sx={{ gridColumn: "1/-1" }}
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="lithuania">Lithuania</option>
+            <option value="other">Other</option>
+          </Field.Select>
+
+          <Field.Select
+            name="startBusiness"
+            label="Are you willing to start your own business in Sweden?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+
+          <Field.Select
+            name="jobOfferSweden"
+            label="Do you have job offer in Sweden?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+
+          <Field.Select
+            name="assets"
+            label="Do you have Assets/Saving?"
+            select
+            value={assetStatus}
+            onChange={handleAssetStatus}
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+          {assetStatus === "yes" && (
+            <>
+              <Field.Select
+                name="worth"
+                label="Worht of Asset?"
+                select
+                native
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="25-29">25000 To 29000 SEK</option>
+                <option value="30-35">30000 To 35000 SEK</option>
+              </Field.Select>
+            </>
+          )}
+        </>
+      )}
     </Box>
   )
 
@@ -397,20 +1160,9 @@ export default function WorkPermitForm() {
         select
         native
         required
-        InputLabelProps={{ shrink: true }}      >
-        <option value="">Choose an Option</option>
-        <option value="yes">Yes</option>
-        <option value="no">No</option>
-      </Field.Select>
-
-
-      <Field.Select
-        name="minimumSalary"
-        label="Did you get the job offer by a swedish company with minimum salary of 27550 SEK?"
-        select
-        native
-        required
         InputLabelProps={{ shrink: true }}
+        onChange={handleOutsideSwedenChange}
+        value={outsideSweden}
         sx={{ gridColumn: "1/-1" }}
       >
         <option value="">Choose an Option</option>
@@ -418,65 +1170,239 @@ export default function WorkPermitForm() {
         <option value="no">No</option>
       </Field.Select>
 
+      {outsideSweden === "yes" && (
+        <>
+          <Field.Select
+            name="citizenship"
+            label="Citizenship"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="uae">UAE</option>
+            <option value="USA">USA</option>
+          </Field.Select>
+
+          <Field.Select
+            name="residence"
+            label="Country of Residence"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="uae">UAE</option>
+            <option value="USA">USA</option>
+          </Field.Select>
+
+          <Field.Select
+            name="minimumSalary"
+            label="Did you get the job offer by a swedish company with minimum salary of 27550 SEK?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+            sx={{ gridColumn: "1/-1" }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+
+          <Field.Select
+            name="moreThanFiveEmployees"
+            label="Did your company have more than 5 employees?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+
+          <Field.Select
+            name="validInsurance"
+            label="Did your company have valid insurance for employees?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+
+          <Field.Select
+            name="sameCompany"
+            label="Are you working for the same company branch office in your country of residence?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+            sx={{ gridColumn: "1/-1" }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+
+          <Field.Select
+            name="workinSweden"
+            label="Did you work in Sweden before?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+            sx={{ gridColumn: "1/-1" }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+
+          <Field.Text name="companyName" label="Company Name" required InputLabelProps={{ shrink: true }} />
+
+          <Field.Text
+            name="jobStartDate"
+            label="Job Start Date"
+            type="date"
+            required
+            InputLabelProps={{ shrink: true }}
+          />
+
+          <Field.Text name="jobEndDate" label="Job End Date" type="date" required InputLabelProps={{ shrink: true }} />
+
+          <Field.Select
+            name="schengenVisa"
+            label="Do you currently have any Schengen visa or any kind of residence permit of any Schengen states?"
+            select
+            native
+            required
+            sx={{ gridColumn: "1/-1" }}
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+
+          <Field.Text name="issueCountry" label="Issue Country" required InputLabelProps={{ shrink: true }} />
+
+          <Field.Text name="visaType" label="Type of Visa/Permit" required InputLabelProps={{ shrink: true }} />
+
+          <Field.Text
+            name="visaExpiryDate"
+            label="Expiry Date"
+            type="date"
+            required
+            InputLabelProps={{ shrink: true }}
+          />
+
+          <Field.Select
+            name="withFamily"
+            label="Do you want to move along with your family?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+
+          <Field.Text
+            name="additionalInfo"
+            label="You can provide us more details about your duration of stay in that country:"
+            multiline
+            rows={3}
+            sx={{ gridColumn: "1/-1" }}
+          />
+        </>
+      )}
       <Field.Select
-        name="moreThanFiveEmployees"
-        label="Did your company have more than 5 employees?"
+        name="workinSweden"
+        label="Did you work in Sweden before?"
         select
         native
         required
+        onChange={handleWorkinSweden}
+        value={workinSweden}
         InputLabelProps={{ shrink: true }}
-      >
-        <option value="">Choose an Option</option>
-        <option value="yes">Yes</option>
-        <option value="no">No</option>
-      </Field.Select>
-
-      <Field.Select
-        name="validInsurance"
-        label="Did your company have valid insurance for employees?"
-        select
-        native
-        required
-        InputLabelProps={{ shrink: true }}
-      >
-        <option value="">Choose an Option</option>
-        <option value="yes">Yes</option>
-        <option value="no">No</option>
-      </Field.Select>
-
-      <Field.Text name="companyName" label="Company Name" required InputLabelProps={{ shrink: true }} />
-
-      <Field.Text name="jobStartDate" label="Job Start Date" type="date" required InputLabelProps={{ shrink: true }} />
-
-      <Field.Text name="jobEndDate" label="Job End Date" type="date" required InputLabelProps={{ shrink: true }} />
-
-      <Field.Select
-        name="schengenVisa"
-        label="Do you currently have any Schengen visa or any kind of residence permit of any Schengen states?"
-        select
-        native
-        required
         sx={{ gridColumn: "1/-1" }}
-        InputLabelProps={{ shrink: true }}
       >
         <option value="">Choose an Option</option>
         <option value="yes">Yes</option>
         <option value="no">No</option>
       </Field.Select>
+      {workinSweden === "yes" && (
+        <>
+          <Field.Text name="companyName" label="Company Name" required InputLabelProps={{ shrink: true }} />
 
-      <Field.Text name="issueCountry" label="Issue Country" required InputLabelProps={{ shrink: true }} />
+          <Field.Text
+            name="jobStartDate"
+            label="Job Start Date"
+            type="date"
+            required
+            InputLabelProps={{ shrink: true }}
+          />
 
-      <Field.Text name="visaType" label="Type of Visa/Permit" required InputLabelProps={{ shrink: true }} />
+          <Field.Text name="jobEndDate" label="Job End Date" type="date" required InputLabelProps={{ shrink: true }} />
 
-      <Field.Text name="visaExpiryDate" label="Expiry Date" type="date" required InputLabelProps={{ shrink: true }} />
+          <Field.Select
+            name="schengenVisa"
+            label="Do you currently have any Schengen visa or any kind of residence permit of any Schengen states?"
+            select
+            native
+            required
+            sx={{ gridColumn: "1/-1" }}
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
 
-      <Field.Text
-        name="additionalInfo"
-        label="You can provide us more details about your duration of stay in that country:"
-        multiline
-        rows={3}
-        sx={{ gridColumn: "1/-1" }}
-      />
+          <Field.Text name="issueCountry" label="Issue Country" required InputLabelProps={{ shrink: true }} />
+
+          <Field.Text name="visaType" label="Type of Visa/Permit" required InputLabelProps={{ shrink: true }} />
+
+          <Field.Text
+            name="visaExpiryDate"
+            label="Expiry Date"
+            type="date"
+            required
+            InputLabelProps={{ shrink: true }}
+          />
+
+          <Field.Select
+            name="withFamily"
+            label="Do you want to move along with your family?"
+            select
+            native
+            required
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="">Choose an Option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Field.Select>
+
+          <Field.Text
+            name="additionalInfo"
+            label="You can provide us more details about your duration of stay in that country:"
+            multiline
+            rows={3}
+            sx={{ gridColumn: "1/-1" }}
+          />
+        </>
+      )}
     </Box>
   )
 
@@ -491,25 +1417,13 @@ export default function WorkPermitForm() {
       }}
     >
       <Field.Select
-        name="moveWithFamily"
-        label="Do you want to move along with your family?"
-        select
-        native
-        required
-        InputLabelProps={{ shrink: true }}
-        sx={{ gridColumn: "1/-1" }}
-      >
-        <option value="">Choose an Option</option>
-        <option value="yes">Yes</option>
-        <option value="no">No</option>
-      </Field.Select>
-
-      <Field.Select
         name="sufficientSavings"
         label="Do you have savings or assets in case if your salary is lower than requirements?"
         select
         native
         required
+        onChange={handleSufficientSalary}
+        value={sufficientSalary}
         InputLabelProps={{ shrink: true }}
         sx={{ gridColumn: "1/-1" }}
       >
@@ -517,24 +1431,32 @@ export default function WorkPermitForm() {
         <option value="yes">Yes</option>
         <option value="no">No</option>
       </Field.Select>
-
-      <FormControlLabel
-        control={<Checkbox name="200k" />}
-        label="200.000 SEK for applicant"
-        sx={{ gridColumn: "1/-1" }}
-      />
-      <FormControlLabel control={<Checkbox name="100k" />} label="100.000 SEK for spouse" sx={{ gridColumn: "1/-1" }} />
-      <FormControlLabel
-        control={<Checkbox name="50k" />}
-        label="50.000 SEK for each accompanying Child"
-        sx={{ gridColumn: "1/-1" }}
-      />
-
+      {sufficientSalary === "yes" && (
+        <>
+          <FormControlLabel
+            control={<Checkbox name="200k" />}
+            label="200.000 SEK for applicant"
+            sx={{ gridColumn: "1/-1" }}
+          />
+          <FormControlLabel
+            control={<Checkbox name="100k" />}
+            label="100.000 SEK for spouse"
+            sx={{ gridColumn: "1/-1" }}
+          />
+          <FormControlLabel
+            control={<Checkbox name="50k" />}
+            label="50.000 SEK for each accompanying Child"
+            sx={{ gridColumn: "1/-1" }}
+          />
+        </>
+      )}
       <Field.Select
         name="applied"
         label="Have you applied any sort of Schengen visa or residence permit in past 2 years and got rejected?"
         select
         native
+        onChange={handleAppliedForVisa}
+        value={appliedForVisa}
         required
         InputLabelProps={{ shrink: true }}
         sx={{ gridColumn: "1/-1" }}
@@ -543,22 +1465,25 @@ export default function WorkPermitForm() {
         <option value="yes">Yes</option>
         <option value="no">No</option>
       </Field.Select>
+      {appliedForVisa === "yes" && (
+        <>
+          <Field.Select name="country" label="Country" select native required InputLabelProps={{ shrink: true }}>
+            <option value="">Country</option>
+            <option value="uae">UAE</option>
+            <option value="USA">USA</option>
+          </Field.Select>
 
-      <Field.Select name="country" label="Country" select native required InputLabelProps={{ shrink: true }}>
-        <option value="">Country</option>
-        <option value="uae">UAE</option>
-        <option value="USA">USA</option>
-      </Field.Select>
+          <Field.Text
+            name="DateApp"
+            label="Mon/Year of Application"
+            type="date"
+            required
+            InputLabelProps={{ shrink: true }}
+          />
 
-      <Field.Text
-        name="DateApp"
-        label="Mon/Year of Application"
-        type="date"
-        required
-        InputLabelProps={{ shrink: true }}
-      />
-
-      <Field.Text name="rejection" label="Reason for rejection" multiline rows={3} sx={{ gridColumn: "1/-1" }} />
+          <Field.Text name="rejection" label="Reason for rejection" multiline rows={3} sx={{ gridColumn: "1/-1" }} />
+        </>
+      )}
     </Box>
   )
 
@@ -568,8 +1493,6 @@ export default function WorkPermitForm() {
         return renderPersonalDetails()
       case "categories":
         return renderCategories()
-      case "experience":
-        return renderExperience()
       case "residence":
         return renderResidence()
       case "family":
@@ -613,14 +1536,15 @@ export default function WorkPermitForm() {
                     Previous
                   </LoadingButton>
                 )}
-                <LoadingButton
-                  type={isLastSection ? "submit" : "button"}
-                  variant="contained"
-                  loading={isSubmitting}
-                  onClick={isLastSection ? undefined : handleNext}
-                >
-                  {isLastSection ? "Submit" : "Next"}
-                </LoadingButton>
+                {currentSection === "personal" || (category === "WORK_PERMIT_OUTSIDE" && !isLastSection) ? (
+                  <LoadingButton type="button" variant="contained" onClick={handleNext}>
+                    Next
+                  </LoadingButton>
+                ) : (
+                  <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
+                    Submit
+                  </LoadingButton>
+                )}
               </Box>
             </Stack>
           </Card>
