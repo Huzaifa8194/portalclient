@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
 
-import { PostListView } from 'src/sections/blog/view';
+import { PostListView } from 'src/sections/attorney/view';
 
 // ----------------------------------------------------------------------
 
