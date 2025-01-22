@@ -3,12 +3,10 @@ import { CONFIG } from "src/config-global"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Box, Card, Stack, Grid, MenuItem, Typography, TextField, Button, Container } from "@mui/material"
+import { Box, Card, Stack, Grid, Typography, Button, Container } from "@mui/material"
 import { LoadingButton } from "@mui/lab"
 import { DashboardContent } from "src/layouts/dashboard"
 import { _bankingCreditCard } from "src/_mock"
-
-import { Iconify } from "src/components/iconify/iconify"
 
 import { MoneyForm } from "./money-form"
 import { CreditCard } from "./credit-card"
@@ -23,8 +21,8 @@ const schema = z.object({
   fromCountry: z.string().min(1, "From Country is required"),
   toCountry: z.string().min(1, "To Country is required"),
   isHomeCountry: z.string().min(1, "This field is required"),
-  fromCurrency: z.string().min(1, "From Currency is required"),
-  toCurrency: z.string().min(1, "To Currency is required"),
+  fromCurrencies: z.array(z.string()).min(1, "At least one From Currency is required"),
+  toCurrencies: z.array(z.string()).min(1, "At least one To Currency is required"),
   hasDocuments: z.string().min(1, "This field is required"),
   canVerifySavings: z.string().min(1, "This field is required"),
   isEmployed: z.string().min(1, "This field is required"),
@@ -45,8 +43,8 @@ export default function PostNewEditForm() {
       fromCountry: "",
       toCountry: "",
       isHomeCountry: "",
-      fromCurrency: "",
-      toCurrency: "",
+      fromCurrencies: [],
+      toCurrencies: [],
       hasDocuments: "",
       canVerifySavings: "",
       isEmployed: "",
@@ -64,6 +62,7 @@ export default function PostNewEditForm() {
     control,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues,
@@ -114,6 +113,8 @@ export default function PostNewEditForm() {
                   showBannedWarning={showBannedWarning}
                   allCountries={allCountries}
                   currencies={currencies}
+                  watch={watch}
+                  setValue={setValue}
                 />
                 <Stack
                   direction="row"

@@ -5,7 +5,7 @@ import { useParams } from 'src/routes/hooks';
 import { CONFIG } from 'src/config-global';
 import { useGetPost } from 'src/actions/blog';
 
-import { PostDetailsView } from 'src/sections/blog/view';
+import { PostDetailsView } from 'src/sections/attorney/view';
 
 // ----------------------------------------------------------------------
 
