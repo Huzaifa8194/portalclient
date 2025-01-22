@@ -6,7 +6,7 @@ import { PostCreateView } from 'src/sections/attorney/view';
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `Create a new post | Dashboard - ${CONFIG.appName}` };
+const metadata = { title: `Power of Attorney | Dashboard - ${CONFIG.appName}` };
 
 export default function Page() {
   return (

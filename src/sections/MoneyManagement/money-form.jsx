@@ -1,15 +1,71 @@
 import React from "react"
 import { Controller } from "react-hook-form"
-import { Box, Alert, MenuItem, TextField } from "@mui/material"
+import { Box, Alert, MenuItem, TextField, Autocomplete, Chip } from "@mui/material"
 import { FlagIcon } from "src/components/iconify"
 import { countryCodeMapping } from "src/_mock/country"
 
-export function MoneyForm({ control, errors, showHighRiskWarning, showBannedWarning, allCountries, currencies }) {
+export function MoneyForm({ control, errors, showHighRiskWarning, showBannedWarning, allCountries, currencies, watch, setValue }) {
+  const CurrencySelect = ({ name, label, error }) => {
+    const values = watch(name) || []
+    
+    return (
+      <Controller
+        name={name}
+        control={control}
+        render={({ field }) => (
+          <Autocomplete
+            {...field}
+            multiple
+            options={currencies}
+            value={values}
+            onChange={(_, newValue) => {
+              setValue(name, newValue, { shouldValidate: true })
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label={label}
+                error={!!error}
+                helperText={error?.message}
+                fullWidth
+                sx={{ "& .MuiInputBase-root": { height: "auto", minHeight: "56px" } }}
+              />
+            )}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Chip
+                  key={option}
+                  label={option}
+                  {...getTagProps({ index })}
+                  sx={{
+                    bgcolor: 'success.light',
+                    color: 'success.contrastText',
+                    '& .MuiChip-deleteIcon': {
+                      color: 'success.contrastText',
+                      opacity: 0.7,
+                      '&:hover': {
+                        opacity: 1,
+                      },
+                    },
+                  }}
+                />
+              ))
+            }
+            sx={{
+              width: "100%",
+              mb: 3,
+            }}
+          />
+        )}
+      />
+    )
+  }
+
   return (
     <Box
       sx={{
         display: "grid",
-        gap: 4,
+        gap: 3,
         gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" },
       }}
     >
@@ -92,6 +148,7 @@ export function MoneyForm({ control, errors, showHighRiskWarning, showBannedWarn
             sx={{
               "& .MuiInputBase-root": { height: "56px" },
               gridColumn: { xs: "1", md: "1 / -1" },
+              
             }}
           >
             <MenuItem value="yes">Yes</MenuItem>
@@ -100,49 +157,21 @@ export function MoneyForm({ control, errors, showHighRiskWarning, showBannedWarn
         )}
       />
 
-      <Controller
-        name="fromCurrency"
-        control={control}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            label="From Currency"
-            select
-            error={!!errors.fromCurrency}
-            helperText={errors.fromCurrency?.message}
-            fullWidth
-            sx={{ "& .MuiInputBase-root": { height: "56px" } }}
-          >
-            {currencies.map((currency) => (
-              <MenuItem key={currency} value={currency}>
-                {currency}
-              </MenuItem>
-            ))}
-          </TextField>
-        )}
-      />
+      <Box sx={{ gridColumn: "1 / -1" , mb: -3}}>
+        <CurrencySelect
+          name="fromCurrencies"
+          label="From Currency"
+          error={errors.fromCurrencies}
+        />
+      </Box>
 
-      <Controller
-        name="toCurrency"
-        control={control}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            label="To Currency"
-            select
-            error={!!errors.toCurrency}
-            helperText={errors.toCurrency?.message}
-            fullWidth
-            sx={{ "& .MuiInputBase-root": { height: "56px" } }}
-          >
-            {currencies.map((currency) => (
-              <MenuItem key={currency} value={currency}>
-                {currency}
-              </MenuItem>
-            ))}
-          </TextField>
-        )}
-      />
+      <Box sx={{ gridColumn: "1 / -1" ,mb: -3}}>
+        <CurrencySelect
+          name="toCurrencies"
+          label="To Currency"
+          error={errors.toCurrencies}
+        />
+      </Box>
 
       <Controller
         name="hasDocuments"
@@ -338,4 +367,3 @@ export function MoneyForm({ control, errors, showHighRiskWarning, showBannedWarn
     </Box>
   )
 }
-
