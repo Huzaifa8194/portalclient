@@ -106,9 +106,14 @@ const FormSchema = z.object({
   yourDesignation: z.string().optional(),
 })
 
-export default function WorkPermitForm() {
+function WorkPermitForm() {
   // Section management
-  const sections = ["personal", "categories", "residence", "family"]
+  const sections = [
+    { id: "personal", name: "Personal Details" },
+    { id: "categories", name: "Work Permit Categories" },
+    { id: "residence", name: "Residence and Work Permit" },
+    { id: "family", name: "Family Application" },
+  ]
 
   const [currentSection, setCurrentSection] = useState("personal")
   const [jobExperience, setJobExperience] = useState("")
@@ -124,7 +129,6 @@ export default function WorkPermitForm() {
   const [firstPermit, setFirstPermit] = useState("")
   const [assetStatus, setAssetStatus] = useState("")
   const [AyslumWorkedInSweden, setAyslumWorkedInSweden] = useState("")
-
 
   const handleAyslumWorkedInSweden = (e) => {
     setAyslumWorkedInSweden(e.target.value)
@@ -253,12 +257,14 @@ export default function WorkPermitForm() {
   const methods = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues,
+    mode: "onChange", // Enable real-time validation
   })
 
   const {
     handleSubmit,
     watch,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors },
+    trigger,
   } = methods
 
   const category = watch("category")
@@ -272,18 +278,20 @@ export default function WorkPermitForm() {
     }
   })
 
-  const getSectionTitle = (section) => {
+  const getSectionTitle = (section) => sections.find((s) => s.id === section)?.name || ""
+
+  const getFieldsForSection = (section) => {
     switch (section) {
       case "personal":
-        return "Personal Details"
+        return ["fullName", "email", "phone"]
       case "categories":
-        return "Work Permit Categories"
+        return ["category"]
       case "residence":
-        return "Residence and Work Permit"
+        return ["outsideSweden"]
       case "family":
-        return "Are You Applying for your family?"
+        return ["sufficientSavings"]
       default:
-        return ""
+        return []
     }
   }
 
@@ -434,7 +442,7 @@ export default function WorkPermitForm() {
           {single === "no" && (
             <Field.Select
               name="accompanyFamily"
-              label="Do you have any accompanying family members, like partner, childrens?"
+              label="Do you have any accompanying family members, like partner, children?"
               select
               sx={{ gridColumn: "1/-1" }}
               native
@@ -565,7 +573,7 @@ export default function WorkPermitForm() {
 
           <Field.Select
             name="supportMoney"
-            label="Do you have money so that you can support yourself during the first year in Sweden (atleast 15000 SEK) ?"
+            label="Do you have money so that you can support yourself during the first year in Sweden (at least 15000 SEK)?"
             select
             native
             required
@@ -625,135 +633,134 @@ export default function WorkPermitForm() {
             <option value="yes">Yes</option>
             <option value="no">No</option>
           </Field.Select>
-{AyslumWorkedInSweden === "no" && (
-  <>
-  <Field.Select
-            name="asylumRefused"
-            label="Did Your asylum case has been refused and you want to apply for work permit?"
-            select
-            native
-            required
-            sx={{ gridColumn: "1/-1" }}
-            InputLabelProps={{ shrink: true }}
-          >
-            <option value="">Choose an Option</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </Field.Select>
-
-          <Field.Select
-            name="workPermission"
-            label="Did you get the permission of work in Sweden?"
-            select
-            value={permission}
-            onChange={handlePermissionStatus}
-            native
-            required
-            InputLabelProps={{ shrink: true }}
-          >
-            <option value="">Choose an Option</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </Field.Select>
-          {permission === "yes" && (
+          {AyslumWorkedInSweden === "no" && (
             <>
+              <Field.Select
+                name="asylumRefused"
+                label="Did Your asylum case has been refused and you want to apply for work permit?"
+                select
+                native
+                required
+                sx={{ gridColumn: "1/-1" }}
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
+
+              <Field.Select
+                name="workPermission"
+                label="Did you get the permission of work in Sweden?"
+                select
+                value={permission}
+                onChange={handlePermissionStatus}
+                native
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
+              {permission === "yes" && (
+                <>
+                  <Field.Text
+                    name="negativeDecisionDate"
+                    label="Date of Permission?"
+                    type="date"
+                    required
+                    InputLabelProps={{ shrink: true }}
+                  />
+                </>
+              )}
+              <Field.Select
+                name="workedFourMonths"
+                label="Did you work for 4 months after the permission?"
+                select
+                native
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
+
               <Field.Text
                 name="negativeDecisionDate"
-                label="Date of Permission?"
+                label="When did you got the negative decision?"
                 type="date"
                 required
                 InputLabelProps={{ shrink: true }}
               />
+
+              <Field.Select
+                name="sameCompany"
+                label="Are you still working in the same company for the last 4 months"
+                select
+                native
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
+
+              <Field.Select
+                name="permanentContract"
+                label="Do you have permanent job contract?"
+                select
+                native
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
+
+              <Field.Select
+                name="minimumSalary"
+                label="Is minimum offered salary more than 26560 SEK?"
+                select
+                native
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
+
+              <Field.Select
+                name="moreThanFiveEmployees"
+                label="Does company have more than 5 employees?"
+                select
+                native
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
+
+              <Field.Select
+                name="validInsurance"
+                label="Did your company have valid insurance for employees?"
+                select
+                native
+                required
+                InputLabelProps={{ shrink: true }}
+              >
+                <option value="">Choose an Option</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </Field.Select>
             </>
           )}
-          <Field.Select
-            name="workedFourMonths"
-            label="Did you work for 4 months after the permission?"
-            select
-            native
-            required
-            InputLabelProps={{ shrink: true }}
-          >
-            <option value="">Choose an Option</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </Field.Select>
-
-          <Field.Text
-            name="negativeDecisionDate"
-            label="When did you got the negative decision?"
-            type="date"
-            required
-            InputLabelProps={{ shrink: true }}
-          />
-
-          <Field.Select
-            name="sameCompany"
-            label="Are you still working in the same company for the last 4 months"
-            select
-            native
-            required
-            InputLabelProps={{ shrink: true }}
-          >
-            <option value="">Choose an Option</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </Field.Select>
-
-          <Field.Select
-            name="permanentContract"
-            label="Do you have permanent job contract?"
-            select
-            native
-            required
-            InputLabelProps={{ shrink: true }}
-          >
-            <option value="">Choose an Option</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </Field.Select>
-
-          <Field.Select
-            name="minimumSalary"
-            label="Is minimum offered salary more than 26560 SEK?"
-            select
-            native
-            required
-            InputLabelProps={{ shrink: true }}
-          >
-            <option value="">Choose an Option</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </Field.Select>
-
-          <Field.Select
-            name="moreThanFiveEmployees"
-            label="Does company have more than 5 employees?"
-            select
-            native
-            required
-            InputLabelProps={{ shrink: true }}
-          >
-            <option value="">Choose an Option</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </Field.Select>
-
-          <Field.Select
-            name="validInsurance"
-            label="Did your company have valid insurance for employees?"
-            select
-            native
-            required
-            InputLabelProps={{ shrink: true }}
-          >
-            <option value="">Choose an Option</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </Field.Select>
-  </>
-) }
-          
         </>
       )}
 
@@ -1030,7 +1037,7 @@ export default function WorkPermitForm() {
 
               <Field.Select
                 name="selfEmployedStatus"
-                label="Are you looking to switch to Self-Employed?"
+                label="Are you looking to switchto Self-Employed?"
                 select
                 native
                 required
@@ -1502,20 +1509,57 @@ export default function WorkPermitForm() {
     }
   }
 
-  const currentSectionIndex = sections.indexOf(currentSection)
+  const currentSectionIndex = sections.findIndex((section) => section.id === currentSection)
   const isFirstSection = currentSectionIndex === 0
   const isLastSection = currentSectionIndex === sections.length - 1
 
-  const handleNext = () => {
-    if (!isLastSection) {
-      setCurrentSection(sections[currentSectionIndex + 1])
+  const handleNext = async () => {
+    const isValid = await isCurrentSectionValid()
+    if (isValid && !isLastSection) {
+      setCurrentSection(sections[currentSectionIndex + 1].id)
     }
   }
 
   const handlePrevious = () => {
     if (!isFirstSection) {
-      setCurrentSection(sections[currentSectionIndex - 1])
+      setCurrentSection(sections[currentSectionIndex - 1].id)
     }
+  }
+
+  const isCurrentSectionValid = async () => {
+    let fieldsToValidate = []
+
+    switch (currentSection) {
+      case "personal":
+        fieldsToValidate = ["fullName", "email", "phone"]
+        break
+      case "categories":
+        fieldsToValidate = ["category"]
+        if (category === "WORK_PERMIT_OUTSIDE") {
+          fieldsToValidate.push("educationLevel", "educationalCertificate")
+          if (jobExperience === "yes") {
+            fieldsToValidate.push("totalExperience", "experienceCertificate")
+          }
+        }
+        break
+      case "residence":
+        fieldsToValidate = ["outsideSweden"]
+        if (outsideSweden === "yes") {
+          fieldsToValidate.push("citizenship", "residence", "minimumSalary", "moreThanFiveEmployees", "validInsurance")
+        }
+        break
+      case "family":
+        fieldsToValidate = ["sufficientSavings"]
+        if (appliedForVisa === "yes") {
+          fieldsToValidate.push("country", "DateApp")
+        }
+        break
+      default:
+        break
+    }
+
+    const result = await trigger(fieldsToValidate)
+    return result
   }
 
   return (
@@ -1523,6 +1567,85 @@ export default function WorkPermitForm() {
       <Grid container spacing={3}>
         <Grid xs={12} md={12}>
           <Card sx={{ p: 3 }}>
+            {/* Progress Bar */}
+            <Box sx={{ mb: 4 }}>
+              <Box
+                sx={{
+                  position: "relative",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  width: "100%",
+                  mb: 2,
+                }}
+              >
+                {sections.map((section, index) => {
+                  const isActive = sections.findIndex((s) => s.id === currentSection) >= index
+                  return (
+                    <React.Fragment key={section.id}>
+                      <Box
+                        sx={{
+                          position: "relative",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: 1,
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: "50%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: isActive ? "#00A76F" : "#919EAB",
+                            color: "#fff",
+                            fontWeight: "bold",
+                            zIndex: 1,
+                          }}
+                        >
+                          {index + 1}
+                        </Box>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: isActive ? "#00A76F" : "#919EAB",
+                            textAlign: "center",
+                          }}
+                        >
+                          {section.name}
+                        </Typography>
+                      </Box>
+                      {index < sections.length - 1 && (
+                        <Box
+                          sx={{
+                            position: "relative",
+                            flex: 1,
+                            height: 2,
+                            backgroundColor: "#919EAB",
+                            alignSelf: "start",
+                            mt: 2.5,
+                            "&::before": {
+                              content: '""',
+                              position: "absolute",
+                              left: 0,
+                              top: 0,
+                              height: "100%",
+                              width: isActive ? "100%" : "0%",
+                              backgroundColor: "#00A76F",
+                              transition: "width 0.3s ease",
+                            },
+                          }}
+                        />
+                      )}
+                    </React.Fragment>
+                  )
+                })}
+              </Box>
+            </Box>
+
             <Typography variant="h6" sx={{ mb: 3 }}>
               {getSectionTitle(currentSection)}
             </Typography>
@@ -1536,12 +1659,25 @@ export default function WorkPermitForm() {
                     Previous
                   </LoadingButton>
                 )}
-                {currentSection === "personal" || (category === "WORK_PERMIT_OUTSIDE" && !isLastSection) ? (
-                  <LoadingButton type="button" variant="contained" onClick={handleNext}>
+                {!isLastSection ? (
+                  <LoadingButton
+                    type="button"
+                    variant="contained"
+                    onClick={handleNext}
+                    disabled={Object.keys(errors).some((key) => {
+                      const fieldsInCurrentSection = getFieldsForSection(currentSection)
+                      return fieldsInCurrentSection.includes(key)
+                    })}
+                  >
                     Next
                   </LoadingButton>
                 ) : (
-                  <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
+                  <LoadingButton
+                    type="submit"
+                    variant="contained"
+                    loading={isSubmitting}
+                    disabled={Object.keys(errors).length > 0}
+                  >
                     Submit
                   </LoadingButton>
                 )}
@@ -1553,4 +1689,6 @@ export default function WorkPermitForm() {
     </Form>
   )
 }
+
+export default WorkPermitForm
 
