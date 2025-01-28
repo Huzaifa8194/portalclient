@@ -117,7 +117,12 @@ export const paths = {
     studentVisa:`${ROOTS.DASHBOARD}/student-visa`,
     visitVisa:`${ROOTS.DASHBOARD}/visit-visa`,
     workPermit:`${ROOTS.DASHBOARD}/work-visa`,
+    immigrationEvisa:`${ROOTS.DASHBOARD}/immigration-Evisa`,
+    immigrationEvisaInfo:`${ROOTS.DASHBOARD}/immigration-Evisa-info`,
 
+    globalEvisa:`${ROOTS.DASHBOARD}/immigration-global-Evisa`,
+    globalEvisaInfo:`${ROOTS.DASHBOARD}/immigration-global-Evisa-info`,
+    globalServices:`${ROOTS.DASHBOARD}/global-services`,
     petRelocation: `${ROOTS.DASHBOARD}/pet-relocation`,
     logisticsSolution: `${ROOTS.DASHBOARD}/logistics-solution`,
     moneyManagement: `${ROOTS.DASHBOARD}/money-management`,

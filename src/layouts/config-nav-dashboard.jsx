@@ -44,7 +44,54 @@ const ICONS = {
 export const navData = [
   /* Management
   */
- {
+//  {
+//    subheader: 'Management',
+//    items: [
+
+//      {
+//        title: 'Profile',
+//        path: paths.dashboard.user.root,
+//        icon: ICONS.user,
+//        children: [
+//          { title: 'Profile', path: paths.dashboard.user.account },
+//          { title: 'Co-Applicant', path: paths.dashboard.job.root },
+
+
+//        ],
+//      },
+//      {
+//       title: 'Appointment',
+//       path: paths.dashboard.post.root,
+//       icon: ICONS.blog,
+//       children: [
+
+
+//         { title: 'Book An Appointment', path: paths.dashboard.post.new },
+//         { title: 'Manage Appointments', path: paths.dashboard.user.list },
+//       ],
+//     },
+//     {
+//       title: 'Documents',
+//       path: paths.dashboard.order.root,
+//       icon: ICONS.order,
+//       children: [
+//         { title: 'All Documents', path: paths.dashboard.order.root },
+//         { title: 'Upload Documents', path: paths.dashboard.product.new },
+//       ],
+//     },
+//     { title: 'Invoices (Faktura)', path: paths.dashboard.invoice.root, icon: ICONS.order },
+
+//      { title: 'Messages', path: paths.dashboard.chat, icon: ICONS.chat },
+//      { title: 'Application Status', path: paths.dashboard.general.analytics, icon: ICONS.calendar },
+
+
+
+//      { title: 'Assessments', path: paths.dashboard.assessment, icon: ICONS.calendar },
+//      { title: 'Lawyers', path: paths.dashboard.lawyers, icon: ICONS.calendar },
+
+//    ],
+//  },
+  {
    subheader: 'Management',
    items: [
 
@@ -91,7 +138,6 @@ export const navData = [
 
    ],
  },
- 
   /**
    * Overview
    */
@@ -131,6 +177,36 @@ export const navData = [
   /**
    * Item State
    */
+  {
+    subheader: 'Immigration Services',
+    items: [
+ 
+      {
+        title: 'E-Visa',
+        path: paths.dashboard.user.root,
+        icon: ICONS.user,
+        children: [
+          { title: 'Info', path: paths.dashboard.immigrationEvisaInfo },
+          { title: 'Apply for Visa', path: paths.dashboard.immigrationEvisa },
+ 
+ 
+        ],
+      },
+      {
+       title: 'Global Services',
+       path: paths.dashboard.post.root,
+       icon: ICONS.blog,
+       children: [
+ 
+ 
+         { title: 'Info', path: paths.dashboard.globalEvisaInfo },
+         { title: 'Global Services', path: paths.dashboard.globalEvisa },
+
+       ],
+     },
+ 
+    ],
+  },
   {
     subheader: 'Additional Features',
     items: [

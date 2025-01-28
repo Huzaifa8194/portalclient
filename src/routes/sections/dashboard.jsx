@@ -124,8 +124,11 @@ const LongTermEU= lazy(() => import('src/pages/dashboard/LongTermEUStatus/new'))
 const StudentVisa= lazy(() => import('src/pages/dashboard/StudentVisa/new'));
 const VisitVisa= lazy(() => import('src/pages/dashboard/VisitVisa/new'));
 const WorkPermit= lazy(() => import('src/pages/dashboard/WorkPermit/new'));
-
-
+const ImmigrationEvisa= lazy(() => import('src/pages/dashboard/immigrationEvisa/index'));
+const GlobalServiceVisa= lazy(() => import('src/pages/dashboard/globalServices/index'));
+const ImmigrationEvisaInfo =lazy(() => import('src/pages/dashboard/ImmigrationEVisaInfo/index'));
+const GlobalImmigrationEvisaInfo =lazy(() => import('src/pages/dashboard/globalInfo/index'));
+const GlobalImmigrationEvisa =lazy(() => import('src/pages/dashboard/globalServices/index'));
 
 
 
@@ -239,6 +242,13 @@ export const dashboardRoutes = [
       { path: 'e-visa', element: < EVisa />},
       { path: 'embassy-files', element: < EmbassyFile />},
       { path: 'global-visa', element: < GlobalVisa />},
+      { path: 'global-services', element: < GlobalServiceVisa />},
+      { path: 'immigration-Evisa', element: < ImmigrationEvisa />},
+      { path: 'immigration-Evisa-info', element: < ImmigrationEvisaInfo />},
+
+      { path: 'immigration-global-Evisa', element: < GlobalImmigrationEvisa />},
+      { path: 'immigration-global-Evisa-info', element: < GlobalImmigrationEvisaInfo />},
+
       { path: 'business-visa', element: < BusinessVisa />},
       { path: 'student-visa', element: < StudentVisa />},
       { path: 'visit-visa', element: < VisitVisa />},
