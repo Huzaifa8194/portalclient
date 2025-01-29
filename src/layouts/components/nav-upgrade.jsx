@@ -117,7 +117,7 @@ export function UpgradeBlock({ sx, ...other }) {
 
       <Stack alignItems="flex-start" sx={{ position: 'relative' }}>
         <Box component="span" sx={{ typography: 'h5', color: 'common.white' }}>
-          35% OFF
+          Bronze
         </Box>
 
         <Box
@@ -129,11 +129,11 @@ export function UpgradeBlock({ sx, ...other }) {
             typography: 'subtitle2',
           }}
         >
-          Power up Productivity!
+          Your Wallet Balance: $35
         </Box>
 
         <Button variant="contained" size="small" color="warning">
-          Upgrade to Pro
+          Deposit Money
         </Button>
       </Stack>
     </Stack>

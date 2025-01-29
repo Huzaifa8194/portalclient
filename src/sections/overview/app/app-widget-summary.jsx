@@ -1,9 +1,10 @@
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import { useTheme } from '@mui/material/styles';
+import Button from "@mui/material/Button"
 
 import { fNumber, fPercent } from 'src/utils/format-number';
-
+import { useNavigate } from "react-router-dom"
 import { Iconify } from 'src/components/iconify';
 import { Chart, useChart } from 'src/components/chart';
 
@@ -25,28 +26,46 @@ export function AppWidgetSummary({ title, percent, total, chart, sx, ...other })
     plotOptions: { bar: { borderRadius: 1.5, columnWidth: '64%' } },
     ...chart.options,
   });
+      const navigate = useNavigate()
+  
+    const handleButtonClick = (path) => {
+      console.log("Navigating to:", path)
+      navigate(path)
+    }
+  const getPath = (ti) => {
+    switch (ti) {
+      case "Co-applicants":
+        return "/dashboard/job"
+      case "Documents":
+        return "/dashboard/product/new"
+      case "Appointment":
+        console.log("Work Permit")
+        return "/dashboard/post/new"
+      default:
+        return "#"
+    }
+  }
+  // const renderTrending = (
+  //   <Box sx={{ gap: 0.5, display: 'flex', alignItems: 'center' }}>
+  //     <Iconify
+  //       width={24}
+  //       icon={
+  //         percent < 0
+  //           ? 'solar:double-alt-arrow-down-bold-duotone'
+  //           : 'solar:double-alt-arrow-up-bold-duotone'
+  //       }
+  //       sx={{ flexShrink: 0, color: 'success.main', ...(percent < 0 && { color: 'error.main' }) }}
+  //     />
 
-  const renderTrending = (
-    <Box sx={{ gap: 0.5, display: 'flex', alignItems: 'center' }}>
-      <Iconify
-        width={24}
-        icon={
-          percent < 0
-            ? 'solar:double-alt-arrow-down-bold-duotone'
-            : 'solar:double-alt-arrow-up-bold-duotone'
-        }
-        sx={{ flexShrink: 0, color: 'success.main', ...(percent < 0 && { color: 'error.main' }) }}
-      />
-
-      <Box component="span" sx={{ typography: 'subtitle2' }}>
-        {percent > 0 && '+'}
-        {fPercent(percent)}
-      </Box>
-      <Box component="span" sx={{ typography: 'body2', color: 'text.secondary' }}>
-        last 7 days
-      </Box>
-    </Box>
-  );
+  //     <Box component="span" sx={{ typography: 'subtitle2' }}>
+  //       {percent > 0 && '+'}
+  //       {fPercent(percent)}
+  //     </Box>
+  //     <Box component="span" sx={{ typography: 'body2', color: 'text.secondary' }}>
+  //       last 7 days
+  //     </Box>
+  //   </Box>
+  // );
 
   return (
     <Card
@@ -61,7 +80,21 @@ export function AppWidgetSummary({ title, percent, total, chart, sx, ...other })
       <Box sx={{ flexGrow: 1 }}>
         <Box sx={{ typography: 'subtitle2' }}>{title}</Box>
         <Box sx={{ mt: 1.5, mb: 1, typography: 'h3' }}>{fNumber(total)}</Box>
-        {renderTrending}
+        <Button
+  variant="outlined"
+  onClick={() => handleButtonClick(getPath(title))}
+>
+  {title === "Co-applicant"
+    ? "Add"
+    : title === "Documents"
+    ? "Upload"
+    : title === "Appointment"
+    ? "Book Now"
+    : "Go now"}
+</Button>
+
+
+        {/* {renderTrending} */}
       </Box>
 
       <Chart

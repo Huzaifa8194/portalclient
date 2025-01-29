@@ -38,6 +38,7 @@ export function OverviewAppView() {
   
   const handleButtonClick = (title) => {
     const route = `${paths.dashboard[toCamelCase(title)]}`;
+    console.log(route);
     navigate(route);
   };
   

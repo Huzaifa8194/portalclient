@@ -8,7 +8,6 @@ import { SeoIllustration } from 'src/assets/illustrations';
 import { _appAuthors, _appRelated, _appFeatured, _appInvoices, _appInstalled } from 'src/_mock';
 
 import { svgColorClasses } from 'src/components/svg-color';
-
 import { useMockedUser } from 'src/auth/hooks';
 
 import { AppWidget } from '../app-widget';
@@ -34,14 +33,15 @@ export function OverviewAppView() {
       <Grid container spacing={3}>
         <Grid xs={12} md={8}>
           <AppWelcome
-            title={`Welcome back 👋 \n ${user?.displayName}`}
-            description="If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything."
+            title={`Welcome\n ${user?.displayName} 👋`}
+            description="This all-in-one platform streamlines immigration and relocation worldwide for you and your family.
+"
             img={<SeoIllustration hideBackground />}
-            action={
-              <Button variant="contained" color="primary">
-                Go now
-              </Button>
-            }
+            // action={
+            //   <Button variant="contained" color="primary">
+            //     Go now
+            //   </Button>
+            // }
           />
         </Grid>
 
@@ -51,9 +51,8 @@ export function OverviewAppView() {
 
         <Grid xs={12} md={4}>
           <AppWidgetSummary
-            title="Total active users"
-            percent={2.6}
-            total={18765}
+            title="Co-applicants"
+            total={5}
             chart={{
               categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
               series: [15, 18, 12, 51, 68, 11, 39, 37],
@@ -63,7 +62,7 @@ export function OverviewAppView() {
 
         <Grid xs={12} md={4}>
           <AppWidgetSummary
-            title="Total installed"
+            title="Documents"
             percent={0.2}
             total={4876}
             chart={{
@@ -76,7 +75,7 @@ export function OverviewAppView() {
 
         <Grid xs={12} md={4}>
           <AppWidgetSummary
-            title="Total downloads"
+            title="Appointment"
             percent={-0.1}
             total={678}
             chart={{

@@ -56,15 +56,6 @@ export function WorkspacesPopover({ data = [], sx, ...other }) {
           {workspace?.name}
         </Box>
 
-        <Label
-          color={workspace?.plan === 'Free' ? 'default' : 'info'}
-          sx={{
-            height: 22,
-            display: { xs: 'none', [mediaQuery]: 'inline-flex' },
-          }}
-        >
-          {workspace?.plan}
-        </Label>
 
         <Iconify width={16} icon="carbon:chevron-sort" sx={{ color: 'text.disabled' }} />
       </ButtonBase>
@@ -89,7 +80,6 @@ export function WorkspacesPopover({ data = [], sx, ...other }) {
                 {option.name}
               </Box>
 
-              <Label color={option.plan === 'Free' ? 'default' : 'info'}>{option.plan}</Label>
             </MenuItem>
           ))}
         </MenuList>

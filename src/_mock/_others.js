@@ -33,7 +33,7 @@ export const _addressBooks = [...Array(24)].map((_, index) => ({
 
 // ----------------------------------------------------------------------
 
-export const _contacts = [...Array(20)].map((_, index) => {
+export const _contacts = [...Array(5)].map((_, index) => {
   const status =
     (index % 2 && 'online') || (index % 3 && 'offline') || (index % 4 && 'alway') || 'busy';
 
