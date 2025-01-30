@@ -63,3 +63,4 @@ export const _invoices = [...Array(20)].map((_, index) => {
     dueDate: fAdd({ days: index + 15, hours: index }),
   };
 });
+
