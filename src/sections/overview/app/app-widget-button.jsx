@@ -1,7 +1,6 @@
 import Box from "@mui/material/Box"
-import Button from "@mui/material/Button"
-import Typography from "@mui/material/Typography"
 import { useTheme } from "@mui/material/styles"
+import Typography from "@mui/material/Typography"
 
 import { CONFIG } from "src/config-global"
 
@@ -10,48 +9,32 @@ import { SvgColor } from "src/components/svg-color"
 
 // ----------------------------------------------------------------------
 
-export function AppWidget({ title, icon, sx, ...other }) {
+export function AppWidgetButton({ title, icon, onClick, sx, ...other }) {
   const theme = useTheme()
-
-  const handleHostFamilyClick = () => {
-    console.log("Host Family button clicked")
-    // Add your logic here
-  }
-
-  const handleAuPairClick = () => {
-    console.log("I am au pair button clicked")
-    // Add your logic here
-  }
 
   return (
     <Box
+      onClick={onClick}
       sx={{
         p: 3,
-        gap: 3,
         borderRadius: 2,
-        display: "flex",
-        flexDirection: "column",
         overflow: "hidden",
         position: "relative",
-        alignItems: "center",
         color: "common.white",
         bgcolor: "primary.dark",
+        cursor: "pointer",
+        transition: theme.transitions.create(["background-color", "box-shadow"]),
+        "&:hover": {
+          bgcolor: "primary.darker",
+          boxShadow: theme.customShadows.z8,
+        },
         ...sx,
       }}
       {...other}
     >
-      <Typography variant="h4" component="div" sx={{ fontWeight: "bold", mb: 2 }}>
+      <Typography variant="h4" sx={{ mb: 2, position: "relative", zIndex: 1 }}>
         {title}
       </Typography>
-
-      <Box sx={{ display: "flex", gap: 2 }}>
-        <Button variant="contained" color="secondary" onClick={handleHostFamilyClick} sx={{ minWidth: 120 }}>
-          Host Family
-        </Button>
-        <Button variant="contained" color="secondary" onClick={handleAuPairClick} sx={{ minWidth: 120 }}>
-          I am au pair
-        </Button>
-      </Box>
 
       <SvgColor
         src={`${CONFIG.assetsDir}/assets/background/shape-circle-3.svg`}
@@ -60,6 +43,9 @@ export function AppWidget({ title, icon, sx, ...other }) {
           height: 200,
           opacity: 0.08,
           position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
           color: "primary.light",
         }}
       />
@@ -68,10 +54,11 @@ export function AppWidget({ title, icon, sx, ...other }) {
         icon={icon}
         sx={{
           width: 120,
-          right: -40,
           height: 120,
-          opacity: 0.08,
+          opacity: 0.12,
           position: "absolute",
+          right: -40,
+          bottom: -40,
         }}
       />
     </Box>

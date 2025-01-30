@@ -48,43 +48,10 @@ function Item({ item, index, sx, ...other }) {
 
       <Box flexGrow={1}>
         <Box sx={{ typography: 'subtitle2' }}>{item.name}</Box>
-        <Box
-          sx={{
-            gap: 0.5,
-            mt: 0.5,
-            alignItems: 'center',
-            typography: 'caption',
-            display: 'inline-flex',
-            color: 'text.secondary',
-          }}
-        >
-          <Iconify icon="solar:heart-bold" width={14} />
-          {fShortenNumber(item.totalFavorites)}
-        </Box>
+    
       </Box>
 
-      <Box
-        sx={{
-          width: 40,
-          height: 40,
-          display: 'flex',
-          borderRadius: '50%',
-          alignItems: 'center',
-          color: 'primary.main',
-          justifyContent: 'center',
-          bgcolor: (theme) => varAlpha(theme.vars.palette.primary.mainChannel, 0.08),
-          ...(index === 1 && {
-            color: 'info.main',
-            bgcolor: (theme) => varAlpha(theme.vars.palette.info.mainChannel, 0.08),
-          }),
-          ...(index === 2 && {
-            color: 'error.main',
-            bgcolor: (theme) => varAlpha(theme.vars.palette.error.mainChannel, 0.08),
-          }),
-        }}
-      >
-        <Iconify width={24} icon="solar:cup-star-bold" />
-      </Box>
+    
     </Box>
   );
 }
