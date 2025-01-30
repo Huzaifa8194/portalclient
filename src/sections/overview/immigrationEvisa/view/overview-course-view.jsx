@@ -1,143 +1,310 @@
-import React from 'react';
-import { Box, Typography, Grid, Card, CardContent } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import { CONFIG } from 'src/config-global';
-import { paths } from 'src/routes/paths';
-import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
-import { DashboardContent } from 'src/layouts/dashboard';
-import EVisaCard from './EVisaCard';
-import { CourseMyAccount } from '../course-my-account';
-import { CourseReminders } from '../course-reminders';
-import { CourseWidgetSummary } from '../course-widget-summary';
+import { useState } from "react"
+import {
+  Box,
+  Stepper,
+  Step,
+  StepLabel,
+  Button,
+  Typography,
+  Grid,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Card,
+  CardContent,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormLabel,
+  Divider,
+} from "@mui/material"
+import { styled } from "@mui/material/styles"
 
 const StyledCard = styled(Card)(({ theme }) => ({
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'space-between',
+  height: "100%",
   backgroundColor: theme.palette.background.paper,
   borderRadius: theme.shape.borderRadius * 2,
-  boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.08)',
-  transition: 'transform 0.2s ease-in-out',
-  '&:hover': {
-    transform: 'translateY(-2px)',
-    boxShadow: '0px 6px 25px rgba(0, 0, 0, 0.12)',
-  }
-}));
+  boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.08)",
+}))
+
+const steps = ["Personal Information", "Passport Details", "Contact & Travel", "Security & Dependents"]
+
+const countries = [
+  "United States",
+  "United Kingdom",
+  "Canada",
+  "Australia",
+  "Germany",
+  "France",
+  // Add more countries as needed
+]
 
 export function OverviewCourseView() {
-  const eVisaData = [
-    {
-      id: 'EV123456',
-      country: 'United States',
-      status: 'APPROVED',
-      files: ['application.pdf', 'passport.jpg', 'photo.jpg'],
-    },
-    {
-      id: 'EV789012',
-      country: 'Canada',
-      status: 'PENDING',
-      files: ['application.pdf', 'travel_history.docx'],
-    },
-    {
-      id: 'EV345678',
-      country: 'Australia',
-      status: 'DISAPPROVED',
-      files: ['application.pdf', 'rejection_letter.pdf'],
-    },
-    {
-      id: 'EV901234',
-      country: 'United Kingdom',
-      status: 'APPROVED',
-      files: ['application.pdf', 'visa.pdf'],
-    },
-  ];
+  const [activeStep, setActiveStep] = useState(0)
+  const [formData, setFormData] = useState({
+    fromCountry: "",
+    toCountry: "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    dateOfBirth: "",
+    gender: "",
+    birthCity: "",
+    birthCountry: "",
+    nationality: "",
+    hasMultipleCitizenship: "no",
+    additionalCitizenship: "",
+    // Add more form fields as needed
+  })
+
+  const handleNext = () => {
+    setActiveStep((prevStep) => prevStep + 1)
+  }
+
+  const handleBack = () => {
+    setActiveStep((prevStep) => prevStep - 1)
+  }
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
+  const renderPersonalInfo = () => (
+    <Grid container spacing={3}>
+      <Grid item xs={12}>
+        <Typography variant="h6" gutterBottom>
+          Personal Information
+        </Typography>
+      </Grid>
+      <Grid item xs={12} md={4}>
+        <TextField
+          fullWidth
+          label="First Name"
+          name="firstName"
+          value={formData.firstName}
+          onChange={handleInputChange}
+          required
+        />
+      </Grid>
+      <Grid item xs={12} md={4}>
+        <TextField
+          fullWidth
+          label="Middle Name"
+          name="middleName"
+          value={formData.middleName}
+          onChange={handleInputChange}
+        />
+      </Grid>
+      <Grid item xs={12} md={4}>
+        <TextField
+          fullWidth
+          label="Last Name"
+          name="lastName"
+          value={formData.lastName}
+          onChange={handleInputChange}
+          required
+        />
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <TextField
+          fullWidth
+          type="date"
+          label="Date of Birth"
+          name="dateOfBirth"
+          value={formData.dateOfBirth}
+          onChange={handleInputChange}
+          InputLabelProps={{ shrink: true }}
+          required
+        />
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <FormControl fullWidth>
+          <FormLabel>Gender</FormLabel>
+          <RadioGroup row name="gender" value={formData.gender} onChange={handleInputChange}>
+            <FormControlLabel value="male" control={<Radio />} label="Male" />
+            <FormControlLabel value="female" control={<Radio />} label="Female" />
+            <FormControlLabel value="nonBinary" control={<Radio />} label="Non-Binary" />
+            <FormControlLabel value="preferNotToSay" control={<Radio />} label="Prefer not to say" />
+          </RadioGroup>
+        </FormControl>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <TextField
+          fullWidth
+          label="City of Birth"
+          name="birthCity"
+          value={formData.birthCity}
+          onChange={handleInputChange}
+          required
+        />
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <FormControl fullWidth>
+          <InputLabel>Country of Birth</InputLabel>
+          <Select
+            name="birthCountry"
+            value={formData.birthCountry}
+            onChange={handleInputChange}
+            label="Country of Birth"
+            required
+          >
+            {countries.map((country) => (
+              <MenuItem key={country} value={country}>
+                {country}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Grid>
+    </Grid>
+  )
+
+  const renderPassportDetails = () => (
+    <Grid container spacing={3}>
+      <Grid item xs={12}>
+        <Typography variant="h6" gutterBottom>
+          Passport Details
+        </Typography>
+      </Grid>
+      {/* Add passport detail fields */}
+    </Grid>
+  )
+
+  const renderContactAndTravel = () => (
+    <Grid container spacing={3}>
+      <Grid item xs={12}>
+        <Typography variant="h6" gutterBottom>
+          Contact & Travel Information
+        </Typography>
+      </Grid>
+      {/* Add contact and travel fields */}
+    </Grid>
+  )
+
+  const renderSecurityAndDependents = () => (
+    <Grid container spacing={3}>
+      <Grid item xs={12}>
+        <Typography variant="h6" gutterBottom>
+          Security Questions & Dependents
+        </Typography>
+      </Grid>
+      {/* Add security and dependent fields */}
+    </Grid>
+  )
+
+  const getStepContent = (step) => {
+    switch (step) {
+      case 0:
+        return renderPersonalInfo()
+      case 1:
+        return renderPassportDetails()
+      case 2:
+        return renderContactAndTravel()
+      case 3:
+        return renderSecurityAndDependents()
+      default:
+        return "Unknown step"
+    }
+  }
 
   return (
-    <DashboardContent>
-       <CustomBreadcrumbs
-              heading="E Visa"
-              links={[
-                { name: 'Dashboard', href: paths.dashboard.root },
-                { name: 'E-Visa' },
-              ]}
-              sx={{ mb: { xs: 3, md: 3 } }}
-            />
-      <Box sx={{ mb: 5 }}>
-        {/* <Typography variant="h4" gutterBottom>
-          E-Visa Dashboard
-        </Typography> */}
-        <Typography color="text.secondary">
-          View and manage your E-Visa applications
-        </Typography>
-      </Box>
-
-      <Grid container spacing={3} mb={3}>
-        <Grid item xs={12} sm={6} md={3}>
-          <CourseWidgetSummary title="Total Application" total="12" icon={`${CONFIG.assetsDir}/assets/icons/courses/ic-courses-progress.svg`}/>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <CourseWidgetSummary title="Approved" total="8" color="success" icon={`${CONFIG.assetsDir}/assets/icons/courses/ic-courses-progress.svg`}/>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <CourseWidgetSummary title="Pending" total="3" color="warning" icon={`${CONFIG.assetsDir}/assets/icons/courses/ic-courses-progress.svg`}/>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <CourseWidgetSummary title="Rejected" total="1" color="error" icon={`${CONFIG.assetsDir}/assets/icons/courses/ic-courses-progress.svg`}/>
-        </Grid>
-      </Grid>
-
+    <Box sx={{ width: "100%", p: 3 }}>
       <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom sx={{mb:3}}>
-                Your E-Visa Applications
-              </Typography>
-              {eVisaData.map((visa) => (
-                <EVisaCard key={visa.id} visa={visa} />
-              ))}
-            </CardContent>
-        </Grid>
-
-        <Grid item xs={12} md={4}>
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <StyledCard>
-                  <CourseMyAccount sx={{mt:5, py:2}} />
-              </StyledCard>
+        <Grid item xs={12}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel>I am a citizen of</InputLabel>
+                <Select
+                  name="fromCountry"
+                  value={formData.fromCountry}
+                  onChange={handleInputChange}
+                  label="I am a citizen of"
+                >
+                  {countries.map((country) => (
+                    <MenuItem key={country} value={country}>
+                      {country}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
-    
-            <Grid item xs={12}>
-              <StyledCard>
-                  <CourseReminders sx={{p:3}}
-                    title="Recent Updates"
-                    list={[
-                      {
-                        id: '1',
-                        title: 'USA Visa Approved',
-                        description: 'Your USA visa application has been approved.',
-                        time: '2 hours ago',
-                      },
-                      {
-                        id: '2',
-                        title: 'Canada Visa Processing',
-                        description: 'Your Canada visa application is being processed.',
-                        time: '1 day ago',
-                      },
-                      {
-                        id: '3',
-                        title: 'Australia Visa Rejected',
-                        description: 'Your Australia visa application was not approved.',
-                        time: '3 days ago',
-                      },
-                    ]}
-                  />
-              </StyledCard>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel>I am going to</InputLabel>
+                <Select name="toCountry" value={formData.toCountry} onChange={handleInputChange} label="I am going to">
+                  {countries.map((country) => (
+                    <MenuItem key={country} value={country}>
+                      {country}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
           </Grid>
         </Grid>
+
+        <Grid item xs={12} md={9}>
+          <StyledCard>
+            <CardContent>
+              <Box sx={{ width: "100%", mb: 4 }}>
+                <Stepper activeStep={activeStep}>
+                  {steps.map((label) => (
+                    <Step key={label}>
+                      <StepLabel>{label}</StepLabel>
+                    </Step>
+                  ))}
+                </Stepper>
+              </Box>
+              {getStepContent(activeStep)}
+              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
+                <Button disabled={activeStep === 0} onClick={handleBack} sx={{ mr: 1 }}>
+                  Back
+                </Button>
+                <Button variant="contained" onClick={activeStep === steps.length - 1 ? undefined : handleNext}>
+                  {activeStep === steps.length - 1 ? "Submit" : "Next"}
+                </Button>
+              </Box>
+            </CardContent>
+          </StyledCard>
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <StyledCard>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Important Information
+              </Typography>
+              <Divider sx={{ my: 2 }} />
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  From
+                </Typography>
+                <Typography>{formData.fromCountry || "Not selected"}</Typography>
+              </Box>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  To
+                </Typography>
+                <Typography>{formData.toCountry || "Not selected"}</Typography>
+              </Box>
+              <Box>
+                <Typography variant="subtitle2" gutterBottom>
+                  Currency
+                </Typography>
+                <Typography>USD</Typography>
+              </Box>
+            </CardContent>
+          </StyledCard>
+        </Grid>
       </Grid>
-    </DashboardContent>
-  );
+    </Box>
+  )
 }
 
