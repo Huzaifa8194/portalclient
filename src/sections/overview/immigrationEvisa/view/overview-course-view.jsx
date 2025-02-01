@@ -15,6 +15,10 @@ import {
   Card,
   CardContent,
   Divider,
+  Container,
+  Paper,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material"
 import { styled } from "@mui/material/styles"
 
@@ -24,6 +28,25 @@ const StyledCard = styled(Card)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius * 2,
   boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.08)",
   marginBottom: theme.spacing(2),
+  transition: "box-shadow 0.3s ease-in-out",
+  "&:hover": {
+    boxShadow: "0px 6px 25px rgba(0, 0, 0, 0.1)",
+  },
+}))
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(3),
+  marginBottom: theme.spacing(3),
+  borderRadius: theme.shape.borderRadius * 2,
+  transition: "box-shadow 0.3s ease-in-out",
+  "&:hover": {
+    boxShadow: "0px 6px 25px rgba(0, 0, 0, 0.1)",
+  },
+}))
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  borderRadius: theme.shape.borderRadius * 2,
+  padding: theme.spacing(1, 3),
 }))
 
 const steps = [
@@ -56,6 +79,8 @@ const currencies = [
 ]
 
 export function OverviewCourseView() {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
   const [activeStep, setActiveStep] = useState(0)
   const [formData, setFormData] = useState({
     // Section 1: Personal Information
@@ -117,7 +142,7 @@ export function OverviewCourseView() {
   })
 
   useEffect(() => {
-    const numDependents = Number.parseInt(formData.numberOfDependents, 10)
+    const numDependents = Number.parseInt(formData.numberOfDependents, 10) || 0
     setFormData((prev) => ({
       ...prev,
       dependents: Array(numDependents)
@@ -162,677 +187,694 @@ export function OverviewCourseView() {
   }
 
   const renderPersonalInfo = () => (
-    <Grid container spacing={3}>
-      <Grid item xs={12}>
-        <Typography variant="h6" gutterBottom>
-          Personal Information
-        </Typography>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <TextField
-          fullWidth
-          label="First Name"
-          name="firstName"
-          value={formData.firstName}
-          onChange={handleInputChange}
-          required
-        />
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <TextField
-          fullWidth
-          label="Middle Name (if any)"
-          name="middleName"
-          value={formData.middleName}
-          onChange={handleInputChange}
-        />
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <TextField
-          fullWidth
-          label="Last Name"
-          name="lastName"
-          value={formData.lastName}
-          onChange={handleInputChange}
-          required
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <TextField
-          fullWidth
-          type="date"
-          label="Date of Birth"
-          name="dateOfBirth"
-          value={formData.dateOfBirth}
-          onChange={handleInputChange}
-          InputLabelProps={{
-            shrink: true,
-          }}
-          required
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <FormControl fullWidth required>
-          <InputLabel>Gender</InputLabel>
-          <Select name="gender" value={formData.gender} onChange={handleInputChange} label="Gender">
-            <MenuItem value="male">Male</MenuItem>
-            <MenuItem value="female">Female</MenuItem>
-            <MenuItem value="nonBinary">Non-Binary</MenuItem>
-            <MenuItem value="preferNotToSay">Prefer not to say</MenuItem>
-          </Select>
-        </FormControl>
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <TextField
-          fullWidth
-          label="City of Birth"
-          name="birthCity"
-          value={formData.birthCity}
-          onChange={handleInputChange}
-          required
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <FormControl fullWidth required>
-          <InputLabel>Country of Birth</InputLabel>
-          <Select
-            name="birthCountry"
-            value={formData.birthCountry}
-            onChange={handleInputChange}
-            label="Country of Birth"
-          >
-            {countries.map((country) => (
-              <MenuItem key={country} value={country}>
-                {country}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <FormControl fullWidth required>
-          <InputLabel>Nationality</InputLabel>
-          <Select name="nationality" value={formData.nationality} onChange={handleInputChange} label="Nationality">
-            {countries.map((country) => (
-              <MenuItem key={country} value={country}>
-                {country}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <FormControl fullWidth required>
-          <InputLabel>Do you hold additional citizenships?</InputLabel>
-          <Select
-            name="additionalCitizenship"
-            value={formData.additionalCitizenship}
-            onChange={handleInputChange}
-            label="Do you hold additional citizenships?"
-          >
-            <MenuItem value="yes">Yes</MenuItem>
-            <MenuItem value="no">No</MenuItem>
-          </Select>
-        </FormControl>
-      </Grid>
-      {formData.additionalCitizenship === "yes" && (
+    <StyledPaper elevation={3}>
+      <Grid container spacing={3}>
         <Grid item xs={12}>
+          <Typography variant="h6" gutterBottom >
+            Personal Information
+          </Typography>
+        </Grid>
+        <Grid item xs={12} md={4}>
           <TextField
             fullWidth
-            label="Specify additional citizenships"
-            name="additionalCitizenshipSpecify"
-            value={formData.additionalCitizenshipSpecify}
+            label="First Name"
+            name="firstName"
+            value={formData.firstName}
+            onChange={handleInputChange}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            label="Middle Name (if any)"
+            name="middleName"
+            value={formData.middleName}
             onChange={handleInputChange}
           />
         </Grid>
-      )}
-    </Grid>
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            label="Last Name"
+            name="lastName"
+            value={formData.lastName}
+            onChange={handleInputChange}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            type="date"
+            label="Date of Birth"
+            name="dateOfBirth"
+            value={formData.dateOfBirth}
+            onChange={handleInputChange}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth required>
+            <InputLabel>Gender</InputLabel>
+            <Select name="gender" value={formData.gender} onChange={handleInputChange} label="Gender">
+              <MenuItem value="male">Male</MenuItem>
+              <MenuItem value="female">Female</MenuItem>
+              <MenuItem value="nonBinary">Non-Binary</MenuItem>
+              <MenuItem value="preferNotToSay">Prefer not to say</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="City of Birth"
+            name="birthCity"
+            value={formData.birthCity}
+            onChange={handleInputChange}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth required>
+            <InputLabel>Country of Birth</InputLabel>
+            <Select
+              name="birthCountry"
+              value={formData.birthCountry}
+              onChange={handleInputChange}
+              label="Country of Birth"
+            >
+              {countries.map((country) => (
+                <MenuItem key={country} value={country}>
+                  {country}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth required>
+            <InputLabel>Nationality</InputLabel>
+            <Select name="nationality" value={formData.nationality} onChange={handleInputChange} label="Nationality">
+              {countries.map((country) => (
+                <MenuItem key={country} value={country}>
+                  {country}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth required>
+            <InputLabel>Do you hold additional citizenships?</InputLabel>
+            <Select
+              name="additionalCitizenship"
+              value={formData.additionalCitizenship}
+              onChange={handleInputChange}
+              label="Do you hold additional citizenships?"
+            >
+              <MenuItem value="yes">Yes</MenuItem>
+              <MenuItem value="no">No</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        {formData.additionalCitizenship === "yes" && (
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              label="Specify additional citizenships"
+              name="additionalCitizenshipSpecify"
+              value={formData.additionalCitizenshipSpecify}
+              onChange={handleInputChange}
+            />
+          </Grid>
+        )}
+      </Grid>
+    </StyledPaper>
   )
 
   const renderPassportDetails = () => (
-    <Grid container spacing={3}>
-      <Grid item xs={12}>
-        <Typography variant="h6" gutterBottom>
-          Passport Details
-        </Typography>
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <TextField
-          fullWidth
-          label="Passport Number"
-          name="passportNumber"
-          value={formData.passportNumber}
-          onChange={handleInputChange}
-          required
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <FormControl fullWidth required>
-          <InputLabel>Country of Passport Issuance</InputLabel>
-          <Select
-            name="passportCountry"
-            value={formData.passportCountry}
-            onChange={handleInputChange}
-            label="Country of Passport Issuance"
-          >
-            {countries.map((country) => (
-              <MenuItem key={country} value={country}>
-                {country}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <FormControl fullWidth required>
-          <InputLabel>Passport Type</InputLabel>
-          <Select name="passportType" value={formData.passportType} onChange={handleInputChange} label="Passport Type">
-            <MenuItem value="ordinary">Ordinary</MenuItem>
-            <MenuItem value="diplomatic">Diplomatic</MenuItem>
-            <MenuItem value="official">Official</MenuItem>
-            <MenuItem value="other">Other</MenuItem>
-          </Select>
-        </FormControl>
-      </Grid>
-      {formData.passportType === "other" && (
+    <StyledPaper elevation={3}>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Typography variant="h6" gutterBottom >
+            Passport Details
+          </Typography>
+        </Grid>
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
-            label="Specify Passport Type"
-            name="passportTypeOther"
-            value={formData.passportTypeOther}
+            label="Passport Number"
+            name="passportNumber"
+            value={formData.passportNumber}
             onChange={handleInputChange}
+            required
           />
         </Grid>
-      )}
-      <Grid item xs={12} md={6}>
-        <TextField
-          fullWidth
-          type="date"
-          label="Passport Issue Date"
-          name="passportIssueDate"
-          value={formData.passportIssueDate}
-          onChange={handleInputChange}
-          InputLabelProps={{
-            shrink: true,
-          }}
-          required
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <TextField
-          fullWidth
-          type="date"
-          label="Passport Expiry Date"
-          value={formData.passportExpiryDate}
-          onChange={handleInputChange}
-          name="passportExpiryDate"
-          InputLabelProps={{
-            shrink: true,
-          }}
-          required
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <FormControl fullWidth required>
-          <InputLabel>Is this a replacement for a lost/stolen passport?</InputLabel>
-          <Select
-            name="isReplacementPassport"
-            value={formData.isReplacementPassport}
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth required>
+            <InputLabel>Country of Passport Issuance</InputLabel>
+            <Select
+              name="passportCountry"
+              value={formData.passportCountry}
+              onChange={handleInputChange}
+              label="Country of Passport Issuance"
+            >
+              {countries.map((country) => (
+                <MenuItem key={country} value={country}>
+                  {country}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth required>
+            <InputLabel>Passport Type</InputLabel>
+            <Select
+              name="passportType"
+              value={formData.passportType}
+              onChange={handleInputChange}
+              label="Passport Type"
+            >
+              <MenuItem value="ordinary">Ordinary</MenuItem>
+              <MenuItem value="diplomatic">Diplomatic</MenuItem>
+              <MenuItem value="official">Official</MenuItem>
+              <MenuItem value="other">Other</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        {formData.passportType === "other" && (
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Specify Passport Type"
+              name="passportTypeOther"
+              value={formData.passportTypeOther}
+              onChange={handleInputChange}
+            />
+          </Grid>
+        )}
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            type="date"
+            label="Passport Issue Date"
+            name="passportIssueDate"
+            value={formData.passportIssueDate}
             onChange={handleInputChange}
-            label="Is this a replacement for a lost/stolen passport?"
-          >
-            <MenuItem value="yes">Yes</MenuItem>
-            <MenuItem value="no">No</MenuItem>
-          </Select>
-        </FormControl>
+            InputLabelProps={{
+              shrink: true,
+            }}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            type="date"
+            label="Passport Expiry Date"
+            value={formData.passportExpiryDate}
+            onChange={handleInputChange}
+            name="passportExpiryDate"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            required
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <FormControl fullWidth required>
+            <InputLabel>Is this a replacement for a lost/stolen passport?</InputLabel>
+            <Select
+              name="isReplacementPassport"
+              value={formData.isReplacementPassport}
+              onChange={handleInputChange}
+              label="Is this a replacement for a lost/stolen passport?"
+            >
+              <MenuItem value="yes">Yes</MenuItem>
+              <MenuItem value="no">No</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
       </Grid>
-    </Grid>
+    </StyledPaper>
   )
 
   const renderContactInfo = () => (
-    <Grid container spacing={3}>
-      <Grid item xs={12}>
-        <Typography variant="h6" gutterBottom>
-          Contact Information
-        </Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <TextField
-          fullWidth
-          label="Email Address"
-          name="email"
-          type="email"
-          value={formData.email}
-          onChange={handleInputChange}
-          required
-        />
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <FormControl fullWidth required>
-          <InputLabel>Country Code</InputLabel>
-          <Select
-            name="phoneCountryCode"
-            value={formData.phoneCountryCode}
-            onChange={handleInputChange}
-            label="Country Code"
-          >
-            <MenuItem value="+1">+1 (USA)</MenuItem>
-            <MenuItem value="+44">+44 (UK)</MenuItem>
-            {/* Add more country codes */}
-          </Select>
-        </FormControl>
-      </Grid>
-      <Grid item xs={12} md={8}>
-        <TextField
-          fullWidth
-          label="Phone Number"
-          name="phoneNumber"
-          value={formData.phoneNumber}
-          onChange={handleInputChange}
-          required
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <TextField
-          fullWidth
-          label="Street Address"
-          name="streetAddress"
-          value={formData.streetAddress}
-          onChange={handleInputChange}
-          required
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <TextField fullWidth label="City" name="city" value={formData.city} onChange={handleInputChange} required />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <TextField
-          fullWidth
-          label="State/Province"
-          name="stateProvince"
-          value={formData.stateProvince}
-          onChange={handleInputChange}
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <TextField
-          fullWidth
-          label="Postal Code"
-          name="postalCode"
-          value={formData.postalCode}
-          onChange={handleInputChange}
-          required
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <FormControl fullWidth required>
-          <InputLabel>Country</InputLabel>
-          <Select name="country" value={formData.country} onChange={handleInputChange} label="Country">
-            {countries.map((country) => (
-              <MenuItem key={country} value={country}>
-                {country}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Grid>
-    </Grid>
-  )
-
-  const renderTravelInfo = () => (
-    <Grid container spacing={3}>
-      <Grid item xs={12}>
-        <Typography variant="h6" gutterBottom>
-          Travel Information
-        </Typography>
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <FormControl fullWidth required>
-          <InputLabel>Purpose of Travel</InputLabel>
-          <Select
-            name="travelPurpose"
-            value={formData.travelPurpose}
-            onChange={handleInputChange}
-            label="Purpose of Travel"
-          >
-            <MenuItem value="tourism">Tourism</MenuItem>
-            <MenuItem value="business">Business</MenuItem>
-            <MenuItem value="transit">Transit</MenuItem>
-            <MenuItem value="familyVisit">Family Visit</MenuItem>
-            <MenuItem value="medical">Medical</MenuItem>
-            <MenuItem value="other">Other</MenuItem>
-          </Select>
-        </FormControl>
-      </Grid>
-      {formData.travelPurpose === "other" && (
-        <Grid item xs={12} md={6}>
-          <TextField
-            fullWidth
-            label="Specify Travel Purpose"
-            name="travelPurposeOther"
-            value={formData.travelPurposeOther}
-            onChange={handleInputChange}
-          />
+    <StyledPaper elevation={3}>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Typography variant="h6" gutterBottom >
+            Contact Information
+          </Typography>
         </Grid>
-      )}
-      <Grid item xs={12} md={6}>
-        <FormControl fullWidth required>
-          <InputLabel>Country of Arrival</InputLabel>
-          <Select
-            name="arrivalCountry"
-            value={formData.arrivalCountry}
-            onChange={handleInputChange}
-            label="Country of Arrival"
-          >
-            {countries.map((country) => (
-              <MenuItem key={country} value={country}>
-                {country}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <TextField
-          fullWidth
-          type="date"
-          label="Intended Date of Arrival"
-          name="arrivalDate"
-          value={formData.arrivalDate}
-          onChange={handleInputChange}
-          InputLabelProps={{
-            shrink: true,
-          }}
-          required
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <TextField
-          fullWidth
-          type="date"
-          label="Intended Date of Departure"
-          name="departureDate"
-          value={formData.departureDate}
-          onChange={handleInputChange}
-          InputLabelProps={{
-            shrink: true,
-          }}
-          required
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <TextField
-          fullWidth
-          label="Address of Stay (Hotel or Host Address)"
-          name="stayAddress"
-          value={formData.stayAddress}
-          onChange={handleInputChange}
-          required
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <FormControl fullWidth required>
-          <InputLabel>Have you booked a return ticket?</InputLabel>
-          <Select
-            name="hasReturnTicket"
-            value={formData.hasReturnTicket}
-            onChange={handleInputChange}
-            label="Have you booked a return ticket?"
-          >
-            <MenuItem value="yes">Yes</MenuItem>
-            <MenuItem value="no">No</MenuItem>
-          </Select>
-        </FormControl>
-      </Grid>
-      {formData.hasReturnTicket === "yes" && (
-        <Grid item xs={12} md={6}>
-          <TextField
-            fullWidth
-            label="Flight Details"
-            name="flightDetails"
-            value={formData.flightDetails}
-            onChange={handleInputChange}
-          />
-        </Grid>
-      )}
-    </Grid>
-  )
-
-  const renderSecurityQuestions = () => (
-    <Grid container spacing={3}>
-      <Grid item xs={12}>
-        <Typography variant="h6" gutterBottom>
-          Security and Eligibility Questions
-        </Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <FormControl fullWidth required>
-          <InputLabel>Have you ever been convicted of a crime or offense?</InputLabel>
-          <Select
-            name="hasCriminalRecord"
-            value={formData.hasCriminalRecord}
-            onChange={handleInputChange}
-            label="Have you ever been convicted of a crime or offense?"
-          >
-            <MenuItem value="yes">Yes</MenuItem>
-            <MenuItem value="no">No</MenuItem>
-          </Select>
-        </FormControl>
-      </Grid>
-      <Grid item xs={12}>
-        <FormControl fullWidth required>
-          <InputLabel>Have you ever been refused entry or deported from any country?</InputLabel>
-          <Select
-            name="hasBeenRefusedEntry"
-            value={formData.hasBeenRefusedEntry}
-            onChange={handleInputChange}
-            label="Have you ever been refused entry or deported from any country?"
-          >
-            <MenuItem value="yes">Yes</MenuItem>
-            <MenuItem value="no">No</MenuItem>
-          </Select>
-        </FormControl>
-      </Grid>
-      <Grid item xs={12}>
-        <FormControl fullWidth required>
-          <InputLabel>Do you have any communicable diseases or public health concerns?</InputLabel>
-          <Select
-            name="hasHealthConcerns"
-            value={formData.hasHealthConcerns}
-            onChange={handleInputChange}
-            label="Do you have any communicable diseases or public health concerns?"
-          >
-            <MenuItem value="yes">Yes</MenuItem>
-            <MenuItem value="no">No</MenuItem>
-          </Select>
-        </FormControl>
-      </Grid>
-      <Grid item xs={12}>
-        <FormControl fullWidth required>
-          <InputLabel>Have you traveled to any restricted or high-risk countries in the past 10 years?</InputLabel>
-          <Select
-            name="hasVisitedRestrictedCountries"
-            value={formData.hasVisitedRestrictedCountries}
-            onChange={handleInputChange}
-            label="Have you traveled to any restricted or high-risk countries in the past 10 years?"
-          >
-            <MenuItem value="yes">Yes</MenuItem>
-            <MenuItem value="no">No</MenuItem>
-          </Select>
-        </FormControl>
-      </Grid>
-      {formData.hasVisitedRestrictedCountries === "yes" && (
         <Grid item xs={12}>
           <TextField
             fullWidth
-            label="List restricted countries visited"
-            name="restrictedCountriesList"
-            value={formData.restrictedCountriesList}
+            label="Email Address"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <FormControl fullWidth required>
+            <InputLabel>Country Code</InputLabel>
+            <Select
+              name="phoneCountryCode"
+              value={formData.phoneCountryCode}
+              onChange={handleInputChange}
+              label="Country Code"
+            >
+              <MenuItem value="+1">+1 (USA)</MenuItem>
+              <MenuItem value="+44">+44 (UK)</MenuItem>
+              {/* Add more country codes */}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12} md={8}>
+          <TextField
+            fullWidth
+            label="Phone Number"
+            name="phoneNumber"
+            value={formData.phoneNumber}
+            onChange={handleInputChange}
+            required
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label="Street Address"
+            name="streetAddress"
+            value={formData.streetAddress}
+            onChange={handleInputChange}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField fullWidth label="City" name="city" value={formData.city} onChange={handleInputChange} required />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="State/Province"
+            name="stateProvince"
+            value={formData.stateProvince}
             onChange={handleInputChange}
           />
         </Grid>
-      )}
-    </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="Postal Code"
+            name="postalCode"
+            value={formData.postalCode}
+            onChange={handleInputChange}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth required>
+            <InputLabel>Country</InputLabel>
+            <Select name="country" value={formData.country} onChange={handleInputChange} label="Country">
+              {countries.map((country) => (
+                <MenuItem key={country} value={country}>
+                  {country}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+      </Grid>
+    </StyledPaper>
+  )
+
+  const renderTravelInfo = () => (
+    <StyledPaper elevation={3}>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Typography variant="h6" gutterBottom >
+            Travel Information
+          </Typography>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth required>
+            <InputLabel>Purpose of Travel</InputLabel>
+            <Select
+              name="travelPurpose"
+              value={formData.travelPurpose}
+              onChange={handleInputChange}
+              label="Purpose of Travel"
+            >
+              <MenuItem value="tourism">Tourism</MenuItem>
+              <MenuItem value="business">Business</MenuItem>
+              <MenuItem value="transit">Transit</MenuItem>
+              <MenuItem value="familyVisit">Family Visit</MenuItem>
+              <MenuItem value="medical">Medical</MenuItem>
+              <MenuItem value="other">Other</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        {formData.travelPurpose === "other" && (
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Specify Travel Purpose"
+              name="travelPurposeOther"
+              value={formData.travelPurposeOther}
+              onChange={handleInputChange}
+            />
+          </Grid>
+        )}
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth required>
+            <InputLabel>Country of Arrival</InputLabel>
+            <Select
+              name="arrivalCountry"
+              value={formData.arrivalCountry}
+              onChange={handleInputChange}
+              label="Country of Arrival"
+            >
+              {countries.map((country) => (
+                <MenuItem key={country} value={country}>
+                  {country}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            type="date"
+            label="Intended Date of Arrival"
+            name="arrivalDate"
+            value={formData.arrivalDate}
+            onChange={handleInputChange}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            type="date"
+            label="Intended Date of Departure"
+            name="departureDate"
+            value={formData.departureDate}
+            onChange={handleInputChange}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            required
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label="Address of Stay (Hotel or Host Address)"
+            name="stayAddress"
+            value={formData.stayAddress}
+            onChange={handleInputChange}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth required>
+            <InputLabel>Have you booked a return ticket?</InputLabel>
+            <Select
+              name="hasReturnTicket"
+              value={formData.hasReturnTicket}
+              onChange={handleInputChange}
+              label="Have you booked a return ticket?"
+            >
+              <MenuItem value="yes">Yes</MenuItem>
+              <MenuItem value="no">No</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        {formData.hasReturnTicket === "yes" && (
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Flight Details"
+              name="flightDetails"
+              value={formData.flightDetails}
+              onChange={handleInputChange}
+            />
+          </Grid>
+        )}
+      </Grid>
+    </StyledPaper>
+  )
+
+  const renderSecurityQuestions = () => (
+    <StyledPaper elevation={3}>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Typography variant="h6" gutterBottom >
+            Security and Eligibility Questions
+          </Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <FormControl fullWidth required>
+            <InputLabel>Have you ever been convicted of a crime or offense?</InputLabel>
+            <Select
+              name="hasCriminalRecord"
+              value={formData.hasCriminalRecord}
+              onChange={handleInputChange}
+              label="Have you ever been convicted of a crime or offense?"
+            >
+              <MenuItem value="yes">Yes</MenuItem>
+              <MenuItem value="no">No</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12}>
+          <FormControl fullWidth required>
+            <InputLabel>Have you ever been refused entry or deported from any country?</InputLabel>
+            <Select
+              name="hasBeenRefusedEntry"
+              value={formData.hasBeenRefusedEntry}
+              onChange={handleInputChange}
+              label="Have you ever been refused entry or deported from any country?"
+            >
+              <MenuItem value="yes">Yes</MenuItem>
+              <MenuItem value="no">No</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12}>
+          <FormControl fullWidth required>
+            <InputLabel>Do you have any communicable diseases or public health concerns?</InputLabel>
+            <Select
+              name="hasHealthConcerns"
+              value={formData.hasHealthConcerns}
+              onChange={handleInputChange}
+              label="Do you have any communicable diseases or public health concerns?"
+            >
+              <MenuItem value="yes">Yes</MenuItem>
+              <MenuItem value="no">No</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12}>
+          <FormControl fullWidth required>
+            <InputLabel>Have you traveled to any restricted or high-risk countries in the past 10 years?</InputLabel>
+            <Select
+              name="hasVisitedRestrictedCountries"
+              value={formData.hasVisitedRestrictedCountries}
+              onChange={handleInputChange}
+              label="Have you traveled to any restricted or high-risk countries in the past 10 years?"
+            >
+              <MenuItem value="yes">Yes</MenuItem>
+              <MenuItem value="no">No</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        {formData.hasVisitedRestrictedCountries === "yes" && (
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              label="List restricted countries visited"
+              name="restrictedCountriesList"
+              value={formData.restrictedCountriesList}
+              onChange={handleInputChange}
+            />
+          </Grid>
+        )}
+      </Grid>
+    </StyledPaper>
   )
 
   const renderDependentInfo = () => (
-    <Grid container spacing={3}>
-      <Grid item xs={12}>
-        <Typography variant="h6" gutterBottom>
-          Dependent Information (For Minors Under 18)
-        </Typography>
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <TextField
-          fullWidth
-          type="number"
-          label="Number of Dependents (Minors)"
-          name="numberOfDependents"
-          value={formData.numberOfDependents}
-          onChange={handleInputChange}
-          InputProps={{ inputProps: { min: 0 } }}
-        />
-      </Grid>
-      {formData.dependents.map((dependent, index) => (
-        <Grid container item spacing={3} key={index}>
-          <Grid item xs={12}>
-            <Typography variant="subtitle1">Dependent {index + 1}</Typography>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <FormControl fullWidth required>
-              <InputLabel>Relation</InputLabel>
-              <Select
-                name={`dependents[${index}].relation`}
-                value={formData.dependents[index]?.relation || ""}
-                onChange={handleInputChange}
-                label="Relation"
-              >
-                <MenuItem value="child">Child</MenuItem>
-                <MenuItem value="other">Other</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          {formData.dependents[index]?.relation === "other" && (
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Specify Relation"
-                name={`dependents[${index}].relationOther`}
-                value={formData.dependents[index]?.relationOther || ""}
-                onChange={handleInputChange}
-              />
-            </Grid>
-          )}
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Full Name"
-              name={`dependents[${index}].fullName`}
-              value={formData.dependents[index]?.fullName || ""}
-              onChange={handleInputChange}
-              required
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              type="date"
-              label="Date of Birth"
-              name={`dependents[${index}].dateOfBirth`}
-              value={formData.dependents[index]?.dateOfBirth || null}
-              onChange={handleInputChange}
-              InputLabelProps={{
-                shrink: true,
-              }}
-              required
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Passport Number"
-              name={`dependents[${index}].passportNumber`}
-              value={formData.dependents[index]?.passportNumber || ""}
-              onChange={handleInputChange}
-              required
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <FormControl fullWidth required>
-              <InputLabel>Nationality</InputLabel>
-              <Select
-                name={`dependents[${index}].nationality`}
-                value={formData.dependents[index]?.nationality || ""}
-                onChange={handleInputChange}
-                label="Nationality"
-              >
-                {countries.map((country) => (
-                  <MenuItem key={country} value={country}>
-                    {country}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <FormControl fullWidth required>
-              <InputLabel>Gender</InputLabel>
-              <Select
-                name={`dependents[${index}].gender`}
-                value={formData.dependents[index]?.gender || ""}
-                onChange={handleInputChange}
-                label="Gender"
-              >
-                <MenuItem value="male">Male</MenuItem>
-                <MenuItem value="female">Female</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <FormControl fullWidth required>
-              <InputLabel>Relationship Verification Documents</InputLabel>
-              <Select
-                name={`dependents[${index}].relationshipVerification`}
-                value={formData.dependents[index]?.relationshipVerification || ""}
-                onChange={handleInputChange}
-                label="Relationship Verification Documents"
-              >
-                <MenuItem value="birthCertificate">Birth Certificate</MenuItem>
-                <MenuItem value="adoptionPapers">Adoption Papers</MenuItem>
-                <MenuItem value="other">Other</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          {formData.dependents[index]?.relationshipVerification === "other" && (
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Specify Document Type"
-                name={`dependents[${index}].relationshipVerificationOther`}
-                value={formData.dependents[index]?.relationshipVerificationOther || ""}
-                onChange={handleInputChange}
-              />
-            </Grid>
-          )}
-          <Grid item xs={12} md={6}>
-            <FormControl fullWidth required>
-              <InputLabel>Consent from Other Parents/Guardians (if applicable)</InputLabel>
-              <Select
-                name={`dependents[${index}].parentalConsent`}
-                value={formData.dependents[index]?.parentalConsent || ""}
-                onChange={handleInputChange}
-                label="Consent from Other Parents/Guardians (if applicable)"
-              >
-                <MenuItem value="yes">Yes</MenuItem>
-                <MenuItem value="no">No</MenuItem>
-                <MenuItem value="notApplicable">Not Applicable</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
+    <StyledPaper elevation={3}>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Typography variant="h6" gutterBottom >
+            Dependent Information (For Minors Under 18)
+          </Typography>
         </Grid>
-      ))}
-    </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            type="number"
+            label="Number of Dependents (Minors)"
+            name="numberOfDependents"
+            value={formData.numberOfDependents}
+            onChange={handleInputChange}
+            inputProps={{ min: 0, max: 10 }} // Add a reasonable maximum
+          />
+        </Grid>
+        {formData.dependents.map((dependent, index) => (
+          <Grid container item spacing={3} key={index}>
+            <Grid item xs={12}>
+              <Typography variant="subtitle1">Dependent {index + 1}</Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth required>
+                <InputLabel>Relation</InputLabel>
+                <Select
+                  name={`dependents[${index}].relation`}
+                  value={formData.dependents[index]?.relation || ""}
+                  onChange={handleInputChange}
+                  label="Relation"
+                >
+                  <MenuItem value="child">Child</MenuItem>
+                  <MenuItem value="other">Other</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            {formData.dependents[index]?.relation === "other" && (
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Specify Relation"
+                  name={`dependents[${index}].relationOther`}
+                  value={formData.dependents[index]?.relationOther || ""}
+                  onChange={handleInputChange}
+                />
+              </Grid>
+            )}
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="Full Name"
+                name={`dependents[${index}].fullName`}
+                value={formData.dependents[index]?.fullName || ""}
+                onChange={handleInputChange}
+                required
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                type="date"
+                label="Date of Birth"
+                name={`dependents[${index}].dateOfBirth`}
+                value={formData.dependents[index]?.dateOfBirth || ""}
+                onChange={handleInputChange}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                required
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="Passport Number"
+                name={`dependents[${index}].passportNumber`}
+                value={formData.dependents[index]?.passportNumber || ""}
+                onChange={handleInputChange}
+                required
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth required>
+                <InputLabel>Nationality</InputLabel>
+                <Select
+                  name={`dependents[${index}].nationality`}
+                  value={formData.dependents[index]?.nationality || ""}
+                  onChange={handleInputChange}
+                  label="Nationality"
+                >
+                  {countries.map((country) => (
+                    <MenuItem key={country} value={country}>
+                      {country}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth required>
+                <InputLabel>Gender</InputLabel>
+                <Select
+                  name={`dependents[${index}].gender`}
+                  value={formData.dependents[index]?.gender || ""}
+                  onChange={handleInputChange}
+                  label="Gender"
+                >
+                  <MenuItem value="male">Male</MenuItem>
+                  <MenuItem value="female">Female</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth required>
+                <InputLabel>Relationship Verification Documents</InputLabel>
+                <Select
+                  name={`dependents[${index}].relationshipVerification`}
+                  value={formData.dependents[index]?.relationshipVerification || ""}
+                  onChange={handleInputChange}
+                  label="Relationship Verification Documents"
+                >
+                  <MenuItem value="birthCertificate">Birth Certificate</MenuItem>
+                  <MenuItem value="adoptionPapers">Adoption Papers</MenuItem>
+                  <MenuItem value="other">Other</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            {formData.dependents[index]?.relationshipVerification === "other" && (
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Specify Document Type"
+                  name={`dependents[${index}].relationshipVerificationOther`}
+                  value={formData.dependents[index]?.relationshipVerificationOther || ""}
+                  onChange={handleInputChange}
+                />
+              </Grid>
+            )}
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth required>
+                <InputLabel>Consent from Other Parents/Guardians (if applicable)</InputLabel>
+                <Select
+                  name={`dependents[${index}].parentalConsent`}
+                  value={formData.dependents[index]?.parentalConsent || ""}
+                  onChange={handleInputChange}
+                  label="Consent from Other Parents/Guardians (if applicable)"
+                >
+                  <MenuItem value="yes">Yes</MenuItem>
+                  <MenuItem value="no">No</MenuItem>
+                  <MenuItem value="notApplicable">Not Applicable</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        ))}
+      </Grid>
+    </StyledPaper>
   )
 
   const getStepContent = (step) => {
@@ -855,98 +897,110 @@ export function OverviewCourseView() {
   }
 
   return (
-    <Box sx={{ width: "100%", p: 3 }}>
-      <Grid container spacing={3}>
-        {/* Main content area */}
-        <Grid item xs={12} md={8}>
-          <StyledCard>
-            <CardContent>
-              {getStepContent(activeStep)}
-              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
-                <Button disabled={activeStep === 0} onClick={handleBack} sx={{ mr: 1 }}>
-                  Back
-                </Button>
-                <Button variant="contained" onClick={activeStep === steps.length - 1 ? undefined : handleNext}>
-                  {activeStep === steps.length - 1 ? "Submit" : "Next"}
-                </Button>
-              </Box>
-            </CardContent>
-          </StyledCard>
-        </Grid>
+    <Container maxWidth="lg">
+      <Box sx={{ width: "100%", py: 4 }}>
+        <Grid container spacing={4}>
+          {/* Main content area */}
+          <Grid item xs={12} md={8}>
+            <StyledCard>
+              <CardContent>
+                <Typography variant="h4" gutterBottom  align="center" sx={{ mb: 4 }}>
+                  Visa Application Form
+                </Typography>
+                {getStepContent(activeStep)}
+                <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
+                  <StyledButton disabled={activeStep === 0} onClick={handleBack} variant="outlined">
+                    Back
+                  </StyledButton>
+                  <StyledButton
+                    variant="contained"
+                    
+                    onClick={activeStep === steps.length - 1 ? undefined : handleNext}
+                  >
+                    {activeStep === steps.length - 1 ? "Submit" : "Next"}
+                  </StyledButton>
+                </Box>
+              </CardContent>
+            </StyledCard>
+          </Grid>
 
-        {/* Right side panel with stepper and info */}
-        <Grid item xs={12} md={4}>
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <StyledCard>
-                <CardContent>
-                  <Box sx={{ width: "100%", mb: 4 }}>
-                    <Stepper activeStep={activeStep} orientation="vertical">
-                      {steps.map((label) => (
-                        <Step key={label}>
-                          <StepLabel>{label}</StepLabel>
-                        </Step>
-                      ))}
-                    </Stepper>
-                  </Box>
-                </CardContent>
-              </StyledCard>
-            </Grid>
+          {/* Right side panel with stepper and info */}
+          <Grid item xs={12} md={4}>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <StyledCard>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom >
+                      Application Progress
+                    </Typography>
+                    <Box sx={{ width: "100%", mb: 4 }}>
+                      <Stepper activeStep={activeStep} orientation={isMobile ? "horizontal" : "vertical"}>
+                        {steps.map((label) => (
+                          <Step key={label}>
+                            <StepLabel>{isMobile ? "" : label}</StepLabel>
+                          </Step>
+                        ))}
+                      </Stepper>
+                    </Box>
+                  </CardContent>
+                </StyledCard>
+              </Grid>
 
-            <Grid item xs={12}>
-              <StyledCard>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Important Information
-                  </Typography>
-                  <Divider sx={{ my: 2 }} />
-                  <FormControl fullWidth sx={{ mb: 2 }}>
-                    <InputLabel>I am a citizen of</InputLabel>
-                    <Select
-                      name="fromCountry"
-                      value={formData.fromCountry}
-                      onChange={handleInputChange}
-                      label="I am a citizen of"
-                    >
-                      {countries.map((country) => (
-                        <MenuItem key={country} value={country}>
-                          {country}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <FormControl fullWidth sx={{ mb: 2 }}>
-                    <InputLabel>I am going to</InputLabel>
-                    <Select
-                      name="toCountry"
-                      value={formData.toCountry}
-                      onChange={handleInputChange}
-                      label="I am going to"
-                    >
-                      {countries.map((country) => (
-                        <MenuItem key={country} value={country}>
-                          {country}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <FormControl fullWidth sx={{ mb: 2 }}>
-                    <InputLabel>Currency</InputLabel>
-                    <Select name="currency" value={formData.currency} onChange={handleInputChange} label="Currency">
-                      {currencies.map((currency) => (
-                        <MenuItem key={currency.code} value={currency.code}>
-                          {currency.label} ({currency.code})
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </CardContent>
-              </StyledCard>
+              <Grid item xs={12}>
+                <StyledCard>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom >
+                      Important Information
+                    </Typography>
+                    {/* <Divider sx={{ my: 2 }} /> */}
+                    <FormControl fullWidth sx={{ mb: 2 }}>
+                      <InputLabel>I am a citizen of</InputLabel>
+                      <Select
+                        name="fromCountry"
+                        value={formData.fromCountry}
+                        onChange={handleInputChange}
+                        label="I am a citizen of"
+                      >
+                        {countries.map((country) => (
+                          <MenuItem key={country} value={country}>
+                            {country}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    <FormControl fullWidth sx={{ mb: 2 }}>
+                      <InputLabel>I am going to</InputLabel>
+                      <Select
+                        name="toCountry"
+                        value={formData.toCountry}
+                        onChange={handleInputChange}
+                        label="I am going to"
+                      >
+                        {countries.map((country) => (
+                          <MenuItem key={country} value={country}>
+                            {country}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    <FormControl fullWidth sx={{ mb: 2 }}>
+                      <InputLabel>Currency</InputLabel>
+                      <Select name="currency" value={formData.currency} onChange={handleInputChange} label="Currency">
+                        {currencies.map((currency) => (
+                          <MenuItem key={currency.code} value={currency.code}>
+                            {currency.label} ({currency.code})
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </CardContent>
+                </StyledCard>
+              </Grid>
             </Grid>
           </Grid>
         </Grid>
-      </Grid>
-    </Box>
+      </Box>
+    </Container>
   )
 }
 
