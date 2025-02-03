@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react"
+import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
+import { SeoIllustration } from 'src/assets/illustrations';
 import {
   Box,
   Stepper,
@@ -19,8 +21,12 @@ import {
   Paper,
   useTheme,
   useMediaQuery,
+  Checkbox,
+  ListItemText,
 } from "@mui/material"
 import { styled } from "@mui/material/styles"
+import { paths } from 'src/routes/paths';
+import { AppWelcome } from './app-welcome';
 
 const StyledCard = styled(Card)(({ theme }) => ({
   height: "100%",
@@ -56,6 +62,7 @@ const steps = [
   "Travel Information",
   "Security and Eligibility",
   "Dependent Information",
+  "Document Checklist",
 ]
 
 const countries = [
@@ -139,6 +146,19 @@ export function OverviewCourseView() {
     fromCountry: "",
     toCountry: "",
     currency: "",
+
+    // Section 7: Document Checklist
+    checklist: {
+      personalIdentification: [],
+      financialProof: [],
+      employmentBusiness: [],
+      accommodationTravel: [],
+      relationshipFamily: [],
+      residencyTax: [],
+      educationStudy: [],
+      medicalHealth: [],
+      additionalTravel: [],
+    },
   })
 
   useEffect(() => {
@@ -181,6 +201,10 @@ export function OverviewCourseView() {
         const newDependents = [...prev.dependents]
         newDependents[index] = { ...newDependents[index], [field]: value }
         return { ...prev, dependents: newDependents }
+      }
+      if (name.startsWith("checklist.")) {
+        const [, field] = name.split(".")
+        return { ...prev, checklist: { ...prev.checklist, [field]: value } }
       }
       return { ...prev, [name]: value }
     })
@@ -877,6 +901,136 @@ export function OverviewCourseView() {
     </StyledPaper>
   )
 
+  const renderChecklist = () => (
+    <StyledPaper elevation={3}>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Typography variant="h6" gutterBottom >
+            Document Checklist
+          </Typography>
+        </Grid>
+        {[
+          {
+            title: "Personal Identification Documents",
+            name: "personalIdentification",
+            options: [
+              "Valid Passport",
+              "Completed Visa/Permit Application Form",
+              "Recent Passport-Sized Photographs",
+              "Birth Certificate",
+              "Family Registration Certificate",
+              "Marriage Certificate (if applicable)",
+              "Copies of Old Visas",
+            ],
+          },
+          {
+            title: "Financial Proof and Support Documents",
+            name: "financialProof",
+            options: [
+              "Recent Bank Statement",
+              "Savings Account Statement",
+              "Money Transfer Receipt (if sponsored)",
+              "Proof of Financial Means (e.g., Sponsorship Letter)",
+              "Payslips (last 3–6 months)",
+            ],
+          },
+          {
+            title: "Employment and Business-Related Documents",
+            name: "employmentBusiness",
+            options: [
+              "Employer's Letter (employment verification)",
+              "Employment Contract",
+              "Company Registration Certificate (for business owners)",
+              "Annual Company Reports",
+              "Business Plan (for business visa/start-up permit)",
+            ],
+          },
+          {
+            title: "Accommodation and Travel Documents",
+            name: "accommodationTravel",
+            options: [
+              "Flight Itinerary/Travel Plan",
+              "Proof of Accommodation (hotel booking, rental agreement, or host invitation)",
+              "Travel Health Insurance (minimum €30,000 coverage)",
+              "Visa Fee Payment Receipt",
+            ],
+          },
+          {
+            title: "Relationship and Family Reunification Documents",
+            name: "relationshipFamily",
+            options: [
+              "Invitation Letter from Family/Host",
+              "Proof of Relationship (photos, communication records)",
+              "Host's ID and Residence Proof",
+              "Parental Consent Letter (for minors)",
+              "Parent/Guardian Passport Copies",
+            ],
+          },
+          {
+            title: "Residency and Tax Documentation",
+            name: "residencyTax",
+            options: [
+              "Skatteverket Documents (for Sweden, e.g., personbevis)",
+              "Proof of EU/EEA Spouse's Residence Status",
+            ],
+          },
+          {
+            title: "Education and Study-Related Documents",
+            name: "educationStudy",
+            options: ["Enrollment Letter (for study permit)", "Accommodation Proof (for students)"],
+          },
+          {
+            title: "Medical and Health-Related Documents",
+            name: "medicalHealth",
+            options: [
+              "Medical Appointment Confirmation (for medical visa)",
+              "Proof of Medical Fees Payment or Financial Capability",
+            ],
+          },
+          {
+            title: "Additional Travel Documents",
+            name: "additionalTravel",
+            options: [
+              "Visa for Final Destination (for transit visa)",
+              "Proof of Ongoing Travel (travel card, ticket reservations)",
+            ],
+          },
+        ].map((section) => (
+          <Grid item xs={12} key={section.name}>
+            <Typography variant="subtitle1" gutterBottom>
+              {section.title}
+            </Typography>
+            <FormControl fullWidth>
+              <InputLabel id={`${section.name}-label`}>{section.title}</InputLabel>
+              <Select
+                labelId={`${section.name}-label`}
+                id={section.name}
+                multiple
+                value={formData.checklist[section.name]}
+                onChange={(event) =>
+                  handleInputChange({
+                    target: {
+                      name: `checklist.${section.name}`,
+                      value: event.target.value,
+                    },
+                  })
+                }
+                renderValue={(selected) => selected.join(", ")}
+              >
+                {section.options.map((option) => (
+                  <MenuItem key={option} value={option}>
+                    <Checkbox checked={formData.checklist[section.name].indexOf(option) > -1} />
+                    <ListItemText primary={option} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+        ))}
+      </Grid>
+    </StyledPaper>
+  )
+
   const getStepContent = (step) => {
     switch (step) {
       case 0:
@@ -891,25 +1045,51 @@ export function OverviewCourseView() {
         return renderSecurityQuestions()
       case 5:
         return renderDependentInfo()
+      case 6:
+        return renderChecklist()
       default:
         return "Unknown step"
     }
   }
 
   return (
+
+
+
     <Container maxWidth="lg">
+      <CustomBreadcrumbs
+              heading="Visa Application Form"
+              links={[
+                { name: "Dashboard", href: paths.dashboard.root },
+                { name: "EVisa", href: paths.dashboard.post.root },
+                { name: "Visa Application Form" },
+              ]}
+              sx={{ mb: { xs: 3, md: 3 } }}
+            />
+      
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <AppWelcome
+                  sx={{ mb: 3 }}
+                  title="Welcome back 👋 User"
+                  description="Fill this form and submit only if you are an Entrepreneur or already have any Start-up. We will help you expand your idea or business by providing you the right investors. This service is paid to avoid unnecessary queries."
+                  img={<SeoIllustration hideBackground />}
+                />
+              </Grid>
+            </Grid>
+
       <Box sx={{ width: "100%", py: 4 }}>
         <Grid container spacing={4}>
           {/* Main content area */}
           <Grid item xs={12} md={8}>
             <StyledCard>
               <CardContent>
-                <Typography variant="h4" gutterBottom  align="center" sx={{ mb: 4 }}>
+                {/* <Typography variant="h4" gutterBottom align="center" sx={{ mb: 4 }}>
                   Visa Application Form
-                </Typography>
+                </Typography> */}
                 {getStepContent(activeStep)}
                 <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
-                  <StyledButton disabled={activeStep === 0} onClick={handleBack} variant="outlined">
+                  <StyledButton disabled={activeStep === 0} onClick={handleBack} variant="outlined" >
                     Back
                   </StyledButton>
                   <StyledButton
@@ -952,7 +1132,7 @@ export function OverviewCourseView() {
                     <Typography variant="h6" gutterBottom >
                       Important Information
                     </Typography>
-                    {/* <Divider sx={{ my: 2 }} /> */}
+                  
                     <FormControl fullWidth sx={{ mb: 2 }}>
                       <InputLabel>I am a citizen of</InputLabel>
                       <Select
