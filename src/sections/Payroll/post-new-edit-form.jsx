@@ -1,512 +1,564 @@
-import { z as zod } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useMemo, useEffect, useCallback } from 'react';
-import Grid from '@mui/material/Unstable_Grid2';
+import { z as zod } from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useState, useMemo, useEffect } from "react"
+import Grid from "@mui/material/Grid"
+import Box from "@mui/material/Box"
+import Card from "@mui/material/Card"
+import Button from "@mui/material/Button"
+import Stepper from "@mui/material/Stepper"
+import Step from "@mui/material/Step"
+import StepLabel from "@mui/material/StepLabel"
+import LoadingButton from "@mui/lab/LoadingButton"
+import Typography from "@mui/material/Typography"
 
-import Box from '@mui/material/Box';
-import Chip from '@mui/material/Chip';
-import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
-import Switch from '@mui/material/Switch';
-import Divider from '@mui/material/Divider';
-import CardHeader from '@mui/material/CardHeader';
-import Typography from '@mui/material/Typography';
-import LoadingButton from '@mui/lab/LoadingButton';
-import FormControlLabel from '@mui/material/FormControlLabel';
+import { paths } from "src/routes/paths"
+import { useRouter } from "src/routes/hooks"
 
-import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hooks';
+import { useBoolean } from "src/hooks/use-boolean"
 
-import { useBoolean } from 'src/hooks/use-boolean';
-
-import {
-  _tags,
-  APPOINTMENT_TYPE_OPTIONS,
-  APPOINTMENT_CATEGORY_OPTIONS,
-  APPOINTMENT_COUNTRY_OPTIONS,
-  APPOINTMENT_TIME_OPTIONS,
-} from 'src/_mock';
-
-import { toast } from 'src/components/snackbar';
-import { Form, Field, schemaHelper } from 'src/components/hook-form';
-
-import { PostDetailsPreview } from './post-details-preview';
+import { toast } from "src/components/snackbar"
+import { Form, Field } from "src/components/hook-form"
 
 // ----------------------------------------------------------------------
 
+const steps = [
+  "Company",
+  "Employee",
+  "Employment",
+  "Compensation",
+  "Benefits",
+  "Attendance",
+  "Tax ",
+  "Reports",
+  "Access",
+  "Security",
+  "Integration",
+  "Support",
+  "Features",
+]
 
+const NewPostSchema = zod.object({
+  // Company Information
+  companyName: zod.string().min(1, { message: "Company Name is required!" }),
+  companyRegistrationNumber: zod.string().min(1, { message: "Company Registration Number is required!" }),
+  companyAddress: zod.string().min(1, { message: "Company Address is required!" }),
+  companyEmail: zod.string().email({ message: "Invalid email format" }),
+  companyPhone: zod.string().min(1, { message: "Company Phone is required!" }),
+  industrySector: zod.string().min(1, { message: "Industry/Sector is required!" }),
+  taxIdentificationNumber: zod.string().min(1, { message: "Tax Identification Number is required!" }),
+  companyBankDetails: zod.string().min(1, { message: "Company Bank Details are required!" }),
 
+  // Employee Information
+  employeeName: zod.string().min(1, { message: "Employee Name is required!" }),
+  employeeId: zod.string().min(1, { message: "Employee ID is required!" }),
+  dateOfBirth: zod.string().min(1, { message: "Date of Birth is required!" }),
+  nationality: zod.string().min(1, { message: "Nationality is required!" }),
+  employeeAddress: zod.string().min(1, { message: "Employee Address is required!" }),
+  employeeEmail: zod.string().email({ message: "Invalid email format" }),
+  employeePhone: zod.string().min(1, { message: "Employee Phone is required!" }),
+  socialSecurityNumber: zod.string().min(1, { message: "Social Security Number is required!" }),
+  employeeBankDetails: zod.string().min(1, { message: "Employee Bank Details are required!" }),
+  employeeTaxInfo: zod.string().min(1, { message: "Employee Tax Information is required!" }),
 
+  // Employment Details
+  jobTitle: zod.string().min(1, { message: "Job Title is required!" }),
+  jobDescription: zod.string().min(1, { message: "Job Description is required!" }),
+  department: zod.string().min(1, { message: "Department is required!" }),
+  startDate: zod.string().min(1, { message: "Start Date is required!" }),
+  employmentType: zod.string().min(1, { message: "Employment Type is required!" }),
+  workLocation: zod.string().min(1, { message: "Work Location is required!" }),
+  managerName: zod.string().min(1, { message: "Manager/Supervisor Name is required!" }),
+  workSchedule: zod.string().min(1, { message: "Work Schedule is required!" }),
+  employmentContract: zod.string().min(1, { message: "Employment Contract is required!" }),
 
+  // Compensation Details
+  baseSalary: zod.string().min(1, { message: "Base Salary is required!" }),
+  hourlyRate: zod.string().min(1, { message: "Hourly Rate is required!" }),
+  overtimeRate: zod.string().min(1, { message: "Overtime Rate is required!" }),
+  payFrequency: zod.string().min(1, { message: "Pay Frequency is required!" }),
+  bonusesCommissions: zod.string().min(1, { message: "Bonuses and Commissions information is required!" }),
+  deductions: zod.string().min(1, { message: "Deductions information is required!" }),
+  reimbursements: zod.string().min(1, { message: "Reimbursements information is required!" }),
 
+  // Benefits Information
+  healthInsurance: zod.string().min(1, { message: "Health Insurance information is required!" }),
+  retirementPlans: zod.string().min(1, { message: "Retirement Plans information is required!" }),
+  paidTimeOff: zod.string().min(1, { message: "Paid Time Off information is required!" }),
+  otherBenefits: zod.string().min(1, { message: "Other Benefits information is required!" }),
 
+  // Attendance and Time Tracking
+  timesheets: zod.string().min(1, { message: "Timesheets information is required!" }),
+  leaveRequests: zod.string().min(1, { message: "Leave Requests information is required!" }),
+  overtimeHours: zod.string().min(1, { message: "Overtime Hours information is required!" }),
+  holidayAbsenceTracking: zod.string().min(1, { message: "Holiday and Absence Tracking information is required!" }),
 
+  // Tax and Compliance Information
+  employeeTaxForms: zod.string().min(1, { message: "Employee Tax Forms information is required!" }),
+  companyTaxFiling: zod.string().min(1, { message: "Company Tax Filing information is required!" }),
+  localTaxRegulations: zod.string().min(1, { message: "Local Tax Regulations Compliance information is required!" }),
+  statutoryContributions: zod.string().min(1, { message: "Statutory Contributions information is required!" }),
 
-export const NewPostSchema = zod.object({
-  title: zod.string().min(1, { message: 'Title is required!' }),
-  description: zod.string().min(1, { message: 'Description is required!' }),
-  content: schemaHelper.editor().min(100, { message: 'Content must be at least 100 characters' }),
-  coverUrl: schemaHelper.file({ message: { required_error: 'Cover is required!' } }),
-  tags: zod.string().array().min(2, { message: 'Must have at least 2 items!' }),
-  metaKeywords: zod.string().array().nonempty({ message: 'Meta keywords is required!' }),
-  // Not required
-  metaTitle: zod.string(),
-  metaDescription: zod.string(),
-});
+  // Reporting and Analytics
+  payrollReports: zod.string().min(1, { message: "Payroll Reports information is required!" }),
+  taxReports: zod.string().min(1, { message: "Tax Reports information is required!" }),
+  employeeEarningsStatements: zod.string().min(1, { message: "Employee Earnings Statements information is required!" }),
+  expenseReports: zod.string().min(1, { message: "Expense Reports information is required!" }),
+
+  // User Access and Permissions
+  userRoles: zod.string().min(1, { message: "User Roles information is required!" }),
+  accessLevels: zod.string().min(1, { message: "Access Levels and Permissions information is required!" }),
+  loginCredentials: zod
+    .string()
+    .min(1, { message: "Login Credentials and Security Measures information is required!" }),
+
+  // Security Measures
+  dataEncryption: zod.string().min(1, { message: "Data Encryption information is required!" }),
+  twoFactorAuthentication: zod.string().min(1, { message: "Two-Factor Authentication information is required!" }),
+  dataBackups: zod.string().min(1, { message: "Data Backups information is required!" }),
+  dataProtectionCompliance: zod.string().min(1, { message: "Data Protection Compliance information is required!" }),
+
+  // Integration Capabilities
+  accountingSoftwareIntegration: zod
+    .string()
+    .min(1, { message: "Accounting Software Integration information is required!" }),
+  hrmsIntegration: zod.string().min(1, { message: "HRMS Integration is required!" }),
+  apiAccess: zod.string().min(1, { message: "API Access information is required!" }),
+
+  // Communication and Support
+  customerSupportContact: zod.string().min(1, { message: "Customer Support Contact information is required!" }),
+  helpDeskSystem: zod.string().min(1, { message: "Help Desk or Ticketing System information is required!" }),
+  knowledgeBase: zod.string().min(1, { message: "Knowledge Base and FAQs information is required!" }),
+
+  // Additional Features
+  notificationsAlerts: zod.string().min(1, { message: "Notifications and Alerts information is required!" }),
+  documentManagement: zod.string().min(1, { message: "Document Management information is required!" }),
+  mobileAccess: zod.string().min(1, { message: "Mobile Access information is required!" }),
+  employeeSelfService: zod.string().min(1, { message: "Employee Self-Service Portal information is required!" }),
+})
 
 // ----------------------------------------------------------------------
 
 export function PostNewEditForm({ currentPost }) {
-  const router = useRouter();
+  const router = useRouter()
+  const [activeStep, setActiveStep] = useState(0)
 
-  const preview = useBoolean();
+  const preview = useBoolean()
 
   const defaultValues = useMemo(
     () => ({
-      title: currentPost?.title || '',
-      description: currentPost?.description || '',
-      content: currentPost?.content || '',
-      coverUrl: currentPost?.coverUrl || null,
-      tags: currentPost?.tags || [],
-      metaKeywords: currentPost?.metaKeywords || [],
-      metaTitle: currentPost?.metaTitle || '',
-      metaDescription: currentPost?.metaDescription || '',
+      companyName: currentPost?.companyName || "",
+      companyRegistrationNumber: currentPost?.companyRegistrationNumber || "",
+      companyAddress: currentPost?.companyAddress || "",
+      companyEmail: currentPost?.companyEmail || "",
+      companyPhone: currentPost?.companyPhone || "",
+      industrySector: currentPost?.industrySector || "",
+      taxIdentificationNumber: currentPost?.taxIdentificationNumber || "",
+      companyBankDetails: currentPost?.companyBankDetails || "",
+
+      employeeName: currentPost?.employeeName || "",
+      employeeId: currentPost?.employeeId || "",
+      dateOfBirth: currentPost?.dateOfBirth || "",
+      nationality: currentPost?.nationality || "",
+      employeeAddress: currentPost?.employeeAddress || "",
+      employeeEmail: currentPost?.employeeEmail || "",
+      employeePhone: currentPost?.employeePhone || "",
+      socialSecurityNumber: currentPost?.socialSecurityNumber || "",
+      employeeBankDetails: currentPost?.employeeBankDetails || "",
+      employeeTaxInfo: currentPost?.employeeTaxInfo || "",
+
+      jobTitle: currentPost?.jobTitle || "",
+      jobDescription: currentPost?.jobDescription || "",
+      department: currentPost?.department || "",
+      startDate: currentPost?.startDate || "",
+      employmentType: currentPost?.employmentType || "",
+      workLocation: currentPost?.workLocation || "",
+      managerName: currentPost?.managerName || "",
+      workSchedule: currentPost?.workSchedule || "",
+      employmentContract: currentPost?.employmentContract || "",
+
+      baseSalary: currentPost?.baseSalary || "",
+      hourlyRate: currentPost?.hourlyRate || "",
+      overtimeRate: currentPost?.overtimeRate || "",
+      payFrequency: currentPost?.payFrequency || "",
+      bonusesCommissions: currentPost?.bonusesCommissions || "",
+      deductions: currentPost?.deductions || "",
+      reimbursements: currentPost?.reimbursements || "",
+
+      healthInsurance: currentPost?.healthInsurance || "",
+      retirementPlans: currentPost?.retirementPlans || "",
+      paidTimeOff: currentPost?.paidTimeOff || "",
+      otherBenefits: currentPost?.otherBenefits || "",
+
+      timesheets: currentPost?.timesheets || "",
+      leaveRequests: currentPost?.leaveRequests || "",
+      overtimeHours: currentPost?.overtimeHours || "",
+      holidayAbsenceTracking: currentPost?.holidayAbsenceTracking || "",
+
+      employeeTaxForms: currentPost?.employeeTaxForms || "",
+      companyTaxFiling: currentPost?.companyTaxFiling || "",
+      localTaxRegulations: currentPost?.localTaxRegulations || "",
+      statutoryContributions: currentPost?.statutoryContributions || "",
+
+      payrollReports: currentPost?.payrollReports || "",
+      taxReports: currentPost?.taxReports || "",
+      employeeEarningsStatements: currentPost?.employeeEarningsStatements || "",
+      expenseReports: currentPost?.expenseReports || "",
+
+      userRoles: currentPost?.userRoles || "",
+      accessLevels: currentPost?.accessLevels || "",
+      loginCredentials: currentPost?.loginCredentials || "",
+
+      dataEncryption: currentPost?.dataEncryption || "",
+      twoFactorAuthentication: currentPost?.twoFactorAuthentication || "",
+      dataBackups: currentPost?.dataBackups || "",
+      dataProtectionCompliance: currentPost?.dataProtectionCompliance || "",
+
+      accountingSoftwareIntegration: currentPost?.accountingSoftwareIntegration || "",
+      hrmsIntegration: currentPost?.hrmsIntegration || "",
+      apiAccess: currentPost?.apiAccess || "",
+
+      customerSupportContact: currentPost?.customerSupportContact || "",
+      helpDeskSystem: currentPost?.helpDeskSystem || "",
+      knowledgeBase: currentPost?.knowledgeBase || "",
+
+      notificationsAlerts: currentPost?.notificationsAlerts || "",
+      documentManagement: currentPost?.documentManagement || "",
+      mobileAccess: currentPost?.mobileAccess || "",
+      employeeSelfService: currentPost?.employeeSelfService || "",
     }),
-    [currentPost]
-  );
+    [currentPost],
+  )
 
   const methods = useForm({
-    mode: 'all',
+    mode: "all",
     resolver: zodResolver(NewPostSchema),
     defaultValues,
-  });
+  })
+
   const {
     reset,
     watch,
+    control,
     setValue,
     handleSubmit,
     formState: { isSubmitting, isValid },
-  } = methods;
+  } = methods
 
-  const values = watch();
+  const values = watch()
 
   useEffect(() => {
     if (currentPost) {
-      reset(defaultValues);
+      reset(defaultValues)
     }
-  }, [currentPost, defaultValues, reset]);
+  }, [currentPost, defaultValues, reset])
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      reset();
-      preview.onFalse();
-      toast.success(currentPost ? 'Update success!' : 'Create success!');
-      router.push(paths.dashboard.post.root);
-      console.info('DATA', data);
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      reset()
+      preview.onFalse()
+      toast.success(currentPost ? "Update success!" : "Create success!")
+      router.push(paths.dashboard.post.root)
+      console.info("DATA", data)
     } catch (error) {
-      console.error(error);
+      console.error(error)
     }
-  });
+  })
 
-  const handleRemoveFile = useCallback(() => {
-    setValue('coverUrl', null);
-  }, [setValue]);
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1)
+  }
 
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1)
+  }
 
-  const multiqs1 = [
-    { value: '', label: 'Choose Option' },
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-    { value: 'dontknow', label: 'Dont Know' },
-
-  ];
-
-
-  const multiqs2 = [
-    { value: '', label: 'Choose Option' },
-    { value: '1', label: '1' },
-    { value: '2', label: '2' },
-    { value: '3', label: '3' },
-    { value: '4', label: '4' },
-    { value: '5', label: '5' },
-    { value: '6', label: '6' },
-    { value: '7', label: '7' },
-    { value: '8', label: '8' },
-    { value: '9', label: '8' },
-    { value: '10', label: '8' },
-
-  ];
-
-  const multiqs3 = [
-    { value: '', label: 'Choose Option' },
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-  ];
-
-  const multiqs4 = [
-    { value: '', label: 'Choose Option' },
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-  ];
-
-  const multiqs5 = [
-    { value: '', label: 'Choose Option' },
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-  ];
-
-
-  const multiqs6 = [
-    { value: '', label: 'Choose Option' },
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-  ];
-
-  const renderDetails = (
-    <Card>
-      <CardHeader title="Details" subheader="Title, short description, image..." sx={{ mb: 3 }} />
-
-      <Divider />
-
-      <Stack spacing={3} sx={{ p: 3 }}>
-        <Field.Text name="title" label="Post title" />
-
-        <Field.Text name="description" label="Description" multiline rows={3} />
-
-        <Stack spacing={1.5}>
-          <Typography variant="subtitle2">Content</Typography>
-          <Field.Editor name="content" sx={{ maxHeight: 480 }} />
-        </Stack>
-
-        <Stack spacing={1.5}>
-          <Typography variant="subtitle2">Cover</Typography>
-          <Field.Upload name="coverUrl" maxSize={3145728} onDelete={handleRemoveFile} />
-        </Stack>
-      </Stack>
-    </Card>
-  );
-
-  const renderProperties = (
-    <Card>
-      <CardHeader
-        title="Properties"
-        subheader="Additional functions and attributes..."
-        sx={{ mb: 3 }}
-      />
-
-      <Divider />
-
-      <Stack spacing={3} sx={{ p: 3 }}>
-        <Field.Autocomplete
-          name="tags"
-          label="Tags"
-          placeholder="+ Tags"
-          multiple
-          freeSolo
-          disableCloseOnSelect
-          options={_tags.map((option) => option)}
-          getOptionLabel={(option) => option}
-          renderOption={(props, option) => (
-            <li {...props} key={option}>
-              {option}
-            </li>
-          )}
-          renderTags={(selected, getTagProps) =>
-            selected.map((option, index) => (
-              <Chip
-                {...getTagProps({ index })}
-                key={option}
-                label={option}
-                size="small"
-                color="info"
-                variant="soft"
-              />
-            ))
-          }
-        />
-
-        <Field.Text name="metaTitle" label="Meta title" />
-
-        <Field.Text name="metaDescription" label="Meta description" fullWidth multiline rows={3} />
-
-        <Field.Autocomplete
-          name="metaKeywords"
-          label="Meta keywords"
-          placeholder="+ Keywords"
-          multiple
-          freeSolo
-          disableCloseOnSelect
-          options={_tags.map((option) => option)}
-          getOptionLabel={(option) => option}
-          renderOption={(props, option) => (
-            <li {...props} key={option}>
-              {option}
-            </li>
-          )}
-          renderTags={(selected, getTagProps) =>
-            selected.map((option, index) => (
-              <Chip
-                {...getTagProps({ index })}
-                key={option}
-                label={option}
-                size="small"
-                color="info"
-                variant="soft"
-              />
-            ))
-          }
-        />
-
-        <FormControlLabel
-          control={<Switch defaultChecked inputProps={{ id: 'comments-switch' }} />}
-          label="Enable comments"
-        />
-      </Stack>
-    </Card>
-  );
-
-  const renderActions = (
-    <Box display="flex" alignItems="center" flexWrap="wrap" justifyContent="flex-end">
-      <FormControlLabel
-        control={<Switch defaultChecked inputProps={{ id: 'publish-switch' }} />}
-        label="Publish"
-        sx={{ pl: 3, flexGrow: 1 }}
-      />
-
-      <div>
-        <Button color="inherit" variant="outlined" size="large" onClick={preview.onTrue}>
-          Preview
-        </Button>
-
-        <LoadingButton
-          type="submit"
-          variant="contained"
-          size="large"
-          loading={isSubmitting}
-          sx={{ ml: 2 }}
+  const renderStepContent = (step) => {
+    const renderFields = (fields, title) => (
+      <Box
+        sx={{
+          maxWidth: "4xl",
+          mx: "auto",
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{
+            mb: 4,
+            fontWeight: 600,
+            fontSize: { xs: "1.25rem", md: "1.5rem" },
+          }}
         >
-          {!currentPost ? 'Create post' : 'Save changes'}
-        </LoadingButton>
-      </div>
-    </Box>
-  );
+          {title}
+        </Typography>
+        <Grid container spacing={3}>
+          {fields.map((field, index) => (
+            <Grid item xs={12} md={field.fullWidth ? 12 : 6} key={index}>
+              <Field.Text
+                name={field.name}
+                label={field.label}
+                fullWidth
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    backgroundColor: "background.paper",
+                  },
+                  "& .MuiInputLabel-root": {
+                    fontSize: "0.875rem",
+                    color: "text.secondary",
+                  },
+                  "& .MuiOutlinedInput-input": {
+                    fontSize: "0.875rem",
+                  },
+                }}
+              />
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+    )
+
+    const stepContent = [
+      {
+        title: "Company Information",
+        fields: [
+          { name: "companyName", label: "Company Name" },
+          { name: "companyRegistrationNumber", label: "Company Registration Number" },
+          { name: "companyAddress", label: "Company Address", fullWidth: true },
+          { name: "companyEmail", label: "Company Email" },
+          { name: "companyPhone", label: "Company Phone" },
+          { name: "industrySector", label: "Industry/Sector" },
+          { name: "taxIdentificationNumber", label: "Tax Identification Number" },
+          { name: "companyBankDetails", label: "Company Bank Details", fullWidth: true },
+        ],
+      },
+      {
+        title: "Employee Information",
+        fields: [
+          { name: "employeeName", label: "Full Name" },
+          { name: "employeeId", label: "Employee ID" },
+          { name: "dateOfBirth", label: "Date of Birth" },
+          { name: "nationality", label: "Nationality" },
+          { name: "employeeAddress", label: "Address", fullWidth: true },
+          { name: "employeeEmail", label: "Email" },
+          { name: "employeePhone", label: "Phone Number" },
+          { name: "socialSecurityNumber", label: "Social Security Number or National ID" },
+          { name: "employeeBankDetails", label: "Bank Account Details", fullWidth: true },
+          { name: "employeeTaxInfo", label: "Tax Information", fullWidth: true },
+        ],
+      },
+      {
+        title: "Employment Details",
+        fields: [
+          { name: "jobTitle", label: "Job Title" },
+          { name: "jobDescription", label: "Job Description", fullWidth: true },
+          { name: "department", label: "Department" },
+          { name: "startDate", label: "Start Date" },
+          { name: "employmentType", label: "Employment Type" },
+          { name: "workLocation", label: "Work Location" },
+          { name: "managerName", label: "Manager/Supervisor Name" },
+          { name: "workSchedule", label: "Work Schedule" },
+          { name: "employmentContract", label: "Employment Contract", fullWidth: true },
+        ],
+      },
+      {
+        title: "Compensation Details",
+        fields: [
+          { name: "baseSalary", label: "Base Salary" },
+          { name: "hourlyRate", label: "Hourly Rate" },
+          { name: "overtimeRate", label: "Overtime Rate" },
+          { name: "payFrequency", label: "Pay Frequency" },
+          { name: "bonusesCommissions", label: "Bonuses and Commissions" },
+          { name: "deductions", label: "Deductions" },
+          { name: "reimbursements", label: "Reimbursements" },
+        ],
+      },
+      {
+        title: "Benefits Information",
+        fields: [
+          { name: "healthInsurance", label: "Health Insurance" },
+          { name: "retirementPlans", label: "Retirement Plans" },
+          { name: "paidTimeOff", label: "Paid Time Off" },
+          { name: "otherBenefits", label: "Other Benefits" },
+        ],
+      },
+      {
+        title: "Attendance and Time Tracking",
+        fields: [
+          { name: "timesheets", label: "Timesheets" },
+          { name: "leaveRequests", label: "Leave Requests" },
+          { name: "overtimeHours", label: "Overtime Hours" },
+          { name: "holidayAbsenceTracking", label: "Holiday and Absence Tracking" },
+        ],
+      },
+      {
+        title: "Tax and Compliance Information",
+        fields: [
+          { name: "employeeTaxForms", label: "Employee Tax Forms" },
+          { name: "companyTaxFiling", label: "Company Tax Filing" },
+          { name: "localTaxRegulations", label: "Local Tax Regulations Compliance" },
+          { name: "statutoryContributions", label: "Statutory Contributions" },
+        ],
+      },
+      {
+        title: "Reporting and Analytics",
+        fields: [
+          { name: "payrollReports", label: "Payroll Reports" },
+          { name: "taxReports", label: "Tax Reports" },
+          { name: "employeeEarningsStatements", label: "Employee Earnings Statements" },
+          { name: "expenseReports", label: "Expense Reports" },
+        ],
+      },
+      {
+        title: "User Access and Permissions",
+        fields: [
+          { name: "userRoles", label: "User Roles" },
+          { name: "accessLevels", label: "Access Levels and Permissions" },
+          { name: "loginCredentials", label: "Login Credentials and Security Measures" },
+        ],
+      },
+      {
+        title: "Security Measures",
+        fields: [
+          { name: "dataEncryption", label: "Data Encryption" },
+          { name: "twoFactorAuthentication", label: "Two-Factor Authentication" },
+          { name: "dataBackups", label: "Data Backups" },
+          { name: "dataProtectionCompliance", label: "Data Protection Compliance" },
+        ],
+      },
+      {
+        title: "Integration Capabilities",
+        fields: [
+          { name: "accountingSoftwareIntegration", label: "Accounting Software Integration" },
+          { name: "hrmsIntegration", label: "HR Management Systems Integration" },
+          { name: "apiAccess", label: "API Access for Custom Integrations" },
+        ],
+      },
+      {
+        title: "Communication and Support",
+        fields: [
+          { name: "customerSupportContact", label: "Customer Support Contact Information" },
+          { name: "helpDeskSystem", label: "Help Desk or Ticketing System" },
+          { name: "knowledgeBase", label: "Knowledge Base and FAQs" },
+        ],
+      },
+      {
+        title: "Additional Features",
+        fields: [
+          { name: "notificationsAlerts", label: "Notifications and Alerts" },
+          { name: "documentManagement", label: "Document Management" },
+          { name: "mobileAccess", label: "Mobile Access" },
+          { name: "employeeSelfService", label: "Employee Self-Service Portal" },
+        ],
+      },
+    ]
+
+    return renderFields(stepContent[step].fields, stepContent[step].title)
+  }
 
   return (
     <Form methods={methods} onSubmit={onSubmit}>
-      <Grid spacing={3}>
-        <Grid xs={12} md={8}>
-          <Card sx={{ p: 3 }}>
-            {/* <Typography
-              variant="caption"
-              sx={{
-                mt: 3,
-                mb: 5,
-                mx: 'auto',
-                display: 'block',
-                textAlign: 'left',
-                color: 'gray',
-              }}
-            >
-              Fill this form and submit only if you are an Entrepreneur or already have any Start-up. We will help you to expand your idea or business by providing you right investors. This service is paid to avoid unnecessary queries.
-            </Typography> */}
-            <Box
-              rowGap={3}
-              columnGap={2}
-              display="grid"
-              gridTemplateColumns={{
-                xs: 'repeat(1, 1fr)',
-                sm: 'repeat(2, 1fr)',
-              }}
-              sx={{ 
-                '& .MuiFormControl-root': { 
-                  width: '100%'
-                },
-                '& .MuiInputBase-root': {
-                  minHeight: '56px'
-                },
-                '& .MuiInputLabel-root': {
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  maxWidth: '100%'
-                },
-                '& .full-width': {
-                  gridColumn: '1 / -1'
-                }
-              }}
-            >
-              <Field.Text name="question1" label="What do you want out of this experience?" />
-              <Field.Text name="question2" label="What is your dream job?" />
-              <Field.Text name="question3" label="Where do you go on a night out?" />
-
-              <Field.Text name="question4" label="How can you make the company better?" />
-
-              <Field.Text name="question5" label="Which three adjectives, Describe your strengths?" />
-
-              <Field.Text name="question6" label="What do you want on your resume in next Two Years?" />
-
-              <Field.Text name="question7" label="What Would You Do with unlimited resources?" />
-
-              <Field.Text name="question8" label="Why an investor should invest on you?" />
-
-              <Field.Text name="question9" label="What shares you want to offer an investor in a company?" />
-
-              <Field.Text 
-                name="question10" 
-                label="Are you looking for a sleeping investor or an active investor partner?" 
-                className="full-width"
-                sx={{ 
-                  width: '100%',
-                  '& .MuiInputLabel-root': {
-                    whiteSpace: 'normal',
-                    maxWidth: 'none'
-                  }
-                }} 
-              />
-
-              <Field.Text name="question11" label="How many languages you can speak?" />
-
-              <Field.Text name="question12" label="Which country and city would you prefer for this business?" />
-
-              <Field.Text 
-                name="question13" 
-                label="Do you have ability to manage the business or did you run any business before?" 
-                className="full-width"
-                sx={{ 
-                  width: '100%',
-                  '& .MuiInputLabel-root': {
-                    whiteSpace: 'normal',
-                    maxWidth: 'none'
-                  }
-                }} 
-              />
-
-              <Field.Text name="question14" label="Did import export involve in this business?" />
-
-              <Field.Text name="question15" label="Do you own a house, apartment or living in rental apartment?" />
-              <Field.Text name="question16" label="What are you doing for living?" />
-
-
-
-
-              {/* APPOINTMENT_TYPE_OPTIONS,
-  APPOINTMENT_CATEGORY_OPTIONS,
-  APPOINTMENT_COUNTRY_OPTIONS,
-  APPOINTMENT_TIME_OPTIONS, */}
-
-
-
-              <Field.Select native name="question17" label="Are you friends happy with your business idea?" InputLabelProps={{ shrink: true }}>
-                {multiqs1.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-
-
-              <Field.Select 
-                native 
-                name="question18" 
-                label="How you will rate your confidence and communication level (1-10)?" 
-                InputLabelProps={{ shrink: true }}
-                className="full-width"
-              >
-                {multiqs2.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-
-              <Field.Text name="question19" label="What amount would be enough to start this business?" />
-
-
-
-              <Field.Select native name="question20" label="Are you currently in Europe on study or on work permit?" InputLabelProps={{ shrink: true }}>
-                {multiqs3.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-              <Field.Select 
-                native 
-                name="question21" 
-                label="Do you own a business and looking to start new branch with an investor?" 
-                InputLabelProps={{ shrink: true }}
-                className="full-width"
-              >
-                {multiqs4.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-
-              <Field.Select native name="question22" label="Did your business base outside of Europe?" InputLabelProps={{ shrink: true }}>
-                {multiqs5.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-              <Field.Select native name="question23" label="Do you have an E-Commerce business idea?" InputLabelProps={{ shrink: true }}>
-                {multiqs6.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-
-              <Field.Text 
-                name="question24" 
-                label="Tell us more about yourself business plan and upload the documents on our online portal" 
-                multiline
-                rows={3}
-                className="full-width"
-                sx={{ 
-                  width: '100%',
-                  '& .MuiInputBase-root': {
-                    minHeight: '100px'
+      <Card sx={{ p: 0 }}>
+        <Box sx={{ width: "100%", bgcolor: "background.default" }}>
+          <Box
+            sx={{
+              py: { xs: 2, md: 3 },
+              px: { xs: 2, md: 3 },
+              bgcolor: "background.paper",
+              borderBottom: "1px solid",
+              borderColor: "divider",
+            }}
+          >
+            <Box className="container mx-auto">
+              <Stepper
+                activeStep={activeStep}
+                alternativeLabel
+                sx={{
+                  "& .MuiStepLabel-label": {
+                    fontSize: "0.875rem",
+                    mt: 1,
                   },
-                  '& .MuiInputLabel-root': {
-                    whiteSpace: 'normal',
-                    maxWidth: 'none'
-                  }
-                }} 
-              />
-
-
-
-
-
+                  "& .MuiStepIcon-root": {
+                    fontSize: "1.75rem",
+                  },
+                  "& .Mui-active": {
+                    color: "primary.main",
+                  },
+                }}
+              >
+                {steps.map((label, index) => (
+                  <Step key={label}>
+                    <StepLabel>{label}</StepLabel>
+                  </Step>
+                ))}
+              </Stepper>
             </Box>
+          </Box>
 
+          <Box className="container mx-auto">
+            <Box
+              sx={{
+                py: { xs: 3, md: 5 },
+                px: { xs: 2, md: 3 },
+              }}
+            >
+              {renderStepContent(activeStep)}
 
-
-
-
-            <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>
-              {/* <Field.Text name="about" multiline rows={4} label="About" /> */}
-
-              <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
-                Send Request
-              </LoadingButton>
-            </Stack>
-          </Card>
-        </Grid>
-      </Grid>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  maxWidth: "4xl",
+                  mx: "auto",
+                  mt: { xs: 3, md: 4 },
+                  gap: 2,
+                }}
+              >
+                <Button
+                  color="inherit"
+                  disabled={activeStep === 0}
+                  onClick={handleBack}
+                  sx={{
+                    minWidth: "120px",
+                    px: 3,
+                  }}
+                >
+                  Back
+                </Button>
+                {activeStep === steps.length - 1 ? (
+                  <LoadingButton
+                    type="submit"
+                    variant="contained"
+                    loading={isSubmitting}
+                    sx={{
+                      minWidth: "120px",
+                      px: 3,
+                      bgcolor: "primary.main",
+                      "&:hover": {
+                        bgcolor: "primary.dark",
+                      },
+                    }}
+                  >
+                    Submit Form
+                  </LoadingButton>
+                ) : (
+                  <Button
+                    onClick={handleNext}
+                    variant="contained"
+                    sx={{
+                      minWidth: "120px",
+                      px: 3,
+                    }}
+                  >
+                    Next
+                  </Button>
+                )}
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+      </Card>
     </Form>
-  );
+  )
 }
 

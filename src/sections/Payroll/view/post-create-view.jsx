@@ -29,7 +29,7 @@ export function PostCreateView() {
   <Grid xs={12} md={12}>
           <AppWelcome sx={{ mb: 3 }}
             title="Welcome back 👋 User"
-            description="Fill this form and submit only if you are an Entrepreneur or already have any Start-up. We will help you to expand your idea or business by providing you right investors. This service is paid to avoid unnecessary queries."
+            description="Fill out this form and submit only if you require professional payroll services. We specialize in managing employee wages, taxes, and benefits, ensuring compliance and accuracy. Our services are provided by experienced payroll professionals and are available as a paid solution to streamline your payroll processing."
             img={<SeoIllustration hideBackground />}
           />
         </Grid>
