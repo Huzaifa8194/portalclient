@@ -1,527 +1,553 @@
-import { z as zod } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useMemo } from 'react';
-import Grid from '@mui/material/Unstable_Grid2';
+import { useState, useEffect, useMemo } from "react"
+import { z as zod } from "zod"
+import { useForm, useFieldArray } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import Grid from "@mui/material/Unstable_Grid2"
+import { MenuItem, Stepper, Step, StepLabel, Box, Typography } from "@mui/material"
 
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import LoadingButton from '@mui/lab/LoadingButton';
-import Checkbox from '@mui/material/Checkbox';
-import FormControlLabel from '@mui/material/FormControlLabel';
+import Card from "@mui/material/Card"
+import Stack from "@mui/material/Stack"
+import Button from "@mui/material/Button"
+import Divider from "@mui/material/Divider"
+import CardHeader from "@mui/material/CardHeader"
+import LoadingButton from "@mui/lab/LoadingButton"
 
-import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hooks';
+import { paths } from "src/routes/paths"
+import { useRouter } from "src/routes/hooks"
 
-import { toast } from 'src/components/snackbar';
-import { Form, Field } from 'src/components/hook-form';
+import { useBoolean } from "src/hooks/use-boolean"
 
-// ----------------------------------------------------------------------
-
-const LegalAssistanceSchema = zod.object({
-  fullName: zod.string().min(1, { message: 'Full Name is required!' }),
-  dateOfBirth: zod.string().min(1, { message: 'Date of Birth is required!' }),
-  gender: zod.string().min(1, { message: 'Gender is required!' }),
-  genderOther: zod.string().optional(),
-  phoneNumber: zod.string().min(1, { message: 'Phone Number is required!' }),
-  emailAddress: zod.string().email({ message: 'Invalid email address' }),
-  currentAddress: zod.string().min(1, { message: 'Current Address is required!' }),
-  citizenship: zod.string().min(1, { message: 'Citizenship is required!' }),
-  citizenshipOther: zod.string().optional(),
-  residencyStatus: zod.string().min(1, { message: 'Residency Status is required!' }),
-  residencyStatusOther: zod.string().optional(),
-  preferredContact: zod.string().min(1, { message: 'Preferred Contact Method is required!' }),
-  legalAssistanceType: zod.string().min(1, { message: 'Type of Legal Assistance is required!' }),
-  lawyerType: zod.array(zod.string()).min(1, { message: 'At least one Lawyer Type is required!' }),
-  lawyerTypeOther: zod.string().optional(),
-  legalIssueDescription: zod.string().min(1, { message: 'Legal Issue Description is required!' }),
-  desiredOutcome: zod.string().min(1, { message: 'Desired Outcome is required!' }),
-  firstTimeLegalAssistance: zod.string().min(1, { message: 'First Time Legal Assistance is required!' }),
-  caseStatus: zod.string().min(1, { message: 'Case Status is required!' }),
-  appealingDecision: zod.string().min(1, { message: 'Appealing Decision is required!' }),
-  appealAuthority: zod.string().optional(),
-  appealDeadline: zod.string().optional(),
-  takeOverCase: zod.string().min(1, { message: 'Take Over Case is required!' }),
-  publicFundsAdvice: zod.string().min(1, { message: 'Public Funds Advice is required!' }),
-  publicFundsDetails: zod.string().optional(),
-  urgentAssistance: zod.string().min(1, { message: 'Urgent Assistance is required!' }),
-  urgentAssistanceReason: zod.string().optional(),
-  nativeLanguage: zod.string().min(1, { message: 'Native Language is required!' }),
-  nativeLanguageOther: zod.string().optional(),
-  preferredLanguages: zod.array(zod.string()).min(1, { message: 'At least one Preferred Language is required!' }),
-  preferredLanguagesOther: zod.string().optional(),
-  preferredConsultation: zod.string().min(1, { message: 'Preferred Consultation Method is required!' }),
-  bankIdAccess: zod.string().min(1, { message: 'BankID/MittID Access is required!' }),
-  relevantDocuments: zod.string().min(1, { message: 'Relevant Documents is required!' }),
-  documentTypes: zod.array(zod.string()).optional(),
-  documentTypesOther: zod.string().optional(),
-  referralSource: zod.string().min(1, { message: 'Referral Source is required!' }),
-  referralSourceOther: zod.string().optional(),
-  additionalInformation: zod.string().optional(),
-  termsAgreement: zod.boolean().refine((val) => val === true, { message: 'You must agree to the terms' }),
-  dataProcessingConsent: zod.boolean().refine((val) => val === true, { message: 'You must consent to data processing' }),
-});
+import { toast } from "src/components/snackbar"
+import { Form, Field } from "src/components/hook-form"
 
 // ----------------------------------------------------------------------
 
-export function PostNewEditForm() {
-  const router = useRouter();
+const steps = [
+  "Company Information",
+  "Client Information",
+  "Employee Information",
+  "Employment Details",
+  "Compensation Details",
+  "Benefits Information",
+  "Additional Information",
+]
+
+export const NewPostSchema = zod.object({
+  // Company Information
+  companyName: zod.string().min(1, { message: "Company Name is required!" }),
+  companyRegistrationNumber: zod.string().min(1, { message: "Company Registration Number is required!" }),
+  companyAddress: zod.string().min(1, { message: "Company Address is required!" }),
+  companyEmail: zod.string().email({ message: "Invalid email format" }),
+  companyPhone: zod.string().min(1, { message: "Company Phone Number is required!" }),
+  industry: zod.string().min(1, { message: "Industry/Sector is required!" }),
+  taxIdentificationNumber: zod.string().min(1, { message: "Tax Identification Number is required!" }),
+  bankAccountDetails: zod.string().min(1, { message: "Bank Account Details are required!" }),
+  authorizedSignatories: zod.string().min(1, { message: "Authorized Signatories are required!" }),
+
+  // Client Information
+  clientCompanyName: zod.string().min(1, { message: "Client Company Name is required!" }),
+  clientEmail: zod.string().email({ message: "Invalid email format" }),
+  clientPhone: zod.string().min(1, { message: "Client Phone Number is required!" }),
+  clientAddress: zod.string().min(1, { message: "Client Address is required!" }),
+  clientPointOfContact: zod.string().min(1, { message: "Client Point of Contact is required!" }),
+  serviceAgreementDetails: zod.string().min(1, { message: "Service Agreement Details are required!" }),
+
+  // Employee Information
+  employeeName: zod.string().min(1, { message: "Employee Name is required!" }),
+  employeeId: zod.string().min(1, { message: "Employee ID is required!" }),
+  dateOfBirth: zod.string().min(1, { message: "Date of Birth is required!" }),
+  nationality: zod.string().min(1, { message: "Nationality is required!" }),
+  employeeAddress: zod.string().min(1, { message: "Employee Address is required!" }),
+  employeeEmail: zod.string().email({ message: "Invalid email format" }),
+  employeePhone: zod.string().min(1, { message: "Employee Phone Number is required!" }),
+  socialSecurityNumber: zod.string().min(1, { message: "Social Security Number or National ID is required!" }),
+  employeeBankDetails: zod.string().min(1, { message: "Employee Bank Details are required!" }),
+  taxInformation: zod.string().min(1, { message: "Tax Information is required!" }),
+  emergencyContact: zod.string().min(1, { message: "Emergency Contact Information is required!" }),
+
+  // Employment Details
+  jobTitle: zod.string().min(1, { message: "Job Title is required!" }),
+  jobDescription: zod.string().min(1, { message: "Job Description is required!" }),
+  department: zod.string().min(1, { message: "Department is required!" }),
+  startDate: zod.string().min(1, { message: "Start Date is required!" }),
+  employmentType: zod.string().min(1, { message: "Employment Type is required!" }),
+  workLocation: zod.string().min(1, { message: "Work Location is required!" }),
+  managerName: zod.string().min(1, { message: "Manager/Supervisor Name is required!" }),
+  workSchedule: zod.string().min(1, { message: "Work Schedule is required!" }),
+  employmentContract: zod.array(zod.any()).optional(),
+  probationPeriod: zod.string().min(1, { message: "Probation Period Details are required!" }),
+
+  // Compensation Details
+  baseSalary: zod.string().min(1, { message: "Base Salary is required!" }),
+  hourlyRate: zod.string().optional(),
+  overtimeRate: zod.string().optional(),
+  payFrequency: zod.string().min(1, { message: "Pay Frequency is required!" }),
+  bonusesCommissions: zod.string().optional(),
+  deductions: zod.string().min(1, { message: "Deductions information is required!" }),
+  reimbursements: zod.string().optional(),
+
+  // Benefits Information
+  healthInsurance: zod.string().optional(),
+  retirementPlans: zod.string().optional(),
+  paidTimeOff: zod.string().min(1, { message: "Paid Time Off information is required!" }),
+  otherBenefits: zod.string().optional(),
+  employeeAssistancePrograms: zod.string().optional(),
+
+  // Additional Information
+  timeTracking: zod.string().optional(),
+  leaveManagement: zod.string().optional(),
+  performanceManagement: zod.string().optional(),
+  trainingDevelopment: zod.string().optional(),
+  complianceDocuments: zod.array(zod.any()).optional(),
+})
+
+// ----------------------------------------------------------------------
+
+export function PostNewEditForm({ currentPost }) {
+  const [activeStep, setActiveStep] = useState(0)
+  const router = useRouter()
+  const preview = useBoolean()
 
   const defaultValues = useMemo(
     () => ({
-      fullName: '',
-      dateOfBirth: '',
-      gender: '',
-      genderOther: '',
-      phoneNumber: '',
-      emailAddress: '',
-      currentAddress: '',
-      citizenship: '',
-      citizenshipOther: '',
-      residencyStatus: '',
-      residencyStatusOther: '',
-      preferredContact: '',
-      legalAssistanceType: '',
-      lawyerType: [],
-      lawyerTypeOther: '',
-      legalIssueDescription: '',
-      desiredOutcome: '',
-      firstTimeLegalAssistance: '',
-      caseStatus: '',
-      appealingDecision: '',
-      appealAuthority: '',
-      appealDeadline: '',
-      takeOverCase: '',
-      publicFundsAdvice: '',
-      publicFundsDetails: '',
-      urgentAssistance: '',
-      urgentAssistanceReason: '',
-      nativeLanguage: '',
-      nativeLanguageOther: '',
-      preferredLanguages: [],
-      preferredLanguagesOther: '',
-      preferredConsultation: '',
-      bankIdAccess: '',
-      relevantDocuments: '',
-      documentTypes: [],
-      documentTypesOther: '',
-      referralSource: '',
-      referralSourceOther: '',
-      additionalInformation: '',
-      termsAgreement: false,
-      dataProcessingConsent: false,
+      companyName: currentPost?.companyName || "",
+      companyRegistrationNumber: currentPost?.companyRegistrationNumber || "",
+      companyAddress: currentPost?.companyAddress || "",
+      companyEmail: currentPost?.companyEmail || "",
+      companyPhone: currentPost?.companyPhone || "",
+      industry: currentPost?.industry || "",
+      taxIdentificationNumber: currentPost?.taxIdentificationNumber || "",
+      bankAccountDetails: currentPost?.bankAccountDetails || "",
+      authorizedSignatories: currentPost?.authorizedSignatories || "",
+      clientCompanyName: currentPost?.clientCompanyName || "",
+      clientEmail: currentPost?.clientEmail || "",
+      clientPhone: currentPost?.clientPhone || "",
+      clientAddress: currentPost?.clientAddress || "",
+      clientPointOfContact: currentPost?.clientPointOfContact || "",
+      serviceAgreementDetails: currentPost?.serviceAgreementDetails || "",
+      employeeName: currentPost?.employeeName || "",
+      employeeId: currentPost?.employeeId || "",
+      dateOfBirth: currentPost?.dateOfBirth || "",
+      nationality: currentPost?.nationality || "",
+      employeeAddress: currentPost?.employeeAddress || "",
+      employeeEmail: currentPost?.employeeEmail || "",
+      employeePhone: currentPost?.employeePhone || "",
+      socialSecurityNumber: currentPost?.socialSecurityNumber || "",
+      employeeBankDetails: currentPost?.employeeBankDetails || "",
+      taxInformation: currentPost?.taxInformation || "",
+      emergencyContact: currentPost?.emergencyContact || "",
+      jobTitle: currentPost?.jobTitle || "",
+      jobDescription: currentPost?.jobDescription || "",
+      department: currentPost?.department || "",
+      startDate: currentPost?.startDate || "",
+      employmentType: currentPost?.employmentType || "",
+      workLocation: currentPost?.workLocation || "",
+      managerName: currentPost?.managerName || "",
+      workSchedule: currentPost?.workSchedule || "",
+      employmentContract: [],
+      probationPeriod: currentPost?.probationPeriod || "",
+      baseSalary: currentPost?.baseSalary || "",
+      hourlyRate: currentPost?.hourlyRate || "",
+      overtimeRate: currentPost?.overtimeRate || "",
+      payFrequency: currentPost?.payFrequency || "",
+      bonusesCommissions: currentPost?.bonusesCommissions || "",
+      deductions: currentPost?.deductions || "",
+      reimbursements: currentPost?.reimbursements || "",
+      healthInsurance: currentPost?.healthInsurance || "",
+      retirementPlans: currentPost?.retirementPlans || "",
+      paidTimeOff: currentPost?.paidTimeOff || "",
+      otherBenefits: currentPost?.otherBenefits || "",
+      employeeAssistancePrograms: currentPost?.employeeAssistancePrograms || "",
+      timeTracking: currentPost?.timeTracking || "",
+      leaveManagement: currentPost?.leaveManagement || "",
+      performanceManagement: currentPost?.performanceManagement || "",
+      trainingDevelopment: currentPost?.trainingDevelopment || "",
+      complianceDocuments: [],
     }),
-    []
-  );
+    [currentPost],
+  )
 
   const methods = useForm({
-    mode: 'all',
-    resolver: zodResolver(LegalAssistanceSchema),
+    mode: "onChange",
+    resolver: zodResolver(NewPostSchema),
     defaultValues,
-  });
+  })
 
   const {
     reset,
-    handleSubmit,
     watch,
-    formState: { isSubmitting },
-  } = methods;
+    control,
+    handleSubmit,
+    formState: { isSubmitting, isValid, errors },
+  } = methods
+
+  const values = watch()
+
+  const {
+    fields: employmentContractFields,
+    append: appendEmploymentContract,
+    remove: removeEmploymentContract,
+  } = useFieldArray({
+    control,
+    name: "employmentContract",
+  })
+
+  const {
+    fields: complianceDocumentsFields,
+    append: appendComplianceDocument,
+    remove: removeComplianceDocument,
+  } = useFieldArray({
+    control,
+    name: "complianceDocuments",
+  })
+
+  useEffect(() => {
+    if (currentPost) {
+      reset(defaultValues)
+    }
+  }, [currentPost, defaultValues, reset])
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      reset();
-      toast.success('Form submitted successfully!');
-      router.push(paths.dashboard.root);
-      console.info('DATA', data);
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      reset()
+      preview.onFalse()
+      toast.success(currentPost ? "Update success!" : "Create success!")
+      router.push(paths.dashboard.post.root)
+      console.info("DATA", data)
     } catch (error) {
-      console.error(error);
+      console.error(error)
     }
-  });
+  })
 
-  const watchGender = watch('gender');
-  const watchCitizenship = watch('citizenship');
-  const watchResidencyStatus = watch('residencyStatus');
-  const watchAppealingDecision = watch('appealingDecision');
-  const watchPublicFundsAdvice = watch('publicFundsAdvice');
-  const watchUrgentAssistance = watch('urgentAssistance');
-  const watchNativeLanguage = watch('nativeLanguage');
-  const watchReferralSource = watch('referralSource');
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1)
+  }
 
-  const genderOptions = [
-    { value: 'male', label: 'Male' },
-    { value: 'female', label: 'Female' },
-    { value: 'other', label: 'Other' },
-  ];
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1)
+  }
 
-  const citizenshipOptions = [
-    { value: 'sweden', label: 'Sweden' },
-    { value: 'denmark', label: 'Denmark' },
-    { value: 'eu', label: 'EU Country' },
-    { value: 'non-eu', label: 'Non-EU Country' },
-  ];
+  const isStepValid = () => {
+    const currentStepFields = Object.keys(NewPostSchema.shape).filter((key) =>
+      renderStepContent(activeStep).props.children.some((child) => child.props?.name === key),
+    )
+    return currentStepFields.every((field) => !errors[field])
+  }
 
-  const residencyStatusOptions = [
-    { value: 'citizen', label: 'Citizen' },
-    { value: 'permanent', label: 'Permanent Resident' },
-    { value: 'temporary', label: 'Temporary Resident' },
-    { value: 'asylum', label: 'Asylum Seeker' },
-    { value: 'visa', label: 'Visa Holder' },
-    { value: 'other', label: 'Other' },
-  ];
+  const CustomFileUpload = ({ name, label }) => {
+    const { fields, append, remove } =
+      name === "employmentContract"
+        ? { fields: employmentContractFields, append: appendEmploymentContract, remove: removeEmploymentContract }
+        : { fields: complianceDocumentsFields, append: appendComplianceDocument, remove: removeComplianceDocument }
 
-  const contactMethodOptions = [
-    { value: 'phone', label: 'Phone Call' },
-    { value: 'email', label: 'Email' },
-    { value: 'sms', label: 'SMS/WhatsApp' },
-  ];
+    const handleFileChange = (event) => {
+      const files = Array.from(event.target.files)
+      files.forEach((file) => {
+        append({ file })
+      })
+    }
 
-  const legalAssistanceTypeOptions = [
-    { value: 'lawyer', label: 'A Licensed Lawyer' },
-    { value: 'immigration', label: 'An Immigration Expert' },
-    { value: 'consultant', label: 'A Legal Consultant' },
-    { value: 'paralegal', label: 'A Jurist/Paralegal' },
-    { value: 'unsure', label: 'Not Sure (Need Guidance)' },
-  ];
+    const handleRemoveFile = (index) => {
+      remove(index)
+    }
 
-  const lawyerTypeOptions = [
-    { value: 'personal-injury', label: 'Personal Injury Lawyer' },
-    { value: 'estate-planning', label: 'Estate Planning Lawyer' },
-    { value: 'bankruptcy', label: 'Bankruptcy Lawyer' },
-    { value: 'intellectual-property', label: 'Intellectual Property Lawyer' },
-    { value: 'employment', label: 'Employment Lawyer' },
-    { value: 'corporate', label: 'Corporate/Business Lawyer' },
-    { value: 'immigration', label: 'Immigration Lawyer' },
-    { value: 'criminal-defense', label: 'Criminal Defense Lawyer' },
-    { value: 'medical-malpractice', label: 'Medical Malpractice Lawyer' },
-    { value: 'tax', label: 'Tax Lawyer' },
-    { value: 'family', label: 'Family/Divorce Lawyer' },
-    { value: 'workers-comp', label: 'Worker\'s Compensation Lawyer' },
-    { value: 'contract', label: 'Contract Lawyer' },
-    { value: 'social-security', label: 'Social Security Disability Lawyer' },
-    { value: 'civil-litigation', label: 'Civil Litigation Lawyer' },
-    { value: 'general-practice', label: 'General Practice Lawyer' },
-    { value: 'eu-international', label: 'EU/International Law Lawyer' },
-    { value: 'humanitarian', label: 'Humanitarian/Asylum Lawyer' },
-    { value: 'paralegal', label: 'Jurist/Paralegal Services' },
-    { value: 'other', label: 'Other' },
-  ];
+    return (
+      <Box>
+        <Typography variant="subtitle2" sx={{ mb: 1 }}>
+          {label}
+        </Typography>
+        {fields.length > 0 && (
+          <Box sx={{ mb: 2 }}>
+            {fields.map((field, index) => (
+              <Box
+                key={field.id}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  mb: 1,
+                  p: 1,
+                  bgcolor: "background.neutral",
+                  borderRadius: 1,
+                }}
+              >
+                <Typography variant="body2" sx={{ flexGrow: 1, mr: 2 }}>
+                  {field.file.name}
+                </Typography>
+                <Button size="small" onClick={() => handleRemoveFile(index)} sx={{ minWidth: "auto", p: 0.5 }}>
+                  X
+                </Button>
+              </Box>
+            ))}
+          </Box>
+        )}
+        <Button variant="outlined" component="label" fullWidth>
+          Upload Files
+          <input
+            type="file"
+            hidden
+            multiple
+            onChange={handleFileChange}
+            accept="*" // Allow all file types
+          />
+        </Button>
+      </Box>
+    )
+  }
 
-  const yesNoOptions = [
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-  ];
+  const renderCompanyInformation = (
+    <Card sx={{ border: "1px solid", borderColor: "divider", boxShadow: "none", "& .MuiCardHeader-root": { p: 2 } }}>
+      <CardHeader title="Company Information" sx={{ mb: 3 }} />
+      <Divider />
+      <Stack spacing={3} sx={{ p: 3 }}>
+        <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2}>
+          <Field.Text name="companyName" label="Company Name" />
+          <Field.Text name="companyRegistrationNumber" label="Company Registration Number" />
+        </Box>
+        <Field.Text name="companyAddress" label="Address" multiline rows={3} />
+        <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2}>
+          <Field.Text name="companyEmail" label="Email" type="email" />
+          <Field.Text name="companyPhone" label="Phone Number" />
+        </Box>
+        <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2}>
+          <Field.Text name="industry" label="Industry/Sector" />
+          <Field.Text name="taxIdentificationNumber" label="Tax Identification Number" />
+        </Box>
+        <Field.Text name="bankAccountDetails" label="Bank Account Details for Payroll Processing" multiline rows={3} />
+        <Field.Text name="authorizedSignatories" label="Authorized Signatories" multiline rows={2} />
+      </Stack>
+    </Card>
+  )
 
-  const caseStatusOptions = [
-    { value: 'ongoing', label: 'Ongoing' },
-    { value: 'new', label: 'New Case' },
-  ];
+  const renderClientInformation = (
+    <Card sx={{ border: "1px solid", borderColor: "divider", boxShadow: "none", "& .MuiCardHeader-root": { p: 2 } }}>
+      <CardHeader title="Client Information" sx={{ mb: 3 }} />
+      <Divider />
+      <Stack spacing={3} sx={{ p: 3 }}>
+        <Field.Text name="clientCompanyName" label="Client Company Name" />
+        <Field.Text name="clientEmail" label="Client Email" type="email" />
+        <Field.Text name="clientPhone" label="Client Phone Number" />
+        <Field.Text name="clientAddress" label="Client Address" multiline rows={3} />
+        <Field.Text name="clientPointOfContact" label="Client Point of Contact" />
+        <Field.Text name="serviceAgreementDetails" label="Service Agreement Details" multiline rows={3} />
+      </Stack>
+    </Card>
+  )
 
-  const languageOptions = [
-    { value: 'english', label: 'English' },
-    { value: 'swedish', label: 'Swedish' },
-    { value: 'danish', label: 'Danish' },
-    { value: 'arabic', label: 'Arabic' },
-    { value: 'urdu', label: 'Urdu' },
-    { value: 'hindi', label: 'Hindi' },
-    { value: 'punjabi', label: 'Punjabi' },
-    { value: 'other', label: 'Other' },
-  ];
+  const renderEmployeeInformation = (
+    <Card sx={{ border: "1px solid", borderColor: "divider", boxShadow: "none", "& .MuiCardHeader-root": { p: 2 } }}>
+      <CardHeader title="Employee Information" sx={{ mb: 3 }} />
+      <Divider />
+      <Stack spacing={3} sx={{ p: 3 }}>
+        <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2}>
+          <Field.Text name="employeeName" label="Full Name" />
+          <Field.Text name="employeeId" label="Employee ID" />
+        </Box>
+        <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2}>
+          <Field.Text name="dateOfBirth" label="Date of Birth" type="date" InputLabelProps={{ shrink: true }} />
+          <Field.Text name="nationality" label="Nationality" />
+        </Box>
+        <Field.Text name="employeeAddress" label="Address" multiline rows={3} />
+        <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2}>
+          <Field.Text name="employeeEmail" label="Email" type="email" />
+          <Field.Text name="employeePhone" label="Phone Number" />
+        </Box>
+        <Field.Text name="socialSecurityNumber" label="Social Security Number or National ID" />
+        <Field.Text name="employeeBankDetails" label="Bank Account Details for Salary Deposits" multiline rows={3} />
+        <Field.Text name="taxInformation" label="Tax Information (Tax Code, Exemptions, etc.)" multiline rows={2} />
+        <Field.Text name="emergencyContact" label="Emergency Contact Information" multiline rows={2} />
+      </Stack>
+    </Card>
+  )
 
-  const consultationMethodOptions = [
-    { value: 'online', label: 'Online via Portal/Mobile App' },
-    { value: 'physical', label: 'Physical Meeting at Our Office' },
-    { value: 'call', label: 'Telephone/Video Call' },
-    { value: 'combination', label: 'Combination of Online and In-Person' },
-  ];
+  const renderEmploymentDetails = (
+    <Card sx={{ border: "1px solid", borderColor: "divider", boxShadow: "none", "& .MuiCardHeader-root": { p: 2 } }}>
+      <CardHeader title="Employment Details" sx={{ mb: 3 }} />
+      <Divider />
+      <Stack spacing={3} sx={{ p: 3 }}>
+        <Field.Text name="jobTitle" label="Job Title" />
+        <Field.Text name="jobDescription" label="Job Description" multiline rows={3} />
+        <Field.Text name="department" label="Department" />
+        <Field.Text name="startDate" label="Start Date" type="date" InputLabelProps={{ shrink: true }} />
+        <Field.Select name="employmentType" label="Employment Type">
+          <MenuItem value="fullTime">Full-time</MenuItem>
+          <MenuItem value="partTime">Part-time</MenuItem>
+          <MenuItem value="contract">Contract</MenuItem>
+        </Field.Select>
+        <Field.Text name="workLocation" label="Work Location" />
+        <Field.Text name="managerName" label="Manager/Supervisor Name" />
+        <Field.Text name="workSchedule" label="Work Schedule (Hours per Week)" />
+        <CustomFileUpload name="employmentContract" label="Employment Contract" />
+        <Field.Text name="probationPeriod" label="Probation Period Details" multiline rows={2} />
+      </Stack>
+    </Card>
+  )
 
-  const documentTypeOptions = [
-    { value: 'id', label: 'ID/Passport Copy' },
-    { value: 'residency', label: 'Residency Permit' },
-    { value: 'legal', label: 'Previous Legal Documents' },
-    { value: 'court', label: 'Court/Authority Decision Letters' },
-    { value: 'contracts', label: 'Contracts/Agreements' },
-    { value: 'other', label: 'Other' },
-  ];
+  const renderCompensationDetails = (
+    <Card sx={{ border: "1px solid", borderColor: "divider", boxShadow: "none", "& .MuiCardHeader-root": { p: 2 } }}>
+      <CardHeader title="Compensation Details" sx={{ mb: 3 }} />
+      <Divider />
+      <Stack spacing={3} sx={{ p: 3 }}>
+        <Field.Text name="baseSalary" label="Base Salary" />
+        <Field.Text name="hourlyRate" label="Hourly Rate (if applicable)" />
+        <Field.Text name="overtimeRate" label="Overtime Rate" />
+        <Field.Select name="payFrequency" label="Pay Frequency">
+          <MenuItem value="weekly">Weekly</MenuItem>
+          <MenuItem value="biweekly">Bi-weekly</MenuItem>
+          <MenuItem value="monthly">Monthly</MenuItem>
+        </Field.Select>
+        <Field.Text name="bonusesCommissions" label="Bonuses and Commissions" multiline rows={2} />
+        <Field.Text name="deductions" label="Deductions (Taxes, Benefits, Other)" multiline rows={3} />
+        <Field.Text name="reimbursements" label="Reimbursements (Expenses, Travel, etc.)" multiline rows={2} />
+      </Stack>
+    </Card>
+  )
 
-  const referralSourceOptions = [
-    { value: 'website', label: 'Website' },
-    { value: 'social', label: 'Social Media' },
-    { value: 'referral', label: 'Referral' },
-    { value: 'ad', label: 'Advertisement' },
-    { value: 'other', label: 'Other' },
-  ];
+  const renderBenefitsInformation = (
+    <Card sx={{ border: "1px solid", borderColor: "divider", boxShadow: "none", "& .MuiCardHeader-root": { p: 2 } }}>
+      <CardHeader title="Benefits Information" sx={{ mb: 3 }} />
+      <Divider />
+      <Stack spacing={3} sx={{ p: 3 }}>
+        <Field.Text name="healthInsurance" label="Health Insurance" multiline rows={2} />
+        <Field.Text name="retirementPlans" label="Retirement Plans (Pension Contributions)" multiline rows={2} />
+        <Field.Text name="paidTimeOff" label="Paid Time Off (Vacation, Sick Leave, Personal Days)" multiline rows={3} />
+        <Field.Text
+          name="otherBenefits"
+          label="Other Benefits (e.g., Gym Membership, Transportation Allowance)"
+          multiline
+          rows={2}
+        />
+        <Field.Text name="employeeAssistancePrograms" label="Employee Assistance Programs (EAP)" multiline rows={2} />
+      </Stack>
+    </Card>
+  )
+
+  const renderAdditionalInformation = (
+    <Card sx={{ border: "1px solid", borderColor: "divider", boxShadow: "none", "& .MuiCardHeader-root": { p: 2 } }}>
+      <CardHeader title="Additional Information" sx={{ mb: 3 }} />
+      <Divider />
+      <Stack spacing={3} sx={{ p: 3 }}>
+        <Field.Text name="timeTracking" label="Time Tracking Method" />
+        <Field.Text name="leaveManagement" label="Leave Management Process" multiline rows={2} />
+        <Field.Text name="performanceManagement" label="Performance Management Process" multiline rows={2} />
+        <Field.Text name="trainingDevelopment" label="Training and Development Opportunities" multiline rows={2} />
+        <CustomFileUpload name="complianceDocuments" label="Compliance Documents" />
+      </Stack>
+    </Card>
+  )
+
+  const renderStepContent = (step) => {
+    switch (step) {
+      case 0:
+        return renderCompanyInformation
+      case 1:
+        return renderClientInformation
+      case 2:
+        return renderEmployeeInformation
+      case 3:
+        return renderEmploymentDetails
+      case 4:
+        return renderCompensationDetails
+      case 5:
+        return renderBenefitsInformation
+      case 6:
+        return renderAdditionalInformation
+      default:
+        return null
+    }
+  }
+
+  const renderActions = (
+    <Box
+      display="flex"
+      justifyContent="space-between"
+      sx={{
+        mt: 4,
+        "& .MuiButton-root": {
+          px: 4,
+          minWidth: 120,
+          borderRadius: "4px",
+        },
+      }}
+    >
+      <Button
+        color="inherit"
+        disabled={activeStep === 0}
+        onClick={handleBack}
+        sx={{
+          bgcolor: "action.disabledBackground",
+          color: "text.secondary",
+          "&:hover": {
+            bgcolor: "action.disabledBackground",
+          },
+        }}
+      >
+        Back
+      </Button>
+      <Box>
+        {activeStep === steps.length - 1 ? (
+          <LoadingButton
+            type="submit"
+            variant="contained"
+            loading={isSubmitting}
+            disabled={!isStepValid()}
+            sx={{
+              bgcolor: "success.main",
+              "&:hover": {
+                bgcolor: "success.dark",
+              },
+            }}
+          >
+            Submit
+          </LoadingButton>
+        ) : (
+          <Button
+            variant="contained"
+            onClick={handleNext}
+            disabled={!isStepValid()}
+            sx={{
+              bgcolor: "success.main",
+              "&:hover": {
+                bgcolor: "success.dark",
+              },
+            }}
+          >
+            Next
+          </Button>
+        )}
+      </Box>
+    </Box>
+  )
 
   return (
     <Form methods={methods} onSubmit={onSubmit}>
+      <Box sx={{ mb: 5 }}>
+        <Stepper
+          activeStep={activeStep}
+          alternativeLabel
+          sx={{
+            "& .MuiStepLabel-label": {
+              typography: "body2",
+              color: "text.secondary",
+            },
+            "& .MuiStepLabel-label.Mui-active": {
+              color: "primary.main",
+            },
+          }}
+        >
+          {steps.map((label) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+      </Box>
       <Grid container spacing={3}>
-        <Grid xs={12}>
-          <Card sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ mb: 3 }}>
-              Comprehensive Legal Assistance Request Form
-            </Typography>
-            <Typography variant="subtitle2" sx={{ mb: 3 }}>
-              Professional Legal, Immigration, and Consultancy Services by Sweden Relocators AB | Nordic Relocators
-            </Typography>
-            <Box
-              rowGap={3}
-              columnGap={2}
-              display="grid"
-              gridTemplateColumns={{
-                xs: 'repeat(1, 1fr)',
-                sm: 'repeat(2, 1fr)',
-              }}
-              sx={{ 
-                '& .MuiFormControl-root': { 
-                  width: '100%'
-                },
-                '& .MuiInputBase-root': {
-                  minHeight: '56px'
-                },
-                '& .MuiInputLabel-root': {
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  maxWidth: '100%'
-                },
-                '& .full-width': {
-                  gridColumn: '1 / -1'
-                }
-              }}
-            >
-              <Typography variant="subtitle1" sx={{ gridColumn: '1 / -1', mb: 2 }}>
-                Section 1: Personal Information
-              </Typography>
-              <Field.Text name="fullName" label="Full Name (as per official identification)" />
-              <Field.Text name="dateOfBirth" label="Date of Birth" type="date" InputLabelProps={{ shrink: true }} />
-              <Field.Select native name="gender" label="Gender" InputLabelProps={{ shrink: true }}>
-                {genderOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-              {watchGender === 'other' && (
-                <Field.Text name="genderOther" label="Specify Gender" />
-              )}
-              <Field.Text name="phoneNumber" label="Phone Number (Include country code)" />
-              <Field.Text name="emailAddress" label="Email Address" />
-              <Field.Text name="currentAddress" label="Current Residential Address" className="full-width" />
-              <Field.Select native name="citizenship" label="Citizenship" InputLabelProps={{ shrink: true }}>
-                {citizenshipOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-              {watchCitizenship === 'non-eu' && (
-                <Field.Text name="citizenshipOther" label="Specify Non-EU Country" />
-              )}
-              <Field.Select native name="residencyStatus" label="Current Residency Status in Sweden/Denmark" InputLabelProps={{ shrink: true }}>
-                {residencyStatusOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-              {watchResidencyStatus === 'other' && (
-                <Field.Text name="residencyStatusOther" label="Specify Residency Status" />
-              )}
-              <Field.Select native name="preferredContact" label="Preferred Method of Contact" InputLabelProps={{ shrink: true }}>
-                {contactMethodOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-              <Typography variant="subtitle1" sx={{ gridColumn: '1 / -1', mb: 2, mt: 3 }}>
-                Section 2: Type of Legal Assistance Needed
-              </Typography>
-              <Field.Select native name="legalAssistanceType" label="Are you specifically looking for" InputLabelProps={{ shrink: true }}>
-                {legalAssistanceTypeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-              <Field.Autocomplete
-                name="lawyerType"
-                label="Select the Type of Lawyer/Legal Service You Need"
-                placeholder="Select all that apply"
-                multiple
-                options={lawyerTypeOptions}
-                getOptionLabel={(option) => option.label}
-                isOptionEqualToValue={(option, value) => option.value === value}
-              />
-              {methods.watch('lawyerType').includes('other') && (
-                <Field.Text name="lawyerTypeOther" label="Specify Other Lawyer Type" />
-              )}
-              <Field.Text name="legalIssueDescription" label="Briefly Describe Your Legal Issue" multiline rows={3} className="full-width" />
-              <Field.Text name="desiredOutcome" label="What Is Your Desired Outcome/Resolution?" multiline rows={3} className="full-width" />
-
-              <Typography variant="subtitle1" sx={{ gridColumn: '1 / -1', mb: 2, mt: 3 }}>
-                Section 3: Case Details
-              </Typography>
-              <Field.Select native name="firstTimeLegalAssistance" label="Is This Your First-Time Seeking Legal Assistance?" InputLabelProps={{ shrink: true }}>
-                {yesNoOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-              <Field.Select native name="caseStatus" label="Is Your Case Ongoing or New?" InputLabelProps={{ shrink: true }}>
-                {caseStatusOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-              <Field.Select native name="appealingDecision" label="Are You Appealing a Decision from Authorities?" InputLabelProps={{ shrink: true }}>
-                {yesNoOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-              {watchAppealingDecision === 'yes' && (
-                <>
-                  <Field.Text name="appealAuthority" label="Specify the authority" />
-                  <Field.Text name="appealDeadline" label="Deadline for Appeal" type="date" InputLabelProps={{ shrink: true }} />
-                </>
-              )}
-              <Field.Select native name="takeOverCase" label="Do You Want a Lawyer to Take Over an Ongoing Case?" InputLabelProps={{ shrink: true }}>
-                {yesNoOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-              <Field.Select native name="publicFundsAdvice" label="Has Any Authority Advised You to Choose a Lawyer on Public Funds?" InputLabelProps={{ shrink: true }}>
-                {yesNoOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-              {watchPublicFundsAdvice === 'yes' && (
-                <Field.Text name="publicFundsDetails" label="Specify the authority and case number" />
-              )}
-              <Field.Select native name="urgentAssistance" label="Do You Need Urgent Legal Assistance?" InputLabelProps={{ shrink: true }}>
-                {yesNoOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-              {watchUrgentAssistance === 'yes' && (
-                <Field.Text name="urgentAssistanceReason" label="Specify reason for urgent assistance" />
-              )}
-
-              <Typography variant="subtitle1" sx={{ gridColumn: '1 / -1', mb: 2, mt: 3 }}>
-                Section 4: Communication Preferences
-              </Typography>
-              <Field.Select native name="nativeLanguage" label="What Is Your Native Language?" InputLabelProps={{ shrink: true }}>
-                {languageOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-              {watchNativeLanguage === 'other' && (
-                <Field.Text name="nativeLanguageOther" label="Specify Native Language" />
-              )}
-              <Field.Autocomplete
-                name="preferredLanguages"
-                label="Preferred Language for Communication"
-                placeholder="Select all that apply"
-                multiple
-                options={languageOptions}
-                getOptionLabel={(option) => option.label}
-                isOptionEqualToValue={(option, value) => option.value === value}
-              />
-              {methods.watch('preferredLanguages').includes('other') && (
-                <Field.Text name="preferredLanguagesOther" label="Specify Other Preferred Language" />
-              )}
-              <Field.Select native name="preferredConsultation" label="Preferred Consultation Method" InputLabelProps={{ shrink: true }}>
-                {consultationMethodOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-              <Field.Select native name="bankIdAccess" label="Do You Have Access to BankID/MittID for Secure Online Access?" InputLabelProps={{ shrink: true }}>
-                {yesNoOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-
-              <Typography variant="subtitle1" sx={{ gridColumn: '1 / -1', mb: 2, mt: 3 }}>
-                Section 5: Supporting Documents
-              </Typography>
-              <Field.Select native name="relevantDocuments" label="Do You Have Documents Relevant to Your Case?" InputLabelProps={{ shrink: true }}>
-                {yesNoOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-              <Field.Autocomplete
-                name="documentTypes"
-                label="Select the Types of Documents You Have"
-                placeholder="Select all that apply"
-                multiple
-                options={documentTypeOptions}
-                getOptionLabel={(option) => option.label}
-                isOptionEqualToValue={(option, value) => option.value === value}
-              />
-              {methods.watch('documentTypes').includes('other') && (
-                <Field.Text name="documentTypesOther" label="Specify Other Document Type" />
-              )}
-
-              <Typography variant="subtitle1" sx={{ gridColumn: '1 / -1', mb: 2, mt: 3 }}>
-                Section 6: Additional Information
-              </Typography>
-              <Field.Select native name="referralSource" label="How Did You Hear About Our Legal Services?" InputLabelProps={{ shrink: true }}>
-                {referralSourceOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Field.Select>
-              {watchReferralSource === 'other' && (
-                <Field.Text name="referralSourceOther" label="Specify Other Referral Source" />
-              )}
-              <Field.Text name="additionalInformation" label="Additional Information or Special Requests" multiline rows={4} className="full-width" />
-
-              <Typography variant="subtitle1" sx={{ gridColumn: '1 / -1', mb: 2, mt: 3 }}>
-                Section 7: Declaration and Agreement
-              </Typography>
-              <FormControlLabel
-                control={<Checkbox name="termsAgreement" />}
-                label="I confirm that all information provided above is accurate and complete."
-                sx={{ gridColumn: '1 / -1' }}
-              />
-              <FormControlLabel
-                control={<Checkbox name="dataProcessingConsent" />}
-                label="I consent to the processing of my personal data for legal consultation purposes in compliance with GDPR."
-                sx={{ gridColumn: '1 / -1' }}
-              />
-            </Box>
-
-            <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>
-              <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
-                Submit Form
-              </LoadingButton>
-            </Stack>
-          </Card>
+        <Grid item xs={12}>
+          {renderStepContent(activeStep)}
+          {renderActions}
         </Grid>
       </Grid>
     </Form>
-  );
+  )
 }
-

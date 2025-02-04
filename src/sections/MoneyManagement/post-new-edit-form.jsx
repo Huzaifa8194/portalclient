@@ -99,6 +99,7 @@ export default function PostNewEditForm() {
             <CreditCard creditCardData={_bankingCreditCard} />
           </Box>
         </Grid>
+    
         <Grid xs={12} md={7} lg={12}>
           <Container maxWidth="xl">
             <Card sx={{ p: 4, my: 2 }}>
