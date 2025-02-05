@@ -18,18 +18,18 @@ export function PostCreateView() {
   return (
     <DashboardContent>
       <CustomBreadcrumbs
-        heading=" Entrepreneur"
+        heading=" EOR"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'Business', href: paths.dashboard.post.root },
-          { name: ' Entrepreneur' },
+          { name: 'EOR', href: paths.dashboard.post.root },
+        
         ]}
         sx={{ mb: { xs: 3, md: 3 } }}
       />
   <Grid xs={12} md={12}>
           <AppWelcome sx={{ mb: 3 }}
             title="Welcome back 👋 User"
-            description="Fill this form and submit only if you are an Entrepreneur or already have any Start-up. We will help you to expand your idea or business by providing you right investors. This service is paid to avoid unnecessary queries."
+            description="Fill out this form and submit only if you require Employer of Record (EOR) services. We specialize in managing employee onboarding, payroll, taxes, benefits, and compliance with local labor laws. Our services ensure seamless workforce management and legal compliance, available as a paid solution to simplify your global hiring process."
             img={<SeoIllustration hideBackground />}
           />
         </Grid>

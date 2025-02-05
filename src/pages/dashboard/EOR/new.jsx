@@ -6,7 +6,7 @@ import { PostCreateView } from 'src/sections/EOR/view';
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `Create a new post | Dashboard - ${CONFIG.appName}` };
+const metadata = { title: `EOR | Dashboard ` };
 
 export default function Page() {
   return (

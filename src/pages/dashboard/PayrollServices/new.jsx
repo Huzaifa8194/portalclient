@@ -6,7 +6,7 @@ import { PostCreateView } from 'src/sections/Payroll/view';
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `Create a new post | Dashboard - ${CONFIG.appName}` };
+const metadata = { title: `Payroll Services | Dashboard - ${CONFIG.appName}` };
 
 export default function Page() {
   return (
