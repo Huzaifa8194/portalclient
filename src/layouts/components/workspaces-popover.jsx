@@ -1,15 +1,44 @@
 import { useState, useCallback } from 'react';
-
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
 import MenuList from '@mui/material/MenuList';
 import MenuItem from '@mui/material/MenuItem';
 import ButtonBase from '@mui/material/ButtonBase';
-
-import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { usePopover, CustomPopover } from 'src/components/custom-popover';
+import { CONFIG } from 'src/config-global';
+import { SvgColor } from 'src/components/svg-color';
 
+const icon = (name) => <SvgColor src={`${CONFIG.assetsDir}/assets/icons/navbar/${name}.svg`} />;
+
+const ICONS = {
+  job: icon('ic-job'),
+  blog: icon('ic-blog'),
+  chat: icon('ic-chat'),
+  mail: icon('ic-mail'),
+  user: icon('ic-user'),
+  file: icon('ic-file'),
+  lock: icon('ic-lock'),
+  tour: icon('ic-tour'),
+  order: icon('ic-order'),
+  label: icon('ic-label'),
+  blank: icon('ic-blank'),
+  kanban: icon('ic-kanban'),
+  folder: icon('ic-folder'),
+  course: icon('ic-course'),
+  banking: icon('ic-banking'),
+  booking: icon('ic-booking'),
+  invoice: icon('ic-invoice'),
+  product: icon('ic-product'),
+  calendar: icon('ic-calendar'),
+  disabled: icon('ic-disabled'),
+  external: icon('ic-external'),
+  menuItem: icon('ic-menu-item'),
+  ecommerce: icon('ic-ecommerce'),
+  analytics: icon('ic-analytics'),
+  dashboard: icon('ic-dashboard'),
+  parameter: icon('ic-parameter'),
+};
 // ----------------------------------------------------------------------
 
 export function WorkspacesPopover({ data = [], sx, ...other }) {
@@ -39,12 +68,10 @@ export function WorkspacesPopover({ data = [], sx, ...other }) {
         }}
         {...other}
       >
-        <Box
-          component="img"
-          alt={workspace?.name}
-          src={workspace?.logo}
-          sx={{ width: 24, height: 24, borderRadius: '50%' }}
-        />
+      <Box sx={{ width: 24, height: 24, borderRadius: "50%" }}>
+  {ICONS.calendar}
+</Box>
+
 
         <Box
           component="span"

@@ -1,66 +1,85 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from "react"
+import axios from "axios"
 
-import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
-import Avatar from '@mui/material/Avatar';
-import Drawer from '@mui/material/Drawer';
-import Tooltip from '@mui/material/Tooltip';
-import MenuItem from '@mui/material/MenuItem';
-import { useTheme } from '@mui/material/styles';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
+import Box from "@mui/material/Box"
+import Stack from "@mui/material/Stack"
+import Avatar from "@mui/material/Avatar"
+import Drawer from "@mui/material/Drawer"
+import Tooltip from "@mui/material/Tooltip"
+import MenuItem from "@mui/material/MenuItem"
+import { useTheme } from "@mui/material/styles"
+import Typography from "@mui/material/Typography"
+import IconButton from "@mui/material/IconButton"
 
-import { paths } from 'src/routes/paths';
-import { useRouter, usePathname } from 'src/routes/hooks';
+import { paths } from "src/routes/paths"
+import { useRouter, usePathname } from "src/routes/hooks"
 
-import { _mock } from 'src/_mock';
-import { varAlpha } from 'src/theme/styles';
+import { _mock } from "src/_mock"
+import { varAlpha } from "src/theme/styles"
 
-import { Label } from 'src/components/label';
-import { Iconify } from 'src/components/iconify';
-import { Scrollbar } from 'src/components/scrollbar';
-import { AnimateAvatar } from 'src/components/animate';
+import { Label } from "src/components/label"
+import { Iconify } from "src/components/iconify"
+import { Scrollbar } from "src/components/scrollbar"
+import { AnimateAvatar } from "src/components/animate"
 
-import { useMockedUser } from 'src/auth/hooks';
+import { useAuthContext } from "src/auth/hooks"
 
-import { UpgradeBlock } from './nav-upgrade';
-import { AccountButton } from './account-button';
-import { SignOutButton } from './sign-out-button';
+import { UpgradeBlock } from "./nav-upgrade"
+import { AccountButton } from "./account-button"
+import { SignOutButton } from "./sign-out-button"
 
 // ----------------------------------------------------------------------
 
 export function AccountDrawer({ data = [], sx, ...other }) {
-  const theme = useTheme();
+  const theme = useTheme()
+  const router = useRouter()
+  const pathname = usePathname()
+  const { user } = useAuthContext()
 
-  const router = useRouter();
+  const [open, setOpen] = useState(false)
+  const [userDetails, setUserDetails] = useState(null)
 
-  const pathname = usePathname();
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      if (user?.accessToken) {
+        try {
+          const response = await axios.get("https://nordicrelocators.com/api/client/profile", {
+            headers: {
+              Authorization: `Bearer ${user.accessToken}`,
+            },
+          })
+          setUserDetails(response.data.data)
+          console.log("Fetched user details:", response.data.data)
+        } catch (error) {
+          console.error("Error fetching user details:", error)
+        }
+      }
+    }
 
-  const { user } = useMockedUser();
-
-  const [open, setOpen] = useState(false);
+    fetchUserDetails()
+  }, [user])
 
   const handleOpenDrawer = useCallback(() => {
-    setOpen(true);
-  }, []);
+    setOpen(true)
+  }, [])
 
   const handleCloseDrawer = useCallback(() => {
-    setOpen(false);
-  }, []);
+    setOpen(false)
+  }, [])
 
   const handleClickItem = useCallback(
     (path) => {
-      handleCloseDrawer();
-      router.push(path);
+      handleCloseDrawer()
+      router.push(path)
     },
-    [handleCloseDrawer, router]
-  );
+    [handleCloseDrawer, router],
+  )
 
   const renderAvatar = (
     <AnimateAvatar
       width={96}
       slotProps={{
-        avatar: { src: user?.photoURL, alt: user?.displayName },
+        avatar: { src: userDetails?.profile?.profile_pic, alt: userDetails?.user?.name },
         overlay: {
           border: 2,
           spacing: 3,
@@ -68,16 +87,19 @@ export function AccountDrawer({ data = [], sx, ...other }) {
         },
       }}
     >
-      {user?.displayName?.charAt(0).toUpperCase()}
+      {userDetails?.user?.name?.charAt(0).toUpperCase()}
     </AnimateAvatar>
-  );
+  )
+
+  console.log("User object:", user)
+  console.log("User details:", userDetails)
 
   return (
     <>
       <AccountButton
         onClick={handleOpenDrawer}
-        photoURL={user?.photoURL}
-        displayName={user?.displayName}
+        photoURL={userDetails?.profile?.profile_pic}
+        displayName={userDetails?.user?.name}
         sx={sx}
         {...other}
       />
@@ -89,10 +111,7 @@ export function AccountDrawer({ data = [], sx, ...other }) {
         slotProps={{ backdrop: { invisible: true } }}
         PaperProps={{ sx: { width: 320 } }}
       >
-        <IconButton
-          onClick={handleCloseDrawer}
-          sx={{ top: 12, left: 12, zIndex: 9, position: 'absolute' }}
-        >
+        <IconButton onClick={handleCloseDrawer} sx={{ top: 12, left: 12, zIndex: 9, position: "absolute" }}>
           <Iconify icon="mingcute:close-line" />
         </IconButton>
 
@@ -101,33 +120,26 @@ export function AccountDrawer({ data = [], sx, ...other }) {
             {renderAvatar}
 
             <Typography variant="subtitle1" noWrap sx={{ mt: 2 }}>
-              {user?.displayName}
+              {userDetails?.user?.name || "N/A"}
             </Typography>
 
-            <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }} noWrap>
-              {user?.email}
+            <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }} noWrap>
+              {userDetails?.user?.email || "N/A"}
             </Typography>
           </Stack>
 
           <Stack direction="row" spacing={1} flexWrap="wrap" justifyContent="center" sx={{ p: 3 }}>
             {[...Array(3)].map((_, index) => (
-              <Tooltip
-                key={_mock.fullName(index + 1)}
-                title={`Switch to: ${_mock.fullName(index + 1)}`}
-              >
-                <Avatar
-                  alt={_mock.fullName(index + 1)}
-                  src={_mock.image.avatar(index + 1)}
-                  onClick={() => {}}
-                />
+              <Tooltip key={_mock.fullName(index + 1)} title={`Switch to: ${_mock.fullName(index + 1)}`}>
+                <Avatar alt={_mock.fullName(index + 1)} src={_mock.image.avatar(index + 1)} onClick={() => {}} />
               </Tooltip>
             ))}
 
             <Tooltip title="Add account">
               <IconButton
                 sx={{
-                  bgcolor: varAlpha(theme.vars.palette.grey['500Channel'], 0.08),
-                  border: `dashed 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.32)}`,
+                  bgcolor: varAlpha(theme.vars.palette.grey["500Channel"], 0.08),
+                  border: `dashed 1px ${varAlpha(theme.vars.palette.grey["500Channel"], 0.32)}`,
                 }}
               >
                 <Iconify icon="mingcute:add-line" />
@@ -144,25 +156,25 @@ export function AccountDrawer({ data = [], sx, ...other }) {
             }}
           >
             {data.map((option) => {
-              const rootLabel = pathname.includes('/dashboard') ? 'Home' : 'Dashboard';
+              const rootLabel = pathname.includes("/dashboard") ? "Home" : "Dashboard"
 
-              const rootHref = pathname.includes('/dashboard') ? '/' : paths.dashboard.root;
+              const rootHref = pathname.includes("/dashboard") ? "/" : paths.dashboard.root
 
               return (
                 <MenuItem
                   key={option.label}
-                  onClick={() => handleClickItem(option.label === 'Home' ? rootHref : option.href)}
+                  onClick={() => handleClickItem(option.label === "Home" ? rootHref : option.href)}
                   sx={{
                     py: 1,
-                    color: 'text.secondary',
-                    '& svg': { width: 24, height: 24 },
-                    '&:hover': { color: 'text.primary' },
+                    color: "text.secondary",
+                    "& svg": { width: 24, height: 24 },
+                    "&:hover": { color: "text.primary" },
                   }}
                 >
                   {option.icon}
 
                   <Box component="span" sx={{ ml: 2 }}>
-                    {option.label === 'Home' ? rootLabel : option.label}
+                    {option.label === "Home" ? rootLabel : option.label}
                   </Box>
 
                   {option.info && (
@@ -171,7 +183,7 @@ export function AccountDrawer({ data = [], sx, ...other }) {
                     </Label>
                   )}
                 </MenuItem>
-              );
+              )
             })}
           </Stack>
 
@@ -185,5 +197,6 @@ export function AccountDrawer({ data = [], sx, ...other }) {
         </Box>
       </Drawer>
     </>
-  );
+  )
 }
+

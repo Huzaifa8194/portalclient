@@ -52,7 +52,9 @@ export function AppDirectMessages({ title, subheader, ...other }) {
   const [messages] = useState(dummyMessages)
 
   return (
-    <Card {...other}>
+    <Card {...other}   sx={{
+      minHeight: "81vh", // Ensures the card takes at least 40% of the viewport height
+    }}>
       <CardHeader
         title={title}
         subheader={subheader}
