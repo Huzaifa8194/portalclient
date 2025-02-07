@@ -26,6 +26,7 @@ import {
 } from "@mui/material"
 import { styled } from "@mui/material/styles"
 import { paths } from 'src/routes/paths';
+import FileUploadButton from './FileUploadButton'
 import { AppWelcome } from './app-welcome';
 
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -881,20 +882,54 @@ export function OverviewCourseView() {
               </Grid>
             )}
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth required>
-                <InputLabel>Consent from Other Parents/Guardians (if applicable)</InputLabel>
-                <Select
-                  name={`dependents[${index}].parentalConsent`}
-                  value={formData.dependents[index]?.parentalConsent || ""}
-                  onChange={handleInputChange}
-                  label="Consent from Other Parents/Guardians (if applicable)"
-                >
-                  <MenuItem value="yes">Yes</MenuItem>
-                  <MenuItem value="no">No</MenuItem>
-                  <MenuItem value="notApplicable">Not Applicable</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
+  <FormControl fullWidth required>
+    <InputLabel>Consent from Other Parents/Guardians (if applicable)</InputLabel>
+    <Select
+      name={`dependents[${index}].parentalConsent`}
+      value={formData.dependents[index]?.parentalConsent || ""}
+      onChange={handleInputChange}
+      label="Consent from Other Parents/Guardians (if applicable)"
+    >
+      <MenuItem value="yes">Yes</MenuItem>
+      <MenuItem value="no">No</MenuItem>
+      <MenuItem value="notApplicable">Not Applicable</MenuItem>
+    </Select>
+  </FormControl>
+</Grid>
+
+{/* Show file upload if 'Yes' is selected */}
+{formData.dependents[index]?.parentalConsent === "yes" && (
+  <Grid item xs={12} md={12}>
+    <FileUploadButton
+      label="Attach Consent Letter"
+      fieldName={`dependents[${index}].consentLetter`}
+      acceptedFileTypes=".pdf,.doc,.docx"
+      uploadedFiles={formData.dependents[index]?.consentLetter || []}
+      onUpload={(e, fieldName) => {
+        const files = Array.from(e.target.files);
+        setFormData((prevState) => {
+          const updatedDependents = [...prevState.dependents];
+          updatedDependents[index] = {
+            ...updatedDependents[index],
+            [fieldName]: files,
+          };
+          return { ...prevState, dependents: updatedDependents };
+        });
+      }}
+      onRemove={(fieldName, fileName) => {
+        setFormData((prevState) => {
+          const updatedDependents = [...prevState.dependents];
+          updatedDependents[index] = {
+            ...updatedDependents[index],
+            [fieldName]: updatedDependents[index][fieldName]?.filter((file) => file.name !== fileName),
+          };
+          return { ...prevState, dependents: updatedDependents };
+        });
+      }}
+    />
+  </Grid>
+)}
+
           </Grid>
         ))}
       </Grid>

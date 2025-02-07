@@ -1,9 +1,9 @@
-import { Paper, Typography, Grid, FormControl, InputLabel, Select, MenuItem } from "@mui/material"
+import { Paper, Typography, Grid, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 
-const countries = ["USA", "Canada", "Australia", "New Zealand", "UK", "Germany", "France", "Spain", "Italy", "Sweden"]
-const currencies = ["USD", "EUR", "GBP", "CAD", "AUD"]
+const countries = ["USA", "Canada", "Australia", "New Zealand", "UK", "Germany", "France", "Spain", "Italy", "Sweden"];
+const currencies = ["USD", "EUR", "GBP", "CAD", "AUD"];
 
-export const ImportantInfo = ({ formData, handleInputChange }) => (
+export const ImportantInfo = ({ formData = {}, handleInputChange }) => (
   <Paper elevation={2} sx={{ p: 2, mt: 2 }}>
     <Typography variant="h6" gutterBottom>
       Important Information
@@ -12,7 +12,11 @@ export const ImportantInfo = ({ formData, handleInputChange }) => (
       <Grid item xs={12}>
         <FormControl fullWidth>
           <InputLabel>From</InputLabel>
-          <Select name="fromCountry" value={formData.fromCountry} onChange={handleInputChange} label="From">
+          <Select
+            name="fromCountry"
+            value={formData.fromCountry || ""}
+            onChange={handleInputChange}
+          >
             {countries.map((country) => (
               <MenuItem key={country} value={country}>
                 {country}
@@ -24,7 +28,11 @@ export const ImportantInfo = ({ formData, handleInputChange }) => (
       <Grid item xs={12}>
         <FormControl fullWidth>
           <InputLabel>To</InputLabel>
-          <Select name="toCountry" value={formData.toCountry} onChange={handleInputChange} label="To">
+          <Select
+            name="toCountry"
+            value={formData.toCountry || ""}
+            onChange={handleInputChange}
+          >
             {countries.map((country) => (
               <MenuItem key={country} value={country}>
                 {country}
@@ -36,7 +44,11 @@ export const ImportantInfo = ({ formData, handleInputChange }) => (
       <Grid item xs={12}>
         <FormControl fullWidth>
           <InputLabel>Currency</InputLabel>
-          <Select name="currency" value={formData.currency} onChange={handleInputChange} label="Currency">
+          <Select
+            name="currency"
+            value={formData.currency || ""}
+            onChange={handleInputChange}
+          >
             {currencies.map((currency) => (
               <MenuItem key={currency} value={currency}>
                 {currency}
@@ -47,5 +59,4 @@ export const ImportantInfo = ({ formData, handleInputChange }) => (
       </Grid>
     </Grid>
   </Paper>
-)
-
+);
