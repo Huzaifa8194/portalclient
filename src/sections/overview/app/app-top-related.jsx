@@ -15,10 +15,10 @@ export function AppTopRelated({ title, subheader, list, ...other }) {
 
   return (
     <Card {...other}>
-      <CardHeader title={title} subheader={subheader} sx={{ mb: 3 }} />
+      <CardHeader title={title} subheader={subheader} sx={{mb:2.5}} />
 
       <Scrollbar sx={{ minHeight: 384 }}>
-        <Box sx={{ p: 3, gap: 2, minWidth: 360, display: "flex", flexDirection: "column" }}>
+        <Box sx={{ p: 3, minWidth: 360, display: "flex", flexDirection: "column" }}>
           {list.map((item) => (
             <Item key={item.id} item={item} onClick={() => handleItemClick(item)} />
           ))}

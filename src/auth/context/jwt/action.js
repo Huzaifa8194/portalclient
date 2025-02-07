@@ -1,122 +1,128 @@
-import axios, { endpoints } from 'src/utils/axios';
-
-import { setSession } from './utils';
-import { STORAGE_KEY } from './constant';
+import axios, { endpoints } from "src/utils/axios"
+import { setSession, jwtDecode } from "./utils"
 
 /** **************************************
  * Sign in
  *************************************** */
 export const signInWithPassword = async ({ email, password }) => {
   try {
-    const params = { email, password };
+    const params = { email, password }
+    const res = await axios.post(endpoints.auth.signIn, params)
+    console.log("Sign in response:", res.data)
 
-    const res = await axios.post(endpoints.auth.signIn, params);
+    const { token } = res.data.data
 
-    console.log(res.data.data.token);
-
-    const accessToken = res.data.data.token;
-
-    console.log('ACCESS TOKEN: ', accessToken);
-    if (!accessToken) {
-      throw new Error('Access token not found in response');
+    if (!token) {
+      throw new Error("Access token not found in response")
     }
 
-    setSession(accessToken);
+    console.log("Received token:", token)
+
+    const decodedToken = jwtDecode(token)
+    if (!decodedToken) {
+      console.error("Failed to decode token:", token)
+      throw new Error("Invalid token received from server")
+    }
+
+    setSession(token)
+    return { ...decodedToken, accessToken: token }
   } catch (error) {
-    console.error('Error during sign in:', error);
-    throw error;
+    console.error("Error during sign in:", error)
+    throw error
   }
-};
+}
 
 /** **************************************
  * Sign up
  *************************************** */
 
+// Helper function to get country identifier
+const getCountryId = async (countryName) => {
+  try {
+    const response = await axios.get(`${endpoints.auth.country}/${countryName}`, {
+      headers: {
+        Accept: "application/json",
+      },
+    })
+
+    if (response.data.data && response.data.data[0]) {
+      return response.data.data[0].id
+    }
+    throw new Error(`Country not found: ${countryName}`)
+  } catch (error) {
+    console.error(`Error fetching country ID for ${countryName}:`, error)
+    throw error
+  }
+}
+
 export const signUp = async ({
-  firstName,
+  name,
   email,
   password,
-  passwordConfirmation,
-  dateOfBirth,
+  password_confirmation,
+  dob,
   nationality,
-  placeOfBirth,
-  countryResiding,
+  place_of_birth,
+  currently_residing,
   address,
-  contactNumber,
+  gender,
+  contact_number,
+  is_term_accepted,
 }) => {
-  // Helper function to get country identifier
-  const getCountryId = async (country) => {
-    try {
-      const response = await axios.get(`${endpoints.auth.country}/${country}`, {
-        headers: {
-          Accept: 'application/json',
-        },
-      });
-
-      console.log('GET COUNTRY RESPONSE: ', response.data.data[0]);
-      return response.data.data[0].id; // Assuming the API returns an 'id' for the country
-    } catch (error) {
-      console.error(`Error fetching country ID for ${country}:`, error);
-      throw new Error(`Unable to fetch country ID for ${country}`);
-    }
-  };
-
   try {
-    // Fetch IDs for the necessary countries
-    const nationalityId = await getCountryId(nationality);
-    const placeOfBirthId = await getCountryId(placeOfBirth);
-    const countryResidingId = await getCountryId(countryResiding);
+    // Get country IDs
+    const nationalityId = await getCountryId(nationality)
+    const placeOfBirthId = await getCountryId(place_of_birth)
+    const currentlyResidingId = await getCountryId(currently_residing)
 
-    // Prepare the form data for multipart/form-data
-    const formData = new FormData();
-    formData.append('name', firstName);
-    formData.append('email', email);
-    formData.append('password', password);
-    formData.append('password_confirmation', passwordConfirmation);
-    formData.append('dob', dateOfBirth);
-    formData.append('place_of_birth', placeOfBirthId); // Use fetched ID
-    formData.append('currently_residing', countryResidingId); // Use fetched ID
-    formData.append('nationality', nationalityId); // Use fetched ID
-    formData.append('address', address);
-    formData.append('contact_number', contactNumber);
+    // Prepare the form data
+    const formData = new FormData()
+    formData.append("name", name)
+    formData.append("email", email)
+    formData.append("password", password)
+    formData.append("password_confirmation", password_confirmation)
+    formData.append("gender", gender) // Should be "1", "2", or "3"
+    formData.append("dob", dob)
+    formData.append("place_of_birth", placeOfBirthId)
+    formData.append("currently_residing", currentlyResidingId)
+    formData.append("nationality", nationalityId)
+    formData.append("address", address)
+    formData.append("contact_number", contact_number)
+    formData.append("is_term_accepted", is_term_accepted ? "1" : "0")
 
-    // Log form data to console
-    console.log('Form Data:');
-    [...formData.entries()].forEach(([key, value]) => {
-      console.log(`${key}: ${value}`);
-    });
+    // Log form data for debugging
+    console.log("Form Data:")
+    ;[...formData.entries()].forEach(([key, value]) => {
+      console.log(`${key}: ${value}`)
+    })
 
     // Make the sign-up API call
-    const res = await axios.post(`${endpoints.auth.signUp}`, formData, {
+    const res = await axios.post(endpoints.auth.signUp, formData, {
       headers: {
-        Accept: 'application/json',
-        'Content-Type': 'multipart/form-data',
+        Accept: "application/json",
+        "Content-Type": "multipart/form-data",
       },
-    });
+    })
 
-    console.log('response: ', res);
-
-    // const { accessToken } = res.data;
-
-    // if (!accessToken) {
-    //   throw new Error('Access token not found in response');
-    // }
-
-    // sessionStorage.setItem(STORAGE_KEY, accessToken);
+    return res.data
   } catch (error) {
-    console.error('Error during sign-up:', error);
-    throw error;
+    console.error("Error during sign-up:", error)
+    if (error.response?.data) {
+      throw error.response.data
+    }
+    throw error
   }
-};
+}
 
 /** **************************************
  * Sign out
  *************************************** */
 export const signOut = async () => {
   try {
-    await setSession(null);
+    await setSession(null)
   } catch (error) {
-    console.error('Error during sign out:', error);
-    throw error;
+    console.error("Error during sign out:", error)
+    throw error
   }
-};
+}
+

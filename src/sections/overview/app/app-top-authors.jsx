@@ -22,6 +22,7 @@ export function AppTopAuthors({ title, subheader, list, ...other }) {
           p: 3,
           gap: 3,
           display: 'flex',
+          minHeight: "43.5vh", 
           flexDirection: 'column',
         }}
       >
