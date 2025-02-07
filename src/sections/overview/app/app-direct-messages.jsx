@@ -53,7 +53,7 @@ export function AppDirectMessages({ title, subheader, ...other }) {
 
   return (
     <Card {...other}   sx={{
-      minHeight: "81vh", // Ensures the card takes at least 40% of the viewport height
+      minHeight: "86vh", // Ensures the card takes at least 40% of the viewport height
     }}>
       <CardHeader
         title={title}

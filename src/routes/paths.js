@@ -119,7 +119,7 @@ export const paths = {
     workPermit:`${ROOTS.DASHBOARD}/work-visa`,
     immigrationEvisa:`${ROOTS.DASHBOARD}/immigration-Evisa`,
     immigrationEvisaInfo:`${ROOTS.DASHBOARD}/immigration-Evisa-info`,
-
+    termsAndCondition: `${ROOTS.DASHBOARD}/terms-and-condition`,
     globalEvisa:`${ROOTS.DASHBOARD}/immigration-global-Evisa`,
     globalEvisaInfo:`${ROOTS.DASHBOARD}/immigration-global-Evisa-info`,
     globalServices:`${ROOTS.DASHBOARD}/global-services`,

@@ -129,7 +129,7 @@ const GlobalServiceVisa= lazy(() => import('src/pages/dashboard/globalServices/i
 const ImmigrationEvisaInfo =lazy(() => import('src/pages/dashboard/ImmigrationEVisaInfo/index'));
 const GlobalImmigrationEvisaInfo =lazy(() => import('src/pages/dashboard/globalInfo/index'));
 const GlobalImmigrationEvisa =lazy(() => import('src/pages/dashboard/globalServices/index'));
-
+const TermsAndCondition=lazy(() => import('src/pages/dashboard/TermsandConditons/new'));
 
 
 // ----------------------------------------------------------------------
@@ -238,6 +238,7 @@ export const dashboardRoutes = [
       { path: 'entrepenaur', element: < Entrepenaur /> },
       { path: 'importexport', element: < ImportExportServices /> },
       { path: 'investors', element: < Investors /> },
+      { path: 'terms-and-condition', element: < TermsAndCondition/>},
 
       { path: 'e-visa', element: < EVisa />},
       { path: 'embassy-files', element: < EmbassyFile />},

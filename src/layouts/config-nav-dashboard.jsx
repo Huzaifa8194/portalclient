@@ -130,11 +130,7 @@ export const navData = [
 
      { title: 'Messages', path: paths.dashboard.chat, icon: ICONS.chat },
      { title: 'Application Status', path: paths.dashboard.general.analytics, icon: ICONS.calendar },
-
-
-
-     { title: 'Assessments', path: paths.dashboard.assessment, icon: ICONS.calendar },
-     { title: 'Lawyers', path: paths.dashboard.lawyers, icon: ICONS.calendar },
+     { title: 'Service Charges', path: paths.dashboard.serviceCharges, icon: ICONS.calendar },
 
    ],
  },
@@ -181,6 +177,8 @@ export const navData = [
     subheader: 'Immigration Services',
     items: [
  
+      { title: 'Assessments', path: paths.dashboard.assessment, icon: ICONS.calendar },
+      { title: 'Lawyers', path: paths.dashboard.lawyers, icon: ICONS.calendar },
       {
         title: 'E-Visa',
         path: paths.dashboard.user.root,
@@ -210,7 +208,6 @@ export const navData = [
   {
     subheader: 'Additional Features',
     items: [
-      { title: 'Service Charges', path: paths.dashboard.serviceCharges, icon: ICONS.calendar },
       {
         title: 'Visa & Permits',
         path: paths.dashboard.user.root,
@@ -226,11 +223,11 @@ export const navData = [
       },      { title: 'Power of Attorney', path: paths.dashboard.powerOfAttorney, icon: ICONS.calendar },
  
     
-      { title: 'Terms & Conditions', path: ' ', icon: ICONS.calendar },
+      { title: 'Terms & Conditions', path: paths.dashboard.termsAndCondition, icon: ICONS.calendar },
       { title: 'FAQ', path:paths.dashboard.faq, icon: ICONS.calendar },
       { title: 'Feedback', path: paths.dashboard.feedback, icon: ICONS.calendar },
-      { title: 'Course', path: paths.dashboard.general.course, icon: ICONS.calendar },
-      { title: 'tour', path: paths.dashboard.tour.root, icon: ICONS.calendar },
+      // { title: 'Course', path: paths.dashboard.general.course, icon: ICONS.calendar },
+      // { title: 'tour', path: paths.dashboard.tour.root, icon: ICONS.calendar },
 
     ],
   },

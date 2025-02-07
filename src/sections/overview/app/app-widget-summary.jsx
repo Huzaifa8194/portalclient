@@ -51,7 +51,7 @@ export function AppWidgetSummary({ title, percent, total, chart, sx, renderCusto
         display: "flex",
         alignItems: "center",
         p: 3,
-        minHeight: "36vh",
+        minHeight: "38vh",
         ...sx,
       }}
       {...other}

@@ -1,15 +1,20 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import { z as zod } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { isValidPhoneNumber } from "react-phone-number-input/input"
+import { isValidPhoneNumber } from "react-phone-number-input"
+import Button from "@mui/material/Button"
 import axios from "axios"
+import dayjs from "dayjs"
 
 import { toast } from "src/components/snackbar"
 
 import Box from "@mui/material/Box"
 import Card from "@mui/material/Card"
 import Stack from "@mui/material/Stack"
-import Button from "@mui/material/Button"
 import Grid from "@mui/material/Unstable_Grid2"
 import Typography from "@mui/material/Typography"
 import LoadingButton from "@mui/lab/LoadingButton"
@@ -17,8 +22,6 @@ import LoadingButton from "@mui/lab/LoadingButton"
 import { fData } from "src/utils/format-number"
 
 import { Form, Field, schemaHelper } from "src/components/hook-form"
-
-import { useMockedUser } from "src/auth/hooks"
 import { AppWidgetSummary } from "./app-widget-summary"
 
 // ----------------------------------------------------------------------
@@ -29,48 +32,126 @@ export const UpdateUserSchema = zod.object({
     .string()
     .min(1, { message: "Email is required!" })
     .email({ message: "Email must be a valid email address!" }),
-  photoURL: schemaHelper.file({
-    message: { required_error: "Avatar is required!" },
+  photoURL: schemaHelper
+    .file({
+      message: { required_error: "Avatar is required!" },
+    })
+    .optional(),
+  phoneNumber: zod.string().refine((value) => !value || isValidPhoneNumber(value), {
+    message: "Invalid phone number",
   }),
-  phoneNumber: schemaHelper.phoneNumber({ isValidPhoneNumber }),
-  country: schemaHelper.objectOrNull({
-    message: { required_error: "Country is required!" },
-  }),
+  country: zod
+    .object({
+      label: zod.string(),
+      value: zod.string(),
+    })
+    .nullable(),
   address: zod.string().min(1, { message: "Address is required!" }),
-  state: zod.string().min(1, { message: "State is required!" }),
-  city: zod.string().min(1, { message: "City is required!" }),
-  zipCode: zod.string().min(1, { message: "Zip code is required!" }),
-  about: zod.string().min(1, { message: "About is required!" }),
-  dateofbirth: zod.string().nullable().optional(),
+  dateofbirth: zod.any(),
   NID: zod.string().min(1, { message: "NID is required!" }),
-  // Not required
-  isPublic: zod.boolean(),
+  nationality: zod.string(),
+  placeOfBirth: zod.string(),
+  currentlyResiding: zod.string(),
 })
 
-export function AccountGeneral() {
-  const { user } = useMockedUser()
+const fetchUserData = async () => {
+  try {
+    const token = localStorage.getItem("authToken")
+    if (!token) {
+      throw new Error("No token found. Redirecting to login.")
+    }
 
-  const defaultValues = {
-    displayName: user?.displayName || "",
-    email: user?.email || "",
-    photoURL: user?.photoURL || null,
-    phoneNumber: user?.phoneNumber || "",
-    country: user?.country || null,
-    address: user?.address || "",
-    state: user?.state || "",
-    city: user?.city || "",
-    zipCode: user?.zipCode || "",
-    about: user?.about || "",
-    dateofbirth: user?.dateofbirth || null,
-    NID: user?.NID || "",
-    isPublic: user?.isPublic || false,
+    const response = await axios.get("https://nordicrelocators.com/api/client/profile", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    console.log("User data:", response.data)
+    return response.data.data
+  } catch (error) {
+    if (error.response && error.response.status === 401) {
+      throw new Error("Authentication failed. Please login again.")
+    } else {
+      console.error("Error fetching user data:", error)
+      throw error
+    }
   }
+}
+
+const fetchCountries = async () => {
+  try {
+    const response = await axios.get("https://nordicrelocators.com/api/miscellaneous/countries")
+    return response.data.data
+  } catch (error) {
+    console.error("Error fetching countries:", error)
+    throw error
+  }
+}
+
+export function AccountGeneral() {
+  const [userData, setUserData] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [countries, setCountries] = useState([])
+  const navigate = useNavigate()
 
   const methods = useForm({
     mode: "all",
     resolver: zodResolver(UpdateUserSchema),
-    defaultValues,
+    defaultValues: {
+      displayName: "",
+      email: "",
+      photoURL: null,
+      phoneNumber: "",
+      country: null,
+      address: "",
+      dateofbirth: null,
+      NID: "",
+      nationality: null,
+      placeOfBirth: null,
+      currentlyResiding: null,
+    },
   })
+
+  const { reset } = methods
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [data, countriesList] = await Promise.all([fetchUserData(), fetchCountries()])
+        setUserData(data)
+        setCountries(countriesList)
+
+        const getCountryById = (id) => {
+          const country = countriesList.find((c) => c.id === id)
+          return country ? { label: country.name, value: country.id.toString() } : null
+        }
+
+        reset({
+          displayName: data.user?.name || "",
+          email: data.user?.email || "",
+          photoURL: data.profile?.profile_pic || null,
+          phoneNumber: data.profile?.contact_number || "",
+          country: getCountryById(data.profile?.nationality_id),
+          address: data.profile?.address || "",
+          dateofbirth: data.profile?.dob ? dayjs(data.profile.dob) : null,
+          NID: data.profile?.nic || "",
+          nationality: getCountryById(data.profile?.nationality_id) || null,
+          placeOfBirth: getCountryById(data.profile?.place_of_birth_id) || null,
+          currentlyResiding: getCountryById(data.profile?.currently_residing_id) || null,
+        })
+      } catch (error) {
+        console.error(error.message)
+        toast.error(error.message)
+        if (error.message.includes("No token found") || error.message.includes("Authentication failed")) {
+          navigate("/login")
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    loadData()
+  }, [navigate, reset])
 
   const {
     handleSubmit,
@@ -81,11 +162,12 @@ export function AccountGeneral() {
     try {
       const formData = new FormData()
 
-      // Append form fields to formData
-      formData.append("dob", data.dateofbirth || "")
-      formData.append("place_of_birth", data.country?.label || "")
-      formData.append("currently_residing", data.country?.label || "")
-      formData.append("nationality", data.country?.label || "")
+      formData.append("name", data.displayName)
+      formData.append("email", data.email)
+      formData.append("dob", data.dateofbirth ? data.dateofbirth.format("YYYY-MM-DD") : "")
+      formData.append("place_of_birth", data.placeOfBirth ? data.placeOfBirth.value : "")
+      formData.append("currently_residing", data.currentlyResiding ? data.currentlyResiding.value : "")
+      formData.append("nationality", data.nationality ? data.nationality.value : "")
       formData.append("address", data.address)
       formData.append("secondary_address", "")
       formData.append("contact_number", data.phoneNumber)
@@ -97,10 +179,15 @@ export function AccountGeneral() {
       formData.append("issue_date", "")
       formData.append("expiry_date", "")
 
+      const token = localStorage.getItem("authToken")
+      if (!token) {
+        throw new Error("No authentication token found. Please log in again.")
+      }
+
       const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/client/profile/edit/6`, formData, {
         headers: {
           Accept: "application/json",
-          Authorization: "Bearer 32|zzDWAiYeEkrWyVU1WCITAR6vWNc3iZ57bLjOhAbce9018f40",
+          Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       })
@@ -112,6 +199,19 @@ export function AccountGeneral() {
       toast.error("Failed to update profile")
     }
   })
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
+  if (!userData) {
+    return <div>No user data available</div>
+  }
+
+  const countryOptions = countries.map((country) => ({
+    label: country.name,
+    value: country.id.toString(),
+  }))
 
   return (
     <>
@@ -135,7 +235,7 @@ export function AccountGeneral() {
                 </g>
               </svg>
             }
-            total={357}
+            total={userData.profile.user_type_id || "N/A"}
             extratext="Unique Identifier"
             chart={{
               categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
@@ -147,7 +247,7 @@ export function AccountGeneral() {
           <AppWidgetSummary
             title="User Type"
             extratext="Basic User."
-            total="Bronze"
+            total={userData.profile.user_type || "N/A"}
             codeicon={
               <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24">
                 <path
@@ -177,8 +277,8 @@ export function AccountGeneral() {
                 />
               </svg>
             }
-            total="12/4/2024"
-            extratext="Joined on 12/4/2024"
+            total={userData.user.created_at ? dayjs(userData.user.created_at).format("YYYY-MM-DD") : "N/A"}
+            extratext={`Joined on ${userData.user.created_at ? dayjs(userData.user.created_at).format("YYYY-MM-DD") : "N/A"}`}
             chart={{
               categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
               series: [18, 19, 31, 8, 16, 37, 12, 33],
@@ -192,7 +292,7 @@ export function AccountGeneral() {
             <Card
               sx={{
                 pt: 10,
-                pb: 27,
+                pb: 5,
                 px: 3,
                 textAlign: "center",
               }}
@@ -216,30 +316,17 @@ export function AccountGeneral() {
                   </Typography>
                 }
               />
-              <Button variant="soft" color="success" sx={{ mt: 3, mr: 1 }}>
+               <Button variant="soft" color="success" sx={{ mt: 3, mr: 1 }}>
                 Update password
               </Button>
               <Button variant="soft" color="error" sx={{ mt: 3 }}>
                 Delete user
               </Button>
+
             </Card>
           </Grid>
           <Grid xs={12} md={8}>
             <Card sx={{ p: 3 }}>
-              <Typography
-                variant="caption"
-                sx={{
-                  mt: 3,
-                  mb: 5,
-                  mx: "auto",
-                  display: "block",
-                  textAlign: "left",
-                  color: "gray",
-                }}
-              >
-                You can Update-Delete your profile in this section. You are not allowed to change your Name, DOB and
-                Email.
-              </Typography>
               <Box
                 rowGap={3}
                 columnGap={2}
@@ -253,10 +340,28 @@ export function AccountGeneral() {
                 <Field.Text name="email" label="Email address" />
                 <Field.DatePicker name="dateofbirth" label="Date of Birth" />
                 <Field.Text name="NID" label="National Identification Number - CPR - Personnummer" />
-                <Field.CountrySelect name="nationality" label="Nationality" placeholder="Choose a country" />
-                <Field.CountrySelect name="placeOfBirth" label="Place of Birth" placeholder="Choose a country" />
+                <Field.CountrySelect
+                  name="nationality"
+                  label="Nationality"
+                  placeholder="Choose a country"
+                  options={countryOptions}
+                  getOptionLabel={(option) => option.label || ""}
+                />
+                <Field.CountrySelect
+                  name="placeOfBirth"
+                  label="Place of Birth"
+                  placeholder="Choose a country"
+                  options={countryOptions}
+                  getOptionLabel={(option) => option.label || ""}
+                />
+                <Field.CountrySelect
+                  name="currentlyResiding"
+                  label="Currently Residing"
+                  placeholder="Choose a country"
+                  options={countryOptions}
+                  getOptionLabel={(option) => option.label || ""}
+                />
                 <Field.Text name="address" label="Address" />
-                <Field.CountrySelect name="currentlyResidence" label="Currently Residing in" placeholder="Choose a country" />
                 <Field.Phone name="phoneNumber" label="Contact Number" />
               </Box>
               <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>

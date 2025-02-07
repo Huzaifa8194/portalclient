@@ -8,7 +8,6 @@ export const signInWithPassword = async ({ email, password }) => {
   try {
     const params = { email, password }
     const res = await axios.post(endpoints.auth.signIn, params)
-    console.log("Sign in response:", res.data)
 
     const { token } = res.data.data
 
@@ -16,14 +15,13 @@ export const signInWithPassword = async ({ email, password }) => {
       throw new Error("Access token not found in response")
     }
 
-    console.log("Received token:", token)
-
     const decodedToken = jwtDecode(token)
     if (!decodedToken) {
       console.error("Failed to decode token:", token)
       throw new Error("Invalid token received from server")
     }
 
+    localStorage.setItem("authToken", token)
     setSession(token)
     return { ...decodedToken, accessToken: token }
   } catch (error) {

@@ -49,7 +49,7 @@ export function AccountDrawer({ data = [], sx, ...other }) {
             },
           })
           setUserDetails(response.data.data)
-          console.log("Fetched user details:", response.data.data)
+          // console.log("Fetched user details:", response.data.data)
         } catch (error) {
           console.error("Error fetching user details:", error)
         }
@@ -91,8 +91,8 @@ export function AccountDrawer({ data = [], sx, ...other }) {
     </AnimateAvatar>
   )
 
-  console.log("User object:", user)
-  console.log("User details:", userDetails)
+  // console.log("User object:", user)
+  // console.log("User details:", userDetails)
 
   return (
     <>

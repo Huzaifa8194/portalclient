@@ -18,7 +18,7 @@ export function AuthProvider({ children }) {
   const checkUserSession = useCallback(async () => {
     try {
       const accessToken = sessionStorage.getItem(STORAGE_KEY)
-      console.log("Stored access token:", accessToken)
+      // console.log("Stored access token:", accessToken)
 
       if (accessToken && isValidToken(accessToken)) {
         setSession(accessToken)
@@ -44,7 +44,7 @@ export function AuthProvider({ children }) {
           setState({ user: null, loading: false })
         }
       } else {
-        console.log("No valid token found, clearing session")
+        // console.log("No valid token found, clearing session")
         setSession(null)
         setState({ user: null, loading: false })
       }

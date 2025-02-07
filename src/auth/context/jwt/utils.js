@@ -9,7 +9,7 @@ export function jwtDecode(token) {
       return null
     }
 
-    console.log("Received token:", token)
+    // console.log("Received token:", token)
 
     // Check if the token is in the format "id|token"
     const parts = token.split("|")
