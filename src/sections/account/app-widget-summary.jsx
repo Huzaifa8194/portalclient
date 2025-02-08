@@ -1,68 +1,53 @@
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import { useTheme } from '@mui/material/styles';
-
-import { fNumber, fPercent } from 'src/utils/format-number';
-
-import { Iconify } from 'src/components/iconify';
-import { Chart, useChart } from 'src/components/chart';
+import PropTypes from "prop-types"
+import { useTheme } from "@mui/material/styles"
+import { Card, Typography, Grid, Avatar } from "@mui/material"
 
 // ----------------------------------------------------------------------
 
-export function AppWidgetSummary({ title, percent, total, codeicon, chart, sx, icon, extratext, ...other }) {
-  const theme = useTheme();
+AppWidgetSummary.propTypes = {
+  title: PropTypes.string,
+  total: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  icon: PropTypes.node,
+  sx: PropTypes.shape({}),
+  extratext: PropTypes.string,
+  codeicon: PropTypes.node,
+}
 
-  const chartColors = chart.colors ?? [theme.palette.primary.main];
-
-  const chartOptions = useChart({
-    chart: { sparkline: { enabled: true } },
-    colors: chartColors,
-    stroke: { width: 0 },
-    xaxis: { categories: chart.categories },
-    tooltip: {
-      y: { formatter: (value) => fNumber(value), title: { formatter: () => '' } },
-    },
-    plotOptions: { bar: { borderRadius: 1.5, columnWidth: '64%' } },
-    ...chart.options,
-  });
-
-  const renderTrending = (
-    <Box sx={{ gap: 0.5, display: 'flex', alignItems: 'center' }}>
-
-
-
-
-
-
-
-
-      <Box component="span" sx={{ typography: 'subtitle2' }}>
-        {percent > 0 && '+'}
-        {fPercent(percent)}
-      </Box>
-      <Box component="span" sx={{ typography: 'body2', color: 'text.secondary' }}>
-        {extratext}
-      </Box>
-    </Box>
-  );
+export function AppWidgetSummary({ title, total, icon, sx, extratext, codeicon }) {
+  const theme = useTheme()
 
   return (
-    <Card
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        p: 3,
-        ...sx,
-      }}
-      {...other}
-    >
-      <Box sx={{ flexGrow: 1 }}>
-        <Box sx={{ typography: 'subtitle2' }}>{title}</Box>
-        <Box sx={{ mt: 1.5, mb: 1, typography: 'h3' }}>{total}</Box>
-        {renderTrending}
-      </Box>
-
-      {codeicon}
+    <Card sx={sx}>
+      <Grid container justifyContent="space-between" alignItems="center" sx={{ px: 3, py: 3 }}>
+        <Grid item xs>
+          <Typography variant="subtitle2" sx={{ color: "text.secondary" }}>
+            {title}
+          </Typography>
+          <Typography variant="h5" sx={{ mt: 0.5 }}>
+            {total}
+          </Typography>
+          {extratext && (
+            <Typography variant="caption" sx={{ mt: 0.5, color: "text.secondary" }}>
+              {extratext}
+            </Typography>
+          )}
+        </Grid>
+        <Grid item>
+          {codeicon || (
+            <Avatar
+              sx={{
+                width: 40,
+                height: 40,
+                bgcolor: theme.palette.grey[100],
+                color: theme.palette.grey[500],
+              }}
+            >
+              {icon}
+            </Avatar>
+          )}
+        </Grid>
+      </Grid>
     </Card>
-  );
+  )
 }
+

@@ -35,10 +35,17 @@ export const endpoints = {
   kanban: '/api/kanban',
   calendar: '/api/calendar',
   auth: {
-    me: '/api/auth/me',
-    signIn: '/api/clientLogin',
-    signUp: '/api/clientRegistration',
-    country: '/api/miscellaneous/countries',
+    me: '/auth/me',
+    signIn: '/clientLogin',
+    signUp: '/clientRegistration',
+    country: '/miscellaneous/countries',
+  },
+  supporting: {
+    countries: '/miscellaneous/countries',
+  },
+  client: {
+    editProfile: '/client/profile/edit',
+    profile: '/client/profile',
   },
   mail: {
     list: '/api/mail/list',

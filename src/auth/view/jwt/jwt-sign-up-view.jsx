@@ -48,7 +48,7 @@ export const SignUpSchema = zod
       .min(6, { message: "Password must be at least 6 characters!" }),
     password_confirmation: zod.string().min(1, { message: "Confirm Password is required!" }),
     phonenumber: zod.string().min(1, { message: "Phone number is required!" }),
-    gender: zod.string().min(1, { message: "Gender is required!" }),
+    gender: zod.string().refine((value) => value !== "Choose Option", { message: "Please select a gender" }),
     is_term_accepted: zod.boolean().refine((value) => value === true, {
       message: "You must accept the terms and conditions",
     }),
@@ -61,6 +61,7 @@ export const SignUpSchema = zod
 // ----------------------------------------------------------------------
 
 const genderOptions = [
+  { value: "Choose Option", label: "Choose Option" },
   { value: "1", label: "Male" },
   { value: "2", label: "Female" },
   { value: "3", label: "Other" },
@@ -88,7 +89,7 @@ export function JwtSignUpView() {
     countryresiding: "",
     address: "",
     phonenumber: "",
-    gender: 1,
+    gender: "Choose Option",
     is_term_accepted: false,
   }
 
@@ -115,7 +116,7 @@ export function JwtSignUpView() {
         currently_residing: data.countryresiding,
         address: data.address,
         contact_number: data.phonenumber,
-        gender: 1,
+        gender: data.gender,
         is_term_accepted: data.is_term_accepted ? 1 : 0,
       })
 
@@ -171,7 +172,7 @@ export function JwtSignUpView() {
       <Field.CountrySelect name="placeofbirth" label="Place of Birth" />
       <Field.CountrySelect name="countryresiding" label="Country Residing In" />
 
-      <Field.Select name="gender" label="Gender" select>
+      <Field.Select name="gender" label="Gender" select  defaultValue="Choose Option">
         {genderOptions.map((option) => (
           <MenuItem key={option.value} value={option.value}>
             {option.label}

@@ -43,7 +43,7 @@ export function AccountDrawer({ data = [], sx, ...other }) {
     const fetchUserDetails = async () => {
       if (user?.accessToken) {
         try {
-          const response = await axios.get("https://nordicrelocators.com/api/client/profile", {
+          const response = await axios.get("https://api.swedenrelocators.se/api/client/profile", {
             headers: {
               Authorization: `Bearer ${user.accessToken}`,
             },

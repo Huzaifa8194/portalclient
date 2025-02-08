@@ -73,13 +73,14 @@ export const signUp = async ({
     const placeOfBirthId = await getCountryId(place_of_birth)
     const currentlyResidingId = await getCountryId(currently_residing)
 
+    console.log(gender);
     // Prepare the form data
     const formData = new FormData()
     formData.append("name", name)
     formData.append("email", email)
     formData.append("password", password)
     formData.append("password_confirmation", password_confirmation)
-    formData.append("gender", gender) // Should be "1", "2", or "3"
+    formData.append("gender", gender) 
     formData.append("dob", dob)
     formData.append("place_of_birth", placeOfBirthId)
     formData.append("currently_residing", currentlyResidingId)

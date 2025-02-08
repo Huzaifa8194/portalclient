@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { isValidPhoneNumber } from "react-phone-number-input"
 import Button from "@mui/material/Button"
-import axios from "axios"
+import axios, { endpoints } from "src/utils/axios"
 import dayjs from "dayjs"
 
 import { toast } from "src/components/snackbar"
@@ -49,24 +49,29 @@ export const UpdateUserSchema = zod.object({
   address: zod.string().min(1, { message: "Address is required!" }),
   dateofbirth: zod.any(),
   NID: zod.string().min(1, { message: "NID is required!" }),
-  nationality: zod.string(),
-  placeOfBirth: zod.string(),
-  currentlyResiding: zod.string(),
+  nationality: zod
+    .object({
+      label: zod.string(),
+      value: zod.string(),
+    })
+    .nullable(),
+  placeOfBirth: zod
+    .object({
+      label: zod.string(),
+      value: zod.string(),
+    })
+    .nullable(),
+  currentlyResiding: zod
+    .object({
+      label: zod.string(),
+      value: zod.string(),
+    })
+    .nullable(),
 })
 
 const fetchUserData = async () => {
   try {
-    const token = localStorage.getItem("authToken")
-    if (!token) {
-      throw new Error("No token found. Redirecting to login.")
-    }
-
-    const response = await axios.get("https://nordicrelocators.com/api/client/profile", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-
+    const response = await axios.get(endpoints.client.profile)
     console.log("User data:", response.data)
     return response.data.data
   } catch (error) {
@@ -81,8 +86,14 @@ const fetchUserData = async () => {
 
 const fetchCountries = async () => {
   try {
-    const response = await axios.get("https://nordicrelocators.com/api/miscellaneous/countries")
-    return response.data.data
+    const response = await axios.get(endpoints.supporting.countries)
+    // console.log("Raw countries data:", response.data.data)
+    // Add data structure validation
+    const validCountries = response.data.data.filter(
+      (country) => country && typeof country === "object" && country.name && country.id,
+    )
+    // console.log("Validated countries:", validCountries)
+    return validCountries
   } catch (error) {
     console.error("Error fetching countries:", error)
     throw error
@@ -110,6 +121,7 @@ export function AccountGeneral() {
       nationality: null,
       placeOfBirth: null,
       currentlyResiding: null,
+      gender: "",
     },
   })
 
@@ -118,27 +130,43 @@ export function AccountGeneral() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [data, countriesList] = await Promise.all([fetchUserData(), fetchCountries()])
-        setUserData(data)
+        const [userDataResponse, countriesList] = await Promise.all([fetchUserData(), fetchCountries()])
+        setUserData(userDataResponse)
         setCountries(countriesList)
 
         const getCountryById = (id) => {
+          if (!id) return null
           const country = countriesList.find((c) => c.id === id)
           return country ? { label: country.name, value: country.id.toString() } : null
         }
 
+        // // Log the found countries for debugging
+        // console.log("Found nationality:", getCountryById(userDataResponse.profile?.nationality_id))
+        // console.log("Found place of birth:", getCountryById(userDataResponse.profile?.place_of_birth_id))
+        // console.log("Found currently residing:", getCountryById(userDataResponse.profile?.currently_residing_id))
+
         reset({
-          displayName: data.user?.name || "",
-          email: data.user?.email || "",
-          photoURL: data.profile?.profile_pic || null,
-          phoneNumber: data.profile?.contact_number || "",
-          country: getCountryById(data.profile?.nationality_id),
-          address: data.profile?.address || "",
-          dateofbirth: data.profile?.dob ? dayjs(data.profile.dob) : null,
-          NID: data.profile?.nic || "",
-          nationality: getCountryById(data.profile?.nationality_id) || null,
-          placeOfBirth: getCountryById(data.profile?.place_of_birth_id) || null,
-          currentlyResiding: getCountryById(data.profile?.currently_residing_id) || null,
+          displayName: userDataResponse.user?.name || "",
+          email: userDataResponse.user?.email || "",
+          photoURL: userDataResponse.profile?.profile_pic || null,
+          phoneNumber: userDataResponse.profile?.contact_number || "",
+          country: getCountryById(userDataResponse.profile?.nationality_id),
+          address: userDataResponse.profile?.address || "",
+          dateofbirth: userDataResponse.profile?.dob ? dayjs(userDataResponse.profile.dob) : null,
+          NID: userDataResponse.profile?.nic || "",
+          nationality: {
+            label: userDataResponse.profile?.nationality || "",
+            value: userDataResponse.profile?.nationality_id?.toString() || "",
+          },
+          placeOfBirth: {
+            label: userDataResponse.profile?.place_of_birth || "",
+            value: userDataResponse.profile?.place_of_birth_id?.toString() || "",
+          },
+          currentlyResiding: {
+            label: userDataResponse.profile?.currently_residing || "",
+            value: userDataResponse.profile?.currently_residing_id?.toString() || "",
+          },
+          gender: userDataResponse.profile?.gender || "",
         })
       } catch (error) {
         console.error(error.message)
@@ -164,10 +192,10 @@ export function AccountGeneral() {
 
       formData.append("name", data.displayName)
       formData.append("email", data.email)
-      formData.append("dob", data.dateofbirth ? data.dateofbirth.format("YYYY-MM-DD") : "")
-      formData.append("place_of_birth", data.placeOfBirth ? data.placeOfBirth.value : "")
-      formData.append("currently_residing", data.currentlyResiding ? data.currentlyResiding.value : "")
-      formData.append("nationality", data.nationality ? data.nationality.value : "")
+      formData.append("dob", data.dateofbirth ? dayjs(data.dateofbirth).format("YYYY-MM-DD") : "")
+      formData.append("place_of_birth_id", data.placeOfBirth?.value || userData.profile.place_of_birth_id)
+      formData.append("currently_residing_id", data.currentlyResiding?.value || userData.profile.currently_residing_id)
+      formData.append("nationality_id", data.nationality?.value || userData.profile.nationality_id)
       formData.append("address", data.address)
       formData.append("secondary_address", "")
       formData.append("contact_number", data.phoneNumber)
@@ -178,16 +206,15 @@ export function AccountGeneral() {
       formData.append("passport_no", "")
       formData.append("issue_date", "")
       formData.append("expiry_date", "")
+      formData.append("gender_id", userData.profile.gender_id) // Use the gender_id from the API response
 
-      const token = localStorage.getItem("authToken")
-      if (!token) {
-        throw new Error("No authentication token found. Please log in again.")
-      }
+      // Log form data for debugging
+      Array.from(formData.entries()).forEach(([key, value]) => {
+        console.log(`${key}: ${value}`)
+      })
 
-      const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/client/profile/edit/6`, formData, {
+      const response = await axios.post(endpoints.client.editProfile, formData, {
         headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       })
@@ -196,7 +223,7 @@ export function AccountGeneral() {
       toast.success("Update success!")
     } catch (error) {
       console.error("Error updating profile:", error)
-      toast.error("Failed to update profile")
+      toast.error(error.response?.data?.message || "Failed to update profile")
     }
   })
 
@@ -208,10 +235,14 @@ export function AccountGeneral() {
     return <div>No user data available</div>
   }
 
-  const countryOptions = countries.map((country) => ({
-    label: country.name,
-    value: country.id.toString(),
-  }))
+  const countryOptions = countries
+    .filter((country) => country && country.name && country.id) // Ensure valid data
+    .map((country) => ({
+      label: country.name,
+      value: country.id.toString(),
+    }))
+
+  // console.log("Mapped country options:", countryOptions) // Debug output
 
   return (
     <>
@@ -316,13 +347,12 @@ export function AccountGeneral() {
                   </Typography>
                 }
               />
-               <Button variant="soft" color="success" sx={{ mt: 3, mr: 1 }}>
+              <Button variant="soft" color="success" sx={{ mt: 3, mr: 1 }}>
                 Update password
               </Button>
               <Button variant="soft" color="error" sx={{ mt: 3 }}>
                 Delete user
               </Button>
-
             </Card>
           </Grid>
           <Grid xs={12} md={8}>
@@ -345,24 +375,70 @@ export function AccountGeneral() {
                   label="Nationality"
                   placeholder="Choose a country"
                   options={countryOptions}
-                  getOptionLabel={(option) => option.label || ""}
+                  getOptionLabel={(option) => {
+                    // Handle both string and object cases
+                    if (typeof option === "string") return option
+                    return option?.label || ""
+                  }}
+                  isOptionEqualToValue={(option, value) => {
+                    if (!option || !value) return false
+                    // Handle both string and object cases
+                    const optionValue = typeof option === "string" ? option : option.value
+                    const compareValue = typeof value === "string" ? value : value.value
+                    return optionValue === compareValue
+                  }}
+                  renderOption={(props, option) => (
+                    <li {...props} key={option.value}>
+                      {option.label}
+                    </li>
+                  )}
                 />
+
                 <Field.CountrySelect
                   name="placeOfBirth"
                   label="Place of Birth"
                   placeholder="Choose a country"
                   options={countryOptions}
-                  getOptionLabel={(option) => option.label || ""}
+                  getOptionLabel={(option) => {
+                    if (typeof option === "string") return option
+                    return option?.label || ""
+                  }}
+                  isOptionEqualToValue={(option, value) => {
+                    if (!option || !value) return false
+                    const optionValue = typeof option === "string" ? option : option.value
+                    const compareValue = typeof value === "string" ? value : value.value
+                    return optionValue === compareValue
+                  }}
+                  renderOption={(props, option) => (
+                    <li {...props} key={option.value}>
+                      {option.label}
+                    </li>
+                  )}
                 />
                 <Field.CountrySelect
                   name="currentlyResiding"
                   label="Currently Residing"
                   placeholder="Choose a country"
                   options={countryOptions}
-                  getOptionLabel={(option) => option.label || ""}
+                  getOptionLabel={(option) => {
+                    if (typeof option === "string") return option
+                    return option?.label || ""
+                  }}
+                  isOptionEqualToValue={(option, value) => {
+                    if (!option || !value) return false
+                    const optionValue = typeof option === "string" ? option : option.value
+                    const compareValue = typeof value === "string" ? value : value.value
+                    return optionValue === compareValue
+                  }}
+                  renderOption={(props, option) => (
+                    <li {...props} key={option.value}>
+                      {option.label}
+                    </li>
+                  )}
                 />
                 <Field.Text name="address" label="Address" />
                 <Field.Phone name="phoneNumber" label="Contact Number" />
+
               </Box>
               <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>
                 <LoadingButton type="submit" variant="contained" loading={isSubmitting}>

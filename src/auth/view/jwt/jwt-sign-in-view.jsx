@@ -48,7 +48,7 @@ export function JwtSignInView() {
   const password = useBoolean();
 
   const defaultValues = {
-    email: 'moazateeq235@gmail.com',
+    email: 'demo@gmail.com',
     password: '12345678',
   };
 
