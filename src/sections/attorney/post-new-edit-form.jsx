@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form"
 import { Box, Card, Stepper, Step, StepLabel } from "@mui/material"
 import PowerOfAttorneyForm from "./formComponents/PowerOfAttorneyForm"
 
-export function PostNewEditForm({ currentPost }) {
+export default function PostNewEditForm({ currentPost }) {
   const { handleSubmit, methods, control } = useForm()
   const [activeStep, setActiveStep] = useState(0)
   const steps = [
@@ -14,6 +14,7 @@ export function PostNewEditForm({ currentPost }) {
     "Responsibilities",
     "Disputes",
     "Liability",
+    "Legal",
     "Amendments",
     "Acknowledgment",
   ]
