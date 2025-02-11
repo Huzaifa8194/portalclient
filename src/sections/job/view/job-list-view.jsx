@@ -79,38 +79,6 @@ export function JobListView() {
     },
     [search]
   );
-
-  const renderFilters = (
-    <Stack
-      spacing={3}
-      justifyContent="space-between"
-      alignItems={{ xs: 'flex-end', sm: 'center' }}
-      direction={{ xs: 'column', sm: 'row' }}
-    >
-      <JobSearch search={search} onSearch={handleSearch} />
-
-      <Stack direction="row" spacing={1} flexShrink={0}>
-        <JobFilters
-          filters={filters}
-          canReset={canReset}
-          open={openFilters.value}
-          onOpen={openFilters.onTrue}
-          onClose={openFilters.onFalse}
-          options={{
-            roles: _roles,
-            benefits: JOB_BENEFIT_OPTIONS.map((option) => option.label),
-            employmentTypes: JOB_EMPLOYMENT_TYPE_OPTIONS.map((option) => option.label),
-            experiences: ['all', ...JOB_EXPERIENCE_OPTIONS.map((option) => option.label)],
-          }}
-        />
-
-        <JobSort sort={sortBy} onSort={handleSortBy} sortOptions={JOB_SORT_OPTIONS} />
-      </Stack>
-    </Stack>
-  );
-
-  const renderResults = <JobFiltersResult filters={filters} totalResults={dataFiltered.length} />;
-
   return (
     <DashboardContent>
       <CustomBreadcrumbs

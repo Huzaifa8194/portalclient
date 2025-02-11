@@ -131,15 +131,15 @@ export function JobItem({ job, onView, onEdit, onDelete }) {
 
         <Box
           display="grid"
-          gridTemplateColumns="repeat(3, 1fr)"
+          gridTemplateColumns="repeat(2, 1fr)"
           sx={{ py: 3, typography: 'subtitle1' }}
         >
-          <div>
+          {/* <div>
             <Typography variant="caption" component="div" sx={{ mb: 0.5, color: 'text.secondary' }}>
               NIC
             </Typography>
             {job.nic || '123'}
-          </div>
+          </div> */}
 
           <div>
             <Typography variant="caption" component="div" sx={{ mb: 0.5, color: 'text.secondary' }}>

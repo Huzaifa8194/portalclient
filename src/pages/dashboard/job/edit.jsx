@@ -1,28 +1,20 @@
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-
-import { useParams } from 'src/routes/hooks';
-
-import { _jobs } from 'src/_mock/_job';
-import { CONFIG } from 'src/config-global';
-
 import { JobEditView } from 'src/sections/job/view';
 
-// ----------------------------------------------------------------------
-
-const metadata = { title: `Job edit | Dashboard - ${CONFIG.appName}` };
-
 export default function Page() {
-  const { id = '' } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const currentJob = _jobs.find((job) => job.id === id);
-
+  // Get member data from state instead of query
+  const selectedMember = location.state?.member || null;
   return (
     <>
       <Helmet>
-        <title> {metadata.title}</title>
+        <title> Job Edit | Dashboard </title>
       </Helmet>
 
-      <JobEditView job={currentJob} />
+      <JobEditView job={selectedMember} />
     </>
   );
 }
