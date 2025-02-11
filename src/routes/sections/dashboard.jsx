@@ -130,6 +130,7 @@ const ImmigrationEvisaInfo =lazy(() => import('src/pages/dashboard/ImmigrationEV
 const GlobalImmigrationEvisaInfo =lazy(() => import('src/pages/dashboard/globalInfo/index'));
 const GlobalImmigrationEvisa =lazy(() => import('src/pages/dashboard/globalServices/index'));
 const TermsAndCondition=lazy(() => import('src/pages/dashboard/TermsandConditons/new'));
+const Reviews=lazy(() => import('src/pages/dashboard/Reviews/new'));
 
 
 // ----------------------------------------------------------------------
@@ -254,6 +255,7 @@ export const dashboardRoutes = [
       { path: 'student-visa', element: < StudentVisa />},
       { path: 'visit-visa', element: < VisitVisa />},
       { path: 'work-visa', element: < WorkPermit />},
+      { path: 'reviews', element: < Reviews />},
 
       { path: 'pet-relocation', element: < PetRelocation />},
       { path: 'service-charges', element: < ServiceCharges />},

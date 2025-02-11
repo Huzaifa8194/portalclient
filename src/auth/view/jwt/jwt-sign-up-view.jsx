@@ -1,5 +1,5 @@
 import { z as zod } from "zod"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 
@@ -38,6 +38,9 @@ export const SignUpSchema = zod
     placeofbirth: zod.string().min(1, { message: "Place of Birth is required!" }),
     countryresiding: zod.string().min(1, { message: "Country Residing In is required!" }),
     address: zod.string().min(1, { message: "Address is required!" }),
+    city: zod.string().min(1, { message: "City is required!" }),
+    postalCode: zod.string().min(1, { message: "PostalCode is required!" }),
+
     email: zod
       .string()
       .min(1, { message: "Email is required!" })
@@ -47,11 +50,18 @@ export const SignUpSchema = zod
       .min(1, { message: "Password is required!" })
       .min(6, { message: "Password must be at least 6 characters!" }),
     password_confirmation: zod.string().min(1, { message: "Confirm Password is required!" }),
-    phonenumber: zod.string().min(1, { message: "Phone number is required!" }),
-    gender: zod.string().refine((value) => value !== "Choose Option", { message: "Please select a gender" }),
+    phonenumber: zod
+      .string()
+      .min(1, { message: "Phone number is required!" })
+      .regex(/^\+\d{7,14}$/, { message: "Phone number must start with + and be followed by 7 to 14 digits" }),
+      
+    gender: zod.string().refine((value) => value !== "Choose Option" && value !== "", {
+      message: "Please select a gender",
+    }),
     is_term_accepted: zod.boolean().refine((value) => value === true, {
       message: "You must accept the terms and conditions",
     }),
+
   })
   .refine((data) => data.password === data.password_confirmation, {
     message: "Passwords don't match",
@@ -59,13 +69,6 @@ export const SignUpSchema = zod
   })
 
 // ----------------------------------------------------------------------
-
-const genderOptions = [
-  { value: "Choose Option", label: "Choose Option" },
-  { value: "1", label: "Male" },
-  { value: "2", label: "Female" },
-  { value: "3", label: "Other" },
-]
 
 export function JwtSignUpView() {
   const { checkUserSession } = useAuthContext()
@@ -76,6 +79,39 @@ export function JwtSignUpView() {
   const passwordConfirmation = useBoolean()
 
   const [errorMsg, setErrorMsg] = useState("")
+  const [genderOptions, setGenderOptions] = useState([{ value: "Choose Option", label: "Choose Option" }])
+  const [isLoadingGenders, setIsLoadingGenders] = useState(true)
+
+  useEffect(() => {
+    const fetchGenderOptions = async () => {
+      try {
+        const response = await fetch("https://api.swedenrelocators.se/api/miscellaneous/gender")
+        const result = await response.json()
+        console.log(result)
+        if (result.data) {
+          const formattedOptions = [
+            { value: "Choose Option", label: "Choose Option" },
+            ...result.data.map((gender) => ({
+              value: gender.id,
+              label: gender.name,
+            })),
+          ]
+          setGenderOptions(formattedOptions)
+          console.log(formattedOptions)
+        } else {
+          console.error("Unexpected API response structure:", result)
+          setErrorMsg("Failed to load gender options: Invalid response format")
+        }
+      } catch (error) {
+        console.error("Error fetching gender options:", error)
+        setErrorMsg("Failed to load gender options")
+      } finally {
+        setIsLoadingGenders(false)
+      }
+    }
+
+    fetchGenderOptions()
+  }, [])
 
   const defaultValues = {
     firstName: "",
@@ -88,6 +124,8 @@ export function JwtSignUpView() {
     placeofbirth: "",
     countryresiding: "",
     address: "",
+    postalCode:"",
+    city: "",
     phonenumber: "",
     gender: "Choose Option",
     is_term_accepted: false,
@@ -105,7 +143,7 @@ export function JwtSignUpView() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await signUp({
+      const formData = {
         name: `${data.firstName} ${data.lastName}`,
         email: data.email,
         password: data.password,
@@ -116,15 +154,20 @@ export function JwtSignUpView() {
         currently_residing: data.countryresiding,
         address: data.address,
         contact_number: data.phonenumber,
-        gender: data.gender,
+        city: data.city,
+        postal: data.postalCode,
+        gender: data.gender === "Choose Option" ? "" : data.gender.toString(),
         is_term_accepted: data.is_term_accepted ? 1 : 0,
-      })
+      }
 
+      console.log("Submitting form data:", formData) // For debugging
+
+      await signUp(formData)
       await checkUserSession?.()
       router.refresh()
     } catch (error) {
-      console.error(error)
-      setErrorMsg(typeof error === "string" ? error : error.message)
+      console.error("Submission error:", error)
+      setErrorMsg(typeof error === "string" ? error : error.message || "An error occurred during sign up")
     }
   })
 
@@ -164,7 +207,14 @@ export function JwtSignUpView() {
           ),
         }}
       />
-      <Field.Text name="phonenumber" label="Phone number" />
+      <Field.Text name="postalCode" label="Postal Code" />
+
+      <Field.Text
+        name="phonenumber"
+        label="Phone number"
+        placeholder="+1234567890"
+        helperText="Must start with + followed by 7-14 digits"
+      />
 
       <Field.DatePicker name="dateOfBirth" label="Date of birth" />
       <Field.CountrySelect name="nationality" label="Nationality" />
@@ -172,15 +222,17 @@ export function JwtSignUpView() {
       <Field.CountrySelect name="placeofbirth" label="Place of Birth" />
       <Field.CountrySelect name="countryresiding" label="Country Residing In" />
 
-      <Field.Select name="gender" label="Gender" select  defaultValue="Choose Option">
+      <Field.Select name="gender" label="Gender" select defaultValue="" disabled={isLoadingGenders}>
+        <MenuItem value="">Choose Option</MenuItem>
         {genderOptions.map((option) => (
-          <MenuItem key={option.value} value={option.value}>
+          <MenuItem key={option.value} value={option.value.toString()}>
             {option.label}
           </MenuItem>
         ))}
       </Field.Select>
 
       <Field.Text name="address" label="Address" />
+      <Field.Text name="city" label="City" />
 
       <Field.Checkbox name="is_term_accepted" label="I accept the terms and conditions" />
 

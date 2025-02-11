@@ -47,6 +47,9 @@ export const endpoints = {
     editProfile: '/client/profile/edit',
     profile: '/client/profile',
   },
+  management: {
+    getCoApplicant:'/client/familyMember/list',
+  },
   mail: {
     list: '/api/mail/list',
     details: '/api/mail/details',

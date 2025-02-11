@@ -10,7 +10,6 @@ export const signInWithPassword = async ({ email, password }) => {
     const res = await axios.post(endpoints.auth.signIn, params)
 
     const { token } = res.data.data
-
     if (!token) {
       throw new Error("Access token not found in response")
     }
@@ -23,6 +22,7 @@ export const signInWithPassword = async ({ email, password }) => {
 
     localStorage.setItem("authToken", token)
     setSession(token)
+    console.log("Login Token: ", token);
     return { ...decodedToken, accessToken: token }
   } catch (error) {
     console.error("Error during sign in:", error)
@@ -60,10 +60,12 @@ export const signUp = async ({
   password_confirmation,
   dob,
   nationality,
+  postal,
   place_of_birth,
   currently_residing,
   address,
   gender,
+  city,
   contact_number,
   is_term_accepted,
 }) => {
@@ -80,15 +82,18 @@ export const signUp = async ({
     formData.append("email", email)
     formData.append("password", password)
     formData.append("password_confirmation", password_confirmation)
-    formData.append("gender", gender) 
     formData.append("dob", dob)
     formData.append("place_of_birth", placeOfBirthId)
     formData.append("currently_residing", currentlyResidingId)
     formData.append("nationality", nationalityId)
     formData.append("address", address)
+    formData.append("city", city)
+    formData.append("postal_code", postal)
     formData.append("contact_number", contact_number)
     formData.append("is_term_accepted", is_term_accepted ? "1" : "0")
-
+    console.log("Gender (before conversion):", gender)
+    formData.append("gender_id", gender.toString())
+    console.log("Gender (after conversion):", gender.toString())
     // Log form data for debugging
     console.log("Form Data:")
     ;[...formData.entries()].forEach(([key, value]) => {

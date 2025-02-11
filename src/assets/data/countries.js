@@ -134,7 +134,7 @@ export const countries = [
   { code: 'LT', label: 'Lithuania', phone: '370' },
   { code: 'LU', label: 'Luxembourg', phone: '352' },
   { code: 'LV', label: 'Latvia', phone: '371' },
-  { code: 'LY', label: 'Libya', phone: '218' },
+  { code: 'LY', label: 'Libyan Arab Jamahiriya', phone: '218' },
   { code: 'MA', label: 'Morocco', phone: '212' },
   { code: 'MC', label: 'Monaco', phone: '377' },
   { code: 'MD', label: 'Moldova, Republic of', phone: '373' },

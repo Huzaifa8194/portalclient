@@ -74,7 +74,7 @@ export const Logo = forwardRef(
       >
          <Box
         component="img"
-        src="/public/assets/images/SwedenRelocators.png"
+        src="/assets/images/SwedenRelocators.png"
         alt="Logo"
         sx={{ width: '100%', height: '100%', objectFit: 'contain' }}
       />

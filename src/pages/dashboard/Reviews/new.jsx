@@ -2,11 +2,11 @@ import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
 
-import { PostListView } from 'src/sections/blog/view';
+import { PostCreateView } from 'src/sections/Reviews/view';
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `Post list | Dashboard - ${CONFIG.appName}` };
+const metadata = { title: `Create a new post | Dashboard - ${CONFIG.appName}` };
 
 export default function Page() {
   return (
@@ -15,7 +15,7 @@ export default function Page() {
         <title> {metadata.title}</title>
       </Helmet>
 
-      {/* <PostListView /> */}
+      <PostCreateView />
     </>
   );
 }
