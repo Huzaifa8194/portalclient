@@ -38,9 +38,6 @@ export function JobList() {
           },
           validateStatus: (status) => status >= 200 && status < 300,
         })
-        console.log("Response status:", response.status)
-        console.log("Response headers:", response.headers)
-        console.log("Full API response:", response.data)
         if (response.data && Array.isArray(response.data.data)) {
           setFamilyMembers(response.data.data)
         } else {

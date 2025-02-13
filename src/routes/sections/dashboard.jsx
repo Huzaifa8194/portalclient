@@ -70,7 +70,7 @@ const UserCardsPage = lazy(() => import('src/pages/dashboard/user/cards'));
 const UserListPage = lazy(() => import('src/pages/dashboard/user/list'));
 const UserAccountPage = lazy(() => import('src/pages/dashboard/user/account'));
 const UserCreatePage = lazy(() => import('src/pages/dashboard/user/new'));
-const UserEditPage = lazy(() => import('src/pages/dashboard/user/edit'));
+const UserEditPage = lazy(() => import('src/pages/dashboard/HousingPage/edit'));
 // Blog
 const BlogPostsPage = lazy(() => import('src/pages/dashboard/post/list'));
 const BlogPostPage = lazy(() => import('src/pages/dashboard/post/details'));

@@ -58,7 +58,7 @@ const TABLE_HEAD = [
 
 // ----------------------------------------------------------------------
 
-export function UserListView() {
+export function   UserListView() {
   const table = useTable();
   const router = useRouter();
   const confirm = useBoolean();

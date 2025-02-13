@@ -49,7 +49,9 @@ export const UpdateUserSchema = zod.object({
   expiryDate: zod
     .string()
     .refine((date) => !Number.isNaN(Date.parse(date)), { message: "Expiry Date must be a valid date!" }),
-  dateofbirth: zod.any(),
+    dateOfBirth: zod
+    .string()
+    .refine((date) => !Number.isNaN(Date.parse(date)), { message: "Date of birth must be a valid date!" }),
   NID: zod.string().min(1, { message: "NID is required!" }),
   passport: zod.string().min(1, { message: "NID is required!" }),
   nationality: zod.string().optional(),
@@ -107,7 +109,7 @@ export function AccountGeneral() {
       address: "",
       passport: "",
       postalCode: "",
-      dateofbirth: null,
+      dateOfBirth: "",
       issueDate: null,
       expiryDate: null,
       NID: "",
@@ -145,7 +147,7 @@ export function AccountGeneral() {
             address: userDataResponse.profile?.address || "",
             city: userDataResponse.profile?.city || "",
             postalCode: userDataResponse.profile?.postal_code.toString() || "",
-            dateofbirth: userDataResponse.profile?.dob ? dayjs(userDataResponse.profile.dob) : null,
+            dateOfBirth: userDataResponse.profile?.dob  ? dayjs(userDataResponse.profile.dob) : null ,
             Issue: userDataResponse.profile?.issue_date ? dayjs(userDataResponse.profile.issue_date) : null,
             Expiry: userDataResponse.profile?.expiry_date ? dayjs(userDataResponse.profile.expiry_date) : null,
             passportNo: userDataResponse.profile.passport_no || "",
@@ -172,13 +174,13 @@ export function AccountGeneral() {
     fetchUserData()
   }, [user, reset])
 
-  const onSubmit = async (data) => {
+  const onSubmit = handleSubmit(async (data) => {
     console.log("Submit function called", data)
     try {
       const apiData = {
-        dob: data.dateofbirth ? dayjs(data.dateofbirth).format("YYYY-MM-DD") : null,
-        issueDate: data.Issue ? dayjs(data.Issue).format("YYYY-MM-DD") : null,
-        expiryDate: data.Expiry ? dayjs(data.Expiry).format("YYYY-MM-DD") : null,
+        dob: data.dateOfBirth,
+        issue_date: data.Issue ? dayjs(data.Issue).format("YYYY-MM-DD") : null,
+        expiry_date: data.Expiry ? dayjs(data.Expiry).format("YYYY-MM-DD") : null,
         place_of_birth: data.placeOfBirth,
         nationality: data.nationality,
         address: data.address,
@@ -187,8 +189,8 @@ export function AccountGeneral() {
         nic: data.NID,
         profile_pic: data.photoURL,
         city: data.city,
-        passport: data.passportNo,
-        postal: data.postalCode,
+        passport_not: data.passportNo,
+        postal_code: data.postalCode,
         gender: data.gender === "Choose Option" ? "" : data.gender.toString(),
       }
 
@@ -221,7 +223,8 @@ export function AccountGeneral() {
       console.error("Error updating profile:", error)
       toast.error(error.message || "Failed to update profile")
     }
-  }
+  
+  })
 
   if (isLoading) {
     return <div>Loading...</div>
@@ -304,7 +307,7 @@ export function AccountGeneral() {
           />
         </Grid>
       </Grid>
-      <Form methods={methods} onSubmit={methods.handleSubmit(onSubmit)} sx={{ mt: 10 }}>
+      <Form methods={methods}  onSubmit={onSubmit} sx={{ mt: 10 }}>
         <Grid container spacing={3}>
           <Grid xs={12} md={4}>
             <Card
@@ -353,16 +356,16 @@ export function AccountGeneral() {
                   sm: "repeat(2, 1fr)",
                 }}
               >
-                <Field.Select name="gender" label="Gender" select defaultValue="" disabled={isLoadingGenders}>
-                  <MenuItem value="">Choose Option</MenuItem>
-                  {genderOptions.map((option) => (
-                    <MenuItem key={option.value} value={option.value.toString()}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </Field.Select>
+               <Field.Select name="gender" label="Gender" select defaultValue="" disabled={isLoadingGenders}>
+        <MenuItem value="">Choose Option</MenuItem>
+        {genderOptions.map((option) => (
+          <MenuItem key={option.value} value={option.value.toString()}>
+            {option.label}
+          </MenuItem>
+        ))}
+      </Field.Select>
                 {/* <Field.Text name="email" label="Email address" /> */}
-                <Field.DatePicker name="dateofbirth" label="Date of Birth" />
+                <Field.DatePicker name="dateOfBirth" label="Date of birth" />
                 <Field.Text name="NID" label="Social Security Number" />
                 <Field.CountrySelect name="nationality" label="Nationality" placeholder="Choose a country" />
 
@@ -386,7 +389,7 @@ export function AccountGeneral() {
                   type="submit"
                   variant="contained"
                   loading={isSubmitting}
-                  onClick={methods.handleSubmit(onSubmit)}
+                  // onClick={()=>onSubmit()}
                 >
                   Save changes
                 </LoadingButton>
