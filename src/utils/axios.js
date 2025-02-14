@@ -63,4 +63,17 @@ export const endpoints = {
     details: '/api/product/details',
     search: '/api/product/search',
   },
+  appointment: {
+    book : '/appointment/book',
+    timeslot : '/miscellaneous/appointmentTimeSlots',
+    type : '/miscellaneous/appointmentTypes',
+    categories :'/miscellaneous/appointmentCategories'
+  },
+  countries : {
+    countrylist : '/miscellaneous/countries'
+  },
+  assessments : {
+    familyreunification : '/assessment/familyReunification',
+    businessVisa : '/assessment/businessVisa'
+  }
 };
