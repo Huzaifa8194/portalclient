@@ -15,8 +15,8 @@ export function JobEditView({ job }) {
         heading="Edit"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'Job', href: paths.dashboard.job.root },
-          { name: job?.title },
+          { name: 'Co-Applicant', href: paths.dashboard.job.root },
+          { name: job?.name },
         ]}
         sx={{ mb: { xs: 3, md: 5 } }}
       />

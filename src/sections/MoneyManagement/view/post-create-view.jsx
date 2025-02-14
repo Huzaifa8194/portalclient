@@ -18,6 +18,7 @@ export function PostCreateView() {
   return (
     <DashboardContent>
       <CustomBreadcrumbs
+      
         heading=" Money Management"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },

@@ -226,7 +226,7 @@ export const navData = [
       { title: 'Terms & Conditions', path: paths.dashboard.termsAndCondition, icon: ICONS.calendar },
       { title: 'FAQ', path:paths.dashboard.faq, icon: ICONS.calendar },
       { title: 'Feedback', path: paths.dashboard.feedback, icon: ICONS.calendar },
-      // { title: 'Course', path: paths.dashboard.general.course, icon: ICONS.calendar },
+      { title: 'Reviews', path: paths.dashboard.reviews, icon: ICONS.calendar },
       // { title: 'tour', path: paths.dashboard.tour.root, icon: ICONS.calendar },
 
     ],

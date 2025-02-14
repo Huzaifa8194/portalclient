@@ -25,44 +25,7 @@ export function OrderWidgetSummary({
 }) {
   const theme = useTheme();
 
-  const chartColors = [theme.palette[color].dark];
 
-  const chartOptions = useChart({
-    chart: { sparkline: { enabled: true } },
-    colors: chartColors,
-    xaxis: { categories: chart.categories },
-    grid: {
-      padding: {
-        top: 6,
-        left: 6,
-        right: 6,
-        bottom: 6,
-      },
-    },
-    tooltip: {
-      y: { formatter: (value) => fNumber(value), title: { formatter: () => '' } },
-    },
-    ...chart.options,
-  });
-
-  const renderTrending = (
-    <Box
-      sx={{
-        top: 16,
-        gap: 0.5,
-        right: 16,
-        display: 'flex',
-        position: 'absolute',
-        alignItems: 'center',
-      }}
-    >
-      <Iconify width={20} icon={percent < 0 ? 'eva:trending-down-fill' : 'eva:trending-up-fill'} />
-      <Box component="span" sx={{ typography: 'subtitle2' }}>
-        {percent > 0 && '+'}
-        {fPercent(percent)}
-      </Box>
-    </Box>
-  );
 
   return (
     <Card
@@ -111,4 +74,3 @@ export function OrderWidgetSummary({
     </Card>
   );
 }
-

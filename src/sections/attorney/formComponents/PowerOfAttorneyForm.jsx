@@ -11,8 +11,9 @@ import DisputeResolution from "./DisputeResolution"
 import LimitationOfLiability from "./LimitationOfLiability"
 import Amendments from "./Amendments"
 import Acknowledgment from "./Acknowledgment"
+import LegalFrameworkAndLiability from "./LegalFrameworkAndLiability"
 
-const PowerOfAttorneyForm = ({ currentStep, onNext, onBack }) => {
+const  PowerOfAttorneyForm = ({ currentStep, onNext, onBack }) => {
   const [formData, setFormData] = useState({})
 
   const steps = [
@@ -23,6 +24,7 @@ const PowerOfAttorneyForm = ({ currentStep, onNext, onBack }) => {
     { title: "Client Responsibilities", component: ClientResponsibilities },
     { title: "Dispute Resolution", component: DisputeResolution },
     { title: "Limitation of Liability", component: LimitationOfLiability },
+    { title: "Legal Framework and Liability", component: LegalFrameworkAndLiability },
     { title: "Amendments", component: Amendments },
     { title: "Acknowledgment", component: Acknowledgment },
   ]

@@ -4,7 +4,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 
-import { PostNewEditForm } from '../post-new-edit-form';
+import PostNewEditForm from '../post-new-edit-form';
 
 // ----------------------------------------------------------------------
 

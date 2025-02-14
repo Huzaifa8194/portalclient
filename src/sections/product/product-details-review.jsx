@@ -24,21 +24,30 @@ export function ProductDetailsReview({ totalRatings, totalReviews, ratings = [],
   const total = sumBy(ratings, (star) => star.starCount);
 
   const renderSummary = (
-    <Stack spacing={1} alignItems="center" justifyContent="center">
+    <Stack spacing={1.5} sx={{ py: 5, px: { xs: 3, md: 5 } }}>
       <Typography variant="subtitle2">Average rating</Typography>
-
-      <Typography variant="h2">
+        
+      {/* <Typography variant="h2">
         {totalRatings}
+        /5
+      </Typography> */}
+      <Typography variant="h2">
+        4.5
         /5
       </Typography>
 
-      <Rating readOnly value={totalRatings} precision={0.1} />
+      <Rating readOnly value={{totalRatings}} precision={0.1} />
 
-      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+      {/* <Typography variant="caption" sx={{ color: 'text.secondary' }}>
         ({fShortenNumber(totalReviews)} reviews)
+      </Typography> */}
+      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+        {1453}
       </Typography>
+      
     </Stack>
   );
+  
 
   const renderProgress = (
     <Stack
@@ -94,6 +103,12 @@ export function ProductDetailsReview({ totalRatings, totalReviews, ratings = [],
 
   return (
     <>
+    
+      
+      <Typography variant="subtitle2"  component="span" sx={{ width: 42 }}>
+            data will come from the backend
+            </Typography>
+            
       <Box
         display="grid"
         gridTemplateColumns={{ xs: 'repeat(1, 1fr)', md: 'repeat(3, 1fr)' }}

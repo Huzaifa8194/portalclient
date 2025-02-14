@@ -6,37 +6,83 @@ const DisputeResolution = ({ formData, onChange }) => {
     onChange({ [e.target.name]: e.target.checked })
   }
 
+  const sectionNumberStyle = {
+    backgroundColor: "#1B4D3E",
+    color: "white",
+    padding: "4px 8px",
+    borderRadius: "4px",
+    marginRight: "12px",
+    fontSize: "14px",
+    minWidth: "40px",
+    textAlign: "center",
+    display: "inline-block",
+  }
+
+  const sectionStyle = {
+    display: "flex",
+    alignItems: "flex-start",
+    marginBottom: "24px",
+  }
+
+  const sectionContentStyle = {
+    flex: 1,
+  }
+
+  const sections = [
+    {
+      number: "6.1",
+      title: "Applicable Law",
+      content: "This contract is governed by Swedish, Danish, and applicable EU laws."
+    },
+    {
+      number: "6.2",
+      title: "Dispute Resolution",
+      content: "Disputes will be resolved through:"
+    },
+    {
+      number: "6.3",
+      title: "Jurisdiction",
+      content: "Legal actions will be pursued in Sweden or Denmark, depending on service location."
+    }
+  ]
+
+  const resolutionPoints = [
+    "Stockholm Chamber of Commerce Arbitration Institute under Swedish law.",
+    "Copenhagen Arbitration Institute under Danish law.",
+    "EU Regulation (Brussels I Recast Regulation No 1215/2012) for cross-border disputes."
+  ]
+
   return (
     <Grid container spacing={2}>
-      <Grid item xs={12}>
-        <Typography variant="h6" gutterBottom>
-          5.1. Applicable Law
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          This contract is governed by Swedish, Danish, and applicable EU laws.
-        </Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <Typography variant="h6" gutterBottom>
-          5.2. Dispute Resolution
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Disputes will be resolved through:
-        </Typography>
-        <ul>
-          <li>Stockholm Chamber of Commerce Arbitration Institute under Swedish law.</li>
-          <li>Copenhagen Arbitration Institute under Danish law.</li>
-          <li>EU Regulation (Brussels I Recast Regulation No 1215/2012) for cross-border disputes.</li>
-        </ul>
-      </Grid>
-      <Grid item xs={12}>
-        <Typography variant="h6" gutterBottom>
-          5.3. Jurisdiction
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Legal actions will be pursued in Sweden or Denmark, depending on service location.
-        </Typography>
-      </Grid>
+      {sections.map((section, index) => (
+        <Grid item xs={12} key={index}>
+          <div style={sectionStyle}>
+            <div style={sectionNumberStyle}>
+              {section.number}
+            </div>
+            <div style={sectionContentStyle}>
+              <Typography variant="h6" gutterBottom>
+                {section.title}
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                {section.content}
+              </Typography>
+              {section.number === "6.2" && (
+                <ul style={{ listStyle: "none", padding: 0, marginTop: "12px" }}>
+                  {resolutionPoints.map((point, idx) => (
+                    <li key={idx} style={{ display: "flex", alignItems: "flex-start", marginBottom: "12px" }}>
+                      <div style={{ ...sectionNumberStyle, marginTop: "2px" }}>
+                        {idx + 1}
+                      </div>
+                      <Typography variant="body1">{point}</Typography>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </Grid>
+      ))}
       <Grid item xs={12}>
         <FormControlLabel
           control={
@@ -55,4 +101,3 @@ const DisputeResolution = ({ formData, onChange }) => {
 }
 
 export default DisputeResolution
-

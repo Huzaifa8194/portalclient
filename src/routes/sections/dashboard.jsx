@@ -70,7 +70,7 @@ const UserCardsPage = lazy(() => import('src/pages/dashboard/user/cards'));
 const UserListPage = lazy(() => import('src/pages/dashboard/user/list'));
 const UserAccountPage = lazy(() => import('src/pages/dashboard/user/account'));
 const UserCreatePage = lazy(() => import('src/pages/dashboard/user/new'));
-const UserEditPage = lazy(() => import('src/pages/dashboard/user/edit'));
+const UserEditPage = lazy(() => import('src/pages/dashboard/HousingPage/edit'));
 // Blog
 const BlogPostsPage = lazy(() => import('src/pages/dashboard/post/list'));
 const BlogPostPage = lazy(() => import('src/pages/dashboard/post/details'));
@@ -130,6 +130,7 @@ const ImmigrationEvisaInfo =lazy(() => import('src/pages/dashboard/ImmigrationEV
 const GlobalImmigrationEvisaInfo =lazy(() => import('src/pages/dashboard/globalInfo/index'));
 const GlobalImmigrationEvisa =lazy(() => import('src/pages/dashboard/globalServices/index'));
 const TermsAndCondition=lazy(() => import('src/pages/dashboard/TermsandConditons/new'));
+const Reviews=lazy(() => import('src/pages/dashboard/Reviews/new'));
 
 
 // ----------------------------------------------------------------------
@@ -254,6 +255,7 @@ export const dashboardRoutes = [
       { path: 'student-visa', element: < StudentVisa />},
       { path: 'visit-visa', element: < VisitVisa />},
       { path: 'work-visa', element: < WorkPermit />},
+      { path: 'reviews', element: < Reviews />},
 
       { path: 'pet-relocation', element: < PetRelocation />},
       { path: 'service-charges', element: < ServiceCharges />},
