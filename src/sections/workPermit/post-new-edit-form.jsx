@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from "react"
+"use client"
+
+import { useMemo, useState } from "react"
 import { z } from "zod"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import Grid from "@mui/material/Unstable_Grid2"
 import Box from "@mui/material/Box"
@@ -11,6 +13,11 @@ import LoadingButton from "@mui/lab/LoadingButton"
 import { Form, Field } from "src/components/hook-form"
 import Checkbox from "@mui/material/Checkbox"
 import FormControlLabel from "@mui/material/FormControlLabel"
+import Stepper from "@mui/material/Stepper"
+import Step from "@mui/material/Step"
+import StepLabel from "@mui/material/StepLabel"
+import TextField from "@mui/material/TextField"
+import MenuItem from "@mui/material/MenuItem"
 
 // Schema definition with all fields
 const FormSchema = z.object({
@@ -104,6 +111,9 @@ const FormSchema = z.object({
   moreDetail: z.string().optional(),
   accompanyFamily: z.string().optional(),
   yourDesignation: z.string().optional(),
+  fromCountry: z.string().optional(),
+  toCountry: z.string().optional(),
+  currency: z.string().optional(),
 })
 
 function WorkPermitForm() {
@@ -250,6 +260,9 @@ function WorkPermitForm() {
       moreDetail: "",
       accompanyFamily: "",
       yourDesignation: "",
+      fromCountry: "",
+      toCountry: "",
+      currency: "",
     }),
     [],
   )
@@ -257,12 +270,13 @@ function WorkPermitForm() {
   const methods = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues,
-    mode: "onChange", // Enable real-time validation
+    mode: "onChange",
   })
 
   const {
     handleSubmit,
     watch,
+    control,
     formState: { isSubmitting, errors },
     trigger,
   } = methods
@@ -1023,19 +1037,6 @@ function WorkPermitForm() {
               </Field.Select>
 
               <Field.Select
-                name="anotherJobOffer"
-                label="Do you currently have any other job offer?"
-                select
-                native
-                required
-                InputLabelProps={{ shrink: true }}
-              >
-                <option value="">Choose an Option</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </Field.Select>
-
-              <Field.Select
                 name="selfEmployedStatus"
                 label="Are you looking to switchto Self-Employed?"
                 select
@@ -1565,125 +1566,123 @@ function WorkPermitForm() {
   return (
     <Form methods={methods} onSubmit={onSubmit}>
       <Grid container spacing={3}>
-        <Grid xs={12} md={12}>
+        <Grid xs={12} md={8}>
           <Card sx={{ p: 3 }}>
-            {/* Progress Bar */}
-            <Box sx={{ mb: 4 }}>
-              <Box
-                sx={{
-                  position: "relative",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  width: "100%",
-                  mb: 2,
-                }}
-              >
-                {sections.map((section, index) => {
-                  const isActive = sections.findIndex((s) => s.id === currentSection) >= index
-                  return (
-                    <React.Fragment key={section.id}>
-                      <Box
-                        sx={{
-                          position: "relative",
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          gap: 1,
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: "50%",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            backgroundColor: isActive ? "#00A76F" : "#919EAB",
-                            color: "#fff",
-                            fontWeight: "bold",
-                            zIndex: 1,
-                          }}
-                        >
-                          {index + 1}
-                        </Box>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            color: isActive ? "#00A76F" : "#919EAB",
-                            textAlign: "center",
-                          }}
-                        >
-                          {section.name}
-                        </Typography>
-                      </Box>
-                      {index < sections.length - 1 && (
-                        <Box
-                          sx={{
-                            position: "relative",
-                            flex: 1,
-                            height: 2,
-                            backgroundColor: "#919EAB",
-                            alignSelf: "start",
-                            mt: 2.5,
-                            "&::before": {
-                              content: '""',
-                              position: "absolute",
-                              left: 0,
-                              top: 0,
-                              height: "100%",
-                              width: isActive ? "100%" : "0%",
-                              backgroundColor: "#00A76F",
-                              transition: "width 0.3s ease",
-                            },
-                          }}
-                        />
-                      )}
-                    </React.Fragment>
-                  )
-                })}
-              </Box>
-            </Box>
-
             <Typography variant="h6" sx={{ mb: 3 }}>
               {getSectionTitle(currentSection)}
             </Typography>
 
             {renderCurrentSection()}
 
-            <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>
-              <Box sx={{ display: "flex", gap: 2 }}>
-                {!isFirstSection && (
-                  <LoadingButton variant="outlined" onClick={handlePrevious}>
-                    Previous
-                  </LoadingButton>
-                )}
-                {!isLastSection ? (
-                  <LoadingButton
-                    type="button"
-                    variant="contained"
-                    onClick={handleNext}
-                    disabled={Object.keys(errors).some((key) => {
-                      const fieldsInCurrentSection = getFieldsForSection(currentSection)
-                      return fieldsInCurrentSection.includes(key)
-                    })}
-                  >
-                    Next
-                  </LoadingButton>
-                ) : (
-                  <LoadingButton
-                    type="submit"
-                    variant="contained"
-                    loading={isSubmitting}
-                    disabled={Object.keys(errors).length > 0}
-                  >
-                    Submit
-                  </LoadingButton>
-                )}
-              </Box>
+            <Stack direction="row" spacing={3} justifyContent="space-between" sx={{ mt: 3 }}>
+              {!isFirstSection && (
+                <LoadingButton variant="outlined" onClick={handlePrevious}>
+                  Previous
+                </LoadingButton>
+              )}
+              {!isLastSection ? (
+                <LoadingButton
+                  type="button"
+                  variant="contained"
+                  onClick={handleNext}
+                  disabled={Object.keys(errors).some((key) => {
+                    const fieldsInCurrentSection = getFieldsForSection(currentSection)
+                    return fieldsInCurrentSection.includes(key)
+                  })}
+                >
+                  Next
+                </LoadingButton>
+              ) : (
+                <LoadingButton
+                  type="submit"
+                  variant="contained"
+                  loading={isSubmitting}
+                  disabled={Object.keys(errors).length > 0}
+                >
+                  Submit
+                </LoadingButton>
+              )}
             </Stack>
           </Card>
+        </Grid>
+
+        <Grid xs={12} md={4}>
+          <Stack spacing={3}>
+            {/* Stepper Section */}
+            <Card sx={{ p: 3 }}>
+              <Box
+                sx={{
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 1,
+                  p: 2,
+                }}
+              >
+                <Stepper activeStep={currentSectionIndex} orientation="vertical">
+                  {sections.map((section) => (
+                    <Step key={section.id}>
+                      <StepLabel>{section.name}</StepLabel>
+                    </Step>
+                  ))}
+                </Stepper>
+              </Box>
+            </Card>
+
+            {/* Important Information Section */}
+            <Card sx={{ p: 3 }}>
+              <Typography variant="h6" sx={{ mb: 3 }}>
+                IMP INFO
+              </Typography>
+
+              <Box
+                sx={{
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 1,
+                  p: 2,
+                  mb: 3,
+                }}
+              >
+                <Stack spacing={2}>
+                  <Controller
+                    name="fromCountry"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField {...field} select label="From" fullWidth>
+                        <MenuItem value="">Select Country</MenuItem>
+                        <MenuItem value="armenia">Armenia</MenuItem>
+                        <MenuItem value="other">Other</MenuItem>
+                      </TextField>
+                    )}
+                  />
+
+                  <Controller
+                    name="toCountry"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField {...field} select label="To" fullWidth>
+                        <MenuItem value="">Select Country</MenuItem>
+                        <MenuItem value="sweden">Sweden</MenuItem>
+                        <MenuItem value="other">Other</MenuItem>
+                      </TextField>
+                    )}
+                  />
+                  <Controller
+                    name="currency"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField {...field} select label="Currency" fullWidth>
+                        <MenuItem value="">Select Currency</MenuItem>
+                        <MenuItem value="sek">SEK</MenuItem>
+                        <MenuItem value="eur">EUR</MenuItem>
+                        <MenuItem value="usd">USD</MenuItem>
+                      </TextField>
+                    )}
+                  />
+                </Stack>
+              </Box>
+            </Card>
+          </Stack>
         </Grid>
       </Grid>
     </Form>

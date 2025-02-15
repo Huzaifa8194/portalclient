@@ -8,6 +8,8 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
+import Paper from '@mui/material/Paper';
+import Divider from '@mui/material/Divider';
 
 import { Form, Field } from 'src/components/hook-form';
 
@@ -22,6 +24,9 @@ const FormSchema = zod.object({
   marriageRegistration: zod.string().optional(),
   familyRegistration: zod.string().optional(),
   childrenCount: zod.string().optional(),
+  fromCountry: zod.string().optional(),
+  toCountry: zod.string().optional(),
+  currency: zod.string().optional(),
 });
 
 export default function PostNewEditForm() {
@@ -37,6 +42,9 @@ export default function PostNewEditForm() {
       marriageRegistration: '',
       familyRegistration: '',
       childrenCount: '',
+      fromCountry: '',
+      toCountry: '',
+      currency: '',
     }),
     []
   );
@@ -67,14 +75,11 @@ export default function PostNewEditForm() {
   return (
     <Form methods={methods} onSubmit={onSubmit}>
       <Grid container spacing={3}>
-        <Grid xs={12}>
+        <Grid xs={12} md={8}>
           <Card sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ 
-              mb: 3, 
-              borderRadius: 1 
-            }}>
-              Main Applicant Assessment
-            </Typography>
+          <Typography variant="h6" sx={{ mb: 3 }}>
+                  Long Term EU Status
+                </Typography>
             <Box
               rowGap={3}
               columnGap={2}
@@ -92,6 +97,7 @@ export default function PostNewEditForm() {
                 },
               }}
             >
+              
               <Field.Select
                 native
                 name="citizenship"
@@ -147,14 +153,6 @@ export default function PostNewEditForm() {
                 <option value="No">No</option>
                 <option value="Yes">Yes</option>
               </Field.Select>
-
-              <Typography variant="h6" sx={{ 
-                gridColumn: '1 / -1', 
-                mt: 3, 
-                borderRadius: 1 
-              }}>
-                Family Assessment
-              </Typography>
 
               <Field.Select
                 native
@@ -230,8 +228,58 @@ export default function PostNewEditForm() {
             </Stack>
           </Card>
         </Grid>
+
+        <Grid xs={12} md={4}>
+          <Card sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ mb: 3 }}>
+              IMP INFO
+            </Typography>
+            
+            <Box sx={{ 
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 1,
+              p: 2,
+              mb: 3
+            }}>
+              <Stack spacing={2}>
+                <Field.Select
+                  native
+                  name="fromCountry"
+                  label="From"
+                  InputLabelProps={{ shrink: true }}
+                >
+                  <option value="">Select Country</option>
+                  <option value="sweden">Sweden</option>
+                  <option value="other">Other</option>
+                </Field.Select>
+
+                <Field.Select
+                  native
+                  name="toCountry"
+                  label="To"
+                  InputLabelProps={{ shrink: true }}
+                >
+                  <option value="">Select Country</option>
+                  <option value="sweden">Sweden</option>
+                  <option value="other">Other</option>
+                </Field.Select>
+                <Field.Select
+              native
+              name="currency"
+              label="Currency"
+              InputLabelProps={{ shrink: true }}
+            >
+              <option value="">Select Currency</option>
+              <option value="sek">SEK</option>
+              <option value="eur">EUR</option>
+              <option value="usd">USD</option>
+            </Field.Select>
+              </Stack>
+            </Box>
+          </Card>
+        </Grid>
       </Grid>
     </Form>
   );
 }
-

@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from "react"
+"use client"
+
+import { useMemo, useState } from "react"
 import { z } from "zod"
-import { useForm } from "react-hook-form"
+import { useForm ,Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import Grid from "@mui/material/Unstable_Grid2"
 import Box from "@mui/material/Box"
@@ -9,8 +11,14 @@ import Stack from "@mui/material/Stack"
 import Typography from "@mui/material/Typography"
 import LoadingButton from "@mui/lab/LoadingButton"
 import { Form, Field } from "src/components/hook-form"
-import Checkbox from '@mui/material/Checkbox';
-import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from "@mui/material/Checkbox"
+import FormControlLabel from "@mui/material/FormControlLabel"
+import Stepper from "@mui/material/Stepper"
+import Step from "@mui/material/Step"
+import StepLabel from "@mui/material/StepLabel"
+import TextField from "@mui/material/TextField"
+import MenuItem from "@mui/material/MenuItem"
+
 
 const FormSchema = z.object({
   // Personal Details
@@ -52,6 +60,11 @@ const FormSchema = z.object({
   proofOfEnrollment: z.string().optional(),
   invitationForVisit: z.string().optional(),
   noObjectionLetter: z.string().optional(),
+  fromCountry: z.string().optional(),
+  toCountry: z.string().optional(),
+  currency: z.string().optional(),
+  additionalInfo: z.string().optional(),
+  termsAgreement: z.boolean().optional(),
 })
 
 function PostNewEditForm() {
@@ -89,6 +102,11 @@ function PostNewEditForm() {
       proofOfEnrollment: "",
       invitationForVisit: "",
       noObjectionLetter: "",
+      fromCountry: "",
+      toCountry: "",
+      currency: "",
+      additionalInfo: "",
+      termsAgreement: false,
     }),
     [],
   )
@@ -102,6 +120,7 @@ function PostNewEditForm() {
   const {
     handleSubmit,
     watch,
+    control,
     formState: { isSubmitting },
   } = methods
 
@@ -149,14 +168,25 @@ function PostNewEditForm() {
         sm: "repeat(2, 1fr)",
       }}
     >
-      <Field.Select native name="hasNationalPassport" label="Do you have National Passport?"  InputLabelProps={{ shrink: true }}
- required>
+      <Field.Select
+        native
+        name="hasNationalPassport"
+        label="Do you have National Passport?"
+        InputLabelProps={{ shrink: true }}
+        required
+      >
         <option value="">Choose an Option</option>
         <option value="yes">Yes</option>
         <option value="no">No</option>
       </Field.Select>
 
-      <Field.Select native name="visitedSchengen" label="Did you visit Schengen Countries before?" InputLabelProps={{ shrink: true }} required>
+      <Field.Select
+        native
+        name="visitedSchengen"
+        label="Did you visit Schengen Countries before?"
+        InputLabelProps={{ shrink: true }}
+        required
+      >
         <option value="">Choose an Option</option>
         <option value="yes">Yes</option>
         <option value="no">No</option>
@@ -164,14 +194,26 @@ function PostNewEditForm() {
 
       {visitedSchengen === "yes" && (
         <>
-          <Field.Select native name="timesVisited" label="How many time you visited the Schengen States?" InputLabelProps={{ shrink: true }} required>
+          <Field.Select
+            native
+            name="timesVisited"
+            label="How many time you visited the Schengen States?"
+            InputLabelProps={{ shrink: true }}
+            required
+          >
             <option value="">Choose an Option</option>
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3+">3 or more</option>
           </Field.Select>
 
-          <Field.Select native name="purposeOfVisit" label="Purpose of Visit" InputLabelProps={{ shrink: true }} required>
+          <Field.Select
+            native
+            name="purposeOfVisit"
+            label="Purpose of Visit"
+            InputLabelProps={{ shrink: true }}
+            required
+          >
             <option value="">Choose an Option</option>
             <option value="tourism">Tourism</option>
             <option value="business">Business</option>
@@ -181,7 +223,13 @@ function PostNewEditForm() {
         </>
       )}
 
-      <Field.Select native name="hasRefusal" label="Have you got any refusal for Schengen Countries?" InputLabelProps={{ shrink: true }} required>
+      <Field.Select
+        native
+        name="hasRefusal"
+        label="Have you got any refusal for Schengen Countries?"
+        InputLabelProps={{ shrink: true }}
+        required
+      >
         <option value="">Choose an Option</option>
         <option value="yes">Yes</option>
         <option value="no">No</option>
@@ -190,7 +238,13 @@ function PostNewEditForm() {
       {hasRefusal === "yes" && (
         <>
           <Field.Text name="refusalReason" label="Reason for Refusal" required />
-          <Field.Text name="refusalDate" label="Date of Refusal" type="date" required InputLabelProps={{ shrink: true }} />
+          <Field.Text
+            name="refusalDate"
+            label="Date of Refusal"
+            type="date"
+            required
+            InputLabelProps={{ shrink: true }}
+          />
         </>
       )}
 
@@ -198,7 +252,8 @@ function PostNewEditForm() {
         native
         name="hasRelative"
         label="Is any of your close relative living in Schengen Countries and you want to visit him/her?"
-        InputLabelProps={{ shrink: true }} required
+        InputLabelProps={{ shrink: true }}
+        required
         sx={{ gridColumn: "1 / -1" }}
       >
         <option value="">Choose an Option</option>
@@ -211,7 +266,8 @@ function PostNewEditForm() {
           native
           name="relationType"
           label="Relation with the EU person (Like Parents, Siblings, Family friend)"
-          InputLabelProps={{ shrink: true }} required
+          InputLabelProps={{ shrink: true }}
+          required
         >
           <option value="">Choose an Option</option>
           <option value="parents">Parents</option>
@@ -225,7 +281,8 @@ function PostNewEditForm() {
         native
         name="isDependent"
         label="Are you dependent on the person who is living in Schengen Countries?"
-        InputLabelProps={{ shrink: true }} required
+        InputLabelProps={{ shrink: true }}
+        required
       >
         <option value="">Choose an Option</option>
         <option value="yes">Yes</option>
@@ -236,18 +293,18 @@ function PostNewEditForm() {
         <Field.Text name="dependentDescription" label="Describe How?" multiline rows={4} required />
       )}
 
-<Field.Select
-  native
-  name="hasInvitation"
-  label="Do you have an invitation from any Individual Business Group, Company, Organisation, Association and you are coming for official, Volunteer, Sports, Research, Cultural Purposes?"
-  InputLabelProps={{ shrink: true }}
-  required
-  sx={{ gridColumn: "1 / -1", width: "100%", minWidth: "300px" }}
->
-  <option value="">Choose an Option</option>
-  <option value="yes">Yes</option>
-  <option value="no">No</option>
-</Field.Select>
+      <Field.Select
+        native
+        name="hasInvitation"
+        label="Do you have an invitation from any Individual Business Group, Company, Organisation, Association and you are coming for official, Volunteer, Sports, Research, Cultural Purposes?"
+        InputLabelProps={{ shrink: true }}
+        required
+        sx={{ gridColumn: "1 / -1", width: "100%", minWidth: "300px" }}
+      >
+        <option value="">Choose an Option</option>
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+      </Field.Select>
 
       {hasInvitation === "yes" && (
         <Field.Text
@@ -260,7 +317,13 @@ function PostNewEditForm() {
         />
       )}
 
-      <Field.Select native name="canSupportSelf" label="Can you support yourself for this trip?" InputLabelProps={{ shrink: true }} required>
+      <Field.Select
+        native
+        name="canSupportSelf"
+        label="Can you support yourself for this trip?"
+        InputLabelProps={{ shrink: true }}
+        required
+      >
         <option value="">Choose an Option</option>
         <option value="yes">Yes</option>
         <option value="no">No</option>
@@ -310,7 +373,13 @@ function PostNewEditForm() {
             <option value="no">No</option>
           </Field.Select>
 
-          <Field.Select native name="vacationsLetter" label="Vacations Letter" InputLabelProps={{ shrink: true }} required>
+          <Field.Select
+            native
+            name="vacationsLetter"
+            label="Vacations Letter"
+            InputLabelProps={{ shrink: true }}
+            required
+          >
             <option value="">Choose an Option</option>
             <option value="yes">Yes</option>
             <option value="no">No</option>
@@ -320,19 +389,37 @@ function PostNewEditForm() {
 
       {employeeType === "self-employed" && (
         <>
-          <Field.Select native name="registrationCertificate" label="Registration Certificate" InputLabelProps={{ shrink: true }} required>
+          <Field.Select
+            native
+            name="registrationCertificate"
+            label="Registration Certificate"
+            InputLabelProps={{ shrink: true }}
+            required
+          >
             <option value="">Choose an Option</option>
             <option value="yes">Yes</option>
             <option value="no">No</option>
           </Field.Select>
 
-          <Field.Select native name="availableAssets" label="Available Assets" InputLabelProps={{ shrink: true }} required>
+          <Field.Select
+            native
+            name="availableAssets"
+            label="Available Assets"
+            InputLabelProps={{ shrink: true }}
+            required
+          >
             <option value="">Choose an Option</option>
             <option value="yes">Yes</option>
             <option value="no">No</option>
           </Field.Select>
 
-          <Field.Select native name="taxReturns" label="Tax Returns of 2 to 3 Years" InputLabelProps={{ shrink: true }} required>
+          <Field.Select
+            native
+            name="taxReturns"
+            label="Tax Returns of 2 to 3 Years"
+            InputLabelProps={{ shrink: true }}
+            required
+          >
             <option value="">Choose an Option</option>
             <option value="yes">Yes</option>
             <option value="no">No</option>
@@ -342,13 +429,25 @@ function PostNewEditForm() {
 
       {employeeType === "student" && (
         <>
-          <Field.Select native name="proofOfEnrollment" label="Proof of enrollment" InputLabelProps={{ shrink: true }} required>
+          <Field.Select
+            native
+            name="proofOfEnrollment"
+            label="Proof of enrollment"
+            InputLabelProps={{ shrink: true }}
+            required
+          >
             <option value="">Choose an Option</option>
             <option value="yes">Yes</option>
             <option value="no">No</option>
           </Field.Select>
 
-          <Field.Select native name="invitationForVisit" label="Invitation for visit" InputLabelProps={{ shrink: true }} required>
+          <Field.Select
+            native
+            name="invitationForVisit"
+            label="Invitation for visit"
+            InputLabelProps={{ shrink: true }}
+            required
+          >
             <option value="">Choose an Option</option>
             <option value="yes">Yes</option>
             <option value="no">No</option>
@@ -358,7 +457,8 @@ function PostNewEditForm() {
             native
             name="noObjectionLetter"
             label="No objection letter from School/College/University"
-             InputLabelProps={{ shrink: true }} required
+            InputLabelProps={{ shrink: true }}
+            required
           >
             <option value="">Choose an Option</option>
             <option value="yes">Yes</option>
@@ -366,11 +466,16 @@ function PostNewEditForm() {
           </Field.Select>
         </>
       )}
-       {employeeType === "other" && (
+      {employeeType === "other" && (
         <>
-         <Field.Text name="additionalInfo" label="Please describe NGO / Media /Sports / Association:" className="full-width" multiline rows={3}         sx={{ gridColumn: "1 / -1" }}
- />
-
+          <Field.Text
+            name="additionalInfo"
+            label="Please describe NGO / Media /Sports / Association:"
+            className="full-width"
+            multiline
+            rows={3}
+            sx={{ gridColumn: "1 / -1" }}
+          />
         </>
       )}
     </Box>
@@ -385,27 +490,21 @@ function PostNewEditForm() {
         sm: "repeat(2, 1fr)",
       }}
     >
-   <FormControlLabel
-                  control={<Checkbox name="termsAgreement" />}
-                  label="I am Visiting Alone"
-                  sx={{ gridColumn: '1 / -1' }}
-                />
+      <FormControlLabel
+        control={<Checkbox name="termsAgreement" />}
+        label="I am Visiting Alone"
+        sx={{ gridColumn: "1 / -1" }}
+      />
     </Box>
   )
   return (
     <Form methods={methods} onSubmit={onSubmit}>
       <Grid container spacing={3}>
-        <Grid xs={12}>
+        <Grid xs={12} md={8}>
           <Card sx={{ p: 3 }}>
             {currentSection === "personal" && (
               <>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    mb: 3,
-                    borderRadius: 1,
-                  }}
-                >
+                <Typography variant="h6" sx={{ mb: 3 }}>
                   Personal Details
                 </Typography>
                 {renderPersonalDetails()}
@@ -419,14 +518,7 @@ function PostNewEditForm() {
 
             {currentSection === "application" && (
               <>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    mb: 4,
-
-                    borderRadius: 1,
-                  }}
-                >
+                <Typography variant="h6" sx={{ mb: 4 }}>
                   Applicant Assessment
                 </Typography>
                 {renderApplicationAssessment()}
@@ -440,17 +532,11 @@ function PostNewEditForm() {
                 </Stack>
               </>
             )}
-             {currentSection === "family" && (
-              <>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    mb: 4,
 
-                    borderRadius: 1,
-                  }}
-                >
-                   Family Documents Assessment
+            {currentSection === "family" && (
+              <>
+                <Typography variant="h6" sx={{ mb: 4 }}>
+                  Family Documents Assessment
                 </Typography>
                 {renderFamilyAssessment()}
                 <Stack direction="row" spacing={3} justifyContent="space-between" sx={{ mt: 3 }}>
@@ -465,9 +551,96 @@ function PostNewEditForm() {
             )}
           </Card>
         </Grid>
+
+        <Grid xs={12} md={4}>
+          <Stack spacing={3}>
+            {/* Stepper Section */}
+            <Card sx={{ p: 3 }}>
+              <Box
+                sx={{
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 1,
+                  p: 2,
+                }}
+              >
+                <Stepper
+                  activeStep={currentSection === "personal" ? 0 : currentSection === "application" ? 1 : 2}
+                  orientation="vertical"
+                >
+                  <Step>
+                    <StepLabel>Personal Details</StepLabel>
+                  </Step>
+                  <Step>
+                    <StepLabel>Applicant Assessment</StepLabel>
+                  </Step>
+                  <Step>
+                    <StepLabel>Family Documents</StepLabel>
+                  </Step>
+                </Stepper>
+              </Box>
+            </Card>
+
+            {/* Important Information Section */}
+            <Card sx={{ p: 3 }}>
+              <Typography variant="h6" sx={{ mb: 3 }}>
+                IMP INFO
+              </Typography>
+
+              <Box
+                sx={{
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 1,
+                  p: 2,
+                  mb: 3,
+                }}
+              >
+                <Stack spacing={2}>
+                  <Controller
+                    name="fromCountry"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField {...field} select label="From" fullWidth>
+                        <MenuItem value="">Select Country</MenuItem>
+                        <MenuItem value="armenia">Armenia</MenuItem>
+                        <MenuItem value="other">Other</MenuItem>
+                      </TextField>
+                    )}
+                  />
+
+                  <Controller
+                    name="toCountry"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField {...field} select label="To" fullWidth>
+                        <MenuItem value="">Select Country</MenuItem>
+                        <MenuItem value="sweden">Sweden</MenuItem>
+                        <MenuItem value="other">Other</MenuItem>
+                      </TextField>
+                    )}
+                  />
+                  <Controller
+                    name="currency"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField {...field} select label="Currency" fullWidth>
+                        <MenuItem value="">Select Currency</MenuItem>
+                        <MenuItem value="sek">SEK</MenuItem>
+                        <MenuItem value="eur">EUR</MenuItem>
+                        <MenuItem value="usd">USD</MenuItem>
+                      </TextField>
+                    )}
+                  />
+                </Stack>
+              </Box>
+            </Card>
+          </Stack>
+        </Grid>
       </Grid>
     </Form>
   )
 }
 
-export default PostNewEditForm;
+export default PostNewEditForm
+

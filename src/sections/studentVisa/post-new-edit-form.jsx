@@ -10,6 +10,9 @@ import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
+import Stepper from '@mui/material/Stepper';
+import Step from '@mui/material/Step';
+import StepLabel from '@mui/material/StepLabel';
 import { Form } from 'src/components/hook-form';
 
 const educationLevels = [
@@ -40,7 +43,7 @@ const FormSchema = z.object({
     z.string().min(1, { message: 'Years of study is required' }),
     z.number(),
   ]),
-    heSubject: z.string().optional(),
+  heSubject: z.string().optional(),
   heCompletionYear: z.string().optional(),
   hePercentage: z.string().optional(),
   heGrade: z.string().optional(),
@@ -65,6 +68,9 @@ const FormSchema = z.object({
   proficiencyScore: z.string().optional(),
   otherLanguage: z.string().optional(),
   otherDetails: z.string().optional(),
+  fromCountry: z.string().optional(),
+  toCountry: z.string().optional(),
+  currency: z.string().optional(),
 });
 
 export default function PostCreateView() {
@@ -107,6 +113,9 @@ export default function PostCreateView() {
       proficiencyScore: '',
       otherLanguage: '',
       otherDetails: '',
+      fromCountry: '',
+      toCountry: '',
+      currency: '',
     },
   });
 
@@ -1050,7 +1059,7 @@ export default function PostCreateView() {
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3}>
-        <Grid xs={12}>
+        <Grid xs={12} md={8}>
           <Card sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
               EDUCATIONAL & BUSINESS BACKGROUND
@@ -1074,7 +1083,7 @@ export default function PostCreateView() {
               }}
             >
               {/* Personal Details */}
-              <Typography variant="h6" sx={{ gridColumn: '1 / -1', mb: 2 }}>
+              <Typography variant="h6" sx={{ gridColumn: '1 / -1' }}>
                 Personal Details
               </Typography>
 
@@ -1124,7 +1133,7 @@ export default function PostCreateView() {
               />
 
               {/* Educational Background */}
-              <Typography variant="h6" sx={{ gridColumn: '1 / -1', mt: 3, mb: 2 }}>
+              <Typography variant="h6" sx={{ gridColumn: '1 / -1'}}>
                 Educational Background
               </Typography>
 
@@ -1196,7 +1205,7 @@ export default function PostCreateView() {
               {renderEducationFields()}
 
               {/* English Proficiency Test */}
-              <Typography variant="h6" sx={{ gridColumn: '1 / -1', mt: 3, mb: 2 }}>
+              <Typography variant="h6" sx={{ gridColumn: '1 / -1' }}>
                 English Proficiency Test
               </Typography>
 
@@ -1233,6 +1242,81 @@ export default function PostCreateView() {
             </Stack>
           </Card>
         </Grid>
+
+        <Grid xs={12} md={4}>
+          <Stack spacing={3}>
+            {/* Stepper Section */}
+
+            {/* Important Information Section */}
+            <Card sx={{ p: 3 }}>
+              <Typography variant="h6" sx={{ mb: 3 }}>
+                IMP INFO
+              </Typography>
+              
+              <Box sx={{ 
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1,
+                p: 2,
+                mb: 3
+              }}>
+                <Stack spacing={2}>
+                  <Controller
+                    name="fromCountry"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        select
+                        label="From"
+                        fullWidth
+                      >
+                        <MenuItem value="">Select Country</MenuItem>
+                        <MenuItem value="armenia">Armenia</MenuItem>
+                        <MenuItem value="other">Other</MenuItem>
+                      </TextField>
+                    )}
+                  />
+
+                  <Controller
+                    name="toCountry"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        select
+                        label="To"
+                        fullWidth
+                      >
+                        <MenuItem value="">Select Country</MenuItem>
+                        <MenuItem value="sweden">Sweden</MenuItem>
+                        <MenuItem value="other">Other</MenuItem>
+                      </TextField>
+                    )}
+                  />
+                  <Controller
+                name="currency"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    select
+                    label="Currency"
+                    fullWidth
+                  >
+                    <MenuItem value="">Select Currency</MenuItem>
+                    <MenuItem value="sek">SEK</MenuItem>
+                    <MenuItem value="eur">EUR</MenuItem>
+                    <MenuItem value="usd">USD</MenuItem>
+                  </TextField>
+                )}
+              />
+                </Stack>
+              </Box>
+            </Card>
+          </Stack>
+        </Grid>
       </Grid>
     </Form>
-  )}
+  );
+}
