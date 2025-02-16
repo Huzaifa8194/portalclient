@@ -1,8 +1,11 @@
+"use client"
+
 import { z as zod } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMemo, useEffect, useState } from "react"
 import Grid from "@mui/material/Unstable_Grid2"
+import axios, { endpoints } from "src/utils/axios"
 
 import Box from "@mui/material/Box"
 import Card from "@mui/material/Card"
@@ -13,12 +16,7 @@ import { useRouter } from "src/routes/hooks"
 
 import { useBoolean } from "src/hooks/use-boolean"
 
-import {
-  APPOINTMENT_TYPE_OPTIONS,
-  APPOINTMENT_CATEGORY_OPTIONS,
-  APPOINTMENT_COUNTRY_OPTIONS,
-  APPOINTMENT_TIME_OPTIONS,
-} from "src/_mock"
+import { APPOINTMENT_COUNTRY_OPTIONS } from "src/_mock"
 
 import { toast } from "src/components/snackbar"
 import { Form, Field } from "src/components/hook-form"
@@ -29,7 +27,10 @@ export const NewPostSchema = zod.object({
   category: zod.string().min(1, { message: "Appointment Type is required!" }),
   category2: zod.string().min(1, { message: "Appointment Category is required!" }),
   category3: zod.string().min(1, { message: "Appointment Country is required!" }),
-  dateofbirth: zod.date({ required_error: "Appointment Date is required!" }),
+  dateofbirth: zod
+    .string()
+    .refine((date) => !Number.isNaN(Date.parse(date)), { message: "Date of birth must be a valid date!" }),
+  category4: zod.string().min(1, { message: "Appointment Time is required!" }),
   description: zod.string().min(1, { message: "Appointment Description is required!" }),
   promocode: zod.string().optional(),
   agreement: zod.boolean().refine((val) => val === true, {
@@ -43,13 +44,17 @@ export function PostNewEditForm({ currentPost }) {
   const router = useRouter()
   const preview = useBoolean()
   const [formSubmitted, setFormSubmitted] = useState(false)
+  const [appointmentTypes, setAppointmentTypes] = useState([])
+  const [appointmentCategories, setAppointmentCategories] = useState([])
+  const [appointmentTimeSlots, setAppointmentTimeSlots] = useState([])
 
   const defaultValues = useMemo(
     () => ({
       category: currentPost?.category || "",
       category2: currentPost?.category2 || "",
       category3: currentPost?.category3 || "",
-      dateofbirth: currentPost?.dateofbirth || null,
+      dateofbirth: currentPost?.dateofbirth || "",
+      category4: currentPost?.category4 || "",
       description: currentPost?.description || "",
       promocode: currentPost?.promocode || "",
       agreement: currentPost?.agreement || false,
@@ -70,6 +75,7 @@ export function PostNewEditForm({ currentPost }) {
     getValues,
     setError,
     clearErrors,
+    setValue,
   } = methods
 
   useEffect(() => {
@@ -77,6 +83,35 @@ export function PostNewEditForm({ currentPost }) {
       reset(defaultValues)
     }
   }, [currentPost, defaultValues, reset])
+
+  useEffect(() => {
+    const fetchAppointmentData = async () => {
+      try {
+        const [typeResponse, categoriesResponse, timeslotResponse] = await Promise.all([
+          axios.get(endpoints.appointment.type),
+          axios.get(endpoints.appointment.categories),
+          axios.get(endpoints.appointment.timeslot),
+        ])
+
+        console.log("Appointment Types:", typeResponse.data)
+        console.log("Appointment Categories:", categoriesResponse.data)
+        console.log("Appointment Time Slots:", timeslotResponse.data.data)
+
+        setAppointmentTypes(typeResponse.data.data || [])
+        setAppointmentCategories(categoriesResponse.data.data || [])
+
+        // Ensure we're setting the correct structure for time slots
+        const timeSlots = timeslotResponse.data.data || []
+        console.log("Time slots before setting state:", timeSlots)
+        setAppointmentTimeSlots(timeSlots)
+      } catch (error) {
+        console.error("Error fetching appointment data:", error)
+        toast.error("Failed to load some appointment options. Please try again.")
+      }
+    }
+
+    fetchAppointmentData()
+  }, [])
 
   const onSubmit = handleSubmit(async (data) => {
     try {
@@ -93,37 +128,64 @@ export function PostNewEditForm({ currentPost }) {
   const handleApplyPromoCode = () => {
     const promoCode = getValues("promocode")
     if (promoCode) {
-      // Add your logic for applying the promo code here
       toast.success(`Promo code "${promoCode}" applied successfully!`)
     } else {
       toast.error("Please enter a promo code.")
     }
   }
 
-  const handleAddCoApplicant = () => {
+  const handleBookAppointment = async () => {
     const formData = getValues()
-    const emptyFields = Object.keys(NewPostSchema.shape).filter((key) => key !== "promocode" && !formData[key])
+    const requiredFields = [
+      "category",
+      "category2",
+      "category3",
+      "dateofbirth",
+      "category4",
+      "description",
+      "agreement",
+    ]
+    const emptyFields = requiredFields.filter((field) => !formData[field])
 
     if (emptyFields.length === 0) {
-      console.log("Co-Applicant Details:", formData)
-      toast.success("Co-Applicant added successfully!")
-      // Add your logic for adding a co-applicant here
-    } else {
-      // Clear any existing errors
-      clearErrors()
+      try {
+        const appointmentData = {
+          type_id: formData.category,
+          language_id: 1, // Adding default language_id
+          category_id: formData.category2,
+          country: formData.category3,
+          appointment_date: formData.dateofbirth,
+          time_slot_id: formData.category4,
+          description: formData.description,
+          is_coupon: formData.promocode ? 1 : 0,
+          net_total_amount: 0, // You need to calculate this based on your business logic
+          total_amount: 0, // You need to calculate this based on your business logic
+          transaction_id: "PENDING", // You may need to generate this or get it from somewhere
+          vat: 0, // You need to calculate this based on your business logic
+        }
 
-      // Set errors for empty fields
+        console.log("Appointment data being sent:", appointmentData)
+        const response = await axios.post(endpoints.appointment.book, appointmentData)
+        console.log("Appointment booked:", response.data)
+        toast.success("Appointment booked successfully!")
+      } catch (error) {
+        console.error("Error booking appointment:", error.response?.data || error)
+        toast.error(error.response?.data?.message || "Failed to book appointment. Please try again.")
+      }
+    } else {
+      clearErrors()
       emptyFields.forEach((field) => {
         setError(field, {
           type: "manual",
           message: "This field is required",
         })
       })
-
-      // Show a single toast message
       toast.error("Please fill in all required fields.")
     }
   }
+
+  // Note: You'll need to implement logic to calculate net_total_amount, total_amount, and vat
+  // based on your business requirements. These values are currently set to 0.
 
   return (
     <Form methods={methods} onSubmit={onSubmit}>
@@ -154,22 +216,25 @@ export function PostNewEditForm({ currentPost }) {
               }}
             >
               <Field.Select native name="category" label="Appointment Type" InputLabelProps={{ shrink: true }}>
-                {APPOINTMENT_TYPE_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
+                <option value="">Select Appointment Type</option>
+                {appointmentTypes.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name}
                   </option>
                 ))}
               </Field.Select>
 
               <Field.Select native name="category2" label="Appointment Category" InputLabelProps={{ shrink: true }}>
-                {APPOINTMENT_CATEGORY_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
+                <option value="">Select Appointment Category</option>
+                {appointmentCategories.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name}
                   </option>
                 ))}
               </Field.Select>
 
               <Field.Select native name="category3" label="Appointment Country" InputLabelProps={{ shrink: true }}>
+                <option value="">Select Appointment Country</option>
                 {APPOINTMENT_COUNTRY_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -177,12 +242,18 @@ export function PostNewEditForm({ currentPost }) {
                 ))}
               </Field.Select>
 
-              <Field.DatePicker name="dateofbirth" label="Appointment Date (First you have to select country)" />
+              <Field.DatePicker
+                name="dateofbirth"
+                label="Appointment Date"
+                inputFormat="yyyy-MM-dd"
+                onChange={(date) => setValue("dateofbirth", date.toISOString().split("T")[0])}
+              />
 
-              <Field.Select native name="category3" label="Appointment Time" InputLabelProps={{ shrink: true }}>
-                {APPOINTMENT_TIME_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
+              <Field.Select native name="category4" label="Appointment Time" InputLabelProps={{ shrink: true }}>
+                <option value="">Select Appointment Time</option>
+                {appointmentTimeSlots.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.time_range}
                   </option>
                 ))}
               </Field.Select>
@@ -203,8 +274,8 @@ export function PostNewEditForm({ currentPost }) {
                 Add Promo Code
               </LoadingButton>
 
-              <LoadingButton onClick={handleAddCoApplicant} variant="contained" loading={isSubmitting}>
-                Add Co-Applicant
+              <LoadingButton onClick={handleBookAppointment} variant="contained" loading={isSubmitting}>
+                Book an Appointment
               </LoadingButton>
             </Stack>
           </Card>

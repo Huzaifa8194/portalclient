@@ -10,19 +10,19 @@ import { useAuthContext } from "src/auth/hooks"
 import { MenuItem } from "@mui/material"
 import { toast } from "src/components/snackbar"
 
-import Box from "@mui/material/Box"
-import Card from "@mui/material/Card"
-import Stack from "@mui/material/Stack"
-import Grid from "@mui/material/Unstable_Grid2"
-import Typography from "@mui/material/Typography"
-import LoadingButton from "@mui/lab/LoadingButton"
+  import Box from "@mui/material/Box"
+  import Card from "@mui/material/Card"
+  import Stack from "@mui/material/Stack"
+  import Grid from "@mui/material/Unstable_Grid2"
+  import Typography from "@mui/material/Typography"
+  import LoadingButton from "@mui/lab/LoadingButton"
 
-import { fData } from "src/utils/format-number"
+  import { fData } from "src/utils/format-number"
 
-import { Form, Field, schemaHelper } from "src/components/hook-form"
-import { AppWidgetSummary } from "./app-widget-summary"
+  import { Form, Field, schemaHelper } from "src/components/hook-form"
+  import { AppWidgetSummary } from "./app-widget-summary"
 
-// ----------------------------------------------------------------------
+  // ----------------------------------------------------------------------
 
 export const UpdateUserSchema = zod.object({
   gender: zod.string().refine((value) => value !== "Choose Option" && value !== "", {
@@ -226,9 +226,9 @@ export function AccountGeneral() {
   
   })
 
-  if (isLoading) {
-    return <div>Loading...</div>
-  }
+    if (isLoading) {
+      return <div>Loading...</div>
+    }
 
   if (!userData) {
     return <div>No user data available</div>
