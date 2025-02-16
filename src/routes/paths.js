@@ -135,7 +135,7 @@ export const paths = {
     hostFamily: `${ROOTS.DASHBOARD}/host-family`,
     iAmAuPair: `${ROOTS.DASHBOARD}/AuPair`,
     reviews: `${ROOTS.DASHBOARD}/reviews`,
-
+    healthInsurance: `${ROOTS.DASHBOARD}/health-insurance`,
 
     visaPermit:{
       eVisa: `${ROOTS.DASHBOARD}/e-visa`,

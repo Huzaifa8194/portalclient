@@ -134,6 +134,44 @@ export const navData = [
 
    ],
  },
+ {
+  subheader: 'Immigration Services',
+  items: [
+
+    { title: 'Assessments', path: paths.dashboard.assessment, icon: ICONS.calendar },
+    {
+      title: 'E-Visa',
+      path: paths.dashboard.user.root,
+      icon: ICONS.user,
+      children: [
+        { title: 'Apply Now', path: paths.dashboard.immigrationEvisa },
+        { title: 'Before you apply', path: paths.dashboard.immigrationEvisaInfo },
+
+
+      ],
+    },
+    {
+     title: 'Global Visa',
+     path: paths.dashboard.post.root,
+     icon: ICONS.blog,
+     children: [
+
+
+       { title: 'Apply Now', path: paths.dashboard.globalEvisa },
+       { title: 'Before you apply ', path: paths.dashboard.globalEvisaInfo },
+       { title: 'Embassy Files', path: paths.dashboard.visaPermit.embassyFiles },
+
+
+     ],
+   },
+   { title: 'Health Insurance', path: paths.dashboard.healthInsurance, icon: ICONS.calendar },
+
+    { title: 'Lawyers', path: paths.dashboard.lawyers, icon: ICONS.calendar },
+    { title: 'Au Pair', path:paths.dashboard.auPair, icon: ICONS.calendar },
+
+
+  ],
+},
   /**
    * Overview
    */
@@ -162,7 +200,6 @@ export const navData = [
 
       { title: 'Pet Relocation', path: paths.dashboard.petRelocation, icon: ICONS.calendar },
       { title: 'Logistics Solution', path: paths.dashboard.logisticsSolution, icon: ICONS.calendar },
-      { title: 'Au Pair', path:paths.dashboard.auPair, icon: ICONS.calendar },
       { title: 'Payroll Services', path: paths.dashboard.payrollServices, icon: ICONS.calendar },
       { title: 'EOR', path: paths.dashboard.EOR, icon: ICONS.calendar },
 
@@ -173,56 +210,26 @@ export const navData = [
   /**
    * Item State
    */
-  {
-    subheader: 'Immigration Services',
-    items: [
- 
-      { title: 'Assessments', path: paths.dashboard.assessment, icon: ICONS.calendar },
-      { title: 'Lawyers', path: paths.dashboard.lawyers, icon: ICONS.calendar },
-      {
-        title: 'E-Visa',
-        path: paths.dashboard.user.root,
-        icon: ICONS.user,
-        children: [
-          { title: 'Info', path: paths.dashboard.immigrationEvisaInfo },
-          { title: 'Apply for Visa', path: paths.dashboard.immigrationEvisa },
- 
- 
-        ],
-      },
-      {
-       title: 'Global Services',
-       path: paths.dashboard.post.root,
-       icon: ICONS.blog,
-       children: [
- 
- 
-         { title: 'Info', path: paths.dashboard.globalEvisaInfo },
-         { title: 'Global Services', path: paths.dashboard.globalEvisa },
 
-       ],
-     },
- 
-    ],
-  },
   {
-    subheader: 'Additional Features',
+    subheader: 'Support & Agreements',
     items: [
-      {
-        title: 'Visa & Permits',
-        path: paths.dashboard.user.root,
-        icon: ICONS.user,
-        children: [
-          { title: 'E-Visa', path: paths.dashboard.visaPermit.eVisa },
-          { title: 'Embassy Files', path: paths.dashboard.visaPermit.embassyFiles },
-          { title: 'Global Visa', path: paths.dashboard.visaPermit.globalVisa },
+      // {
+      //   title: 'Visa & Permits',
+      //   path: paths.dashboard.user.root,
+      //   icon: ICONS.user,
+      //   children: [
+      //     { title: 'E-Visa', path: paths.dashboard.visaPermit.eVisa },
+      //     { title: 'Embassy Files', path: paths.dashboard.visaPermit.embassyFiles },
+      //     { title: 'Global Visa', path: paths.dashboard.visaPermit.globalVisa },
 
  
  
-        ],
-      },      { title: 'Power of Attorney', path: paths.dashboard.powerOfAttorney, icon: ICONS.calendar },
+      //   ],
+      // },      
+      { title: 'Power of Attorney', path: paths.dashboard.powerOfAttorney, icon: ICONS.calendar },
  
-    
+
       { title: 'Terms & Conditions', path: paths.dashboard.termsAndCondition, icon: ICONS.calendar },
       { title: 'FAQ', path:paths.dashboard.faq, icon: ICONS.calendar },
       { title: 'Feedback', path: paths.dashboard.feedback, icon: ICONS.calendar },

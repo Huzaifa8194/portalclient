@@ -131,6 +131,7 @@ const GlobalImmigrationEvisaInfo =lazy(() => import('src/pages/dashboard/globalI
 const GlobalImmigrationEvisa =lazy(() => import('src/pages/dashboard/globalServices/index'));
 const TermsAndCondition=lazy(() => import('src/pages/dashboard/TermsandConditons/new'));
 const Reviews=lazy(() => import('src/pages/dashboard/Reviews/new'));
+const HealthInsurance=lazy(() => import('src/pages/dashboard/HealthInsurance/index'));
 
 
 // ----------------------------------------------------------------------
@@ -284,6 +285,7 @@ export const dashboardRoutes = [
       { path: 'permission', element: <PermissionDeniedPage /> },
       { path: 'params', element: <ParamsPage /> },
       { path: 'blank', element: <BlankPage /> },
+      { path: 'health-insurance', element: <HealthInsurance /> },
     ],
   },
 ];
