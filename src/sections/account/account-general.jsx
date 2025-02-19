@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import { z as zod } from "zod"
 import { useForm } from "react-hook-form"
@@ -7,22 +9,21 @@ import Button from "@mui/material/Button"
 import axios, { endpoints } from "src/utils/axios"
 import dayjs from "dayjs"
 import { useAuthContext } from "src/auth/hooks"
-import { MenuItem } from "@mui/material"
+import { MenuItem, Dialog, DialogContent } from "@mui/material"
 import { toast } from "src/components/snackbar"
 
-  import Box from "@mui/material/Box"
-  import Card from "@mui/material/Card"
-  import Stack from "@mui/material/Stack"
-  import Grid from "@mui/material/Unstable_Grid2"
-  import Typography from "@mui/material/Typography"
-  import LoadingButton from "@mui/lab/LoadingButton"
+import Box from "@mui/material/Box"
+import Card from "@mui/material/Card"
+import Stack from "@mui/material/Stack"
+import Grid from "@mui/material/Unstable_Grid2"
+import Typography from "@mui/material/Typography"
+import LoadingButton from "@mui/lab/LoadingButton"
 
-  import { fData } from "src/utils/format-number"
+import { fData } from "src/utils/format-number"
 
-  import { Form, Field, schemaHelper } from "src/components/hook-form"
-  import { AppWidgetSummary } from "./app-widget-summary"
-
-  // ----------------------------------------------------------------------
+import { Form, Field, schemaHelper } from "src/components/hook-form"
+import { AppWidgetSummary } from "./app-widget-summary"
+import { ManagerDetails } from "./ManagerDetails"
 
 export const UpdateUserSchema = zod.object({
   gender: zod.string().refine((value) => value !== "Choose Option" && value !== "", {
@@ -49,14 +50,13 @@ export const UpdateUserSchema = zod.object({
   expiryDate: zod
     .string()
     .refine((date) => !Number.isNaN(Date.parse(date)), { message: "Expiry Date must be a valid date!" }),
-    dateOfBirth: zod
+  dateOfBirth: zod
     .string()
     .refine((date) => !Number.isNaN(Date.parse(date)), { message: "Date of birth must be a valid date!" }),
   NID: zod.string().min(1, { message: "NID is required!" }),
   passport: zod.string().min(1, { message: "NID is required!" }),
   nationality: zod.string().optional(),
   placeOfBirth: zod.string().optional(),
-  // gender: zod.string().refine((value) => value !== "Choose Option", { message: "Please select a gender" }),
   currentlyResiding: zod.string().optional(),
 })
 
@@ -67,6 +67,7 @@ export function AccountGeneral() {
   const [errorMsg, setErrorMsg] = useState("")
   const [genderOptions, setGenderOptions] = useState([{ value: "Choose Option", label: "Choose Option" }])
   const [isLoadingGenders, setIsLoadingGenders] = useState(true)
+  const [openManagerDetails, setOpenManagerDetails] = useState(false)
 
   useEffect(() => {
     const fetchGenderOptions = async () => {
@@ -98,6 +99,7 @@ export function AccountGeneral() {
 
     fetchGenderOptions()
   }, [])
+
   const methods = useForm({
     mode: "all",
     resolver: zodResolver(UpdateUserSchema),
@@ -141,13 +143,12 @@ export function AccountGeneral() {
           console.log(userDataResponse)
 
           reset({
-            // email: userDataResponse.user?.email || "",
             photoURL: userDataResponse.profile?.profile_pic || null,
             phoneNumber: userDataResponse.profile?.contact_number || "",
             address: userDataResponse.profile?.address || "",
             city: userDataResponse.profile?.city || "",
             postalCode: userDataResponse.profile?.postal_code.toString() || "",
-            dateOfBirth: userDataResponse.profile?.dob  ? dayjs(userDataResponse.profile.dob) : null ,
+            dateOfBirth: userDataResponse.profile?.dob ? dayjs(userDataResponse.profile.dob) : null,
             Issue: userDataResponse.profile?.issue_date ? dayjs(userDataResponse.profile.issue_date) : null,
             Expiry: userDataResponse.profile?.expiry_date ? dayjs(userDataResponse.profile.expiry_date) : null,
             passportNo: userDataResponse.profile.passport_no || "",
@@ -223,12 +224,11 @@ export function AccountGeneral() {
       console.error("Error updating profile:", error)
       toast.error(error.message || "Failed to update profile")
     }
-  
   })
 
-    if (isLoading) {
-      return <div>Loading...</div>
-    }
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
 
   if (!userData) {
     return <div>No user data available</div>
@@ -239,7 +239,7 @@ export function AccountGeneral() {
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid xs={12} md={4}>
           <AppWidgetSummary
-            title="User ID:"
+            title="Client ID:"
             codeicon={
               <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24">
                 <g
@@ -257,7 +257,7 @@ export function AccountGeneral() {
               </svg>
             }
             total={userData.profile.user_type_id || "N/A"}
-            extratext="Unique Identifier"
+            extratext="Your unique identifier"
             chart={{
               categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
               series: [15, 18, 12, 51, 68, 11, 39, 37],
@@ -307,7 +307,16 @@ export function AccountGeneral() {
           />
         </Grid>
       </Grid>
-      <Form methods={methods}  onSubmit={onSubmit} sx={{ mt: 10 }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+        <Button
+          variant="contained"
+          onClick={() => setOpenManagerDetails(true)}
+          sx={{ backgroundColor: "black", color: "white", "&:hover": { backgroundColor: "#333" } }}
+        >
+          My Case Manager
+        </Button>
+      </Box>
+      <Form methods={methods} onSubmit={onSubmit} sx={{ mt: 10 }}>
         <Grid container spacing={3}>
           <Grid xs={12} md={4}>
             <Card
@@ -356,19 +365,17 @@ export function AccountGeneral() {
                   sm: "repeat(2, 1fr)",
                 }}
               >
-               <Field.Select name="gender" label="Gender" select defaultValue="" disabled={isLoadingGenders}>
-        <MenuItem value="">Choose Option</MenuItem>
-        {genderOptions.map((option) => (
-          <MenuItem key={option.value} value={option.value.toString()}>
-            {option.label}
-          </MenuItem>
-        ))}
-      </Field.Select>
-                {/* <Field.Text name="email" label="Email address" /> */}
+                <Field.Select name="gender" label="Gender" select defaultValue="" disabled={isLoadingGenders}>
+                  <MenuItem value="">Choose Option</MenuItem>
+                  {genderOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value.toString()}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Field.Select>
                 <Field.DatePicker name="dateOfBirth" label="Date of birth" />
                 <Field.Text name="NID" label="Social Security Number" />
                 <Field.CountrySelect name="nationality" label="Nationality" placeholder="Choose a country" />
-
                 <Field.CountrySelect name="placeOfBirth" label="Place of Birth" placeholder="Choose a country" />
                 <Field.CountrySelect
                   name="currentlyResiding"
@@ -381,16 +388,10 @@ export function AccountGeneral() {
                 <Field.Text name="passportNo" label="Passport Number" variant="outlined" />
                 <Field.DatePicker name="Issue" label="Issue Date" />
                 <Field.DatePicker name="Expiry" label="Expiry Date" />
-
                 <Field.Phone name="phoneNumber" label="Contact Number" />
               </Box>
               <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>
-                <LoadingButton
-                  type="submit"
-                  variant="contained"
-                  loading={isSubmitting}
-                  // onClick={()=>onSubmit()}
-                >
+                <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
                   Save changes
                 </LoadingButton>
               </Stack>
@@ -398,6 +399,15 @@ export function AccountGeneral() {
           </Grid>
         </Grid>
       </Form>
+      <Dialog
+        open={openManagerDetails}
+        onClose={() => setOpenManagerDetails(false)}
+        PaperProps={{ style: { borderRadius: 16 } }}
+      >
+        <DialogContent sx={{ p: 0 }}>
+          <ManagerDetails onClose={() => setOpenManagerDetails(false)} />
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

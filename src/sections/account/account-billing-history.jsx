@@ -1,54 +1,53 @@
-import Link from '@mui/material/Link';
-import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import CardHeader from '@mui/material/CardHeader';
-import Typography from '@mui/material/Typography';
-import ListItemText from '@mui/material/ListItemText';
+import Card from "@mui/material/Card"
+import Stack from "@mui/material/Stack"
+import Button from "@mui/material/Button"
+import Divider from "@mui/material/Divider"
+import CardHeader from "@mui/material/CardHeader"
+import ListItemText from "@mui/material/ListItemText"
+import Chip from "@mui/material/Chip"
 
-import { useBoolean } from 'src/hooks/use-boolean';
+import { useBoolean } from "src/hooks/use-boolean"
 
-import { fDate } from 'src/utils/format-time';
-import { fCurrency } from 'src/utils/format-number';
+import { fDate } from "src/utils/format-time"
 
-import { Iconify } from 'src/components/iconify';
+import { Iconify } from "src/components/iconify"
 
-// ----------------------------------------------------------------------
+export function AccountBillingHistory({ referrals }) {
+  const showMore = useBoolean()
 
-export function AccountBillingHistory({ invoices }) {
-  const showMore = useBoolean();
+  // Dummy data for accepted referrals
+  const acceptedReferrals = [
+    { id: 1, name: "John Doe", status: "accepted", date: "2023-05-15" },
+    { id: 2, name: "Jane Smith", status: "accepted", date: "2023-05-20" },
+  ]
+
+  // Combine accepted and pending referrals
+  const allReferrals = [...acceptedReferrals, ...referrals]
 
   return (
     <Card>
-      <CardHeader title="Invoice history" />
+      <CardHeader title="Referral Status" />
 
       <Stack spacing={1.5} sx={{ px: 3, pt: 3 }}>
-        {(showMore.value ? invoices : invoices.slice(0, 8)).map((invoice) => (
-          <Stack key={invoice.id} direction="row" alignItems="center">
+        {(showMore.value ? allReferrals : allReferrals.slice(0, 8)).map((referral) => (
+          <Stack key={referral.id} direction="row" alignItems="center" justifyContent="space-between">
             <ListItemText
-              primary={invoice.invoiceNumber}
-              secondary={fDate(invoice.createdAt)}
-              primaryTypographyProps={{ typography: 'body2' }}
+              primary={referral.name}
+              secondary={fDate(referral.date)}
+              primaryTypographyProps={{ typography: "body2" }}
               secondaryTypographyProps={{
                 mt: 0.5,
-                component: 'span',
-                typography: 'caption',
-                color: 'text.disabled',
+                component: "span",
+                typography: "caption",
+                color: "text.disabled",
               }}
             />
 
-            <Typography variant="body2" sx={{ textAlign: 'right', mr: 5 }}>
-              {fCurrency(invoice.price)}
-            </Typography>
-
-            <Link color="inherit" underline="always" variant="body2" href="#">
-              PDF
-            </Link>
+            <Chip label={referral.status} color={referral.status === "accepted" ? "success" : "warning"} size="small" />
           </Stack>
         ))}
 
-        <Divider sx={{ borderStyle: 'dashed' }} />
+        <Divider sx={{ borderStyle: "dashed" }} />
       </Stack>
 
       <Stack alignItems="flex-start" sx={{ p: 2 }}>
@@ -58,15 +57,16 @@ export function AccountBillingHistory({ invoices }) {
           startIcon={
             <Iconify
               width={16}
-              icon={showMore.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
+              icon={showMore.value ? "eva:arrow-ios-upward-fill" : "eva:arrow-ios-downward-fill"}
               sx={{ mr: -0.5 }}
             />
           }
           onClick={showMore.onToggle}
         >
-          Show {showMore.value ? `less` : `more`}
+          Show {showMore.value ? "less" : "more"}
         </Button>
       </Stack>
     </Card>
-  );
+  )
 }
+
