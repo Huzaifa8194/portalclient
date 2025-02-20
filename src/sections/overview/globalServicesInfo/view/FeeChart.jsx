@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Card,
@@ -12,6 +12,7 @@ import {
   TableRow,
   Paper,
   useTheme,
+  TablePagination,
 } from "@mui/material";
 
 const visaFees = [
@@ -39,74 +40,162 @@ const schengenFees = [
 
 const FeeChart = () => {
   const theme = useTheme();
+  const [visaPage, setVisaPage] = useState(0);
+  const [visaRowsPerPage, setVisaRowsPerPage] = useState(5);
+  const [schengenPage, setSchengenPage] = useState(0);
+  const [schengenRowsPerPage, setSchengenRowsPerPage] = useState(5);
+
+  const handleVisaPageChange = (event, newPage) => {
+    setVisaPage(newPage);
+  };
+
+  const handleVisaRowsPerPageChange = (event) => {
+    setVisaRowsPerPage(parseInt(event.target.value, 10));
+    setVisaPage(0);
+  };
+
+  const handleSchengenPageChange = (event, newPage) => {
+    setSchengenPage(newPage);
+  };
+
+  const handleSchengenRowsPerPageChange = (event) => {
+    setSchengenRowsPerPage(parseInt(event.target.value, 10));
+    setSchengenPage(0);
+  };
+
+  const customLabelDisplayedRows = ({ from, to, count }) => `${from}–${to} of ${count}`;
 
   return (
     <Box sx={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", mt: 3 }}>
-      <Card sx={{ width: "100%", overflow: "hidden", mb: 4 }}>
+      <Card
+        sx={{
+          width: "100%",
+          overflow: "hidden",
+          mb: 4,
+          borderRadius: '8px',
+          transition: 'transform 0.2s, box-shadow 0.2s',
+          '&:hover': {
+            transform: 'translateY(-4px)',
+            boxShadow: 6,
+          },
+        }}
+      >
         <CardContent sx={{ p: 0 }}>
           <Typography
             variant="h5"
-            sx={{ p: 3, backgroundColor: 'black', color: 'white' }}
+            sx={{
+              p: 3,
+              fontWeight: 'bold',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+            }}
           >
             Visa Fee Chart
           </Typography>
-          <TableContainer component={Paper} sx={{ maxHeight: 440 }}>
+          <TableContainer component={Paper}>
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: "bold" }}>Country</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Visa Type</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Duration</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Fee (Adults)</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Fee (Minors)</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Notes</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: 'primary.main' }}>Country</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: 'primary.main' }}>Visa Type</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: 'primary.main' }}>Duration</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: 'primary.main' }}>Fee (Adults)</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: 'primary.main' }}>Fee (Minors)</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: 'primary.main' }}>Notes</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {visaFees.map((row, index) => (
-                  <TableRow key={index} sx={{ "&:nth-of-type(odd)": { backgroundColor: theme.palette.action.hover } }}>
-                    <TableCell>{row.country}</TableCell>
-                    <TableCell>{row.visaType}</TableCell>
-                    <TableCell>{row.duration}</TableCell>
-                    <TableCell>{row.feeAdults}</TableCell>
-                    <TableCell>{row.feeMinors}</TableCell>
-                    <TableCell>{row.notes}</TableCell>
-                  </TableRow>
-                ))}
+                {visaFees
+                  .slice(visaPage * visaRowsPerPage, visaPage * visaRowsPerPage + visaRowsPerPage)
+                  .map((row, index) => (
+                    <TableRow key={index} sx={{ "&:nth-of-type(odd)": { backgroundColor: theme.palette.action.hover } }}>
+                      <TableCell>{row.country}</TableCell>
+                      <TableCell>{row.visaType}</TableCell>
+                      <TableCell>{row.duration}</TableCell>
+                      <TableCell>{row.feeAdults}</TableCell>
+                      <TableCell>{row.feeMinors}</TableCell>
+                      <TableCell>{row.notes}</TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={visaFees.length}
+            rowsPerPage={visaRowsPerPage}
+            page={visaPage}
+            onPageChange={handleVisaPageChange}
+            onRowsPerPageChange={handleVisaRowsPerPageChange}
+            labelRowsPerPage="Rows per page:"
+            labelDisplayedRows={customLabelDisplayedRows}
+            sx={{ mt: 2,  }}
+          />
         </CardContent>
       </Card>
 
-      <Card sx={{ width: "100%", overflow: "hidden" }}>
+      <Card
+        sx={{
+          width: "100%",
+          overflow: "hidden",
+      
+          
+          borderRadius: '8px',
+          transition: 'transform 0.2s, box-shadow 0.2s',
+          '&:hover': {
+            transform: 'translateY(-4px)',
+            boxShadow: 6,
+          },
+        }}
+      >
         <CardContent sx={{ p: 0 }}>
           <Typography
             variant="h5"
-            sx={{ p: 3, backgroundColor: 'black', color: 'white' }}
+            sx={{
+              p: 3,
+            
+              fontWeight: 'bold',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+            }}
           >
             Schengen Visa Fee Chart
           </Typography>
-          <TableContainer component={Paper} sx={{ maxHeight: 440 }}>
+          <TableContainer component={Paper}>
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: "bold" }}>Category</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Fee</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Notes</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: 'primary.main' }}>Category</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: 'primary.main' }}>Fee</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: 'primary.main' }}>Notes</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {schengenFees.map((row, index) => (
-                  <TableRow key={index} sx={{ "&:nth-of-type(odd)": { backgroundColor: theme.palette.action.hover } }}>
-                    <TableCell>{row.category}</TableCell>
-                    <TableCell>{row.fee}</TableCell>
-                    <TableCell>{row.notes}</TableCell>
-                  </TableRow>
-                ))}
+                {schengenFees
+                  .slice(schengenPage * schengenRowsPerPage, schengenPage * schengenRowsPerPage + schengenRowsPerPage)
+                  .map((row, index) => (
+                    <TableRow key={index} sx={{ "&:nth-of-type(odd)": { backgroundColor: theme.palette.action.hover } }}>
+                      <TableCell>{row.category}</TableCell>
+                      <TableCell>{row.fee}</TableCell>
+                      <TableCell>{row.notes}</TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={schengenFees.length}
+            rowsPerPage={schengenRowsPerPage}
+            page={schengenPage}
+            onPageChange={handleSchengenPageChange}
+            onRowsPerPageChange={handleSchengenRowsPerPageChange}
+            labelRowsPerPage="Rows per page:"
+            labelDisplayedRows={customLabelDisplayedRows}
+            sx={{ mt: 2 }}
+          />
         </CardContent>
       </Card>
     </Box>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Card,
@@ -12,6 +12,7 @@ import {
   TableRow,
   Paper,
   useTheme,
+  TablePagination,
 } from "@mui/material";
 
 const visaFees = [
@@ -35,41 +36,92 @@ const visaFees = [
 
 const FeeChart = () => {
   const theme = useTheme();
+  const [page, setPage] = useState(0); 
+  const [rowsPerPage, setRowsPerPage] = useState(5); 
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); 
+  };
+
+  const customLabelDisplayedRows = ({ from, to, count }) => `${from}–${to} of ${count}`;
 
   return (
     <Box sx={{ width: "100%", display: "flex", justifyContent: "center", mt: 3 }}>
-      <Card sx={{ width: "100%", overflow: "hidden" }}>
+      <Card
+        sx={{
+          width: "100%",
+          overflow: "hidden",
+          borderRadius: '8px', 
+          transition: 'transform 0.2s, box-shadow 0.2s', 
+          '&:hover': {
+            transform: 'translateY(-4px)',
+            boxShadow: 6,
+          },
+        }}
+      >
         <CardContent sx={{ p: 0 }}>
           <Typography
             variant="h5"
-            sx={{ p: 3, backgroundColor: 'black', color: 'white' }}
+            sx={{
+              p: 3,
+              fontWeight: 'bold', 
+              textTransform: 'uppercase', 
+              letterSpacing: '1px', 
+            }}
           >
             ETA & ESTA Fee Chart
           </Typography>
-          <TableContainer component={Paper} sx={{ maxHeight: 440 }}>
+          <TableContainer component={Paper}>
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: "bold" }}>Country</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Program</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Fee (Local Currency)</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Fee (Approx. USD)</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Validity</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: 'primary.main' }}>Country</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: 'primary.main' }}>Program</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: 'primary.main' }}>Fee (Local Currency)</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: 'primary.main' }}>Fee (Approx. USD)</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: 'primary.main' }}>Validity</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {visaFees.map((row, index) => (
-                  <TableRow key={index} sx={{ "&:nth-of-type(odd)": { backgroundColor: theme.palette.action.hover } }}>
-                    <TableCell>{row.country}</TableCell>
-                    <TableCell>{row.program}</TableCell>
-                    <TableCell>{row.localFee}</TableCell>
-                    <TableCell>{row.usdFee}</TableCell>
-                    <TableCell>{row.validity}</TableCell>
-                  </TableRow>
-                ))}
+                {visaFees
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) 
+                  .map((row, index) => (
+                    <TableRow
+                      key={index}
+                      sx={{
+                        "&:nth-of-type(odd)": { backgroundColor: theme.palette.action.hover },
+                      }}
+                    >
+                      <TableCell>{row.country}</TableCell>
+                      <TableCell>{row.program}</TableCell>
+                      <TableCell>{row.localFee}</TableCell>
+                      <TableCell>{row.usdFee}</TableCell>
+                      <TableCell>{row.validity}</TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>
+
+         
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={visaFees.length} 
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage} 
+            labelRowsPerPage="Rows per page:" 
+            labelDisplayedRows={customLabelDisplayedRows} 
+            
+          />
         </CardContent>
       </Card>
     </Box>

@@ -2,6 +2,9 @@ import Box from "@mui/material/Box"
 import Card from "@mui/material/Card"
 import { useTheme } from "@mui/material/styles"
 import Button from "@mui/material/Button"
+import { useState } from "react"
+import Tabs from "@mui/material/Tabs"
+import Tab from "@mui/material/Tab"
 
 import { fNumber } from "src/utils/format-number"
 import { useNavigate } from "react-router-dom"
@@ -9,8 +12,20 @@ import { Chart, useChart } from "src/components/chart"
 
 // ----------------------------------------------------------------------
 
-export function AppWidgetSummary({ title, percent, total, chart, sx, renderCustomContent, ...other }) {
+export function AppWidgetSummary({ title, percent, total, chart, sx, renderCustomContent, coApplicants = [], documents = [], ...other }) {
   const theme = useTheme()
+  const [showDropdown, setShowDropdown] = useState(false)
+  const [showDocs, setShowDocs] = useState(false)
+  const [tabIndex, setTabIndex] = useState(0)
+
+  const dummyCoApplicants = ["John Doe", "Jane Smith", "Michael Johnson", "Emily Davis", "David Brown"]
+  const dummyDocuments = [
+    { name: "Obaid", count: 54 },
+    { name: "Aisha", count: 32 },
+    { name: "Rahul", count: 21 },
+    { name: "Sophia", count: 40 },
+    { name: "Liam", count: 15 }
+  ]
 
   const chartColors = chart.colors ?? [theme.palette.primary.main]
 
@@ -69,6 +84,50 @@ export function AppWidgetSummary({ title, percent, total, chart, sx, renderCusto
                 : "Go now"}
         </Button>
 
+        {title === "Co-applicants" && (
+          <Box sx={{ mt: 2 }}>
+            <Button variant="text" onClick={() => setShowDropdown(!showDropdown)}>
+              {showDropdown ? "Hide names" : "Show names"}
+            </Button>
+            {showDropdown && (
+              <Box sx={{ mt: 1 }}>
+                {dummyCoApplicants.map((name, index) => (
+                  <Box key={index} sx={{ typography: "body2", mb: 0.5 }}>
+                    {name}
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
+        )}
+
+        {title === "Documents" && (
+          <Box sx={{ mt: 2 }}>
+            <Button variant="text" onClick={() => setShowDocs(!showDocs)}>
+              {showDocs ? "Hide submitted documents" : "Show submitted documents"}
+            </Button>
+            {showDocs && (
+              <Box sx={{ mt: 1 }}>
+                {dummyDocuments.map((doc, index) => (
+                  <Box key={index} sx={{ typography: "body2", mb: 0.5 }}>
+                    {doc.name} - {doc.count} submitted
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
+        )}
+
+        {title === "Appointment" && (
+          <Box sx={{ mt: 2 }}>
+            <Tabs value={tabIndex} onChange={(e, newIndex) => setTabIndex(newIndex)}>
+              <Tab label="Sweden Relocators" />
+              <Tab label="Authority" />
+            </Tabs>
+            {/*  */}
+          </Box>
+        )}
+
         {renderCustomContent && renderCustomContent()}
       </Box>
 
@@ -76,4 +135,3 @@ export function AppWidgetSummary({ title, percent, total, chart, sx, renderCusto
     </Card>
   )
 }
-
