@@ -85,7 +85,7 @@ export function JobListView() {
         heading="Co-Applicant"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'Job', href: paths.dashboard.job.root },
+          { name: 'Profile' },
           { name: 'Co-Applicant' },
         ]}
         action={

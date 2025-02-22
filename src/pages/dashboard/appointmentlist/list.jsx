@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
 
-import { ApplicationChoice } from 'src/sections/appointmentlist/view/ApplicationChoice';
+import { ApplicationChoice } from 'src/sections/overview/analytics/view/ApplicationChoice';
 
 // ----------------------------------------------------------------------
 

@@ -76,6 +76,7 @@ const BlogPostsPage = lazy(() => import('src/pages/dashboard/post/list'));
 const BlogPostPage = lazy(() => import('src/pages/dashboard/post/details'));
 const BlogNewPostPage = lazy(() => import('src/pages/dashboard/post/new'));
 const BlogEditPostPage = lazy(() => import('src/pages/dashboard/post/edit'));
+const CoApplicant = lazy(() => import('src/pages/dashboard/coapplicant/list'));
 // Job
 const JobDetailsPage = lazy(() => import('src/pages/dashboard/job/details'));
 const JobListPage = lazy(() => import('src/pages/dashboard/job/list'));
@@ -132,7 +133,15 @@ const GlobalImmigrationEvisa =lazy(() => import('src/pages/dashboard/globalServi
 const TermsAndCondition=lazy(() => import('src/pages/dashboard/TermsandConditons/new'));
 const Reviews=lazy(() => import('src/pages/dashboard/Reviews/new'));
 const HealthInsurance=lazy(() => import('src/pages/dashboard/HealthInsurance/index'));
-
+const AssessmentList=lazy(() => import('src/pages/dashboard/AssessmentQuery/new'));
+const ImmigrationEVisaList=lazy(() => import('src/pages/dashboard/immigrationEVisaList/new'));
+const ImmigrationGlobalList=lazy(() => import('src/pages/dashboard/immigrationGlobalList/new'));
+const HealthInsuranceList=lazy(() => import('src/pages/dashboard/HealthInsuranceList/new'));
+const LawyersList=lazy(() => import('src/pages/dashboard/LawyerList/new'));
+const AuPairList=lazy(() => import('src/pages/dashboard/AuPairList/new'));
+const PetRelocationList=lazy(() => import('src/pages/dashboard/PetRelocationList/new'));
+const LogisticsList=lazy(() => import('src/pages/dashboard/LogisticsSolutionList/new'));
+const POAList=lazy(() => import('src/pages/dashboard/POAList/new'));
 
 // ----------------------------------------------------------------------
 
@@ -156,17 +165,36 @@ export const dashboardRoutes = [
       { path: 'booking', element: <OverviewBookingPage /> },
       { path: 'file', element: <OverviewFilePage /> },
       { path: 'course', element: <OverviewCoursePage /> },
+
+      {
+        path: 'profile',
+        children: [
+          { path: 'account', element: <UserAccountPage /> },
+          { path: 'coapplicant', element: <CoApplicant /> },
+          { path: ':id/edit', element: <JobEditPage /> },
+
+        ],
+      },
+      {
+        path: 'appointment',
+        children: [
+          { path: 'new', element: <BlogNewPostPage /> },
+          { path: 'manage', element: <AppointmentListPage /> },
+
+
+        ],
+      },
       {
         path: 'user',
         children: [
           { element: <UserProfilePage />, index: true },
-          { path: 'coapplicant', element: <JobListPage /> },
+          // { path: 'coapplicant', element: <CoApplicant /> },
           { path: 'profile', element: <UserProfilePage /> },
           { path: 'cards', element: <UserCardsPage /> },
           { path: 'list', element: <AppointmentListPage /> },
           { path: 'new', element: <UserCreatePage /> },
           { path: ':id/edit', element: <UserEditPage /> },
-          { path: 'account', element: <UserAccountPage /> },
+          // { path: 'account', element: <UserAccountPage /> },
         ],
       },
 
@@ -234,6 +262,8 @@ export const dashboardRoutes = [
 
 
       { path: 'assessments', element: <AssessmentsPage /> },
+      { path: 'assessments-list', element: <AssessmentList /> },
+
 
       { path: 'businessquery', element: <  BusinessQueryPage /> },
 
@@ -248,9 +278,18 @@ export const dashboardRoutes = [
       { path: 'global-services', element: < GlobalServiceVisa />},
       { path: 'immigration-Evisa', element: < ImmigrationEvisa />},
       { path: 'immigration-Evisa-info', element: < ImmigrationEvisaInfo />},
+      { path: 'immigration-Evisa-List', element: < ImmigrationEVisaList />},
+
 
       { path: 'immigration-global-Evisa', element: < GlobalImmigrationEvisa />},
       { path: 'immigration-global-Evisa-info', element: < GlobalImmigrationEvisaInfo />},
+      { path: 'immigration-global-List', element: < ImmigrationGlobalList />},
+      { path: 'health-insurance-list', element: < HealthInsuranceList />},
+      { path: 'lawyers-list', element: < LawyersList />},
+      { path: 'Au-Pair-List', element: < AuPairList />},
+      { path: 'pet-relocation-List', element: < PetRelocationList />},
+      { path: 'logistics-solution-List', element: < LogisticsSolution />},
+      { path: 'POA-List', element: < POAList />},
 
       { path: 'business-visa', element: < BusinessVisa />},
       { path: 'student-visa', element: < StudentVisa />},

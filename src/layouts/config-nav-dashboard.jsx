@@ -95,17 +95,15 @@ export const navData = [
    subheader: 'Management',
    items: [
 
-     {
-       title: 'Profile',
-       path: paths.dashboard.user.root,
-       icon: ICONS.user,
-       children: [
-         { title: 'Profile', path: paths.dashboard.user.account },
-         { title: 'Co-Applicant', path: paths.dashboard.job.root },
-
-
-       ],
-     },
+    {
+      title: 'Profile',
+      path: paths.dashboard.profile.account, // This will be '/dashboard/profile/account'
+      icon: ICONS.user,
+      children: [
+        { title: 'Account', path: paths.dashboard.profile.account },
+        { title: 'Co-Applicant', path: paths.dashboard.profile.coapplicant },
+      ],
+    },    
      {
       title: 'Appointment',
       path: paths.dashboard.post.root,
@@ -113,8 +111,8 @@ export const navData = [
       children: [
 
 
-        { title: 'Book An Appointment', path: paths.dashboard.post.new },
-        { title: 'Manage Appointments', path: paths.dashboard.user.list },
+        { title: 'Book An Appointment', path: paths.dashboard.appointment.bookAppointment },
+        { title: 'Manage Appointments', path: paths.dashboard.appointment.manageAppointment },
       ],
     },
     {
@@ -130,6 +128,7 @@ export const navData = [
 
      { title: 'Messages', path: paths.dashboard.chat, icon: ICONS.chat },
      { title: 'Application Status', path: paths.dashboard.general.analytics, icon: ICONS.calendar },
+
      { title: 'Service Charges', path: paths.dashboard.serviceCharges, icon: ICONS.calendar },
 
    ],
@@ -138,7 +137,18 @@ export const navData = [
   subheader: 'Immigration Services',
   items: [
 
-    { title: 'Assessments', path: paths.dashboard.assessment, icon: ICONS.calendar },
+    // { title: 'Assessments', path: paths.dashboard.assessment, icon: ICONS.calendar },
+    {
+      title: 'Assessments',
+      path: paths.dashboard.user.root,
+      icon: ICONS.user,
+      children: [
+        { title: 'Assessments', path: paths.dashboard.assessment.assessment },
+        { title: 'My Query', path: paths.dashboard.assessment.assessmentLists },
+
+
+      ],
+    },
     {
       title: 'E-Visa',
       path: paths.dashboard.user.root,
@@ -146,7 +156,7 @@ export const navData = [
       children: [
         { title: 'Apply Now', path: paths.dashboard.immigrationEvisa },
         { title: 'Before you apply', path: paths.dashboard.immigrationEvisaInfo },
-
+        { title: 'My Queries', path: paths.dashboard.immigrationEvisaList },
 
       ],
     },
@@ -160,15 +170,45 @@ export const navData = [
        { title: 'Apply Now', path: paths.dashboard.globalEvisa },
        { title: 'Before you apply ', path: paths.dashboard.globalEvisaInfo },
        { title: 'Embassy Files', path: paths.dashboard.visaPermit.embassyFiles },
+       { title: 'My Queries', path: paths.dashboard.globalList },
 
 
      ],
    },
-   { title: 'Health Insurance', path: paths.dashboard.healthInsurance, icon: ICONS.calendar },
+   {
+    title: 'Health Insurance',
+    path: paths.dashboard.post.root,
+    icon: ICONS.blog,
+    children: [
 
-    { title: 'Lawyers', path: paths.dashboard.lawyers, icon: ICONS.calendar },
-    { title: 'Au Pair', path:paths.dashboard.auPair, icon: ICONS.calendar },
+      { title: 'Health Insurance', path: paths.dashboard.healthInsurance},
+      { title: 'My Queries', path: paths.dashboard.healthInsuranceList },
 
+
+    ],
+  },
+  {
+    title: 'Lawyers',
+    path: paths.dashboard.post.root,
+    icon: ICONS.blog,
+    children: [
+
+      { title: 'Lawyers', path: paths.dashboard.lawyers},
+      { title: 'My Queries', path: paths.dashboard.lawyerList },
+
+
+    ],
+  },
+  {
+    title: 'Au Pair',
+    path: paths.dashboard.post.root,
+    icon: ICONS.blog,
+    children: [
+
+      { title: 'Au Pair', path:paths.dashboard.auPair },
+      { title: 'My Queries', path: paths.dashboard.AuPairList },
+    ],
+  },
 
   ],
 },
@@ -198,8 +238,26 @@ export const navData = [
       },
       { title: 'Money Management', path: paths.dashboard.moneyManagement, icon: ICONS.calendar },
 
-      { title: 'Pet Relocation', path: paths.dashboard.petRelocation, icon: ICONS.calendar },
-      { title: 'Logistics Solution', path: paths.dashboard.logisticsSolution, icon: ICONS.calendar },
+      {
+        title: 'Pet Relocation',
+        path: paths.dashboard.post.root,
+        icon: ICONS.blog,
+        children: [
+    
+          { title: 'Pet Relocation', path: paths.dashboard.petRelocation, },
+          { title: 'My Queries', path: paths.dashboard.PetRelocationList },
+        ],
+      },
+      {
+        title: 'Logistics Solution',
+        path: paths.dashboard.post.root,
+        icon: ICONS.blog,
+        children: [
+    
+          { title: 'Logistics Solution', path: paths.dashboard.logisticsSolution },
+          { title: 'My Queries', path: paths.dashboard.logisticsSolutionList },
+        ],
+      },
       { title: 'Payroll Services', path: paths.dashboard.payrollServices, icon: ICONS.calendar },
       { title: 'EOR', path: paths.dashboard.EOR, icon: ICONS.calendar },
 
@@ -227,14 +285,23 @@ export const navData = [
  
       //   ],
       // },      
-      { title: 'Power of Attorney', path: paths.dashboard.powerOfAttorney, icon: ICONS.calendar },
- 
+      {
+        title: 'Power of Attorney',
+        path: paths.dashboard.post.root,
+        icon: ICONS.blog,
+        children: [
+    
+          { title: 'Power of Attorney', path: paths.dashboard.powerOfAttorney },
+          { title: 'My Queries', path: paths.dashboard.POAList },
+        ],
+      },
 
       { title: 'Terms & Conditions', path: paths.dashboard.termsAndCondition, icon: ICONS.calendar },
       { title: 'FAQ', path:paths.dashboard.faq, icon: ICONS.calendar },
       { title: 'Feedback', path: paths.dashboard.feedback, icon: ICONS.calendar },
       { title: 'Reviews', path: paths.dashboard.reviews, icon: ICONS.calendar },
-      // { title: 'tour', path: paths.dashboard.tour.root, icon: ICONS.calendar },
+      { title: 'Course', path: paths.dashboard.general.course, icon: ICONS.calendar },
+      { title: 'tour', path: paths.dashboard.tour.root, icon: ICONS.calendar },
 
     ],
   },

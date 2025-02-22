@@ -6,29 +6,31 @@ import { setSession, jwtDecode } from "./utils"
  *************************************** */
 export const signInWithPassword = async ({ email, password }) => {
   try {
-    const params = { email, password }
-    const res = await axios.post(endpoints.auth.signIn, params)
+    const params = { email, password };
 
-    const { token } = res.data.data
+    // Include params in the request body
+    const res = await axios.post("https://api.swedenrelocators.se/api/clientLogin", params);
+
+    const { token } = res.data.data;
     if (!token) {
-      throw new Error("Access token not found in response")
+      throw new Error("Access token not found in response");
     }
 
-    const decodedToken = jwtDecode(token)
+    const decodedToken = jwtDecode(token);
     if (!decodedToken) {
-      console.error("Failed to decode token:", token)
-      throw new Error("Invalid token received from server")
+      console.error("Failed to decode token:", token);
+      throw new Error("Invalid token received from server");
     }
 
-    localStorage.setItem("authToken", token)
-    setSession(token)
+    localStorage.setItem("authToken", token);
+    setSession(token);
     console.log("Login Token: ", token);
-    return { ...decodedToken, accessToken: token }
+    return { ...decodedToken, accessToken: token };
   } catch (error) {
-    console.error("Error during sign in:", error)
-    throw error
+    console.error("Error during sign in:", error);
+    throw error;
   }
-}
+};
 
 /** **************************************
  * Sign up

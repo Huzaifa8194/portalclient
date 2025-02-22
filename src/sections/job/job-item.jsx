@@ -17,7 +17,7 @@ import { CustomPopover, usePopover } from 'src/components/custom-popover';
 import { _mock } from 'src/_mock';
 import CoApplicantProfile from './co-applicant-profile';
 
-export function JobItem({ job, onView, onEdit, onDelete }) {
+export function JobItem({ job, onEdit, onDelete }) {
   const popover = usePopover();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
@@ -106,26 +106,32 @@ export function JobItem({ job, onView, onEdit, onDelete }) {
           />
         </Box>
 
-        <ListItemText
-          sx={{ mt: 7, mb: 1 }}
-          primary={
-            <Typography
-              component="a"
-              variant="subtitle1"
-              sx={{
-                cursor: 'pointer',
-                '&:hover': {
-                  textDecoration: 'underline',
-                },
-              }}
-              onClick={handleNameClick}
-            >
-              {job.company.name || 'Name'}
-            </Typography>
-          }
-          secondary={job.relation || 'Brother'}
-          secondaryTypographyProps={{ component: 'span', mt: 0.5 }}
-        />
+       <ListItemText
+  sx={{ mt: 7, mb: 1 }}
+  primary={
+    <Typography
+      component="a"
+      variant="subtitle1"
+      sx={{
+        cursor: 'pointer',
+        '&:hover': {
+          textDecoration: 'underline',
+        },
+      }}
+      onClick={handleNameClick}
+    >
+      {job.company.name || 'Name'}
+    </Typography>
+  }
+  secondary={
+    <>
+      {job.relation || 'Brother'}
+      <br />
+      ID: {job.id || 'N/A'}
+    </>
+  }  secondaryTypographyProps={{ component: 'span', mt: 0.5 }}
+/>
+
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
@@ -163,17 +169,6 @@ export function JobItem({ job, onView, onEdit, onDelete }) {
           slotProps={{ arrow: { placement: 'right-top' } }}
         >
           <MenuList>
-            <MenuItem 
-              onClick={(e) => { 
-                e.stopPropagation();
-                popover.onClose(); 
-                onView(); 
-              }}
-              sx={{ gap: 1 }}
-            >
-              <Iconify icon="solar:eye-bold" />
-              View
-            </MenuItem>
             <MenuItem 
               onClick={(e) => { 
                 e.stopPropagation();

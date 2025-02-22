@@ -1,280 +1,512 @@
-import React, { useState } from 'react';
+import { z as zod } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMemo, useEffect, useCallback } from 'react';
+import Grid from '@mui/material/Unstable_Grid2';
+
+import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import Switch from '@mui/material/Switch';
+import Divider from '@mui/material/Divider';
+import CardHeader from '@mui/material/CardHeader';
+import Typography from '@mui/material/Typography';
+import LoadingButton from '@mui/lab/LoadingButton';
+import FormControlLabel from '@mui/material/FormControlLabel';
+
+import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
+
+import { useBoolean } from 'src/hooks/use-boolean';
+
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  Card,
-  Box,
-  TablePagination,
-} from '@mui/material';
+  _tags,
+  APPOINTMENT_TYPE_OPTIONS,
+  APPOINTMENT_CATEGORY_OPTIONS,
+  APPOINTMENT_COUNTRY_OPTIONS,
+  APPOINTMENT_TIME_OPTIONS,
+} from 'src/_mock';
 
-const serviceData = [
-  {
-    category: 'FAMILY REUNIFICATION',
-    services: [
-      { code: 'A11', name: 'Destination Services (SSN-Bank Account-Other Registration)', price: '12 000 SEK' },
-      { code: 'A12', name: 'A11 + Visit Visa for Spouse', price: '18 500 SEK' },
-      { code: 'A13', name: 'Sweden EU Residence Card', price: '35 000 SEK' },
-      { code: 'A14', name: 'A13 + Nordic Permit', price: '37 500 SEK' },
-      { code: 'A15', name: 'EU Residence card-Family', price: '50 000 SEK' },
-      { code: 'A16', name: 'Nordic Permit Family up to 4 Children', price: '35 000 SEK' },
-      { code: 'A17', name: 'Denmark EU Return', price: '30 000 SEK' },
-      { code: 'A18', name: 'Denmark EU Return up to 4 Children', price: '40 000 SEK' },
-      { code: 'FRSN0232', name: 'Family Reunification Sweden (National Laws)', price: '35 000 SEK' },
-      { code: 'SF0012', name: 'Schengen-Joining a Family Member', price: '12 500 SEK' },
-      { code: 'MEU200438', name: 'Parents EU Residence -Minor EU Child', price: '50 000 SEK' },
-      { code: 'EULR1265', name: 'EU 2004/38 EU Family Case with other history', price: '50 000 SEK' },
-    ],
-  },
-  {
-    category: 'APPEAL CASES',
-    services: [
-      { code: 'D21', name: 'Student-Appeal Individual', price: '10 000 SEK' },
-      { code: 'D22', name: 'Student-Appeal with Family upto 4 children', price: '15 000 SEK' },
-      { code: 'DKAP011', name: 'Denmark EU -Return', price: '15 000 SEK' },
-      { code: 'EURPX1', name: 'EU Family Residence Permit/Card', price: '20 000 SEK' },
-      { code: 'EUX2', name: 'Individual-EU Long-Term', price: '30 000 SEK' },
-      { code: 'SC125', name: 'Appeal for Swedish Citizenship', price: '10 000 SEK' },
-      { code: 'SR01', name: 'Schengen Visa Refusal -Appeal', price: '12 500 SEK' },
-      { code: 'WPA112', name: 'Work/Self Employed Permit-Appeal Individual', price: '20 000 SEK' },
-      { code: 'WPA113', name: 'Work/Self Employed Permit-Appeal Family upto 4 children', price: '40 000 SEK' },
-    ],
-  },
-  {
-    category: 'EU LONG TERM PERMITS',
-    services: [
-      { code: 'E31', name: 'Long Term (Ist Time)', price: '20 000 SEK' },
-      { code: 'E32', name: 'EU Long Term with Family', price: '30 000 SEK' },
-      { code: 'E33', name: 'EU Long Term (After Refusal)', price: '25 000 SEK' },
-      { code: 'E34', name: 'EU Long Term Family (After Refusal)', price: '30 000 SEK' },
-      { code: 'E35', name: 'EU Long Term Permanent', price: '35 000 SEK' },
-      { code: 'E36', name: 'Long Term EU-Permanent with Family', price: '50 000 SEK' },
-      { code: 'E37', name: 'EU Long Term Status (Family more than 5 members)', price: '75 000 SEK' },
-    ],
-  },
-  {
-    category: 'WORK PERMIT',
-    services: [
-      { code: 'W41', name: 'Work Permit', price: '30 000 SEK' },
-      { code: 'W42', name: 'Work Permit with Family', price: '40 000 SEK' },
-      { code: 'W43', name: 'Work Permit + Housing', price: '45 000 SEK' },
-      { code: 'W44', name: 'WP Spouse Application', price: '15 000 SEK' },
-      { code: 'WPA01', name: 'Work Permit (After Asylum)', price: '30 000 SEK' },
-      { code: 'WP44', name: 'Work Permit Extension', price: '30 000 SEK' },
-      { code: 'WPF231', name: 'WP-Family Upto 2 children', price: '30 000 SEK' },
-      { code: 'WEP232', name: 'WP Extension-Permanent Residence Permit', price: '30 000 SEK' },
-      { code: 'WS52', name: 'Job Searching Permit-9 Months', price: '15 000 SEK' },
-      { code: 'AP01', name: 'AU Pair', price: '30 000 SEK' },
-      { code: 'BR01', name: 'Berry Pickers-Seasonal Workers', price: '15 000 SEK' },
-      { code: 'ACRE05', name: 'Athlete- Coaches-Researcher-EU Blue Card', price: '30 000 SEK' },
-      { code: 'EWP231', name: 'Extension of Work Permit', price: '24 500 SEK' },
-      { code: 'PWP031', name: 'Pre-Work Permit Process For Employer', price: '12 500 SEK' },
-    ],
-  },
-  {
-    category: 'BUSINESS PERMIT',
-    services: [
-      { code: 'B1', name: 'Business Permit with Follow up', price: '50 000 SEK' },
-      { code: 'BPR010', name: 'Permanent on Business permit', price: '40 000 SEK' },
-      { code: 'BRPF01', name: 'Business Permit Family upto 2 Children', price: '75 000 SEK' },
-      { code: 'SE0797', name: 'Self-Employed Permit: Appeal - Customized Follow-Up Process', price: '40 000 SEK' },
-    ],
-  },
-  {
-    category: 'COMPANY REGISTRATION',
-    services: [
-      { code: 'C1', name: 'Company Registration EF HB KB AB', price: '10 000 SEK' },
-      { code: 'C2', name: 'Company Address Cost', price: '3 000 SEK' },
-      { code: 'C3', name: 'C1+Company Account', price: '15 000 SEK' },
-      { code: 'C4', name: 'Company Bank Account', price: '03 500 SEK' },
-    ],
-  },
-  {
-    category: 'GENERAL VISIT VISAS ON NON-EUROPEAN PASSPORTS',
-    services: [
-      { code: 'V1', name: 'General Visit (UK-Canada-Aus-NZ-USA)', price: '15 000 SEK' },
-      { code: 'V2', name: 'Schengen Visit/EEA/EU from Outside Europe', price: '12 500 SEK' },
-      { code: 'VF1', name: 'V1 + Family', price: '25 000 SEK' },
-      { code: 'VF2', name: 'V2 + Family', price: '15 000 SEK' },
-      { code: 'LVP012', name: 'Visit Permit upto 12 Months', price: '10 000 SEK' },
-    ],
-  },
-  {
-    category: 'PERMANENT RESIDENCE AND PASSPORT APPLICATION',
-    services: [
-      { code: 'P1', name: 'Permanent Residence After Work Permit', price: '22 500 SEK' },
-      { code: 'P2', name: 'Passport Application -Follow up', price: '10 000 SEK' },
-      { code: 'P3', name: 'Permanent Residence after EU Card', price: '25 000 SEK' },
-      { code: 'P4', name: 'Permanent Residence after Nordic Permit', price: '10 000 SEK' },
-      { code: 'PRG01', name: 'Regain Permanent Residence', price: '30 000 SEK' },
-      { code: 'SCF2143', name: 'Swedish Citizenship With Family (Upto 4 child)', price: '30 000 SEK' },
-    ],
-  },
-  {
-    "category": "STUDENT APPLICATION",
-    "services": [
-      { "code": "ST1", "name": "Student Admission (Includes Fee)", "price": "5 000 SEK" },
-      { "code": "ST2", "name": "Student individual Permit (Excl. Visa Fee)", "price": "15 000 SEK" },
-      { "code": "ST3", "name": "ST Family", "price": "20 000 SEK" },
-      { "code": "EUF021", "name": "Application Fee Eu Universities", "price": "1 800 SEK" }
-    ]
-  },
-  {
-    "category": "HOUSING SOLUTIONS",
-    "services": [
-      { "code": "HSL10", "name": "Long Term Rental or Bostadrätt Solution", "price": "60 000 SEK" },
-      { "code": "HSL11", "name": "Limited Housing Solution", "price": "25 000 SEK" },
-      { "code": "HSL12", "name": "Short Term Solution", "price": "10 000 SEK" },
-      { "code": "HSL13", "name": "Shared Space", "price": "5 000 SEK" },
-      { "code": "HSL14", "name": "Instant Housing Solutions", "price": "40 000 SEK" }
-    ]
-  },
-  {
-    "category": "OTHERS",
-    "services": [
-      { "code": "MRG200", "name": "Marriage Registration Process", "price": "10 000 SEK" },
-      { "code": "DVR201", "name": "Divorce Registration Process", "price": "20 000 SEK" },
-      { "code": "DKR001", "name": "Re-Entry Permit Denmark", "price": "10 000 SEK" },
-      { "code": "CPRDK01", "name": "CPR Registration Denmark", "price": "10 000 SEK" },
-      { "code": "RLP01", "name": "Relocation Package", "price": "75 000 SEK" },
-      { "code": "AHF219", "name": "Application Fee and Health Insurance Fee", "price": "5 000 SEK" },
-      { "code": "EUC032", "name": "EU Certificate Denmark", "price": "7 500 SEK" },
-      { "code": "SRC01", "name": "Customised Relocation Package Sweden", "price": "50 000 SEK" },
-      { "code": "RS01", "name": "Rental Services", "price": "10 000 SEK" },
-      { "code": "DPR01", "name": "Deposit-One month Rent", "price": "30 000 SEK" },
-      { "code": "ITS021", "name": "IT-Solution Per Hour", "price": "22 500 SEK" },
-      { "code": "HIS01", "name": "AU Pair Health Insurance", "price": "6 200 SEK" },
-      { "code": "FLUA1", "name": "Folkuniversitetet Swedish A1 Fee", "price": "4 895 SEK" },
-      { "code": "MGRAUF01", "name": "AU Pair Application Fee Migrationsverket", "price": "1 500 SEK" },
-      { "code": "DKEUF01", "name": "DK-EU Combine application Fee (Family)", "price": "3 280 SEK" },
-      { "code": "EULTC321", "name": "EU Long-Term (Correspondence)", "price": "15 000 SEK" },
-      { "code": "EUSKV012", "name": "Child Registration & EU Citizenship", "price": "15 000 SEK" },
-      { "code": "ELPRK01", "name": "EL & Parking (June 2024-Dec 2024)", "price": "3 308 SEK" },
-      { "code": "DS160", "name": "US DS160 Application Fee", "price": "2 000 SEK" },
-      { "code": "DKDST01", "name": "Destination Services (SSN-Bank Account-Other Registration)", "price": "16 000 SEK" },
-      { "code": "MVF01", "name": "Application Fee Migrationsverket", "price": "2 250 SEK" },
-      { "code": "SKVT2135", "name": "Assistance in other Services", "price": "20 000 SEK" },
-      { "code": "HR0231", "name": "Home Rent Måbärsgatan 2 Malmö", "price": "5 000 SEK" },
-      { "code": "HR0232", "name": "Rent for Gustaf Pålssons väg 32 Oxie", "price": "5 000 SEK" },
-      { "code": "CUS01", "name": "Company Registration+Bank Account & other Services", "price": "12 500 SEK" },
-      { "code": "RS011", "name": "Rent-Sallerupsvägen 28D Malmö", "price": "10 750 SEK" },
-      { "code": "SCHN201", "name": "Schengen Visa Fee", "price": "895 SEK" },
-      { "code": "SISBR0122", "name": "Assistance in SIS Ban Removal Application", "price": "10 000 SEK" }
-    ]
-  }
+import { toast } from 'src/components/snackbar';
+import { Form, Field, schemaHelper } from 'src/components/hook-form';
 
-];
+import { PostDetailsPreview } from './post-details-preview';
 
-export function PostNewEditForm() {
+// ----------------------------------------------------------------------
 
-  const [paginationState, setPaginationState] = useState(
-    serviceData.reduce((acc, category, index) => {
-      acc[index] = { page: 0, rowsPerPage: 5 };
-      return acc;
-    }, {})
+
+
+
+
+
+
+
+
+export const NewPostSchema = zod.object({
+  title: zod.string().min(1, { message: 'Title is required!' }),
+  description: zod.string().min(1, { message: 'Description is required!' }),
+  content: schemaHelper.editor().min(100, { message: 'Content must be at least 100 characters' }),
+  coverUrl: schemaHelper.file({ message: { required_error: 'Cover is required!' } }),
+  tags: zod.string().array().min(2, { message: 'Must have at least 2 items!' }),
+  metaKeywords: zod.string().array().nonempty({ message: 'Meta keywords is required!' }),
+  // Not required
+  metaTitle: zod.string(),
+  metaDescription: zod.string(),
+});
+
+// ----------------------------------------------------------------------
+
+export function PostNewEditForm({ currentPost }) {
+  const router = useRouter();
+
+  const preview = useBoolean();
+
+  const defaultValues = useMemo(
+    () => ({
+      title: currentPost?.title || '',
+      description: currentPost?.description || '',
+      content: currentPost?.content || '',
+      coverUrl: currentPost?.coverUrl || null,
+      tags: currentPost?.tags || [],
+      metaKeywords: currentPost?.metaKeywords || [],
+      metaTitle: currentPost?.metaTitle || '',
+      metaDescription: currentPost?.metaDescription || '',
+    }),
+    [currentPost]
   );
 
+  const methods = useForm({
+    mode: 'all',
+    resolver: zodResolver(NewPostSchema),
+    defaultValues,
+  });
+  const {
+    reset,
+    watch,
+    setValue,
+    handleSubmit,
+    formState: { isSubmitting, isValid },
+  } = methods;
 
-  const handleChangePage = (index, newPage) => {
-    setPaginationState((prevState) => ({
-      ...prevState,
-      [index]: { ...prevState[index], page: newPage },
-    }));
-  };
+  const values = watch();
 
+  useEffect(() => {
+    if (currentPost) {
+      reset(defaultValues);
+    }
+  }, [currentPost, defaultValues, reset]);
 
-  const handleChangeRowsPerPage = (index, event) => {
-    const newRowsPerPage = parseInt(event.target.value, 10);
-    setPaginationState((prevState) => ({
-      ...prevState,
-      [index]: { page: 0, rowsPerPage: newRowsPerPage },
-    }));
-  };
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      reset();
+      preview.onFalse();
+      toast.success(currentPost ? 'Update success!' : 'Create success!');
+      router.push(paths.dashboard.post.root);
+      console.info('DATA', data);
+    } catch (error) {
+      console.error(error);
+    }
+  });
 
-
-  const customLabelDisplayedRows = ({ from, to, count }) => `${from}–${to} of ${count}`;
-
-  return (
-    <Box sx={{ p: 3 }}>
-      {/* <Typography variant="h4" sx={{ mb: 3 , textTransform: 'uppercase', letterSpacing: '1px',}}>
-        Service Pricing Table
-      </Typography> */}
-
-      {serviceData.map((category, index) => {
-        const { page, rowsPerPage } = paginationState[index];
-
-        return (
-          <Card
-            key={index}
-            sx={{
-              mb: 4,
-              p: 3,
-              boxShadow: 3,
-              borderLeft: '6px solid', // Use primary color for the border
-              borderColor: 'primary.main',
-              borderRadius: '8px',
-              transition: 'transform 0.2s, box-shadow 0.2s',
-              '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: 6,
-              },
-            }}
-          >
-            <Typography
-              variant="h5"
-              sx={{
-                mb: 2,
-                fontWeight: 'bold',
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-              }}
-            >
-              {category.category}
-            </Typography>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 'bold' , color : "primary.main" }}>Code</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' , color : "primary.main" }}>Service Name</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' , color : "primary.main" }}>Price</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {category.services
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((service, idx) => (
-                      <TableRow key={idx}>
-                        <TableCell>{service.code}</TableCell>
-                        <TableCell>{service.name}</TableCell>
-                        <TableCell>{service.price}</TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+  const handleRemoveFile = useCallback(() => {
+    setValue('coverUrl', null);
+  }, [setValue]);
 
 
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
-              component="div"
-              count={category.services.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={(event, newPage) => handleChangePage(index, newPage)}
-              onRowsPerPageChange={(event) => handleChangeRowsPerPage(index, event)}
-              labelRowsPerPage="Rows per page:"
-              labelDisplayedRows={customLabelDisplayedRows}
-              sx={{ mt: 2 }}
-            />
-          </Card>
-        );
-      })}
+  const multiqs1 = [
+    { value: '', label: 'Choose Option' },
+    { value: 'yes', label: 'Yes' },
+    { value: 'no', label: 'No' },
+    { value: 'dontknow', label: 'Dont Know' },
+
+  ];
+
+
+  const multiqs2 = [
+    { value: '', label: 'Choose Option' },
+    { value: '1', label: '1' },
+    { value: '2', label: '2' },
+    { value: '3', label: '3' },
+    { value: '4', label: '4' },
+    { value: '5', label: '5' },
+    { value: '6', label: '6' },
+    { value: '7', label: '7' },
+    { value: '8', label: '8' },
+    { value: '9', label: '8' },
+    { value: '10', label: '8' },
+
+  ];
+
+  const multiqs3 = [
+    { value: '', label: 'Choose Option' },
+    { value: 'yes', label: 'Yes' },
+    { value: 'no', label: 'No' },
+  ];
+
+  const multiqs4 = [
+    { value: '', label: 'Choose Option' },
+    { value: 'yes', label: 'Yes' },
+    { value: 'no', label: 'No' },
+  ];
+
+  const multiqs5 = [
+    { value: '', label: 'Choose Option' },
+    { value: 'yes', label: 'Yes' },
+    { value: 'no', label: 'No' },
+  ];
+
+
+  const multiqs6 = [
+    { value: '', label: 'Choose Option' },
+    { value: 'yes', label: 'Yes' },
+    { value: 'no', label: 'No' },
+  ];
+
+  const renderDetails = (
+    <Card>
+      <CardHeader title="Details" subheader="Title, short description, image..." sx={{ mb: 3 }} />
+
+      <Divider />
+
+      <Stack spacing={3} sx={{ p: 3 }}>
+        <Field.Text name="title" label="Post title" />
+
+        <Field.Text name="description" label="Description" multiline rows={3} />
+
+        <Stack spacing={1.5}>
+          <Typography variant="subtitle2">Content</Typography>
+          <Field.Editor name="content" sx={{ maxHeight: 480 }} />
+        </Stack>
+
+        <Stack spacing={1.5}>
+          <Typography variant="subtitle2">Cover</Typography>
+          <Field.Upload name="coverUrl" maxSize={3145728} onDelete={handleRemoveFile} />
+        </Stack>
+      </Stack>
+    </Card>
+  );
+
+  const renderProperties = (
+    <Card>
+      <CardHeader
+        title="Properties"
+        subheader="Additional functions and attributes..."
+        sx={{ mb: 3 }}
+      />
+
+      <Divider />
+
+      <Stack spacing={3} sx={{ p: 3 }}>
+        <Field.Autocomplete
+          name="tags"
+          label="Tags"
+          placeholder="+ Tags"
+          multiple
+          freeSolo
+          disableCloseOnSelect
+          options={_tags.map((option) => option)}
+          getOptionLabel={(option) => option}
+          renderOption={(props, option) => (
+            <li {...props} key={option}>
+              {option}
+            </li>
+          )}
+          renderTags={(selected, getTagProps) =>
+            selected.map((option, index) => (
+              <Chip
+                {...getTagProps({ index })}
+                key={option}
+                label={option}
+                size="small"
+                color="info"
+                variant="soft"
+              />
+            ))
+          }
+        />
+
+        <Field.Text name="metaTitle" label="Meta title" />
+
+        <Field.Text name="metaDescription" label="Meta description" fullWidth multiline rows={3} />
+
+        <Field.Autocomplete
+          name="metaKeywords"
+          label="Meta keywords"
+          placeholder="+ Keywords"
+          multiple
+          freeSolo
+          disableCloseOnSelect
+          options={_tags.map((option) => option)}
+          getOptionLabel={(option) => option}
+          renderOption={(props, option) => (
+            <li {...props} key={option}>
+              {option}
+            </li>
+          )}
+          renderTags={(selected, getTagProps) =>
+            selected.map((option, index) => (
+              <Chip
+                {...getTagProps({ index })}
+                key={option}
+                label={option}
+                size="small"
+                color="info"
+                variant="soft"
+              />
+            ))
+          }
+        />
+
+        <FormControlLabel
+          control={<Switch defaultChecked inputProps={{ id: 'comments-switch' }} />}
+          label="Enable comments"
+        />
+      </Stack>
+    </Card>
+  );
+
+  const renderActions = (
+    <Box display="flex" alignItems="center" flexWrap="wrap" justifyContent="flex-end">
+      <FormControlLabel
+        control={<Switch defaultChecked inputProps={{ id: 'publish-switch' }} />}
+        label="Publish"
+        sx={{ pl: 3, flexGrow: 1 }}
+      />
+
+      <div>
+        <Button color="inherit" variant="outlined" size="large" onClick={preview.onTrue}>
+          Preview
+        </Button>
+
+        <LoadingButton
+          type="submit"
+          variant="contained"
+          size="large"
+          loading={isSubmitting}
+          sx={{ ml: 2 }}
+        >
+          {!currentPost ? 'Create post' : 'Save changes'}
+        </LoadingButton>
+      </div>
     </Box>
   );
+
+  return (
+    <Form methods={methods} onSubmit={onSubmit}>
+      <Grid spacing={3}>
+        <Grid xs={12} md={8}>
+          <Card sx={{ p: 3 }}>
+            {/* <Typography
+              variant="caption"
+              sx={{
+                mt: 3,
+                mb: 5,
+                mx: 'auto',
+                display: 'block',
+                textAlign: 'left',
+                color: 'gray',
+              }}
+            >
+              Fill this form and submit only if you are an Entrepreneur or already have any Start-up. We will help you to expand your idea or business by providing you right investors. This service is paid to avoid unnecessary queries.
+            </Typography> */}
+            <Box
+              rowGap={3}
+              columnGap={2}
+              display="grid"
+              gridTemplateColumns={{
+                xs: 'repeat(1, 1fr)',
+                sm: 'repeat(2, 1fr)',
+              }}
+              sx={{ 
+                '& .MuiFormControl-root': { 
+                  width: '100%'
+                },
+                '& .MuiInputBase-root': {
+                  minHeight: '56px'
+                },
+                '& .MuiInputLabel-root': {
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '100%'
+                },
+                '& .full-width': {
+                  gridColumn: '1 / -1'
+                }
+              }}
+            >
+              <Field.Text name="question1" label="What do you want out of this experience?" />
+              <Field.Text name="question2" label="What is your dream job?" />
+              <Field.Text name="question3" label="Where do you go on a night out?" />
+
+              <Field.Text name="question4" label="How can you make the company better?" />
+
+              <Field.Text name="question5" label="Which three adjectives, Describe your strengths?" />
+
+              <Field.Text name="question6" label="What do you want on your resume in next Two Years?" />
+
+              <Field.Text name="question7" label="What Would You Do with unlimited resources?" />
+
+              <Field.Text name="question8" label="Why an investor should invest on you?" />
+
+              <Field.Text name="question9" label="What shares you want to offer an investor in a company?" />
+
+              <Field.Text 
+                name="question10" 
+                label="Are you looking for a sleeping investor or an active investor partner?" 
+                className="full-width"
+                sx={{ 
+                  width: '100%',
+                  '& .MuiInputLabel-root': {
+                    whiteSpace: 'normal',
+                    maxWidth: 'none'
+                  }
+                }} 
+              />
+
+              <Field.Text name="question11" label="How many languages you can speak?" />
+
+              <Field.Text name="question12" label="Which country and city would you prefer for this business?" />
+
+              <Field.Text 
+                name="question13" 
+                label="Do you have ability to manage the business or did you run any business before?" 
+                className="full-width"
+                sx={{ 
+                  width: '100%',
+                  '& .MuiInputLabel-root': {
+                    whiteSpace: 'normal',
+                    maxWidth: 'none'
+                  }
+                }} 
+              />
+
+              <Field.Text name="question14" label="Did import export involve in this business?" />
+
+              <Field.Text name="question15" label="Do you own a house, apartment or living in rental apartment?" />
+              <Field.Text name="question16" label="What are you doing for living?" />
+
+
+
+
+              {/* APPOINTMENT_TYPE_OPTIONS,
+  APPOINTMENT_CATEGORY_OPTIONS,
+  APPOINTMENT_COUNTRY_OPTIONS,
+  APPOINTMENT_TIME_OPTIONS, */}
+
+
+
+              <Field.Select native name="question17" label="Are you friends happy with your business idea?" InputLabelProps={{ shrink: true }}>
+                {multiqs1.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </Field.Select>
+
+
+
+              <Field.Select 
+                native 
+                name="question18" 
+                label="How you will rate your confidence and communication level (1-10)?" 
+                InputLabelProps={{ shrink: true }}
+                className="full-width"
+              >
+                {multiqs2.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </Field.Select>
+
+
+              <Field.Text name="question19" label="What amount would be enough to start this business?" />
+
+
+
+              <Field.Select native name="question20" label="Are you currently in Europe on study or on work permit?" InputLabelProps={{ shrink: true }}>
+                {multiqs3.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </Field.Select>
+
+              <Field.Select 
+                native 
+                name="question21" 
+                label="Do you own a business and looking to start new branch with an investor?" 
+                InputLabelProps={{ shrink: true }}
+                className="full-width"
+              >
+                {multiqs4.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </Field.Select>
+
+
+              <Field.Select native name="question22" label="Did your business base outside of Europe?" InputLabelProps={{ shrink: true }}>
+                {multiqs5.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </Field.Select>
+
+              <Field.Select native name="question23" label="Do you have an E-Commerce business idea?" InputLabelProps={{ shrink: true }}>
+                {multiqs6.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </Field.Select>
+
+
+              <Field.Text 
+                name="question24" 
+                label="Tell us more about yourself business plan and upload the documents on our online portal" 
+                multiline
+                rows={3}
+                className="full-width"
+                sx={{ 
+                  width: '100%',
+                  '& .MuiInputBase-root': {
+                    minHeight: '100px'
+                  },
+                  '& .MuiInputLabel-root': {
+                    whiteSpace: 'normal',
+                    maxWidth: 'none'
+                  }
+                }} 
+              />
+
+
+
+
+
+            </Box>
+
+
+
+
+
+            <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>
+              {/* <Field.Text name="about" multiline rows={4} label="About" /> */}
+
+              <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
+                Send Request
+              </LoadingButton>
+            </Stack>
+          </Card>
+        </Grid>
+      </Grid>
+    </Form>
+  );
 }
+

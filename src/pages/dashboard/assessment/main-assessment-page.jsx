@@ -26,7 +26,6 @@ export function OverviewAppView() {
     { title: 'Student Visa', color: 'warning', icon: `${CONFIG.assetsDir}/assets/icons/courses/ic-courses-certificates.svg` },
     { title: 'Visit Visa', color: 'error', icon: `${CONFIG.assetsDir}/assets/icons/courses/ic-courses-certificates.svg` },
     { title: 'Work Permit', color: 'secondary', icon: `${CONFIG.assetsDir}/assets/icons/courses/ic-courses-certificates.svg` },
-    { title: 'All Assessment', color: 'info', icon: `${CONFIG.assetsDir}/assets/icons/courses/ic-courses-certificates.svg` },
   ];
   const toCamelCase = (str) =>
     str

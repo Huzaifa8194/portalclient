@@ -23,10 +23,7 @@ const ITEMS = [...Array(3)].map((__, index) => {
 
   return {
     id: _mock.id(index),
-    total,
     title: _mock.productName(index),
-    description: _mock.sentence(index),
-    price: INVOICE_SERVICE_OPTIONS[index].price,
     service: INVOICE_SERVICE_OPTIONS[index].name,
     quantity: _mock.number.nativeS(index),
   };
@@ -48,19 +45,12 @@ export const _invoices = [...Array(20)].map((_, index) => {
 
   return {
     id: _mock.id(index),
-    taxes,
-    status,
-    discount,
-    shipping,
-    subtotal,
-    totalAmount,
     items: ITEMS,
     invoiceNumber: `INV-199${index}`,
     invoiceFrom: _addressBooks[index],
     invoiceTo: _addressBooks[index + 1],
     sent: _mock.number.nativeS(index),
     createDate: fSub({ days: index }),
-    dueDate: fAdd({ days: index + 15, hours: index }),
   };
 });
 

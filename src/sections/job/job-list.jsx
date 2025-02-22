@@ -60,19 +60,19 @@ export function JobList() {
     fetchFamilyMembers()
   }, [])
 
-  const handleView = useCallback(
-    (member) => {
-      router.push({
-        pathname: paths.dashboard.job.details(member.id),
-        query: { memberData: JSON.stringify(member) },
-      })
-    },
-    [router],
-  )
+  // const handleView = useCallback(
+  //   (member) => {
+  //     router.push({
+  //       pathname: paths.dashboard.job.details(member.id),
+  //       query: { memberData: JSON.stringify(member) },
+  //     })
+  //   },
+  //   [router],
+  // )
 
   const handleEdit = (member) => {
     console.log(member); // Log the selected member
-    navigate(paths.dashboard.job.edit(member.id),  { state: { member } });
+    navigate(paths.dashboard.profile.editCoapplicant(member.id),  { state: { member } });
   };
   
 
@@ -138,7 +138,6 @@ export function JobList() {
                 dob: member.dob,
                 passport: member.passport_no,
               }}
-              onView={() => handleView(member)}
               onEdit={() => handleEdit(member)}
               onDelete={() => handleDelete(member.id)}
             />
