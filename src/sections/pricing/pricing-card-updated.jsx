@@ -1,3 +1,5 @@
+"use client"
+
 import Box from "@mui/material/Box"
 import Card from "@mui/material/Card"
 import Avatar from "@mui/material/Avatar"
@@ -5,6 +7,10 @@ import Divider from "@mui/material/Divider"
 import Typography from "@mui/material/Typography"
 import ListItemText from "@mui/material/ListItemText"
 import Button from "@mui/material/Button"
+import Menu from "@mui/material/Menu"
+import MenuItem from "@mui/material/MenuItem"
+import IconButton from "@mui/material/IconButton"
+import { useState } from "react"
 
 import { varAlpha } from "src/theme/styles"
 import { AvatarShape } from "src/assets/illustrations"
@@ -14,128 +20,261 @@ import cap1 from "src/assets/images/cap1.PNG"
 import cap2 from "src/assets/images/cap2.PNG"
 import cap3 from "src/assets/images/cap3.PNG"
 
+// Define the grayish-black color
+const grayishBlack = "rgba(45, 45, 45, 0.9)"
+
 export function PricingCardUpdated({ card }) {
-    const { subscription, price, caption, labelAction } = card
+  const { subscription, price, caption, labelAction } = card
+  const [anchorEl, setAnchorEl] = useState(null)
+  const open = Boolean(anchorEl)
 
-    const getHref = (labelaction) => {
-        switch (labelaction) {
-            case "Choose Private":
-                return "/auth/jwt/sign-up-options"
-            case "Choose Companies":
-                return "/auth/jwt/sign-up-company"
-            case "Choose Partners":
-                return "/auth/jwt/sign-up-partner"
-            default:
-                return "#" // Fallback to prevent invalid links
-        }
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
+
+  const getHref = (labelaction) => {
+    switch (labelaction) {
+      case "Choose Private":
+        return "/auth/jwt/sign-up-options"
+      case "Choose Companies":
+        return "/auth/jwt/sign-up-company"
+      case "Choose Partners":
+        return "/auth/jwt/sign-up-partner"
+      default:
+        return "#" // Fallback to prevent invalid links
     }
+  }
 
-   
-    const avatarLetter = price ? price.charAt(0) : "P"
+  const avatarLetter = price ? price.charAt(0) : "P"
 
-    // Select the appropriate image based on the price
-    const getImage = () => {
-        switch (price) {
-            case "Private":
-                return cap1
-            case "Companies":
-                return cap2
-            case "Partners":
-                return cap3
-            default:
-                return cap1 // Default to cap1 if no match
-        }
+  // Select the appropriate image based on the price
+  const getImage = () => {
+    switch (price) {
+      case "Private":
+        return cap1
+      case "Companies":
+        return cap2
+      case "Partners":
+        return cap3
+      default:
+        return cap1 // Default to cap1 if no match
     }
+  }
 
-    return (
-        <Card
-            sx={{
-                textAlign: "center",
-                minHeight: "100%",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                "&:hover": {
-                    transform: "translateY(-4px)",
-                    transition: "transform 0.2s ease-in-out",
-                },
-            }}
+  // Get features based on the price
+  const getFeatures = () => {
+    switch (price) {
+      case "Private":
+        return [
+          "One-Stop Immigration & Relocation Services",
+          "Property Listing & Search",
+          "EU Family Permits (Parents/Partner)",
+          "Worldwide Visa Applications",
+          "Immigration & Legal Assistance",
+          "Move & Financial Management",
+          "Temporary & Long-Term Housing Solutions",
+          "School & Childcare Assistance",
+          "Language & Cultural Training",
+          "Healthcare & Social Security Setup",
+          "Tax & Company Consultation",
+          "List your Private Property",
+          "Citizenship by Investment Programs",
+        ]
+      case "Companies":
+        return [
+          "Employees Work Permit Applications",
+          "Employee Immigration Management",
+          "Employee Housing Management",
+          "Global Talent Recruitment & Relocation",
+          "Payroll & EOR Services",
+          "HR & Compliance Support",
+          "Business Expansion & Market Entry",
+          "Tax & Legal Advisory",
+          "Corporate Housing & Employee Housing Solutions",
+          "Real Estate & Property Management Firms",
+          "Employee Integration Support",
+          "Business Visa & Investor Immigration",
+          "Recruitment & Talent Acquisition Firms",
+          "Global Mobility & HR Consultants",
+        ]
+      case "Partners":
+        return [
+          "Immigration Consultants",
+          "Relocation Companies & Agencies",
+          "Law Firms & Legal Advisors",
+          "Travel & Visa Agencies",
+          "expat and business networking services",
+        ]
+      default:
+        return []
+    }
+  }
+
+  return (
+    <Card
+      sx={{
+        textAlign: "center",
+        minHeight: "100%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        "&:hover": {
+          transform: "translateY(-4px)",
+          transition: "transform 0.2s ease-in-out",
+        },
+      }}
+    >
+      <Box sx={{ position: "relative", height: 280 }}>
+        <AvatarShape
+          sx={{
+            left: 0,
+            right: 0,
+            zIndex: 10,
+            mx: "auto",
+            bottom: -26,
+            position: "absolute",
+          }}
+        />
+
+        <Avatar
+          sx={{
+            width: 64,
+            height: 64,
+            zIndex: 11,
+            left: 0,
+            right: 0,
+            bottom: -32,
+            mx: "auto",
+            position: "absolute",
+            bgcolor: "black",
+          }}
         >
+          {avatarLetter}
+        </Avatar>
 
-            <Box sx={{ position: "relative", height: 280 }}>
-                <AvatarShape
-                    sx={{
-                        left: 0,
-                        right: 0,
-                        zIndex: 10,
-                        mx: "auto",
-                        bottom: -26,
-                        position: "absolute",
-                    }}
-                />
+        <Image
+          src={getImage() || "/placeholder.svg"}
+          alt={price}
+          ratio="16/9"
+          sx={{
+            height: "100%",
+            width: "100%",
+            objectFit: "cover",
+            borderRadius: "8px",
+          }}
+          slotProps={{
+            overlay: {
+              bgcolor: (theme) => varAlpha(theme.palette.common.blackChannel, 0.05), // Even lighter overlay
+            },
+          }}
+        />
+      </Box>
 
-                <Avatar
-                    sx={{
-                        width: 64,
-                        height: 64,
-                        zIndex: 11,
-                        left: 0,
-                        right: 0,
-                        bottom: -32,
-                        mx: "auto",
-                        position: "absolute",
-                        bgcolor: "black"
-                    }}
-                >
-                    {avatarLetter}
-                </Avatar>
+      <ListItemText
+        sx={{ mt: 8, mb: 2 }}
+        primary={
+          <Typography
+            component="a"
+            variant="subtitle1"
+            sx={{
+              cursor: "pointer",
+              textDecoration: "none",
+              color: "inherit", // Keeps default text color
+            }}
+            href={getHref(labelAction)}
+          >
+            {price || "Account Type"}
+          </Typography>
+        }
+        secondary={
+          <>
+            <Typography component="span" variant="body2">
+              {caption || "Description"}
+            </Typography>
+          </>
+        }
+        secondaryTypographyProps={{ component: "span", mt: 0.5 }}
+      />
 
-                <Image
-                    src={getImage() || "/placeholder.svg"}
-                    alt={price}
-                    ratio="16/9"
-                    sx={{
-                        height: "100%",
-                        width: "100%",
-                        objectFit: "cover",
-                        borderRadius: "8px"
-                    }} 
-                    slotProps={{
-                        overlay: {
-                            bgcolor: (theme) => varAlpha(theme.palette.common.blackChannel, 0.05), // Even lighter overlay
-                        },
-                    }}
-                />
-            </Box>
+      <Divider sx={{ borderStyle: "dashed" }} />
 
-            <ListItemText
-                sx={{ mt: 8, mb: 2 }}
-                primary={
-                    <Typography
-                        component="a"
-                        variant="subtitle1"
-                        sx={{
-                            cursor: "pointer",
-                            textDecoration: "none",
-                            color: "inherit" // Keeps default text color
-                        }}
-                        href={getHref(labelAction)}
-                    >
-                        {price || "Account Type"}
-                    </Typography>
-                }
-                secondary={caption || "Description"}
-                secondaryTypographyProps={{ component: "span", mt: 0.5 }}
-            />
+      <Box sx={{ p: 3, display: "flex", alignItems: "center", gap: 1 }}>
+        <Button sx={{ flex: 1 }} size="large" variant="contained" href={getHref(labelAction)}>
+          {labelAction}
+        </Button>
 
+        <IconButton
+          size="small"
+          sx={{
+            color: grayishBlack,
+            border: 2,
+            borderColor: grayishBlack,
+            "&:hover": {
+              bgcolor: grayishBlack,
+              color: "white",
+            },
+            width: 32,
+            height: 32,
+            fontSize: 20,
+            fontWeight: "bold",
+            borderRadius: "50%",
+          }}
+          onClick={handleClick}
+          aria-controls={open ? "features-menu" : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? "true" : undefined}
+        >
+          ?
+        </IconButton>
 
-            <Divider sx={{ borderStyle: "dashed" }} />
-
-            <Box sx={{ p: 3 }}>
-                <Button fullWidth size="large" variant="contained" href={getHref(labelAction)}>
-                    {labelAction}
-                </Button>
-            </Box>
-        </Card>
-    )
+        <Menu
+          id="features-menu"
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          MenuListProps={{
+            "aria-labelledby": "features-button",
+            sx: { maxWidth: 320, maxHeight: 400 },
+          }}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+        >
+          <MenuItem
+            sx={{
+              pointerEvents: "none",
+              backgroundColor: grayishBlack,
+              color: "white",
+              fontWeight: "bold",
+            }}
+          >
+            Services included in this sign up
+          </MenuItem>
+          {getFeatures().map((feature, index) => (
+            <MenuItem
+              key={index}
+              onClick={handleClose}
+              sx={{
+                whiteSpace: "normal",
+                textAlign: "left",
+                py: 1,
+              }}
+            >
+              <Typography variant="body2">{feature}</Typography>
+            </MenuItem>
+          ))}
+        </Menu>
+      </Box>
+    </Card>
+  )
 }
+
