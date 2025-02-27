@@ -17,11 +17,11 @@ export function PostCreateView() {
   return (
     <DashboardContent>
       <CustomBreadcrumbs
-        heading="Student Visa"
+        heading="Terms And Conditions"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'Assessment',href: paths.dashboard.assessment },
-          { name: 'Student Visa'},
+          
+          { name: 'Terms And Conditions'},
 
         ]}
         sx={{ mb: { xs: 3, md: 3 } }}

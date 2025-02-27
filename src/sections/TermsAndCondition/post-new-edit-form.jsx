@@ -1,1238 +1,213 @@
-import { z } from 'zod';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useMemo } from 'react';
-import Grid from '@mui/material/Unstable_Grid2';
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import LoadingButton from '@mui/lab/LoadingButton';
-import TextField from '@mui/material/TextField';
-import MenuItem from '@mui/material/MenuItem';
-import { Form } from 'src/components/hook-form';
-
-const educationLevels = [
-  { value: 'Higher Secondary Education', label: 'Higher Secondary Education' },
-  { value: 'Intermediate O/A Levels', label: 'Intermediate O/A Levels' },
-  { value: 'Under Graduate', label: 'Under Graduate' },
-  { value: 'Master / Mphil/ Post Graduate', label: 'Master / Mphil/ Post Graduate' },
-  { value: 'Other', label: 'Other' }
-];
-
-const proficiencyTests = [
-  { value: 'IELTS', label: 'IELTS' },
-  { value: 'TOEFL (Paper-based)', label: 'TOEFL (Paper-based)' },
-  { value: 'TOEFL (Internet-based)', label: 'TOEFL (Internet-based)' },
-  { value: 'Cambridge', label: 'Cambridge' },
-  { value: 'Pearson', label: 'Pearson' },
-  { value: 'Letter of Proficiency', label: 'Letter of Proficiency' },
-  { value: 'Other', label: 'Other' }
-];
-
-const FormSchema = z.object({
-  fullName: z.string().min(1, { message: 'Full name is required' }),
-  contactNo: z.string().min(1, { message: 'Contact number is required' }),
-  email: z.string().email({ message: 'Must be a valid email' }),
-  country: z.string().min(1, { message: 'Country is required' }),
-  educationalLevel: z.string().min(1, { message: 'Educational level is required' }),
-  totalYearsOfStudy: z.union([
-    z.string().min(1, { message: 'Years of study is required' }),
-    z.number(),
-  ]),
-    heSubject: z.string().optional(),
-  heCompletionYear: z.string().optional(),
-  hePercentage: z.string().optional(),
-  heGrade: z.string().optional(),
-  imSubject: z.string().optional(),
-  imCompletionYear: z.string().optional(),
-  imPercentage: z.string().optional(),
-  imGrade: z.string().optional(),
-  ugSubject: z.string().optional(),
-  ugFromCompletionYear: z.string().optional(),
-  ugToCompletionYear: z.string().optional(),
-  ugPercentage: z.string().optional(),
-  ugCGPA: z.string().optional(),
-  ugGrade: z.string().optional(),
-  masterSubject: z.string().optional(),
-  masterFromCompletionYear: z.string().optional(),
-  masterToCompletionYear: z.string().optional(),
-  masterPercentage: z.string().optional(),
-  masterCGPA: z.string().optional(),
-  masterGrade: z.string().optional(),
-  educationDescription: z.string().optional(),
-  proficiencyTest: z.string().min(1, { message: 'Proficiency test is required' }),
-  proficiencyScore: z.string().optional(),
-  otherLanguage: z.string().optional(),
-  otherDetails: z.string().optional(),
-});
+import React from 'react';
+import { Box, Card, Typography, Container, Divider, List, ListItem, ListItemText } from '@mui/material';
 
 export default function PostCreateView() {
-  const {
-    control,
-    handleSubmit,
-    watch,
-    formState: { errors, isSubmitting },
-  } = useForm({
-    resolver: zodResolver(FormSchema),
-    defaultValues: {
-      fullName: '',
-      contactNo: '',
-      email: '',
-      country: '',
-      educationalLevel: '',
-      totalYearsOfStudy: '',
-      heSubject: '',
-      heCompletionYear: '',
-      hePercentage: '',
-      heGrade: '',
-      imSubject: '',
-      imCompletionYear: '',
-      imPercentage: '',
-      imGrade: '',
-      ugSubject: '',
-      ugFromCompletionYear: '',
-      ugToCompletionYear: '',
-      ugPercentage: '',
-      ugCGPA: '',
-      ugGrade: '',
-      masterSubject: '',
-      masterFromCompletionYear: '',
-      masterToCompletionYear: '',
-      masterPercentage: '',
-      masterCGPA: '',
-      masterGrade: '',
-      educationDescription: '',
-      proficiencyTest: '',
-      proficiencyScore: '',
-      otherLanguage: '',
-      otherDetails: '',
-    },
-  });
-
-  const educationalLevel = watch('educationalLevel');
-  const proficiencyTest = watch('proficiencyTest');
-
-  const onSubmit = async (data) => {
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      console.log('Form Data:', data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const renderEducationFields = () => {
-    switch (educationalLevel) {
-      case 'Higher Secondary Education':
-        return (
-          <>
-            <Typography variant="h6" sx={{ gridColumn: '1 / -1', mt: 3 }}>
-              Higher Secondary Education (Matriculation)
-            </Typography>
-            <Controller
-              name="heSubject"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Subject"
-                  fullWidth
-                  required
-                  error={!!errors.heSubject}
-                  helperText={errors.heSubject?.message}
-                >
-                  <MenuItem value="">Select Subject</MenuItem>
-                  <MenuItem value="Mathematics">Mathematics</MenuItem>
-                  <MenuItem value="Science">Science</MenuItem>
-                  <MenuItem value="Arts">Arts</MenuItem>
-                </TextField>
-              )}
-            />
-            <Controller
-              name="heCompletionYear"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Completion Year"
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  required
-                  error={!!errors.heCompletionYear}
-                  helperText={errors.heCompletionYear?.message}
-                  inputProps={{
-                    max: new Date().toISOString().split('T')[0],
-                  }}
-                />
-              )}
-            />
-            <Controller
-              name="hePercentage"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Percentage"
-                  fullWidth
-                  required
-                  error={!!errors.hePercentage}
-                  helperText={errors.hePercentage?.message}
-                >
-                  <MenuItem value="">Select Percentage</MenuItem>
-                  {[...Array(10)].map((_, i) => (
-                    <MenuItem key={i} value={`${(i + 1) * 10}`}>{`${(i + 1) * 10}%`}</MenuItem>
-                  ))}
-                </TextField>
-              )}
-            />
-            <Controller
-              name="heGrade"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Grade"
-                  fullWidth
-                  required
-                  error={!!errors.heGrade}
-                  helperText={errors.heGrade?.message}
-                >
-                  <MenuItem value="">Select Grade</MenuItem>
-                  <MenuItem value="A">A</MenuItem>
-                  <MenuItem value="B">B</MenuItem>
-                  <MenuItem value="C">C</MenuItem>
-                  <MenuItem value="D">D</MenuItem>
-                </TextField>
-              )}
-            />
-          </>
-        );
-
-      case 'Intermediate O/A Levels':
-        return (
-          <>
-            <Typography variant="h6" sx={{ gridColumn: '1 / -1', mt: 3 }}>
-              Higher Secondary Education (Matriculation)
-            </Typography>
-            <Controller
-              name="heSubject"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Subject"
-                  fullWidth
-                  required
-                  error={!!errors.heSubject}
-                  helperText={errors.heSubject?.message}
-                >
-                  <MenuItem value="">Select Subject</MenuItem>
-                  <MenuItem value="Mathematics">Mathematics</MenuItem>
-                  <MenuItem value="Science">Science</MenuItem>
-                  <MenuItem value="Arts">Arts</MenuItem>
-                </TextField>
-              )}
-            />
-            <Controller
-              name="heCompletionYear"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Completion Year"
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  required
-                  error={!!errors.heCompletionYear}
-                  helperText={errors.heCompletionYear?.message}
-                  inputProps={{
-                    max: new Date().toISOString().split('T')[0],
-                  }}
-                />
-              )}
-            />
-            <Controller
-              name="hePercentage"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Percentage"
-                  fullWidth
-                  required
-                  error={!!errors.hePercentage}
-                  helperText={errors.hePercentage?.message}
-                >
-                  <MenuItem value="">Select Percentage</MenuItem>
-                  {[...Array(10)].map((_, i) => (
-                    <MenuItem key={i} value={`${(i + 1) * 10}`}>{`${(i + 1) * 10}%`}</MenuItem>
-                  ))}
-                </TextField>
-              )}
-            />
-            <Controller
-              name="heGrade"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Grade"
-                  fullWidth
-                  required
-                  error={!!errors.heGrade}
-                  helperText={errors.heGrade?.message}
-                >
-                  <MenuItem value="">Select Grade</MenuItem>
-                  <MenuItem value="A*">A*</MenuItem>
-                  <MenuItem value="A">A</MenuItem>
-                  <MenuItem value="B">B</MenuItem>
-                  <MenuItem value="C">C</MenuItem>
-                </TextField>
-              )}
-            />
-            <Typography variant="h6" sx={{ gridColumn: '1 / -1', mt: 3 }}>
-              Intermediate / O-A Levels (F.A, I.Com, ICS, FSC, DAE, +2 Examination)
-            </Typography>
-            <Controller
-              name="imSubject"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Subject"
-                  fullWidth
-                  required
-                  error={!!errors.imSubject}
-                  helperText={errors.imSubject?.message}
-                >
-                  <MenuItem value="">Select Subject</MenuItem>
-                  <MenuItem value="Pre-Medical">Pre-Medical</MenuItem>
-                  <MenuItem value="Pre-Engineering">Pre-Engineering</MenuItem>
-                  <MenuItem value="Commerce">Commerce</MenuItem>
-                </TextField>
-              )}
-            />
-            <Controller
-              name="imCompletionYear"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Completion Year"
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  required
-                  error={!!errors.imCompletionYear}
-                  helperText={errors.imCompletionYear?.message}
-                  inputProps={{
-                    max: new Date().toISOString().split('T')[0],
-                  }}
-                />
-              )}
-            />
-            <Controller
-              name="imPercentage"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Percentage"
-                  fullWidth
-                  required
-                  error={!!errors.imPercentage}
-                  helperText={errors.imPercentage?.message}
-                >
-                  <MenuItem value="">Select Percentage</MenuItem>
-                  {[...Array(10)].map((_, i) => (
-                    <MenuItem key={i} value={`${(i + 1) * 10}`}>{`${(i + 1) * 10}%`}</MenuItem>
-                  ))}
-                </TextField>
-              )}
-            />
-            <Controller
-              name="imGrade"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Grade"
-                  fullWidth
-                  required
-                  error={!!errors.imGrade}
-                  helperText={errors.imGrade?.message}
-                >
-                  <MenuItem value="">Select Grade</MenuItem>
-                  <MenuItem value="A*">A*</MenuItem>
-                  <MenuItem value="A">A</MenuItem>
-                  <MenuItem value="B">B</MenuItem>
-                  <MenuItem value="C">C</MenuItem>
-                </TextField>
-              )}
-            />
-          </>
-        );
-
-      case 'Under Graduate':
-        return (
-          <>
-            <Typography variant="h6" sx={{ gridColumn: '1 / -1', mt: 3 }}>
-              Higher Secondary Education (Matriculation)
-            </Typography>
-            <Controller
-              name="heSubject"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Subject"
-                  fullWidth
-                  required
-                  error={!!errors.heSubject}
-                  helperText={errors.heSubject?.message}
-                >
-                  <MenuItem value="">Select Subject</MenuItem>
-                  <MenuItem value="Mathematics">Mathematics</MenuItem>
-                  <MenuItem value="Science">Science</MenuItem>
-                  <MenuItem value="Arts">Arts</MenuItem>
-                </TextField>
-              )}
-            />
-            <Controller
-              name="heCompletionYear"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Completion Year"
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  required
-                  error={!!errors.heCompletionYear}
-                  helperText={errors.heCompletionYear?.message}
-                  inputProps={{
-                    max: new Date().toISOString().split('T')[0],
-                  }}
-                />
-              )}
-            />
-            <Controller
-              name="hePercentage"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Percentage"
-                  fullWidth
-                  required
-                  error={!!errors.hePercentage}
-                  helperText={errors.hePercentage?.message}
-                >
-                  <MenuItem value="">Select Percentage</MenuItem>
-                  {[...Array(10)].map((_, i) => (
-                    <MenuItem key={i} value={`${(i + 1) * 10}`}>{`${(i + 1) * 10}%`}</MenuItem>
-                  ))}
-                </TextField>
-              )}
-            />
-            <Controller
-              name="heGrade"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Grade"
-                  fullWidth
-                  required
-                  error={!!errors.heGrade}
-                  helperText={errors.heGrade?.message}
-                >
-                  <MenuItem value="">Select Grade</MenuItem>
-                  <MenuItem value="A">A</MenuItem>
-                  <MenuItem value="B">B</MenuItem>
-                  <MenuItem value="C">C</MenuItem>
-                  <MenuItem value="D">D</MenuItem>
-                </TextField>
-              )}
-            />
-            <Typography variant="h6" sx={{ gridColumn: '1 / -1', mt: 3 }}>
-              Intermediate / O-A Levels (F.A, I.Com, ICS, FSC, DAE, +2 Examination)
-            </Typography>
-            <Controller
-              name="imSubject"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Subject"
-                  fullWidth
-                  required
-                  error={!!errors.imSubject}
-                  helperText={errors.imSubject?.message}
-                >
-                  <MenuItem value="">Select Subject</MenuItem>
-                  <MenuItem value="Pre-Medical">Pre-Medical</MenuItem>
-                  <MenuItem value="Pre-Engineering">Pre-Engineering</MenuItem>
-                  <MenuItem value="Commerce">Commerce</MenuItem>
-                </TextField>
-              )}
-            />
-            <Controller
-              name="imCompletionYear"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Completion Year"
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  required
-                  error={!!errors.imCompletionYear}
-                  helperText={errors.imCompletionYear?.message}
-                  inputProps={{
-                    max: new Date().toISOString().split('T')[0],
-                  }}
-                />
-              )}
-            />
-            <Controller
-              name="imPercentage"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Percentage"
-                  fullWidth
-                  required
-                  error={!!errors.imPercentage}
-                  helperText={errors.imPercentage?.message}
-                >
-                  <MenuItem value="">Select Percentage</MenuItem>
-                  {[...Array(10)].map((_, i) => (
-                    <MenuItem key={i} value={`${(i + 1) * 10}`}>{`${(i + 1) * 10}%`}</MenuItem>
-                  ))}
-                </TextField>
-              )}
-            />
-            <Controller
-              name="imGrade"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Grade"
-                  fullWidth
-                  required
-                  error={!!errors.imGrade}
-                  helperText={errors.imGrade?.message}
-                >
-                  <MenuItem value="">Select Grade</MenuItem>
-                  <MenuItem value="A*">A*</MenuItem>
-                  <MenuItem value="A">A</MenuItem>
-                  <MenuItem value="B">B</MenuItem>
-                  <MenuItem value="C">C</MenuItem>
-                </TextField>
-              )}
-            />
-            <Typography variant="h6" sx={{ gridColumn: '1 / -1', mt: 3 }}>
-              Under Graduate (B.A, B.Com, BBA, BCS, BIT, BSc, BE, BS, DVM, LLB)
-            </Typography>
-            <Controller
-              name="ugSubject"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Subject"
-                  fullWidth
-                  required
-                  error={!!errors.ugSubject}
-                  helperText={errors.ugSubject?.message}
-                  sx={{ gridColumn: '1 / -1' }}
-                >
-                  <MenuItem value="">Select Subject</MenuItem>
-                  <MenuItem value="Computer Science">Computer Science</MenuItem>
-                  <MenuItem value="Engineering">Engineering</MenuItem>
-                  <MenuItem value="Business">Business</MenuItem>
-                </TextField>
-              )}
-            />
-            <Controller
-              name="ugFromCompletionYear"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Degree start from"
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  required
-                  error={!!errors.ugFromCompletionYear}
-                  helperText={errors.ugFromCompletionYear?.message}
-                  inputProps={{
-                    max: new Date().toISOString().split('T')[0],
-                  }}
-                />
-              )}
-            />
-            <Controller
-              name="ugToCompletionYear"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Degree end year"
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  required
-                  error={!!errors.ugToCompletionYear}
-                  helperText={errors.ugToCompletionYear?.message}
-                  inputProps={{
-                    max: new Date().toISOString().split('T')[0],
-                  }}
-                />
-              )}
-            />
-            <Controller
-              name="ugPercentage"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Percentage"
-                  fullWidth
-                  required
-                  error={!!errors.ugPercentage}
-                  helperText={errors.ugPercentage?.message}
-                >
-                  <MenuItem value="">Select Percentage</MenuItem>
-                  {[...Array(10)].map((_, i) => (
-                    <MenuItem key={i} value={`${(i + 1) * 10}`}>{`${(i + 1) * 10}%`}</MenuItem>
-                  ))}
-                </TextField>
-              )}
-            />
-            <Controller
-              name="ugCGPA"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="CGPA"
-                  fullWidth
-                  required
-                  error={!!errors.ugCGPA}
-                  helperText={errors.ugCGPA?.message}
-                >
-                  <MenuItem value="">Select CGPA</MenuItem>
-                  {[...Array(26)].map((_, i) => {
-                    const value = (1.5 + i * 0.1).toFixed(1);
-                    return (
-                      <MenuItem key={i} value={value}>
-                        {value}
-                      </MenuItem>
-                    );
-                  })}
-                </TextField>
-              )}
-            />
-            <Controller
-              name="ugGrade"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Grade"
-                  fullWidth
-                  required
-                  error={!!errors.ugGrade}
-                  helperText={errors.ugGrade?.message}
-                >
-                  <MenuItem value="">Select Grade</MenuItem>
-                  <MenuItem value="A">A</MenuItem>
-                  <MenuItem value="B">B</MenuItem>
-                  <MenuItem value="C">C</MenuItem>
-                  <MenuItem value="D">D</MenuItem>
-                  <MenuItem value="E">E</MenuItem>
-                </TextField>
-              )}
-            />
-          </>
-        );
-
-      case 'Master / Mphil/ Post Graduate':
-        return (
-          <>
-           <Controller
-              name="ugSubject"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Subject"
-                  fullWidth
-                  required
-                  error={!!errors.ugSubject}
-                  helperText={errors.ugSubject?.message}
-                  sx={{ gridColumn: '1 / -1' }}
-                >
-                  <MenuItem value="">Select Subject</MenuItem>
-                  <MenuItem value="Computer Science">Computer Science</MenuItem>
-                  <MenuItem value="Engineering">Engineering</MenuItem>
-                  <MenuItem value="Business">Business</MenuItem>
-                </TextField>
-              )}
-            />
-            <Controller
-              name="ugFromCompletionYear"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Degree start from"
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  required
-                  error={!!errors.ugFromCompletionYear}
-                  helperText={errors.ugFromCompletionYear?.message}
-                  inputProps={{
-                    max: new Date().toISOString().split('T')[0],
-                  }}
-                />
-              )}
-            />
-            <Controller
-              name="ugToCompletionYear"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Degree end year"
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  required
-                  error={!!errors.ugToCompletionYear}
-                  helperText={errors.ugToCompletionYear?.message}
-                  inputProps={{
-                    max: new Date().toISOString().split('T')[0],
-                  }}
-                />
-              )}
-            />
-            <Controller
-              name="ugPercentage"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Percentage"
-                  fullWidth
-                  required
-                  error={!!errors.ugPercentage}
-                  helperText={errors.ugPercentage?.message}
-                >
-                  <MenuItem value="">Select Percentage</MenuItem>
-                  {[...Array(10)].map((_, i) => (
-                    <MenuItem key={i} value={`${(i + 1) * 10}`}>{`${(i + 1) * 10}%`}</MenuItem>
-                  ))}
-                </TextField>
-              )}
-            />
-            <Controller
-              name="ugCGPA"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="CGPA"
-                  fullWidth
-                  required
-                  error={!!errors.ugCGPA}
-                  helperText={errors.ugCGPA?.message}
-                >
-                  <MenuItem value="">Select CGPA</MenuItem>
-                  {[...Array(26)].map((_, i) => {
-                    const value = (1.5 + i * 0.1).toFixed(1);
-                    return (
-                      <MenuItem key={i} value={value}>
-                        {value}
-                      </MenuItem>
-                    );
-                  })}
-                </TextField>
-              )}
-            />
-            <Controller
-              name="ugGrade"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Grade"
-                  fullWidth
-                  required
-                  error={!!errors.ugGrade}
-                  helperText={errors.ugGrade?.message}
-                >
-                  <MenuItem value="">Select Grade</MenuItem>
-                  <MenuItem value="A">A</MenuItem>
-                  <MenuItem value="B">B</MenuItem>
-                  <MenuItem value="C">C</MenuItem>
-                  <MenuItem value="D">D</MenuItem>
-                  <MenuItem value="E">E</MenuItem>
-                </TextField>
-              )} />
-            <Typography variant="h6" sx={{ gridColumn: '1 / -1', mt: 3 }}>
-              Masters (M.A, M.Com, MS, MBBS, MSC, MBA, MIT, MSc, ME)
-            </Typography>
-            <Controller
-              name="masterSubject"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Subject"
-                  fullWidth
-                  required
-                  error={!!errors.masterSubject}
-                  helperText={errors.masterSubject?.message}
-                  sx={{ gridColumn: '1 / -1' }}
-                >
-                  <MenuItem value="">Select Subject</MenuItem>
-                  <MenuItem value="Computer Science">Computer Science</MenuItem>
-                  <MenuItem value="Engineering">Engineering</MenuItem>
-                  <MenuItem value="Business">Business</MenuItem>
-                </TextField>
-              )}
-            />
-            <Controller
-              name="masterFromCompletionYear"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Degree start from"
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  required
-                  error={!!errors.masterFromCompletionYear}
-                  helperText={errors.masterFromCompletionYear?.message}
-                  inputProps={{
-                    max: new Date().toISOString().split('T')[0],
-                  }}
-                />
-              )}
-            />
-            <Controller
-              name="masterToCompletionYear"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Degree end year"
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  required
-                  error={!!errors.masterToCompletionYear}
-                  helperText={errors.masterToCompletionYear?.message}
-                  inputProps={{
-                    max: new Date().toISOString().split('T')[0],
-                  }}
-                />
-              )}
-            />
-            <Controller
-              name="masterPercentage"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Percentage"
-                  fullWidth
-                  required
-                  error={!!errors.masterPercentage}
-                  helperText={errors.masterPercentage?.message}
-                >
-                  <MenuItem value="">Select Percentage</MenuItem>
-                  {[...Array(10)].map((_, i) => (
-                    <MenuItem key={i} value={`${(i + 1) * 10}`}>{`${(i + 1) * 10}%`}</MenuItem>
-                  ))}
-                </TextField>
-              )}
-            />
-            <Controller
-              name="masterCGPA"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="CGPA"
-                  fullWidth
-                  required
-                  error={!!errors.masterCGPA}
-                  helperText={errors.masterCGPA?.message}
-                >
-                  <MenuItem value="">Select CGPA</MenuItem>
-                  {[...Array(26)].map((_, i) => {
-                    const value = (1.5 + i * 0.1).toFixed(1);
-                    return (
-                      <MenuItem key={i} value={value}>
-                        {value}
-                      </MenuItem>
-                    );
-                  })}
-                </TextField>
-              )}
-            />
-            <Controller
-              name="masterGrade"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Grade"
-                  fullWidth
-                  required
-                  error={!!errors.masterGrade}
-                  helperText={errors.masterGrade?.message}
-                >
-                  <MenuItem value="">Select Grade</MenuItem>
-                  <MenuItem value="A">A</MenuItem>
-                  <MenuItem value="B">B</MenuItem>
-                  <MenuItem value="C">C</MenuItem>
-                  <MenuItem value="D">D</MenuItem>
-                  <MenuItem value="E">E</MenuItem>
-                </TextField>
-              )}
-            />
-          </>
-        );
-
-      case 'Other':
-        return (
-          <>
-            <Typography variant="h6" sx={{ gridColumn: '1 / -1', mt: 3 }}>
-              Other Education
-            </Typography>
-            <Controller
-              name="educationDescription"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  multiline
-                  rows={4}
-                  label="Describe Your Education"
-                  fullWidth
-                  required
-                  sx={{ gridColumn: '1 / -1' }}
-                  error={!!errors.educationDescription}
-                  helperText={errors.educationDescription?.message}
-                />
-              )}
-            />
-          </>
-        );
-
-      default:
-        return null;
-    }
-  };
-
-  const renderProficiencyFields = () => {
-    if (proficiencyTest === 'Other') {
-      return (
-        <>
-          <Controller
-            name="otherLanguage"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="Other Language"
-                placeholder="Please specify if you have any other official English Language test"
-                multiline
-                rows={3}
-                fullWidth
-                sx={{ gridColumn: '1 / -1' }}
-                error={!!errors.otherLanguage}
-                helperText={errors.otherLanguage?.message}
-              />
-            )}
-          />
-          <Controller
-            name="otherDetails"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="Other Details"
-                placeholder="You can write anything which you believe can be helpful in your admission process"
-                multiline
-                rows={3}
-                fullWidth
-                sx={{ gridColumn: '1 / -1' }}
-                error={!!errors.otherDetails}
-                helperText={errors.otherDetails?.message}
-              />
-            )}
-          />
-        </>
-      );
-    }
-
-    const scoreRanges = {
-      'IELTS': '0-9',
-      'TOEFL (Paper-based)': '310-677',
-      'TOEFL (Internet-based)': '0-120',
-      'Cambridge': 'A1-C2',
-      'Pearson': '10-90',
-      'Letter of Proficiency': 'N/A'
-    };
-
-    return proficiencyTest !== 'Letter of Proficiency' ? (
-      <Controller
-        name="proficiencyScore"
-        control={control}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            label={`${proficiencyTest} Score (${scoreRanges[proficiencyTest]})`}
-            fullWidth
-            required
-            sx={{ gridColumn: '1 / -1' }}
-            error={!!errors.proficiencyScore}
-            helperText={errors.proficiencyScore?.message}
-          />
-        )}
-      />
-    ) : null;
-  };
-
   return (
-    <Form onSubmit={handleSubmit(onSubmit)}>
-      <Grid container spacing={3}>
-        <Grid xs={12}>
-          <Card sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              EDUCATIONAL & BUSINESS BACKGROUND
+    <Container maxWidth="lg">
+      <Card sx={{ p: 4, my: 4, boxShadow: 3 }}>
+        <Typography variant="h3" gutterBottom align="center" sx={{ mb: 4 }}>
+          Terms and Conditions
+        </Typography>
+        {/* <Divider sx={{ mb: 4 }} /> */}
+
+        {sections.map((section, index) => (
+          <Box key={index} sx={{ mb: 4 }}>
+            <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+              {section.title}
             </Typography>
+            {section.content && <Typography paragraph>{section.content}</Typography>}
+            {section.subsections && (
+              <List disablePadding>
+                {section.subsections.map((subsection, subIndex) => (
+                  <ListItem key={subIndex} sx={{ flexDirection: 'column', alignItems: 'flex-start', pl: 4, py: 1 }}>
+                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+                      {subsection.title}
+                    </Typography>
+                    <Typography>{subsection.content}</Typography>
+                  </ListItem>
+                ))}
+              </List>
+            )}
+          </Box>
+        ))}
+      </Card>
+    </Container>
+  );
+}
 
-            <Box
-              rowGap={3}
-              columnGap={2}
-              display="grid"
-              gridTemplateColumns={{
-                xs: 'repeat(1, 1fr)',
-                sm: 'repeat(2, 1fr)',
-              }}
-              sx={{
-                '& .MuiFormControl-root': {
-                  width: '100%',
-                },
-                '& .MuiInputBase-root': {
-                  minHeight: '56px',
-                },
-              }}
-            >
-              {/* Personal Details */}
-              <Typography variant="h6" sx={{ gridColumn: '1 / -1', mb: 2 }}>
-                Personal Details
-              </Typography>
+const sections = [
+  {
+    title: "1. Acceptance of Terms",
+    content: "By engaging with Sweden Relocators AB and its branch, Nordic Relocators in Denmark, you acknowledge and agree to be bound by these Terms and Conditions. It is the Client's responsibility to review these terms prior to utilizing any services. If the Terms and Conditions were overlooked during the sign-up process, they can be reviewed here before proceeding with any official services. Typically, these terms become fully applicable after the Client signup on our web portal and app."
+  },
+  {
+    title: "2. Scope of Services and Team Structure",
+    subsections: [
+      {
+        title: "2.1 Service Provision",
+        content: "Services are rendered by Sweden Relocators AB and Nordic Relocators as corporate entities. Individual advisors and consultants act solely on behalf of the company."
+      },
+      {
+        title: "2.2 Team Allocation",
+        content: "A dedicated advisor will be assigned as the main point of contact. The company reserves the right to adjust team composition based on the scope of services. This allows us to offer specialized expertise and necessary resources for each application. Team composition may change, expand, or contract during the assignment process."
+      },
+      {
+        title: "2.3 Third-Party Collaboration",
+        content: "We may engage third-party service providers for specialized tasks. Sweden Relocators AB holds no liability for services rendered by third parties."
+      },
+      {
+        title: "2.4 No Guarantee of Outcome",
+        content: "While we strive to provide high-quality services, we do not guarantee successful outcomes in any application or assignment. Our role is to provide professional assistance and guidance."
+      },
+      {
+        title: "2.5 Individual Advisor Liability",
+        content: "All company advisors and partner consultants operate under these terms. No individual advisor or employee is personally liable for services provided unless otherwise mandated by law."
+      }
+    ]
+  },
+  {
+    title: "3. Fees and Payment Terms",
+    subsections: [
+      {
+        title: "3.1 Service Fees",
+        content:
+          "Service fees are outlined in the Client's online portal and are determined by the nature of the requested services. All fees are non-refundable unless specified otherwise. Fees may include consulting, administration, and processing charges.",
+      },
+      {
+        title: "3.2 Advance Payment",
+        content:
+          "Clients, particularly those outside of Sweden, are required to make advance payments before service commencement. Additional services will incur separate charges.",
+      },
+      {
+        title: "3.3 Fee Estimation",
+        content:
+          "At the start of the assignment, we will provide an estimated fee. Depending on the assignment type, a fixed fee may apply, especially after the Power of Attorney is signed. Fees are based on factors including time, skill, experience, assignment value, company risk, urgency, and results.",
+      },
+      {
+        title: "3.4 Invoicing",
+        content:
+          "Invoices are issued upon signing the Power of Attorney. Clients must settle invoices within 30 days. After one reminder, unpaid invoices will be forwarded to our debt collection partners.",
+      },
+      {
+        title: "3.5 Late Payments",
+        content:
+          "Interest on overdue payments is charged according to the Swedish Interest Act. Debt collection actions will be initiated for persistent non-payment.",
+      },
+      {
+        title: "3.6 Additional Costs",
+        content:
+          "Travel and other related expenses may be charged in addition to service fees. Additional services requested beyond the original agreement will incur separate charges.",
+      },
+      {
+        title: "3.7 Refund Policy",
+        content:
+          "Refunds are only granted if services were not delivered due to internal errors or if the Client cancels the contract within 14 days of signing without initiating any service.",
+      },
+    ],
+  },
 
-              <Controller
-                name="fullName"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label="Full Name"
-                    required
-                    error={!!errors.fullName}
-                    helperText={errors.fullName?.message}
-                  />
-                )}
-              />
+  {
+    title: "4. Client Responsibilities",
+    subsections: [
+      {
+        title: "4.1 Accuracy of Information",
+        content:
+          "Clients must provide accurate and truthful information. Submission of false documents will result in immediate service termination and legal accountability.",
+      },
+      {
+        title: "4.2 Document Management",
+        content:
+          "Clients are responsible for submitting complete and correct documentation. Incomplete or incorrect documentation may cause delays or negative outcomes.",
+      },
+      {
+        title: "4.3 Communication Protocol",
+        content:
+          "Sweden Relocators AB will only communicate with the Client or an authorized representative. Unapproved third-party communication may result in contract termination.",
+      },
+      {
+        title: "4.4 Data Privacy",
+        content:
+          "All personal data is handled in accordance with the General Data Protection Regulation (GDPR) and applicable Swedish and Danish laws. Data will be retained until the completion of services. Upon request, data can be deleted within 72 hours.",
+      },
+      {
+        title: "4.5 Client Portal Access",
+        content:
+          "Clients must register on our website to access the online portal, where they can manage documents, communications, and invoices.",
+      },
+      {
+        title: "4.6 Identification Verification",
+        content:
+          "Clients must provide valid identification and supporting documents upon request. This may include personal identification, company records, or family documentation for relocation services.",
+      },
+    ],
+  },
 
-              <Controller
-                name="contactNo"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label="Contact No"
-                    placeholder="Contact No with Country Code"
-                    required
-                    error={!!errors.contactNo}
-                    helperText={errors.contactNo?.message}
-                  />
-                )}
-              />
+  {
+    title: "5. Advisory Services",
+    subsections: [
+      {
+        title: "5.1 Specificity of Advice",
+        content:
+          "All advice provided by Sweden Relocators AB is tailored to the Client's specific assignment and based on the information and documentation provided. Advice is not transferable to other matters and should not be used for purposes beyond the intended scope.",
+      },
+      {
+        title: "5.2 Policy and Legal Changes",
+        content:
+          "Advisory services reflect the most current information available at the time of consultation. Sweden Relocators AB is not liable for changes in laws, regulations, or policies that occur after advice has been provided.",
+      },
+      {
+        title: "5.3 Consultancy Role",
+        content:
+          "Sweden Relocators AB operates as consultants, not legal practitioners. Our advice is based on publicly available information from official government sources in Sweden and Denmark. Legal services may be referred to licensed law firms when necessary.",
+      },
+      {
+        title: "5.4 Audio and Video Recording",
+        content:
+          "Recording of advisory sessions, whether audio or video, is strictly prohibited. Unauthorized recordings will result in immediate action under applicable laws. Written approval is required for any exceptions.",
+      },
+    ],
+  },
 
-              <Controller
-                name="email"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label="Email"
-                    type="email"
-                    required
-                    sx={{ gridColumn: '1 / -1' }}
-                    error={!!errors.email}
-                    helperText={errors.email?.message}
-                  />
-                )}
-              />
-
-              {/* Educational Background */}
-              <Typography variant="h6" sx={{ gridColumn: '1 / -1', mt: 3, mb: 2 }}>
-                Educational Background
-              </Typography>
-
-              <Controller
-                name="country"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    select
-                    label="Country"
-                    fullWidth
-                    required
-                    error={!!errors.country}
-                    helperText={errors.country?.message}
-                  >
-                    <MenuItem value="">Select Country</MenuItem>
-                    <MenuItem value="Armenia">Armenia</MenuItem>
-                    <MenuItem value="Other">Other</MenuItem>
-                  </TextField>
-                )}
-              />
-
-              <Controller
-                name="educationalLevel"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    select
-                    label="Educational Level"
-                    fullWidth
-                    required
-                    error={!!errors.educationalLevel}
-                    helperText={errors.educationalLevel?.message}
-                  >
-                    {educationLevels.map((level) => (
-                      <MenuItem key={level.value} value={level.value}>
-                        {level.label}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-
-              <Controller
-                name="totalYearsOfStudy"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    select
-                    label="Total no of years of study"
-                    fullWidth
-                    required
-                    error={!!errors.totalYearsOfStudy}
-                    helperText={errors.totalYearsOfStudy?.message}
-                  >
-                    <MenuItem value="">Select number of Years</MenuItem>
-                    {[...Array(20)].map((_, i) => (
-                      <MenuItem key={i + 1} value={`${i + 1}`}>
-                        {i + 1}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-
-              {renderEducationFields()}
-
-              {/* English Proficiency Test */}
-              <Typography variant="h6" sx={{ gridColumn: '1 / -1', mt: 3, mb: 2 }}>
-                English Proficiency Test
-              </Typography>
-
-              <Controller
-                name="proficiencyTest"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    select
-                    label="English Language Proficiency Test"
-                    fullWidth
-                    required
-                    error={!!errors.proficiencyTest}
-                    helperText={errors.proficiencyTest?.message}
-                    sx={{ gridColumn: '1 / -1' }}
-                  >
-                    {proficiencyTests.map((test) => (
-                      <MenuItem key={test.value} value={test.value}>
-                        {test.label}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-
-              {renderProficiencyFields()}
-            </Box>
-
-            <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>
-              <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
-                Submit Form
-              </LoadingButton>
-            </Stack>
-          </Card>
-        </Grid>
-      </Grid>
-    </Form>
-  )}
+  {
+    title: "6. Dispute Resolution and Governing Law",
+    subsections: [
+      {
+        title: "6.1 Governing Law",
+        content:
+          "These Terms and Conditions are governed by Swedish and Danish laws, as applicable.",
+      },
+      {
+        title: "6.2 Dispute Resolution",
+        content:
+          "Disputes shall be resolved through arbitration at the Stockholm Chamber of Commerce or Copenhagen Arbitration Institute, depending on the service location.",
+      },
+    ],
+  },
+  {
+    title: "7. Amendments to Terms",
+    subsections: [
+      {
+        title: "7.1 Modifications",
+        content:
+          "Sweden Relocators AB reserves the right to amend these Terms and Conditions at any time. Updates will be posted on our official website.",
+      },
+      {
+        title: "7.2 Continued Use",
+        content:
+          "Continued use of our services implies acceptance of the latest version of these Terms and Conditions.",
+      },
+    ],
+  },
+  // ... Add the rest of the sections here, following the same structure
+  {
+    title: "8. Contact Information",
+    content: (
+      <>
+        For any queries regarding these Terms and Conditions, please contact:{" "}
+        <a href="mailto:Support@swedenrelocators.se" style={{ color: "#1976d2", textDecoration: "none", fontWeight: "bold" }}>
+          Support@swedenrelocators.se
+        </a>
+      </>
+    ),
+  },
+];
