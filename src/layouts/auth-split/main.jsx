@@ -39,7 +39,8 @@ export function Content({ sx, children, layoutQuery, ...other }) {
         width: 1,
         display: 'flex',
         flexDirection: 'column',
-        maxWidth: '80%',
+        maxWidth: '100%',
+        maxHeight: '100%',
       }}
     >
       {children}

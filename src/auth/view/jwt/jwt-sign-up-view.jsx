@@ -1,3 +1,5 @@
+"use client"
+
 import { z as zod } from "zod"
 import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
@@ -10,6 +12,8 @@ import IconButton from "@mui/material/IconButton"
 import LoadingButton from "@mui/lab/LoadingButton"
 import InputAdornment from "@mui/material/InputAdornment"
 import MenuItem from "@mui/material/MenuItem"
+import Stack from "@mui/material/Stack"
+import Paper from "@mui/material/Paper" // Import Paper component
 
 import { paths } from "src/routes/paths"
 import { useRouter } from "src/routes/hooks"
@@ -54,14 +58,13 @@ export const SignUpSchema = zod
       .string()
       .min(1, { message: "Phone number is required!" })
       .regex(/^\+\d{7,14}$/, { message: "Phone number must start with + and be followed by 7 to 14 digits" }),
-      
+
     gender: zod.string().refine((value) => value !== "Choose Option" && value !== "", {
       message: "Please select a gender",
     }),
     is_term_accepted: zod.boolean().refine((value) => value === true, {
       message: "You must accept the terms and conditions",
     }),
-
   })
   .refine((data) => data.password === data.password_confirmation, {
     message: "Passwords don't match",
@@ -124,7 +127,7 @@ export function JwtSignUpView() {
     placeofbirth: "",
     countryresiding: "",
     address: "",
-    postalCode:"",
+    postalCode: "",
     city: "",
     phonenumber: "",
     gender: "Choose Option",
@@ -243,32 +246,77 @@ export function JwtSignUpView() {
   )
 
   return (
-    <>
-      <FormHead
-        title="Get started absolutely free"
-        description={
-          <>
-            {`Already have an account? `}
-            <Link component={RouterLink} href={paths.auth.jwt.signIn} variant="subtitle2">
-              Sign in
-            </Link>
-          </>
-        }
-        sx={{ textAlign: { xs: "center", md: "left" } }}
-      />
+    <Stack direction={{ xs: "column", md: "row" }} sx={{ minHeight: "100vh" }}>
+      {/* Left side - Partner SVG (40% width) */}
+      <Box
+        sx={{
+          display: { xs: "none", md: "flex" },
+          width: "40%",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "background.paper", // Changed to white background
+          position: "relative",
+        }}
+      >
+        <Box
+          component="img"
+          src="/partner.svg"
+          alt="Partner illustration"
+          sx={{
+            width: "100%", // Changed from maxWidth to width
+            height: "100%", // Added height
+            objectFit: "contain",
+            padding: 0, // Added padding
+            margin: 0, // Added margin
+            position: "absolute",
+            top: 0,
+          }}
+        />
+      </Box>
 
-      {!!errorMsg && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {errorMsg}
-        </Alert>
-      )}
+      {/* Right side - Form (60% width) */}
+      <Box
+        sx={{
+          width: { xs: "100%", md: "60%" },
+          p: { xs: 3, md: 5 },
+          overflow: "auto",
+        }}
+      >
+        <Paper
+          elevation={3}
+          sx={{
+            p: 4,
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: 2,
+          }}
+        >
+          <FormHead
+            title="Get started absolutely free"
+            description={
+              <>
+                {`Already have an account? `}
+                <Link component={RouterLink} href={paths.auth.jwt.signIn} variant="subtitle2">
+                  Sign in
+                </Link>
+              </>
+            }
+            sx={{ textAlign: { xs: "center", md: "left" } }}
+          />
 
-      <Form methods={methods} onSubmit={onSubmit}>
-        {renderForm}
-      </Form>
+          {!!errorMsg && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {errorMsg}
+            </Alert>
+          )}
 
-      <SignUpTerms />
-    </>
+          <Form methods={methods} onSubmit={onSubmit}>
+            {renderForm}
+          </Form>
+
+          <SignUpTerms />
+        </Paper>
+      </Box>
+    </Stack>
   )
 }
-

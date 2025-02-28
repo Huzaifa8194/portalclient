@@ -9,6 +9,8 @@ import Alert from '@mui/material/Alert';
 import IconButton from '@mui/material/IconButton';
 import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import Stack from '@mui/material/Stack';
+import Paper from '@mui/material/Paper';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -25,8 +27,6 @@ import { FormHead } from '../../components/form-head';
 import { SignUpTerms } from '../../components/sign-up-terms';
 
 // ----------------------------------------------------------------------
-
-
 
 export const SignUpSchemaCompany = zod.object({
   name: zod.string().min(1, { message: 'Company name is required!' }),
@@ -98,10 +98,22 @@ export function JwtSignUpViewCompany() {
   const [errorMsg, setErrorMsg] = useState('');
 
   const defaultValues = {
-    firstName: 'Hello',
-    lastName: 'Friend',
-    email: 'hello@gmail.com',
-    password: '@demo1',
+    name: '',
+    email: '',
+    password: '',
+    passwordConfirmation: '',
+    company_reg_no: '',
+    company_reg_date: '',
+    company_business_code: '',
+    company_web: '',
+    address: '',
+    currently_residing: '',
+    company_no_of_employees: '',
+    company_certified_employer: '',
+    company_job_arbetsformedlingen: '',
+    company_collective_agreement: '',
+    company_applied_work_permit: '',
+    company_hr_contact: '',
   };
 
   const methods = useForm({
@@ -116,23 +128,8 @@ export function JwtSignUpViewCompany() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await signUp({
-        email: data.email,
-        password: data.password,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        dateOfBirth: data.dateOfBirth,
-        nationality: data.nationality,
-        placeOfBirth: data.placeofbirth,
-        countryResiding: data.countryresiding,
-        address: data.address,
-        city: data.city,
-        zipCode: data.zipCode,
-        contactNumber: data.phonenumber,
-      });
-
+      await signUp(data);
       await checkUserSession?.();
-
       router.refresh();
     } catch (error) {
       console.error(error);
@@ -141,7 +138,7 @@ export function JwtSignUpViewCompany() {
   });
 
   const YES_NO_OPTIONS = [
-    { value: " ", label: "Choose Option" },
+    { value: ' ', label: 'Choose Option' },
     { value: 'Yes', label: 'Yes' },
     { value: 'No', label: 'No' },
   ];
@@ -173,11 +170,12 @@ export function JwtSignUpViewCompany() {
       </Box>
 
       {/* Company Registration */}
-
       <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: 'column', sm: 'row' }}>
         <Field.Text name="company_reg_no" label="Company Registration Number" InputLabelProps={{ shrink: true }} />
         <Field.DatePicker name="company_reg_date" label="Company Registration Date" InputLabelProps={{ shrink: true }} />
       </Box>
+
+      {/* Business Code and Website */}
       <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: 'column', sm: 'row' }}>
         <Field.Text name="company_business_code" label="Business Code" InputLabelProps={{ shrink: true }} />
         <Field.Text name="company_web" label="Company Website" InputLabelProps={{ shrink: true }} />
@@ -186,13 +184,11 @@ export function JwtSignUpViewCompany() {
       {/* Address and Location */}
       <Field.CountrySelect name="currently_residing" label="Country Residing In" InputLabelProps={{ shrink: true }} />
       <Field.Text name="address" label="Address" InputLabelProps={{ shrink: true }} />
-      <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: 'column', sm: 'row' }}>
 
+      {/* Number of Employees */}
+      <Field.Text name="company_no_of_employees" label="Number of Employees" InputLabelProps={{ shrink: true }} />
 
-        {/* Company Specific Fields */}
-        <Field.Text name="company_no_of_employees" label="Number of Employees" InputLabelProps={{ shrink: true }} />
-      </Box>
-
+      {/* Certified Employer and Job Arbetsförmedlingen */}
       <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: 'column', sm: 'row' }}>
         <Field.Select native name="company_certified_employer" label="Certified Employer" InputLabelProps={{ shrink: true }}>
           {YES_NO_OPTIONS.map((option) => (
@@ -211,8 +207,8 @@ export function JwtSignUpViewCompany() {
         </Field.Select>
       </Box>
 
+      {/* Collective Agreement and Applied for Work Permit */}
       <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: 'column', sm: 'row' }}>
-
         <Field.Select native name="company_collective_agreement" label="Collective Agreement" InputLabelProps={{ shrink: true }}>
           {YES_NO_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
@@ -241,7 +237,7 @@ export function JwtSignUpViewCompany() {
         type="submit"
         variant="contained"
         loading={isSubmitting}
-        loadingIndicator="Create account..."
+        loadingIndicator="Creating account..."
       >
         Create account
       </LoadingButton>
@@ -249,31 +245,78 @@ export function JwtSignUpViewCompany() {
   );
 
   return (
-    <>
-      <FormHead
-        title="Get started absolutely free"
-        description={
-          <>
-            {`Already have an account? `}
-            <Link component={RouterLink} href={paths.auth.jwt.signIn} variant="subtitle2">
-              Get started
-            </Link>
-          </>
-        }
-        sx={{ textAlign: { xs: 'center', md: 'left' } }}
-      />
+    <Stack direction={{ xs: 'column', md: 'row' }} sx={{ minHeight: '100vh' }}>
+      {/* Left Side - Image (40%) */}
+      <Box
+        sx={{
+          width: { xs: '100%', md: '40%' },
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'background.paper',
+          p: 4,
+        }}
+      >
+        <Box
+          component="img"
+          src="/company.svg"
+          alt="Company Illustration"
+          sx={{
+            width: '100%',
+            height: 'auto',
+            maxWidth: '500px',
+          }}
+        />
+      </Box>
 
-      {!!errorMsg && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {errorMsg}
-        </Alert>
-      )}
+      {/* Right Side - Form (60%) */}
+      <Box
+        sx={{
+          width: { xs: '100%', md: '60%' },
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'background.default',
+          p: 4,
+        }}
+      >
+        <Paper
+          elevation={3}
+          sx={{
+            width: '100%',
+            maxWidth: '800px',
+            p: 4,
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 2,
+          }}
+        >
+          <FormHead
+            title="Get started absolutely free"
+            description={
+              <>
+                {`Already have an account? `}
+                <Link component={RouterLink} href={paths.auth.jwt.signIn} variant="subtitle2">
+                  Sign in
+                </Link>
+              </>
+            }
+            sx={{ mb: 4, textAlign: 'center' }}
+          />
 
-      <Form methods={methods} onSubmit={onSubmit}>
-        {renderForm}
-      </Form>
+          {!!errorMsg && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {errorMsg}
+            </Alert>
+          )}
 
-      <SignUpTerms />
-    </>
+          <Form methods={methods} onSubmit={onSubmit}>
+            {renderForm}
+          </Form>
+
+          <SignUpTerms />
+        </Paper>
+      </Box>
+    </Stack>
   );
 }
