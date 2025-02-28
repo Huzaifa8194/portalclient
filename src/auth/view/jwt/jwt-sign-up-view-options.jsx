@@ -218,7 +218,7 @@ export function JwtSignUpViewOptions() {
 
         {/* Form Header */}
         <FormHead
-          title="Get started absoldutely free"
+          title="Get started ksdjnkstely free"
           description={
             <>
               {`Already have an account? `}

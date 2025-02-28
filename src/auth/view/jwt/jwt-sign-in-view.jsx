@@ -9,6 +9,8 @@ import Alert from '@mui/material/Alert';
 import IconButton from '@mui/material/IconButton';
 import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import Paper from '@mui/material/Paper'; // Import Paper component
+import Stack from '@mui/material/Stack'; // Import Stack component
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -122,35 +124,86 @@ export function JwtSignInView() {
   );
 
   return (
-    <>
-      <FormHead
-        title="Sign in to your account"
-        description={
-          <>
-            {`Don’t have an account? `}
-            <Link component={RouterLink} href={paths.presignup} variant="subtitle2">
-              Get started
-            </Link>
-          </>
-        }
-        sx={{ textAlign: { xs: 'center', md: 'left' } }}
-      />
+    <Stack direction={{ xs: 'column', md: 'row' }} sx={{ minHeight: '100vh' }}>
+      {/* Left Side - Image (40%) */}
+      <Box
+        sx={{
+          display: { xs: 'none', md: 'flex' },
+          width: '40%',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'background.paper',
+          p: 4,
+        }}
+      >
+        <Box
+          component="img"
+          src="/signup.svg"
+          alt="Signup Illustration"
+          sx={{
+            width: '100%',
+            height: 'auto',
+            maxWidth: '500px',
+          }}
+        />
+      </Box>
 
-      <Alert severity="info" sx={{ mb: 3 }}>
-        Use <strong>{defaultValues.email}</strong>
-        {' with password '}
-        <strong>{defaultValues.password}</strong>
-      </Alert>
+      {/* Right Side - Form (60%) */}
+      <Box
+        sx={{
+          width: { xs: '100%', md: '60%' },
+          display: 'flex',
+          alignItems: 'start',
+          justifyContent: 'center',
+          bgcolor: 'background.default',
+          p: 4,
+        }}
+      >
+        <Paper
+          elevation={3}
+          sx={{
+            width: '100%',
+            maxWidth: '800px',
+            p: 4,
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 2,
+          }}
+        >
+          {/* Form Header */}
+          <FormHead
+            title="Sign in to your account"
+            description={
+              <>
+                {`Don’t have an account? `}
+                <Link component={RouterLink} href={paths.presignup} variant="subtitle2">
+                  Get started
+                </Link>
+              </>
+            }
+            sx={{ textAlign: { xs: 'center', md: 'left' } }}
+          />
 
-      {!!errorMsg && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {errorMsg}
-        </Alert>
-      )}
+          {/* Alert for Default Credentials */}
+          <Alert severity="info" sx={{ mb: 3 }}>
+            Use <strong>{defaultValues.email}</strong>
+            {' with password '}
+            <strong>{defaultValues.password}</strong>
+          </Alert>
 
-      <Form methods={methods} onSubmit={onSubmit}>
-        {renderForm}
-      </Form>
-    </>
+          {/* Error Message */}
+          {!!errorMsg && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {errorMsg}
+            </Alert>
+          )}
+
+          {/* Form */}
+          <Form methods={methods} onSubmit={onSubmit}>
+            {renderForm}
+          </Form>
+        </Paper>
+      </Box>
+    </Stack>
   );
 }
