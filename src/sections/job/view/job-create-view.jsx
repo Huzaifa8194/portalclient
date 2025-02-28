@@ -4,7 +4,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 
-import { JobNewEditForm } from '../job-new-edit-form';
+import { JobNewEditForm } from '../addCoapplicant';
 
 // ----------------------------------------------------------------------
 
@@ -16,7 +16,7 @@ export function JobCreateView() {
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
           { name: 'Co-Applicants', href: paths.dashboard.job.root },
-          { name: 'Add co-Applicant' },
+          { name: 'Add Co-Applicant' },
         ]}
         sx={{ mb: { xs: 3, md: 3 } }}
       />

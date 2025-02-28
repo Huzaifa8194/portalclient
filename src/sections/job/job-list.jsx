@@ -9,11 +9,12 @@ import { paths } from "src/routes/paths"
 import { useAuthContext } from "src/auth/hooks"
 import { endpoints } from "src/utils/axios"
 import axios from "axios"
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom"
+import { toast } from "src/components/snackbar"
 import { JobItem } from "./job-item"
 
 export function JobList() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   const router = useRouter()
   const auth = useAuthContext()
   const [familyMembers, setFamilyMembers] = useState([])
@@ -60,24 +61,33 @@ export function JobList() {
     fetchFamilyMembers()
   }, [])
 
-  // const handleView = useCallback(
-  //   (member) => {
-  //     router.push({
-  //       pathname: paths.dashboard.job.details(member.id),
-  //       query: { memberData: JSON.stringify(member) },
-  //     })
-  //   },
-  //   [router],
-  // )
-
   const handleEdit = (member) => {
-    console.log(member); // Log the selected member
-    navigate(paths.dashboard.profile.editCoapplicant(member.id),  { state: { member } });
-  };
-  
+    console.log(member) // Log the selected member
+    navigate(paths.dashboard.profile.editCoapplicant(member.id), { state: { member } })
+  }
 
-  const handleDelete = useCallback((id) => {
-    console.info("DELETE", id)
+  const handleDelete = useCallback(async (id) => {
+    try {
+      const token = localStorage.getItem("authToken")
+      if (!token) {
+        throw new Error("No authentication token found")
+      }
+
+      const response = await axios.delete(`https://api.swedenrelocators.se/api/client/familyMember/${id}`, {
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      // Update the state by filtering out the deleted member
+      setFamilyMembers((prevMembers) => prevMembers.filter((member) => member.id !== id))
+
+      toast.success("Family member deleted successfully!")
+      console.info("Deleted successfully", response.data)
+    } catch (errordelete) {
+      toast.error("Failed to delete family member!")
+    }
   }, [])
 
   if (isLoading) {
