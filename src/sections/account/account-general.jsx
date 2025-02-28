@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { z as zod } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -22,10 +22,12 @@ import LoadingButton from "@mui/lab/LoadingButton"
 import { fData } from "src/utils/format-number"
 
 import { Form, Field, schemaHelper } from "src/components/hook-form"
+import { countries } from "src/assets/data"
 import { AppWidgetSummary } from "./app-widget-summary"
 import { ManagerDetails } from "./ManagerDetails"
 
-export const UpdateUserSchema = zod.object({
+// Define the schema as a constant
+const UpdateUserSchema = zod.object({
   gender: zod.string().refine((value) => value !== "Choose Option" && value !== "", {
     message: "Please select a gender",
   }),
@@ -42,6 +44,7 @@ export const UpdateUserSchema = zod.object({
     message: "Invalid phone number",
   }),
   address: zod.string().min(1, { message: "Address is required!" }),
+  secondaryAddress: zod.string(),
   postal: zod.string().min(1, { message: "Postal Code is required!" }),
   city: zod.string().min(1, { message: "City is required!" }),
   issueDate: zod
@@ -55,10 +58,13 @@ export const UpdateUserSchema = zod.object({
     .refine((date) => !Number.isNaN(Date.parse(date)), { message: "Date of birth must be a valid date!" }),
   NID: zod.string().min(1, { message: "NID is required!" }),
   passport: zod.string().min(1, { message: "NID is required!" }),
-  nationality: zod.number().optional(),
-  placeOfBirth: zod.number().optional(),
-  currentlyResiding: zod.number().optional(),
+  nationality:  zod.string().optional(),
+  placeOfBirth:  zod.string().optional(),
+  currentlyResiding:  zod.string().optional(),
 })
+
+// Export the schema separately to fix Fast Refresh issues
+export { UpdateUserSchema }
 
 export function AccountGeneral() {
   const [userData, setUserData] = useState(null)
@@ -71,8 +77,13 @@ export function AccountGeneral() {
   const [nationalityId, setNationalityId] = useState(null)
   const [placeOfBirthId, setPlaceOfBirthId] = useState(null)
   const [currentlyResidingId, setCurrentlyResidingId] = useState(null)
-  const [countries, setCountries] = useState([])
+  const [countryList, setCountryList] = useState([])
   const [isLoadingCountries, setIsLoadingCountries] = useState(true)
+
+  // State variables to store country labels
+  const [nationalityLabel, setNationalityLabel] = useState(null)
+  const [placeOfBirthLabel, setPlaceOfBirthLabel] = useState(null)
+  const [countryResidingLabel, setCountryResidingLabel] = useState(null)
 
   useEffect(() => {
     const fetchGenderOptions = async () => {
@@ -105,29 +116,6 @@ export function AccountGeneral() {
     fetchGenderOptions()
   }, [])
 
-  useEffect(() => {
-    const fetchCountries = async () => {
-      try {
-        const response = await fetch("https://api.swedenrelocators.se/api/miscellaneous/countries")
-        const result = await response.json()
-
-        if (result.data) {
-          setCountries(result.data)
-        } else {
-          console.error("Unexpected API response structure:", result)
-          setErrorMsg("Failed to load countries: Invalid response format")
-        }
-      } catch (error) {
-        console.error("Error fetching countries:", error)
-        setErrorMsg("Failed to load countries")
-      } finally {
-        setIsLoadingCountries(false)
-      }
-    }
-
-    fetchCountries()
-  }, [])
-
   const methods = useForm({
     mode: "all",
     resolver: zodResolver(UpdateUserSchema),
@@ -137,6 +125,7 @@ export function AccountGeneral() {
       photoURL: null,
       phoneNumber: "",
       address: "",
+      secondaryAddress: "",
       passport: "",
       postalCode: "",
       dateOfBirth: null,
@@ -158,6 +147,12 @@ export function AccountGeneral() {
     getValues,
   } = methods
 
+  const findCountryIdByLabel = useCallback((countryLabel) => {
+    const country = countries.find((c) => c.label === countryLabel)
+    return country ? country.id : null
+  }, [])
+
+  // Get country labels from IDs if available, otherwise use the provided labels
   useEffect(() => {
     const fetchUserData = async () => {
       if (user?.accessToken) {
@@ -172,20 +167,46 @@ export function AccountGeneral() {
           setUserData(userDataResponse)
           console.log(userDataResponse)
 
+          // Define the function inside the effect
+          const findCountryLabelById = (countryId) => {
+            const country = countries.find((c) => c.id === Number(countryId))
+            return country ? country.label : null
+          }
+
+          // Get country labels and store them in state
+          const nationalityLbl = userDataResponse.profile.nationality_id
+            ? findCountryLabelById(userDataResponse.profile.nationality_id)
+            : userDataResponse.profile.nationality || null
+
+          const placeOfBirthLbl = userDataResponse.profile.place_of_birth_id
+            ? findCountryLabelById(userDataResponse.profile.place_of_birth_id)
+            : userDataResponse.profile.place_of_birth || null
+
+          const countryResidingLbl = userDataResponse.profile.currently_residing_id
+            ? findCountryLabelById(userDataResponse.profile.currently_residing_id)
+            : userDataResponse.profile.currently_residing_ || null
+
+          // Set the state variables
+          setNationalityLabel(nationalityLbl)
+          setPlaceOfBirthLabel(placeOfBirthLbl)
+          setCountryResidingLabel(countryResidingLbl)
+
+          console.log(nationalityLbl, placeOfBirthLbl, countryResidingLbl)
           reset({
             photoURL: userDataResponse.profile?.profile_pic || null,
             phoneNumber: userDataResponse.profile?.contact_number || "",
             address: userDataResponse.profile?.address || "",
             city: userDataResponse.profile?.city || "",
+            secondaryAddress: userDataResponse.profile?.secondary_address || "",
             postalCode: userDataResponse.profile?.postal_code.toString() || "",
             dateOfBirth: userDataResponse.profile?.dob ? dayjs(userDataResponse.profile.dob) : null,
             Issue: userDataResponse.profile?.issue_date ? dayjs(userDataResponse.profile.issue_date) : null,
             Expiry: userDataResponse.profile?.expiry_date ? dayjs(userDataResponse.profile.expiry_date) : null,
             passportNo: userDataResponse.profile.passport_no || "",
             NID: userDataResponse.profile?.nic || "",
-            nationality: userDataResponse.profile.nationality_id,
-            placeOfBirth: userDataResponse?.profile.place_of_birth_id,
-            currentlyResiding: userDataResponse?.profile.currently_residing_id,
+            nationality: nationalityLbl,
+            placeOfBirth: placeOfBirthLbl,
+            currentlyResiding: countryResidingLbl,
             gender: userDataResponse.profile?.gender_id.toString() || "",
           })
         } catch (error) {
@@ -350,61 +371,27 @@ export function AccountGeneral() {
                 </Field.Select>
                 <Field.DatePicker name="dateOfBirth" label="Date of birth" />
                 <Field.Text name="NID" label="Social Security Number" />
-                <Field.Select
+                <Field.CountrySelect
                   name="nationality"
                   label="Nationality"
-                  select
-                  disabled={isLoadingCountries}
-                  onChange={(e) => {
-                    const countryId = e.target.value
-                    setNationalityId(countryId)
-                    setValue("nationality", Number(countryId))
-                  }}
-                >
-                  <MenuItem value="">Choose Country</MenuItem>
-                  {countries.map((country) => (
-                    <MenuItem key={country.id} value={country.id.toString()}>
-                      {country.name}
-                    </MenuItem>
-                  ))}
-                </Field.Select>
-                <Field.Select
+                  placeholder="Choose a country"
+                  helperText="Select Nationality"
+                />
+
+                <Field.CountrySelect
                   name="placeOfBirth"
                   label="Place of Birth"
-                  select
-                  disabled={isLoadingCountries}
-                  onChange={(e) => {
-                    const countryId = e.target.value
-                    setPlaceOfBirthId(countryId)
-                    setValue("placeOfBirth", Number(countryId))
-                  }}
-                >
-                  <MenuItem value="">Choose Country</MenuItem>
-                  {countries.map((country) => (
-                    <MenuItem key={country.id} value={country.id.toString()}>
-                      {country.name}
-                    </MenuItem>
-                  ))}
-                </Field.Select>
-                <Field.Select
+                  placeholder="Choose a country"
+                  helperText="Select place of birth"
+                />
+                <Field.CountrySelect
                   name="currentlyResiding"
                   label="Currently Residing"
-                  select
-                  disabled={isLoadingCountries}
-                  onChange={(e) => {
-                    const countryId = e.target.value
-                    setCurrentlyResidingId(countryId)
-                    setValue("currentlyResiding", Number(countryId))
-                  }}
-                >
-                  <MenuItem value="">Choose Country</MenuItem>
-                  {countries.map((country) => (
-                    <MenuItem key={country.id} value={country.id.toString()}>
-                      {country.name}
-                    </MenuItem>
-                  ))}
-                </Field.Select>
+                  placeholder="Choose a country"
+                />
+
                 <Field.Text name="address" label="Address" />
+                <Field.Text name="secondaryAddress" label="Secondary Address" />
                 <Field.Text name="city" label="City" variant="outlined" />
                 <Field.Text name="postalCode" label="Postal Code" variant="outlined" />
                 <Field.Text name="passportNo" label="Passport Number" variant="outlined" />
@@ -421,21 +408,29 @@ export function AccountGeneral() {
                     const formData = methods.getValues()
                     console.log("Submit function called", formData)
                     try {
+                      const placeOfBirthIdSubmit = formData.placeOfBirth
+                        ? findCountryIdByLabel(formData.placeOfBirth)
+                        : null
+                      const nationalityIdSubmit = formData.nationality
+                        ? findCountryIdByLabel(formData.nationality)
+                        : null
                       const apiData = {
                         dob: formData.dateOfBirth ? dayjs(formData.dateOfBirth).format("YYYY-MM-DD") : null,
                         issue_date: formData.Issue ? dayjs(formData.Issue).format("YYYY-MM-DD") : null,
                         expiry_date: formData.Expiry ? dayjs(formData.Expiry).format("YYYY-MM-DD") : null,
-                        place_of_birth: formData.placeOfBirth || null,
-                        nationality: formData.nationality || null,
+                        place_of_birth: placeOfBirthIdSubmit,
+                        nationality: nationalityIdSubmit,
                         address: formData.address,
-                        currently_residing: formData.currentlyResiding || null,
+                        currently_residing: formData.currentlyResiding
+                          ? findCountryIdByLabel(formData.currentlyResiding)
+                          : null,
                         contact_number: formData.phoneNumber,
                         nic: formData.NID,
                         profile_pic: formData.photoURL instanceof File ? formData.photoURL : null,
                         city: formData.city,
                         passport_no: formData.passportNo,
                         postal_code: formData.postalCode,
-                        secondary_address: "",
+                        secondary_address: formData.secondaryAddress,
                         gender_id: formData.gender === "Choose Option" ? "" : formData.gender,
                       }
 
@@ -462,13 +457,8 @@ export function AccountGeneral() {
                       )
 
                       console.log("API response", response)
+                      toast.success("Update success!")
 
-                      if (response.data.status === "success") {
-                        toast.success("Profile updated successfully!")
-                      } else {
-                        // Handle case where API returns non-success status
-                        toast.error(response.data.message || "Failed to update profile")
-                      }
                     } catch (error) {
                       console.error("Error updating profile:", error)
                       // Make sure we're showing the actual error message from the API if available

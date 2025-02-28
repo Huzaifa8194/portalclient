@@ -1,6 +1,4 @@
-"use client"
-
-import { useMemo, useEffect, useState } from "react"
+import { useMemo, useEffect, useState, useCallback } from "react"
 import { useForm, FormProvider } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z as zod } from "zod"
@@ -16,8 +14,9 @@ import { useRouter, useParams } from "src/routes/hooks"
 import { FAMILY_CATEGORY_OPTIONS } from "src/_mock"
 import { toast } from "src/components/snackbar"
 import { Field } from "src/components/hook-form"
+import { countries } from "src/assets/data"
 
-// Schema remains the same
+// Update the schema to include country fields
 const FamilyMemberSchema = zod.object({
   name: zod.string().min(1, { message: "Name is required" }),
   relationship: zod.string().min(1, { message: "Relationship is required" }),
@@ -47,6 +46,12 @@ export function JobNewEditForm({ currentJob }) {
   const { id } = useParams()
   const [memberData, setMemberData] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
+
+  // Function to find country ID by label
+  const findCountryIdByLabel = useCallback((countryLabel) => {
+    const country = countries.find((c) => c.label === countryLabel)
+    return country ? country.id : null
+  }, [])
 
   // Fetch family member data
   useEffect(() => {
@@ -78,26 +83,63 @@ export function JobNewEditForm({ currentJob }) {
     }
   }, [id])
 
-  const defaultValues = useMemo(
-    () => ({
-      name: memberData?.data?.name || "",
-      relationship: memberData?.data?.relationship || "",
-      contact_number: memberData?.data?.contact_number || "",
-      city: memberData?.data?.city || "",
-      postalCode: memberData?.data?.postal_code || "",
-      passport_no: memberData?.data?.passport_no || "",
-      nic: memberData?.data?.nic || "",
-      dob: memberData?.data?.dob || "",
-      issue_date: memberData?.data?.issue_date || "",
-      expiry_date: memberData?.data?.expiry_date || "",
-      nationality: memberData?.data?.nationality || "",
-      place_of_birth: memberData?.data?.place_of_birth || "",
-      country: memberData?.data?.country || "",
-      email: memberData?.data?.email || "",
-      address: memberData?.data?.address || "",
-    }),
-    [memberData],
-  )
+  const defaultValues = useMemo(() => {
+    if (!memberData?.data)
+      return {
+        name: "",
+        relationship: "",
+        contact_number: "",
+        city: "",
+        postalCode: "",
+        passport_no: "",
+        nic: "",
+        dob: "",
+        issue_date: "",
+        expiry_date: "",
+        nationality: null,
+        place_of_birth: null,
+        country: null,
+        email: "",
+        address: "",
+      }
+
+    // Function to find country label by ID (inside useMemo to avoid dependency issues)
+    const findCountryLabelById = (countryId) => {
+      const country = countries.find((c) => c.id === Number(countryId))
+      return country ? country.label : null
+    }
+
+    // Get country labels from IDs if available, otherwise use the provided labels
+    const nationality = memberData.data.nationality_id
+      ? findCountryLabelById(memberData.data.nationality_id)
+      : memberData.data.nationality || null
+
+    const placeOfBirth = memberData.data.place_of_birth_id
+      ? findCountryLabelById(memberData.data.place_of_birth_id)
+      : memberData.data.place_of_birth || null
+
+    const country = memberData.data.country_id
+      ? findCountryLabelById(memberData.data.country_id)
+      : memberData.data.country || null
+
+    return {
+      name: memberData.data.name || "",
+      relationship: memberData.data.relationship || "",
+      contact_number: memberData.data.contact_number || "",
+      city: memberData.data.city || "",
+      postalCode: memberData.data.postal_code || "",
+      passport_no: memberData.data.passport_no || "",
+      nic: memberData.data.nic || "",
+      dob: memberData.data.dob || "",
+      issue_date: memberData.data.issue_date || "",
+      expiry_date: memberData.data.expiry_date || "",
+      nationality,
+      place_of_birth: placeOfBirth,
+      country,
+      email: memberData.data.email || "",
+      address: memberData.data.address || "",
+    }
+  }, [memberData])
 
   const methods = useForm({
     mode: "all",
@@ -124,6 +166,11 @@ export function JobNewEditForm({ currentJob }) {
         throw new Error("No authentication token found")
       }
 
+      // Get country IDs from labels
+      const countryId = data.country ? findCountryIdByLabel(data.country) : null
+      const placeOfBirthId = data.place_of_birth ? findCountryIdByLabel(data.place_of_birth) : null
+      const nationalityId = data.nationality ? findCountryIdByLabel(data.nationality) : null
+
       const apiData = new FormData()
       apiData.append("name", data.name)
       apiData.append("relationship", data.relationship)
@@ -132,9 +179,12 @@ export function JobNewEditForm({ currentJob }) {
       apiData.append("address", data.address || "")
       apiData.append("city", data.city || "")
       apiData.append("postal_code", data.postalCode || "")
-      apiData.append("country_id", data.country || "")
-      apiData.append("place_of_birth", data.place_of_birth || "")
-      apiData.append("nationality", data.nationality || "")
+
+      apiData.append("country_id", countryId || "")
+      apiData.append("place_of_birth", placeOfBirthId || "")
+      apiData.append("nationality", nationalityId || "")
+      apiData.append("secondary_address","")
+
       apiData.append("nic", data.nic || "")
       apiData.append("passport_no", data.passport_no || "")
       apiData.append("dob", data.dob || "")
@@ -205,11 +255,26 @@ export function JobNewEditForm({ currentJob }) {
                 <Field.Text name="address" label="Address" />
                 <Field.Text name="city" label="City" />
                 <Field.Text name="postalCode" label="Postal Code" />
-                <Field.CountrySelect name="country" label="Country" placeholder="Choose a country" />
+                <Field.CountrySelect
+                  name="country"
+                  label="Country"
+                  placeholder="Choose a country"
+                  helperText="Select a country"
+                />
                 <Field.Text name="nic" label="National Identification Number - CPR - Personnummer" />
                 <Field.DatePicker name="dob" label="Date of Birth" />
-                <Field.CountrySelect name="place_of_birth" label="Place of Birth" placeholder="Choose a country" />
-                <Field.CountrySelect name="nationality" label="Nationality" placeholder="Choose a country" />
+                <Field.CountrySelect
+                  name="place_of_birth"
+                  label="Place of Birth"
+                  placeholder="Choose a country"
+                  helperText="Select place of birth"
+                />
+                <Field.CountrySelect
+                  name="nationality"
+                  label="Nationality"
+                  placeholder="Choose a country"
+                  helperText="Select nationality"
+                />
                 <Field.Text name="passport_no" label="Passport Number" />
                 <Field.DatePicker name="issue_date" label="Issue Date" />
                 <Field.DatePicker name="expiry_date" label="Expiry Date" />
