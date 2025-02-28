@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState, useCallback } from "react"
+import { useMemo, useState, useCallback } from "react"
 import { useForm, FormProvider } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z as zod } from "zod"
@@ -15,6 +15,7 @@ import { FAMILY_CATEGORY_OPTIONS } from "src/_mock"
 import { toast } from "src/components/snackbar"
 import { Field } from "src/components/hook-form"
 import { countries } from "src/assets/data"
+import { secondary } from "src/theme/core"
 
 // Update the schema to include country fields
 const FamilyMemberSchema = zod.object({
@@ -23,6 +24,7 @@ const FamilyMemberSchema = zod.object({
   contact_number: zod.string().optional(),
   email: zod.string().email().optional(),
   address: zod.string().optional(),
+  secondaryAddress: zod.string().optional(),
   city: zod.string().optional(),
   postalCode: zod.string().optional(),
   country: zod.string().optional(),
@@ -44,8 +46,7 @@ const FamilyMemberSchema = zod.object({
 export function JobNewEditForm({ currentJob }) {
   const router = useRouter()
   const { id } = useParams()
-  const [memberData, setMemberData] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
 
   // Function to find country ID by label
   const findCountryIdByLabel = useCallback((countryLabel) => {
@@ -54,92 +55,33 @@ export function JobNewEditForm({ currentJob }) {
   }, [])
 
   // Fetch family member data
-  useEffect(() => {
-    const fetchMemberData = async () => {
-      try {
-        setIsLoading(true)
-        const token = localStorage.getItem("authToken")
-        if (!token) {
-          throw new Error("No authentication token found")
-        }
-        const response = await axios.get(`https://api.swedenrelocators.se/api/client/familyMember/show/${id}`, {
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        setMemberData(response.data)
-      } catch (error) {
-        console.error("Error fetching member data:", error)
-        toast.error("Failed to load member data")
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    if (id) {
-      fetchMemberData()
-    }
-  }, [id])
 
   const defaultValues = useMemo(() => {
-    if (!memberData?.data)
-      return {
-        name: "",
-        relationship: "",
-        contact_number: "",
-        city: "",
-        postalCode: "",
-        passport_no: "",
-        nic: "",
-        dob: "",
-        issue_date: "",
-        expiry_date: "",
-        nationality: null,
-        place_of_birth: null,
-        country: null,
-        email: "",
-        address: "",
-      }
-
-    // Function to find country label by ID (inside useMemo to avoid dependency issues)
+    // Function to find country label by ID (defined before the return)
     const findCountryLabelById = (countryId) => {
       const country = countries.find((c) => c.id === Number(countryId))
       return country ? country.label : null
     }
 
-    // Get country labels from IDs if available, otherwise use the provided labels
-    const nationality = memberData.data.nationality_id
-      ? findCountryLabelById(memberData.data.nationality_id)
-      : memberData.data.nationality || null
-
-    const placeOfBirth = memberData.data.place_of_birth_id
-      ? findCountryLabelById(memberData.data.place_of_birth_id)
-      : memberData.data.place_of_birth || null
-
-    const country = memberData.data.country_id
-      ? findCountryLabelById(memberData.data.country_id)
-      : memberData.data.country || null
-
     return {
-      name: memberData.data.name || "",
-      relationship: memberData.data.relationship || "",
-      contact_number: memberData.data.contact_number || "",
-      city: memberData.data.city || "",
-      postalCode: memberData.data.postal_code || "",
-      passport_no: memberData.data.passport_no || "",
-      nic: memberData.data.nic || "",
-      dob: memberData.data.dob || "",
-      issue_date: memberData.data.issue_date || "",
-      expiry_date: memberData.data.expiry_date || "",
-      nationality,
-      place_of_birth: placeOfBirth,
-      country,
-      email: memberData.data.email || "",
-      address: memberData.data.address || "",
+      name: "",
+      relationship: "",
+      contact_number: "",
+      city: "",
+      postalCode: "",
+      passport_no: "",
+      nic: "",
+      dob: "",
+      issue_date: "",
+      expiry_date: "",
+      nationality: null,
+      place_of_birth: null,
+      country: null,
+      email: "",
+      address: "",
+      secondaryAddress: ""
     }
-  }, [memberData])
+  }, [])
 
   const methods = useForm({
     mode: "all",
@@ -152,12 +94,6 @@ export function JobNewEditForm({ currentJob }) {
     handleSubmit,
     formState: { isSubmitting },
   } = methods
-
-  useEffect(() => {
-    if (memberData) {
-      reset(defaultValues)
-    }
-  }, [memberData, defaultValues, reset])
 
   const onSubmit = handleSubmit(async (data) => {
     try {
@@ -183,7 +119,7 @@ export function JobNewEditForm({ currentJob }) {
       apiData.append("country_id", countryId || "")
       apiData.append("place_of_birth", placeOfBirthId || "")
       apiData.append("nationality", nationalityId || "")
-      apiData.append("secondary_address","")
+      apiData.append("secondary_address", data.secondAddress || "")
 
       apiData.append("nic", data.nic || "")
       apiData.append("passport_no", data.passport_no || "")
@@ -191,14 +127,14 @@ export function JobNewEditForm({ currentJob }) {
       apiData.append("issue_date", data.issue_date || "")
       apiData.append("expiry_date", data.expiry_date || "")
 
-      await axios.post(`https://api.swedenrelocators.se/api/client/familyMember/edit/${id}`, apiData, {
+      await axios.post(`https://api.swedenrelocators.se/api/client/familyMember/add`, apiData, {
         headers: {
           Accept: "application/json",
           Authorization: `Bearer ${token}`,
         },
       })
 
-      toast.success("Update success!")
+      toast.success("Co-Applicant added successfully!")
       router.push(paths.dashboard.job.root)
     } catch (error) {
       console.error(error?.response?.data || error)
@@ -227,7 +163,7 @@ export function JobNewEditForm({ currentJob }) {
                   color: "gray",
                 }}
               >
-                Update your family members information here.
+                Fill in details of a co-applicant to add.
               </Typography>
               <Box
                 rowGap={3}
@@ -253,6 +189,7 @@ export function JobNewEditForm({ currentJob }) {
                 <Field.Text name="contact_number" label="Contact Number" />
                 <Field.Text name="email" label="Email address" />
                 <Field.Text name="address" label="Address" />
+                <Field.Text name="secondAddress" label="Secondary Address" />
                 <Field.Text name="city" label="City" />
                 <Field.Text name="postalCode" label="Postal Code" />
                 <Field.CountrySelect
@@ -281,7 +218,7 @@ export function JobNewEditForm({ currentJob }) {
               </Box>
               <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>
                 <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
-                  Update Co-Applicant
+                  Add Co-applicant
                 </LoadingButton>
               </Stack>
             </Card>

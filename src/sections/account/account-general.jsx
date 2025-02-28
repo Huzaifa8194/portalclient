@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { z as zod } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { isValidPhoneNumber } from "react-phone-number-input"
 import Button from "@mui/material/Button"
-import axios, { endpoints } from "src/utils/axios"
+import axios from "src/utils/axios"
 import dayjs from "dayjs"
 import { useAuthContext } from "src/auth/hooks"
 import { MenuItem, Dialog, DialogContent } from "@mui/material"
@@ -22,10 +22,12 @@ import LoadingButton from "@mui/lab/LoadingButton"
 import { fData } from "src/utils/format-number"
 
 import { Form, Field, schemaHelper } from "src/components/hook-form"
+import { countries } from "src/assets/data"
 import { AppWidgetSummary } from "./app-widget-summary"
 import { ManagerDetails } from "./ManagerDetails"
 
-export const UpdateUserSchema = zod.object({
+// Define the schema as a constant
+const UpdateUserSchema = zod.object({
   gender: zod.string().refine((value) => value !== "Choose Option" && value !== "", {
     message: "Please select a gender",
   }),
@@ -42,6 +44,7 @@ export const UpdateUserSchema = zod.object({
     message: "Invalid phone number",
   }),
   address: zod.string().min(1, { message: "Address is required!" }),
+  secondaryAddress: zod.string(),
   postal: zod.string().min(1, { message: "Postal Code is required!" }),
   city: zod.string().min(1, { message: "City is required!" }),
   issueDate: zod
@@ -55,10 +58,13 @@ export const UpdateUserSchema = zod.object({
     .refine((date) => !Number.isNaN(Date.parse(date)), { message: "Date of birth must be a valid date!" }),
   NID: zod.string().min(1, { message: "NID is required!" }),
   passport: zod.string().min(1, { message: "NID is required!" }),
-  nationality: zod.string().optional(),
-  placeOfBirth: zod.string().optional(),
-  currentlyResiding: zod.string().optional(),
+  nationality:  zod.string().optional(),
+  placeOfBirth:  zod.string().optional(),
+  currentlyResiding:  zod.string().optional(),
 })
+
+// Export the schema separately to fix Fast Refresh issues
+export { UpdateUserSchema }
 
 export function AccountGeneral() {
   const [userData, setUserData] = useState(null)
@@ -68,13 +74,23 @@ export function AccountGeneral() {
   const [genderOptions, setGenderOptions] = useState([{ value: "Choose Option", label: "Choose Option" }])
   const [isLoadingGenders, setIsLoadingGenders] = useState(true)
   const [openManagerDetails, setOpenManagerDetails] = useState(false)
+  const [nationalityId, setNationalityId] = useState(null)
+  const [placeOfBirthId, setPlaceOfBirthId] = useState(null)
+  const [currentlyResidingId, setCurrentlyResidingId] = useState(null)
+  const [countryList, setCountryList] = useState([])
+  const [isLoadingCountries, setIsLoadingCountries] = useState(true)
+
+  // State variables to store country labels
+  const [nationalityLabel, setNationalityLabel] = useState(null)
+  const [placeOfBirthLabel, setPlaceOfBirthLabel] = useState(null)
+  const [countryResidingLabel, setCountryResidingLabel] = useState(null)
 
   useEffect(() => {
     const fetchGenderOptions = async () => {
       try {
         const response = await fetch("https://api.swedenrelocators.se/api/miscellaneous/gender")
         const result = await response.json()
-        console.log(result)
+        // console.log(result)
         if (result.data) {
           const formattedOptions = [
             { value: "Choose Option", label: "Choose Option" },
@@ -84,7 +100,7 @@ export function AccountGeneral() {
             })),
           ]
           setGenderOptions(formattedOptions)
-          console.log(formattedOptions)
+          // console.log(formattedOptions)
         } else {
           console.error("Unexpected API response structure:", result)
           setErrorMsg("Failed to load gender options: Invalid response format")
@@ -109,9 +125,10 @@ export function AccountGeneral() {
       photoURL: null,
       phoneNumber: "",
       address: "",
+      secondaryAddress: "",
       passport: "",
       postalCode: "",
-      dateOfBirth: "",
+      dateOfBirth: null,
       issueDate: null,
       expiryDate: null,
       NID: "",
@@ -125,15 +142,23 @@ export function AccountGeneral() {
   const {
     reset,
     handleSubmit,
+    setValue,
     formState: { isSubmitting },
+    getValues,
   } = methods
 
+  const findCountryIdByLabel = useCallback((countryLabel) => {
+    const country = countries.find((c) => c.label === countryLabel)
+    return country ? country.id : null
+  }, [])
+
+  // Get country labels from IDs if available, otherwise use the provided labels
   useEffect(() => {
     const fetchUserData = async () => {
       if (user?.accessToken) {
         console.log(user?.accessToken)
         try {
-          const response = await axios.get(endpoints.client.profile, {
+          const response = await axios.get("https://api.swedenrelocators.se/api/client/profile", {
             headers: {
               Authorization: `Bearer ${user.accessToken}`,
             },
@@ -142,24 +167,46 @@ export function AccountGeneral() {
           setUserData(userDataResponse)
           console.log(userDataResponse)
 
+          // Define the function inside the effect
+          const findCountryLabelById = (countryId) => {
+            const country = countries.find((c) => c.id === Number(countryId))
+            return country ? country.label : null
+          }
+
+          // Get country labels and store them in state
+          const nationalityLbl = userDataResponse.profile.nationality_id
+            ? findCountryLabelById(userDataResponse.profile.nationality_id)
+            : userDataResponse.profile.nationality || null
+
+          const placeOfBirthLbl = userDataResponse.profile.place_of_birth_id
+            ? findCountryLabelById(userDataResponse.profile.place_of_birth_id)
+            : userDataResponse.profile.place_of_birth || null
+
+          const countryResidingLbl = userDataResponse.profile.currently_residing_id
+            ? findCountryLabelById(userDataResponse.profile.currently_residing_id)
+            : userDataResponse.profile.currently_residing_ || null
+
+          // Set the state variables
+          setNationalityLabel(nationalityLbl)
+          setPlaceOfBirthLabel(placeOfBirthLbl)
+          setCountryResidingLabel(countryResidingLbl)
+
+          console.log(nationalityLbl, placeOfBirthLbl, countryResidingLbl)
           reset({
             photoURL: userDataResponse.profile?.profile_pic || null,
             phoneNumber: userDataResponse.profile?.contact_number || "",
             address: userDataResponse.profile?.address || "",
             city: userDataResponse.profile?.city || "",
+            secondaryAddress: userDataResponse.profile?.secondary_address || "",
             postalCode: userDataResponse.profile?.postal_code.toString() || "",
             dateOfBirth: userDataResponse.profile?.dob ? dayjs(userDataResponse.profile.dob) : null,
             Issue: userDataResponse.profile?.issue_date ? dayjs(userDataResponse.profile.issue_date) : null,
             Expiry: userDataResponse.profile?.expiry_date ? dayjs(userDataResponse.profile.expiry_date) : null,
             passportNo: userDataResponse.profile.passport_no || "",
             NID: userDataResponse.profile?.nic || "",
-            nationality: userDataResponse.profile.nationality ? String(userDataResponse.profile.nationality) : "",
-            placeOfBirth: userDataResponse?.profile.place_of_birth
-              ? String(userDataResponse.profile.place_of_birth)
-              : "",
-            currentlyResiding: userDataResponse?.profile.currently_residing
-              ? String(userDataResponse.profile.currently_residing)
-              : "",
+            nationality: nationalityLbl,
+            placeOfBirth: placeOfBirthLbl,
+            currentlyResiding: countryResidingLbl,
             gender: userDataResponse.profile?.gender_id.toString() || "",
           })
         } catch (error) {
@@ -174,57 +221,6 @@ export function AccountGeneral() {
     }
     fetchUserData()
   }, [user, reset])
-
-  const onSubmit = handleSubmit(async (data) => {
-    console.log("Submit function called", data)
-    try {
-      const apiData = {
-        dob: data.dateOfBirth,
-        issue_date: data.Issue ? dayjs(data.Issue).format("YYYY-MM-DD") : null,
-        expiry_date: data.Expiry ? dayjs(data.Expiry).format("YYYY-MM-DD") : null,
-        place_of_birth: data.placeOfBirth,
-        nationality: data.nationality,
-        address: data.address,
-        currently_residing: data.currentlyResiding,
-        contact_number: data.phoneNumber,
-        nic: data.NID,
-        profile_pic: data.photoURL,
-        city: data.city,
-        passport_not: data.passportNo,
-        postal_code: data.postalCode,
-        gender: data.gender === "Choose Option" ? "" : data.gender.toString(),
-      }
-
-      console.log("API data prepared", apiData)
-
-      const formData = new FormData()
-      Object.keys(apiData).forEach((key) => {
-        if (apiData[key] !== null && apiData[key] !== undefined) {
-          formData.append(key, apiData[key])
-        }
-      })
-
-      console.log("FormData created", formData)
-
-      const response = await axios.post("https://api.swedenrelocators.se/api/client/profile/edit", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${user.accessToken}`,
-        },
-      })
-
-      console.log("API response", response)
-
-      if (response.data.status === "success") {
-        toast.success("Profile updated successfully!")
-      } else {
-        throw new Error(response.data.message || "Failed to update profile")
-      }
-    } catch (error) {
-      console.error("Error updating profile:", error)
-      toast.error(error.message || "Failed to update profile")
-    }
-  })
 
   if (isLoading) {
     return <div>Loading...</div>
@@ -316,7 +312,7 @@ export function AccountGeneral() {
           My Case Manager
         </Button>
       </Box>
-      <Form methods={methods} onSubmit={onSubmit} sx={{ mt: 10 }}>
+      <Form methods={methods} sx={{ mt: 10 }}>
         <Grid container spacing={3}>
           <Grid xs={12} md={4}>
             <Card
@@ -375,14 +371,27 @@ export function AccountGeneral() {
                 </Field.Select>
                 <Field.DatePicker name="dateOfBirth" label="Date of birth" />
                 <Field.Text name="NID" label="Social Security Number" />
-                <Field.CountrySelect name="nationality" label="Nationality" placeholder="Choose a country" />
-                <Field.CountrySelect name="placeOfBirth" label="Place of Birth" placeholder="Choose a country" />
+                <Field.CountrySelect
+                  name="nationality"
+                  label="Nationality"
+                  placeholder="Choose a country"
+                  helperText="Select Nationality"
+                />
+
+                <Field.CountrySelect
+                  name="placeOfBirth"
+                  label="Place of Birth"
+                  placeholder="Choose a country"
+                  helperText="Select place of birth"
+                />
                 <Field.CountrySelect
                   name="currentlyResiding"
                   label="Currently Residing"
                   placeholder="Choose a country"
                 />
+
                 <Field.Text name="address" label="Address" />
+                <Field.Text name="secondaryAddress" label="Secondary Address" />
                 <Field.Text name="city" label="City" variant="outlined" />
                 <Field.Text name="postalCode" label="Postal Code" variant="outlined" />
                 <Field.Text name="passportNo" label="Passport Number" variant="outlined" />
@@ -391,7 +400,73 @@ export function AccountGeneral() {
                 <Field.Phone name="phoneNumber" label="Contact Number" />
               </Box>
               <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>
-                <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
+                <LoadingButton
+                  type="button"
+                  variant="contained"
+                  loading={isSubmitting}
+                  onClick={async () => {
+                    const formData = methods.getValues()
+                    console.log("Submit function called", formData)
+                    try {
+                      const placeOfBirthIdSubmit = formData.placeOfBirth
+                        ? findCountryIdByLabel(formData.placeOfBirth)
+                        : null
+                      const nationalityIdSubmit = formData.nationality
+                        ? findCountryIdByLabel(formData.nationality)
+                        : null
+                      const apiData = {
+                        dob: formData.dateOfBirth ? dayjs(formData.dateOfBirth).format("YYYY-MM-DD") : null,
+                        issue_date: formData.Issue ? dayjs(formData.Issue).format("YYYY-MM-DD") : null,
+                        expiry_date: formData.Expiry ? dayjs(formData.Expiry).format("YYYY-MM-DD") : null,
+                        place_of_birth: placeOfBirthIdSubmit,
+                        nationality: nationalityIdSubmit,
+                        address: formData.address,
+                        currently_residing: formData.currentlyResiding
+                          ? findCountryIdByLabel(formData.currentlyResiding)
+                          : null,
+                        contact_number: formData.phoneNumber,
+                        nic: formData.NID,
+                        profile_pic: formData.photoURL instanceof File ? formData.photoURL : null,
+                        city: formData.city,
+                        passport_no: formData.passportNo,
+                        postal_code: formData.postalCode,
+                        secondary_address: formData.secondaryAddress,
+                        gender_id: formData.gender === "Choose Option" ? "" : formData.gender,
+                      }
+
+                      console.log("API data prepared", apiData)
+
+                      const formDataObj = new FormData()
+                      Object.keys(apiData).forEach((key) => {
+                        if (apiData[key] !== null && apiData[key] !== undefined) {
+                          formDataObj.append(key, apiData[key])
+                        }
+                      })
+
+                      console.log("FormData created", formDataObj)
+
+                      const response = await axios.post(
+                        "https://api.swedenrelocators.se/api/client/profile/edit",
+                        formDataObj,
+                        {
+                          headers: {
+                            "Content-Type": "multipart/form-data",
+                            Authorization: `Bearer ${user.accessToken}`,
+                          },
+                        },
+                      )
+
+                      console.log("API response", response)
+                      toast.success("Update success!")
+
+                    } catch (error) {
+                      console.error("Error updating profile:", error)
+                      // Make sure we're showing the actual error message from the API if available
+                      const errorMessage = error.response?.data?.message || error.message || "Failed to update profile"
+                      toast.error(errorMessage)
+                    }
+                  }}
+                >
                   Save changes
                 </LoadingButton>
               </Stack>
