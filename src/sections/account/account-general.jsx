@@ -252,7 +252,7 @@ export function AccountGeneral() {
                 </g>
               </svg>
             }
-            total={userData.profile.user_type_id || "N/A"}
+            total={userData.user.id || "N/A"}
             extratext="Your unique identifier"
             chart={{
               categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
@@ -263,7 +263,7 @@ export function AccountGeneral() {
         <Grid xs={12} md={4}>
           <AppWidgetSummary
             title="User Type"
-            extratext="Basic User."
+            extratext="Your user type"
             total={userData.profile.user_type || "N/A"}
             codeicon={
               <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24">
