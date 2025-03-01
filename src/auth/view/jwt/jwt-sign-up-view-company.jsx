@@ -280,7 +280,7 @@ export function JwtSignUpViewCompany() {
           </LoadingButton>
         )}
         {activeStep === 0 ? (
-          <LoadingButton  variant="contained" onClick={handleNext}>
+          <LoadingButton variant="contained" onClick={handleNext}>
             Next
           </LoadingButton>
         ) : (
@@ -307,10 +307,10 @@ export function JwtSignUpViewCompany() {
         sx={{
           width: { xs: "100%", md: "40%" },
           display: "flex",
-          alignItems: "flex-start",
+          alignItems: "center",
           justifyContent: "center",
           bgcolor: "background.paper",
-          p: 4,
+          p: 0, // Remove padding to ensure no extra space
         }}
       >
         <Box
@@ -318,17 +318,18 @@ export function JwtSignUpViewCompany() {
           src="/company.svg"
           alt="Company Illustration"
           sx={{
-            width: "90%",
-            height: "auto",
-            maxWidth: "500px",
+            width: "100%", // Ensures full width
+            height: "97%", // Ensures full height
+            objectFit: "cover", // Makes the image cover the container
           }}
         />
       </Box>
 
+
       {/* Right Side - Form and Stepper (60%) */}
       <Box
         sx={{
-          width: { xs: "110%", md: "60%" },
+          width: { xs: "100%", md: "60%" },
           display: "flex",
           alignItems: "flex-start",
           justifyContent: "center",
@@ -339,7 +340,7 @@ export function JwtSignUpViewCompany() {
         <Box sx={{ display: "flex", width: "100%", maxWidth: "800px" }}>
           {/* Form */}
           <Paper
-            
+
             sx={{
               flexGrow: 1,
               p: 4,
@@ -379,7 +380,7 @@ export function JwtSignUpViewCompany() {
           <Paper
             elevation={3}
             sx={{
-              width: "160px",
+              width: "170px",
               p: 2,
               border: "1px solid",
               borderColor: "divider",

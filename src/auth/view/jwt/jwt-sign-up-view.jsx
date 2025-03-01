@@ -280,7 +280,7 @@ export function JwtSignUpView() {
           </LoadingButton>
         )}
         {activeStep < steps.length - 1 ? (
-          <LoadingButton  variant="contained" onClick={handleNext}>
+          <LoadingButton variant="contained" onClick={handleNext}>
             Next
           </LoadingButton>
         ) : (
@@ -312,13 +312,12 @@ export function JwtSignUpView() {
           sx={{
             width: "100%",
             height: "100%",
-            objectFit: "contain",
+            objectFit: "cover",
             padding: 0,
             margin: 0,
-            position: "absolute",
-            top: 0,
           }}
         />
+
       </Box>
 
       {/* Right side - Form and Stepper (60% width) */}
@@ -376,7 +375,7 @@ export function JwtSignUpView() {
             border: "1px solid",
             borderColor: "divider",
             borderRadius: 2,
-            width: "120px",
+            width: "140px",
             height: "fit-content",
           }}
         >
