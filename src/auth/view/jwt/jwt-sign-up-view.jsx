@@ -13,7 +13,10 @@ import LoadingButton from "@mui/lab/LoadingButton"
 import InputAdornment from "@mui/material/InputAdornment"
 import MenuItem from "@mui/material/MenuItem"
 import Stack from "@mui/material/Stack"
-import Paper from "@mui/material/Paper" // Import Paper component
+import Paper from "@mui/material/Paper"
+import Stepper from "@mui/material/Stepper"
+import Step from "@mui/material/Step"
+import StepLabel from "@mui/material/StepLabel"
 
 import { paths } from "src/routes/paths"
 import { useRouter } from "src/routes/hooks"
@@ -84,6 +87,23 @@ export function JwtSignUpView() {
   const [errorMsg, setErrorMsg] = useState("")
   const [genderOptions, setGenderOptions] = useState([{ value: "Choose Option", label: "Choose Option" }])
   const [isLoadingGenders, setIsLoadingGenders] = useState(true)
+  const [activeStep, setActiveStep] = useState(0)
+  const steps = ["Step 1", "Step 2", "Step 3"]
+
+  const handleNext = () => {
+    if (activeStep === 1) {
+      const { nationality, placeofbirth, countryresiding } = methods.getValues()
+      if (!nationality || !placeofbirth || !countryresiding) {
+        setErrorMsg("Please fill in all required fields before proceeding.")
+        return
+      }
+    }
+    setActiveStep((prevActiveStep) => prevActiveStep + 1)
+  }
+
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1)
+  }
 
   useEffect(() => {
     const fetchGenderOptions = async () => {
@@ -123,9 +143,9 @@ export function JwtSignUpView() {
     password: "",
     password_confirmation: "",
     dateOfBirth: "",
-    nationality: "",
-    placeofbirth: "",
-    countryresiding: "",
+    nationality: null,
+    placeofbirth: null,
+    countryresiding: null,
     address: "",
     postalCode: "",
     city: "",
@@ -152,9 +172,9 @@ export function JwtSignUpView() {
         password: data.password,
         password_confirmation: data.password_confirmation,
         dob: data.dateOfBirth,
-        nationality: data.nationality,
-        place_of_birth: data.placeofbirth,
-        currently_residing: data.countryresiding,
+        nationality: data.nationality ? data.nationality : "",
+        place_of_birth: data.placeofbirth ? data.placeofbirth : "",
+        currently_residing: data.countryresiding ? data.countryresiding : "",
         address: data.address,
         contact_number: data.phonenumber,
         city: data.city,
@@ -176,72 +196,99 @@ export function JwtSignUpView() {
 
   const renderForm = (
     <Box gap={3} display="flex" flexDirection="column">
-      <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: "column", sm: "row" }}>
-        <Field.Text name="firstName" label="First name" />
-        <Field.Text name="lastName" label="Last name" />
+      {activeStep === 0 && (
+        // Step 1 fields
+        <>
+          <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: "column", sm: "row" }}>
+            <Field.Text name="firstName" label="First name" />
+            <Field.Text name="lastName" label="Last name" />
+          </Box>
+          <Field.Text name="email" label="Email" />
+          <Field.Text
+            name="password"
+            label="Password"
+            type={password.value ? "text" : "password"}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={password.onToggle} edge="end">
+                    <Iconify icon={password.value ? "solar:eye-bold" : "solar:eye-closed-bold"} />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <Field.Text
+            name="password_confirmation"
+            label="Confirm Password"
+            type={passwordConfirmation.value ? "text" : "password"}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={passwordConfirmation.onToggle} edge="end">
+                    <Iconify icon={passwordConfirmation.value ? "solar:eye-bold" : "solar:eye-closed-bold"} />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        </>
+      )}
+
+      {activeStep === 1 && (
+        // Step 2 fields
+        <>
+          <Field.DatePicker name="dateOfBirth" label="Date of birth" />
+          <Field.CountrySelect name="nationality" label="Nationality" helperText="Please select a country" />
+          <Field.CountrySelect name="placeofbirth" label="Place of Birth" helperText="Please select a country" />
+          <Field.CountrySelect
+            name="countryresiding"
+            label="Country Residing In"
+            helperText="Please select a country"
+          />
+          <Field.Select name="gender" label="Gender" select defaultValue="" disabled={isLoadingGenders}>
+            <MenuItem value="">Choose Option</MenuItem>
+            {genderOptions.map((option) => (
+              <MenuItem key={option.value} value={option.value.toString()}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Field.Select>
+        </>
+      )}
+
+      {activeStep === 2 && (
+        // Step 3 fields
+        <>
+          <Field.Text name="address" label="Address" />
+          <Field.Text name="city" label="City" />
+          <Field.Text name="postalCode" label="Postal Code" />
+          <Field.Text
+            name="phonenumber"
+            label="Phone number"
+            placeholder="+1234567890"
+            helperText="Must start with + followed by 7-14 digits"
+          />
+          <Field.Checkbox name="is_term_accepted" label="I accept the terms and conditions" />
+        </>
+      )}
+
+      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+        {activeStep > 0 && (
+          <LoadingButton color="inherit" variant="outlined" onClick={handleBack}>
+            Back
+          </LoadingButton>
+        )}
+        {activeStep < steps.length - 1 ? (
+          <LoadingButton  variant="contained" onClick={handleNext}>
+            Next
+          </LoadingButton>
+        ) : (
+          <LoadingButton color="inherit" size="large" type="submit" variant="contained" loading={isSubmitting}>
+            Create account
+          </LoadingButton>
+        )}
       </Box>
-
-      <Field.Text name="email" label="Email" />
-      <Field.Text
-        name="password"
-        label="Password"
-        type={password.value ? "text" : "password"}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton onClick={password.onToggle} edge="end">
-                <Iconify icon={password.value ? "solar:eye-bold" : "solar:eye-closed-bold"} />
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-      />
-      <Field.Text
-        name="password_confirmation"
-        label="Confirm Password"
-        type={passwordConfirmation.value ? "text" : "password"}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton onClick={passwordConfirmation.onToggle} edge="end">
-                <Iconify icon={passwordConfirmation.value ? "solar:eye-bold" : "solar:eye-closed-bold"} />
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-      />
-      <Field.Text name="postalCode" label="Postal Code" />
-
-      <Field.Text
-        name="phonenumber"
-        label="Phone number"
-        placeholder="+1234567890"
-        helperText="Must start with + followed by 7-14 digits"
-      />
-
-      <Field.DatePicker name="dateOfBirth" label="Date of birth" />
-      <Field.CountrySelect name="nationality" label="Nationality" />
-
-      <Field.CountrySelect name="placeofbirth" label="Place of Birth" />
-      <Field.CountrySelect name="countryresiding" label="Country Residing In" />
-
-      <Field.Select name="gender" label="Gender" select defaultValue="" disabled={isLoadingGenders}>
-        <MenuItem value="">Choose Option</MenuItem>
-        {genderOptions.map((option) => (
-          <MenuItem key={option.value} value={option.value.toString()}>
-            {option.label}
-          </MenuItem>
-        ))}
-      </Field.Select>
-
-      <Field.Text name="address" label="Address" />
-      <Field.Text name="city" label="City" />
-
-      <Field.Checkbox name="is_term_accepted" label="I accept the terms and conditions" />
-
-      <LoadingButton fullWidth color="inherit" size="large" type="submit" variant="contained" loading={isSubmitting}>
-        Create account
-      </LoadingButton>
     </Box>
   )
 
@@ -254,7 +301,7 @@ export function JwtSignUpView() {
           width: "40%",
           alignItems: "center",
           justifyContent: "center",
-          bgcolor: "background.paper", // Changed to white background
+          bgcolor: "background.paper",
           position: "relative",
         }}
       >
@@ -263,25 +310,27 @@ export function JwtSignUpView() {
           src="/partner.svg"
           alt="Partner illustration"
           sx={{
-            width: "100%", // Changed from maxWidth to width
-            height: "100%", // Added height
+            width: "100%",
+            height: "100%",
             objectFit: "contain",
-            padding: 0, // Added padding
-            margin: 0, // Added margin
+            padding: 0,
+            margin: 0,
             position: "absolute",
             top: 0,
           }}
         />
       </Box>
 
-      {/* Right side - Form (60% width) */}
+      {/* Right side - Form and Stepper (60% width) */}
       <Box
         sx={{
           width: { xs: "100%", md: "60%" },
           p: { xs: 3, md: 5 },
           overflow: "auto",
+          display: "flex",
         }}
       >
+        {/* Form */}
         <Paper
           elevation={3}
           sx={{
@@ -289,6 +338,8 @@ export function JwtSignUpView() {
             border: "1px solid",
             borderColor: "divider",
             borderRadius: 2,
+            flexGrow: 1,
+            mr: 3,
           }}
         >
           <FormHead
@@ -316,7 +367,29 @@ export function JwtSignUpView() {
 
           <SignUpTerms />
         </Paper>
+
+        {/* Stepper */}
+        <Paper
+          elevation={3}
+          sx={{
+            p: 2,
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: 2,
+            width: "120px",
+            height: "fit-content",
+          }}
+        >
+          <Stepper activeStep={activeStep} orientation="vertical">
+            {steps.map((label) => (
+              <Step key={label}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+        </Paper>
       </Box>
     </Stack>
   )
 }
+
