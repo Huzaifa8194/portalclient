@@ -1,24 +1,41 @@
-import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
-import Alert from '@mui/material/Alert';
+import Box from "@mui/material/Box"
+import Link from "@mui/material/Link"
+import Alert from "@mui/material/Alert"
+import { useLocation } from "react-router-dom"
 
-import { paths } from 'src/routes/paths';
-import { RouterLink } from 'src/routes/components';
+import { paths } from "src/routes/paths"
+import { RouterLink } from "src/routes/components"
 
-import { CONFIG } from 'src/config-global';
+import { CONFIG } from "src/config-global"
 
-import { Logo } from 'src/components/logo';
+import { Logo } from "src/components/logo"
 
-import { Section } from './section';
-import { Main, Content } from './main';
-import { HeaderSection } from '../core/header-section';
-import { LayoutSection } from '../core/layout-section';
-import { SettingsButton } from '../components/settings-button';
+import { Section } from "./section"
+import { Main, Content } from "./main"
+import { HeaderSection } from "../core/header-section"
+import { LayoutSection } from "../core/layout-section"
+import { SettingsButton } from "../components/settings-button"
 
 // ----------------------------------------------------------------------
 
 export function AuthSplitLayout({ sx, section, children, header }) {
-  const layoutQuery = 'md';
+  const layoutQuery = "md"
+  const location = useLocation()
+
+  // Determine if we're on the company signup, partner signup, or private signup page
+  const isCompanySignup = location.pathname.includes("sign-up-company")
+  const isPartnerSignup = location.pathname.includes("sign-up-partner")
+  const isPrivateSignup = location.pathname.includes("sign-up-options")
+
+  // Determine the page type for the Section component
+  let pageType = ""
+  if (isCompanySignup) {
+    pageType = "company-signup"
+  } else if (isPartnerSignup) {
+    pageType = "partner-signup"
+  } else if (isPrivateSignup) {
+    pageType = "private-signup"
+  }
 
   return (
     <LayoutSection
@@ -30,10 +47,10 @@ export function AuthSplitLayout({ sx, section, children, header }) {
           disableElevation
           layoutQuery={layoutQuery}
           slotProps={{ container: { maxWidth: false } }}
-          sx={{ position: { [layoutQuery]: 'fixed' }, ...header?.sx }}
+          sx={{ position: { [layoutQuery]: "fixed" }, ...header?.sx }}
           slots={{
             topArea: (
-              <Alert severity="info" sx={{ display: 'none', borderRadius: 0 }}>
+              <Alert severity="info" sx={{ display: "none", borderRadius: 0 }}>
                 This is an info Alert.
               </Alert>
             ),
@@ -46,12 +63,7 @@ export function AuthSplitLayout({ sx, section, children, header }) {
             rightArea: (
               <Box display="flex" alignItems="center" gap={{ xs: 1, sm: 1.5 }}>
                 {/* -- Help link -- */}
-                <Link
-                  href={paths.faqs}
-                  component={RouterLink}
-                  color="inherit"
-                  sx={{ typography: 'subtitle2' }}
-                >
+                <Link href={paths.faqs} component={RouterLink} color="inherit" sx={{ typography: "subtitle2" }}>
                   Need help?
                 </Link>
                 {/* -- Settings button -- */}
@@ -68,46 +80,48 @@ export function AuthSplitLayout({ sx, section, children, header }) {
       /** **************************************
        * Style
        *************************************** */
-      cssVars={{ '--layout-auth-content-width': '420px' }}
+      cssVars={{ "--layout-auth-content-width": "420px" }}
       sx={sx}
     >
       <Main layoutQuery={layoutQuery}>
-        {/* <Section
+        <Section
           title={section?.title}
           layoutQuery={layoutQuery}
           imgUrl={section?.imgUrl}
           method={CONFIG.auth.method}
           subtitle={section?.subtitle}
+          pageType={pageType}
           methods={[
             {
-              label: 'Jwt',
+              label: "Jwt",
               path: paths.auth.jwt.signIn,
               icon: `${CONFIG.assetsDir}/assets/icons/platforms/ic-jwt.svg`,
             },
             {
-              label: 'Firebase',
+              label: "Firebase",
               path: paths.auth.firebase.signIn,
               icon: `${CONFIG.assetsDir}/assets/icons/platforms/ic-firebase.svg`,
             },
             {
-              label: 'Amplify',
+              label: "Amplify",
               path: paths.auth.amplify.signIn,
               icon: `${CONFIG.assetsDir}/assets/icons/platforms/ic-amplify.svg`,
             },
             {
-              label: 'Auth0',
+              label: "Auth0",
               path: paths.auth.auth0.signIn,
               icon: `${CONFIG.assetsDir}/assets/icons/platforms/ic-auth0.svg`,
             },
             {
-              label: 'Supabase',
+              label: "Supabase",
               path: paths.auth.supabase.signIn,
               icon: `${CONFIG.assetsDir}/assets/icons/platforms/ic-supabase.svg`,
             },
           ]}
-        /> */}
+        />
         <Content layoutQuery={layoutQuery}>{children}</Content>
       </Main>
     </LayoutSection>
-  );
+  )
 }
+

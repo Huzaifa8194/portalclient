@@ -302,34 +302,10 @@ export function JwtSignUpViewCompany() {
 
   return (
     <Stack direction={{ xs: "column", md: "row" }} sx={{ minHeight: "100vh" }}>
-      {/* Left Side - Image (40%) */}
-      <Box
-        sx={{
-          width: { xs: "100%", md: "40%" },
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          bgcolor: "background.paper",
-          p: 0, // Remove padding to ensure no extra space
-        }}
-      >
-        <Box
-          component="img"
-          src="/company.svg"
-          alt="Company Illustration"
-          sx={{
-            width: "100%", // Ensures full width
-            height: "97%", // Ensures full height
-            objectFit: "cover", // Makes the image cover the container
-          }}
-        />
-      </Box>
-
-
       {/* Right Side - Form and Stepper (60%) */}
       <Box
         sx={{
-          width: { xs: "100%", md: "60%" },
+          width: { xs: "100%", md: "100%" },
           display: "flex",
           alignItems: "flex-start",
           justifyContent: "center",
@@ -340,7 +316,6 @@ export function JwtSignUpViewCompany() {
         <Box sx={{ display: "flex", width: "100%", maxWidth: "800px" }}>
           {/* Form */}
           <Paper
-
             sx={{
               flexGrow: 1,
               p: 4,

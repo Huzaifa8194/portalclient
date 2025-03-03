@@ -210,33 +210,12 @@ export function JwtSignInViewOptions() {
 
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ minHeight: '100vh' }}>
-      {/* Left Side - Image (40%) */}
-      <Box
-        sx={{
-          display: { xs: 'none', md: 'flex' },
-          width: '40%',
-          alignItems: 'center',
-          justifyContent: 'center',
-          bgcolor: 'background.paper',
-          p: 4,
-        }}
-      >
-        <Box
-          component="img"
-          src="/signup.svg"
-          alt="Signup Illustration"
-          sx={{
-            width: '100%',
-            height: 'auto',
-            maxWidth: '500px',
-          }}
-        />
-      </Box>
+     
 
       {/* Right Side - Form (60%) */}
       <Box
         sx={{
-          width: { xs: '100%', md: '60%' },
+          width: { xs: '100%', md: '90%' },
           display: 'flex',
           alignItems: 'start',
           justifyContent: 'center',

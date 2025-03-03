@@ -11,7 +11,8 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import { Divider } from '@mui/material';
 import { Icon } from '@iconify/react';
-
+import Paper from '@mui/material/Paper'; // Import Paper component
+import Stack from '@mui/material/Stack'; // Import Stack component
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -26,6 +27,7 @@ import { signUp } from '../../context/jwt';
 import { useAuthContext } from '../../hooks';
 import { FormHead } from '../../components/form-head';
 import { SignUpTerms } from '../../components/sign-up-terms';
+
 // ----------------------------------------------------------------------
 
 export const SignUpSchemaTemp = zod.object({
@@ -61,6 +63,7 @@ export const SignUpSchemaTemp = zod.object({
     .min(1, { message: 'Password is required!' })
     .min(6, { message: 'Password must be at least 6 characters!' }),
 });
+
 // ----------------------------------------------------------------------
 
 export function JwtSignUpViewOptions() {
@@ -115,14 +118,8 @@ export function JwtSignUpViewOptions() {
     }
   });
 
-
   const renderForm = (
     <Box gap={3} display="flex" flexDirection="column">
-
-
-
-
-
       <Link component={RouterLink} href={paths.auth.jwt.signUp} variant="subtitle2">
         <LoadingButton
           fullWidth
@@ -132,7 +129,6 @@ export function JwtSignUpViewOptions() {
           variant="contained"
           loading={isSubmitting}
           loadingIndicator="Create account..."
-
         >
           <Box
             sx={{
@@ -146,8 +142,8 @@ export function JwtSignUpViewOptions() {
             <Icon icon="mdi:globe" />
           </Box>
         </LoadingButton>
-
       </Link>
+
       <Divider sx={{ my: 3 }}>OR</Divider>
 
       <LoadingButton
@@ -213,40 +209,61 @@ export function JwtSignUpViewOptions() {
   );
 
   return (
-    <>
-      <Box sx={{ width: '55%', mx: 'auto' }}>
+    <Stack direction={{ xs: 'column', md: 'row' }} sx={{ minHeight: '100vh' }}>
+      
+      <Box
+        sx={{
+          width: { xs: '100%', md: '90%' },
+          p: { xs: 3, md: 5 },
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'background.default',
+        }}
+      >
+        <Paper
+          elevation={3}
+          sx={{
+            width: '100%',
+            maxWidth: '800px',
+            p: 4,
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 2,
+          }}
+        >
+          {/* Form Header */}
+          <FormHead
+            title="Get started absolutely free"
+            description={
+              <>
+                {`Already have an account? `}
+                <Link component={RouterLink} href={paths.auth.jwt.signIn} variant="subtitle2">
+                  Sign in
+                </Link>
+              </>
+            }
+            sx={{ textAlign: { xs: 'center', md: 'left' }, mb: 3 }}
+          />
 
-        {/* Form Header */}
-        <FormHead
-          title="Get started absoldutely free"
-          description={
-            <>
-              {`Already have an account? `}
-              <Link component={RouterLink} href={paths.auth.jwt.signIn} variant="subtitle2">
-                Get started
-              </Link>
-            </>
-          }
-          sx={{ textAlign: { xs: 'center', md: 'left' }, mb: 3 }}
-        />
+          {/* Error Message */}
+          {!!errorMsg && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {errorMsg}
+            </Alert>
+          )}
 
-        {/* Error Message */}
-        {!!errorMsg && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {errorMsg}
-          </Alert>
-        )}
+          {/* Form */}
+          <Form methods={methods} onSubmit={onSubmit}>
+            {renderForm}
+          </Form>
 
-        {/* Form */}
-        <Form methods={methods} onSubmit={onSubmit}>
-          {renderForm}
-        </Form>
-
-        {/* Terms Component */}
-        <Box sx={{ mt: 3 }}>
-          <SignUpTerms />
-        </Box>
+          {/* Terms Component */}
+          <Box sx={{ mt: 3 }}>
+            <SignUpTerms />
+          </Box>
+        </Paper>
       </Box>
-    </>
+    </Stack>
   );
 }
