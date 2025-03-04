@@ -11,6 +11,7 @@ import Menu from "@mui/material/Menu"
 import MenuItem from "@mui/material/MenuItem"
 import IconButton from "@mui/material/IconButton"
 import { useState } from "react"
+import Link from "@mui/material/Link"
 
 import { varAlpha } from "src/theme/styles"
 import { AvatarShape } from "src/assets/illustrations"
@@ -217,9 +218,9 @@ export function PricingCardUpdated({ card }) {
               bgcolor: grayishBlack,
               color: "white",
             },
-            width: 32,
-            height: 32,
-            fontSize: 20,
+            width: 28,
+            height: 28,
+            fontSize: 16,
             fontWeight: "bold",
             borderRadius: "50%",
           }}
@@ -262,6 +263,8 @@ export function PricingCardUpdated({ card }) {
           {getFeatures().map((feature, index) => (
             <MenuItem
               key={index}
+              component={Link}
+              href={getHref(labelAction)}
               onClick={handleClose}
               sx={{
                 whiteSpace: "normal",
