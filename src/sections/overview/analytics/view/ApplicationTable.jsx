@@ -1,151 +1,195 @@
-import React, { useState } from 'react';
-import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
-import Avatar from '@mui/material/Avatar';
-import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import ListItemText from '@mui/material/ListItemText';
-import { applications } from 'src/_mock/_applications';
-import { Image } from 'src/components/image';
-import { varAlpha } from 'src/theme/styles';
-import { AvatarShape } from 'src/assets/illustrations';
-import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
-import { OverviewAnalyticsView } from './overview-analytics-view';
+  "use client"
 
+  import { useState, useEffect } from "react"
+  import axios from "axios"
+  import Box from "@mui/material/Box"
+  import Grid from "@mui/material/Grid"
+  import Card from "@mui/material/Card"
+  import Stack from "@mui/material/Stack"
+  import Avatar from "@mui/material/Avatar"
+  import Divider from "@mui/material/Divider"
+  import Typography from "@mui/material/Typography"
+  import Button from "@mui/material/Button"
+  import ListItemText from "@mui/material/ListItemText"
+  import { Image } from "src/components/image"
+  import { varAlpha } from "src/theme/styles"
+  import { AvatarShape } from "src/assets/illustrations"
+  import { CustomBreadcrumbs } from "src/components/custom-breadcrumbs"
+  import { toast } from "src/components/snackbar"
+  import { OverviewAnalyticsView } from "./overview-analytics-view"
 
-export function ApplicationTable({ authority }) {
-  const image="https://i0.wp.com/picjumbo.com/wp-content/uploads/red-and-blue-pillars-wallpaper-abstract-background-free-image.jpeg?w=600&quality=80";
-  const [selectedApplication, setSelectedApplication] = useState(null);
-  const filteredApplications = applications[authority] || [];
+  export function ApplicationTable({ authority }) {
+    const image =
+      "https://i0.wp.com/picjumbo.com/wp-content/uploads/red-and-blue-pillars-wallpaper-abstract-background-free-image.jpeg?w=600&quality=80"
+    const [selectedApplication, setSelectedApplication] = useState(null)
+    const [applications, setApplications] = useState([])
+    const [loading, setLoading] = useState(true)
 
-  const handleViewClick = (caseNo, govAuthority) => {
-    setSelectedApplication({ caseNo, authority: govAuthority });
-  };
+    useEffect(() => {
+      const fetchApplications = async () => {
+        try {
+          setLoading(true)
+          const token = localStorage.getItem("authToken")
+          if (!token) {
+            throw new Error("No authentication token found")
+          }
 
-  const handleBack = () => {
-    setSelectedApplication(null);
-  };
+          const response = await axios.get("https://api.swedenrelocators.se/api/client/application/status/list", {
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          })
 
-  if (selectedApplication) {
+          console.log("Applications data:", response.data.data)
+
+          if (response.data && Array.isArray(response.data.data)) {
+            setApplications(response.data.data)
+          } else {
+            console.error("Invalid data format received:", response.data)
+            toast.error("Invalid data format received from server")
+            setApplications([]) // Set to empty array to prevent rendering issues
+          }
+        } catch (error) {
+          console.error("Error fetching applications:", error)
+          toast.error(error?.response?.data?.message || "Failed to load applications")
+          setApplications([]) // Set to empty array to prevent rendering issues
+        } finally {
+          setLoading(false)
+        }
+      }
+
+      fetchApplications()
+    }, [])
+
+    // Modified to pass the entire application object
+    const handleViewClick = (application) => {
+      setSelectedApplication(application)
+    }
+
+    const handleBack = () => {
+      setSelectedApplication(null)
+    }
+
+    if (selectedApplication) {
+      return (
+        <OverviewAnalyticsView
+          caseNo={selectedApplication.case_number}
+          authority={selectedApplication.government_authority}
+          application={selectedApplication}
+          onBack={handleBack}
+        />
+      )
+    }
+
+    // Format date to show only the date part (not time)
+    const formatDate = (dateString) => {
+      if (!dateString) return "N/A"
+      return dateString.split(" ")[0] // Split at space and take the first part (date)
+    }
+
     return (
-      <OverviewAnalyticsView
-        caseNo={selectedApplication.caseNo}
-        authority={selectedApplication.authority}
-        onBack={handleBack}
-      />
-    );
-  }
-
-  return (
-    <Box sx={{ padding: '20px 24px' }}>
+      <Box sx={{ padding: "20px 24px" }}>
         <CustomBreadcrumbs
-                heading="Application Status"
-                links={[
-                  { name: 'Dashboard' },
-                  { name: 'Application Status' },
-                  { name: 'Application Detail  ' },
-                ]}
-                sx={{ mb: { xs: 3, md: 3 } }}
-              />
-      
-      <Grid container spacing={3}>
-        {filteredApplications.map((app, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
-            <Card sx={{ textAlign: 'center' }}>
-              <Box sx={{ position: 'relative' }}>
-                <AvatarShape
-                  sx={{
-                    left: 0,
-                    right: 0,
-                    zIndex: 10,
-                    mx: 'auto',
-                    bottom: -26,
-                    position: 'absolute',
-                  }}
-                />
+          heading="Application Status"
+          links={[{ name: "Dashboard" }, { name: "Application Status" }, { name: "Application Detail  " }]}
+          sx={{ mb: { xs: 3, md: 3 } }}
+        />
 
-                <Avatar
-                  alt={app["Application Type"]}
-                  src="/static/images/avatar_placeholder.png"
-                  sx={{
-                    width: 64,
-                    height: 64,
-                    zIndex: 11,
-                    left: 0,
-                    right: 0,
-                    bottom: -32,
-                    mx: 'auto',
-                    position: 'absolute',
-                  }}
-                />
+        {loading ? (
+          <Typography>Loading applications...</Typography>
+        ) : applications.length === 0 ? (
+          <Typography>No applications found.</Typography>
+        ) : (
+          <Grid container spacing={3}>
+            {applications.map((app, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <Card sx={{ textAlign: "center" }}>
+                  <Box sx={{ position: "relative" }}>
+                    <AvatarShape
+                      sx={{
+                        left: 0,
+                        right: 0,
+                        zIndex: 10,
+                        mx: "auto",
+                        bottom: -26,
+                        position: "absolute",
+                      }}
+                    />
 
-                <Image
-                  src={image}
-                  alt="Cover"
-                  ratio="16/9"
-                  slotProps={{
-                    overlay: {
-                      bgcolor: (theme) => varAlpha(theme.vars.palette.common.blackChannel, 0.48),
-                    },
-                  }}
-                />
-              </Box>
+                    <Avatar
+                      alt={app.application_type || "Application"}
+                      src="/static/images/avatar_placeholder.png"
+                      sx={{
+                        width: 64,
+                        height: 64,
+                        zIndex: 11,
+                        left: 0,
+                        right: 0,
+                        bottom: -32,
+                        mx: "auto",
+                        position: "absolute",
+                      }}
+                    />
 
-              <ListItemText
-                sx={{ mt: 7, mb: 1 }}
-                primary={app["Application Type"]}
-                secondary={app["Gov Authority"]}
-                primaryTypographyProps={{ typography: 'subtitle1' }}
-                secondaryTypographyProps={{ component: 'span', mt: 0.5 }}
-              />
+                    <Image
+                      src={image || "/placeholder.svg"}
+                      alt="Cover"
+                      ratio="16/9"
+                      slotProps={{
+                        overlay: {
+                          bgcolor: (theme) => varAlpha(theme.vars.palette.common.blackChannel, 0.48),
+                        },
+                      }}
+                    />
+                  </Box>
 
-              <Stack direction="row" alignItems="center" justifyContent="center" sx={{ mb: 2.5 }}>
-                <Typography variant="body2" color="textSecondary">
-                  <strong>Case No:</strong>{' '}
-                  {app["Case No"] === 'Not Assigned' ? 'N/A' : app["Case No"]}
-                </Typography>
-              </Stack>
+                  <ListItemText
+                    sx={{ mt: 7, mb: 1 }}
+                    primary={app.application_type || "Unknown Application Type"}
+                    secondary={app.government_authority || "Unknown Authority"}
+                    primaryTypographyProps={{ typography: "subtitle1" }}
+                    secondaryTypographyProps={{ component: "span", mt: 0.5 }}
+                  />
 
-              <Divider sx={{ borderStyle: 'dashed' }} />
+                  <Stack direction="row" alignItems="center" justifyContent="center" sx={{ mb: 2.5 }}>
+                    <Typography variant="body2" color="textSecondary">
+                      <strong>Case No:</strong> {app.case_number === null ? "N/A" : app.case_number}
+                    </Typography>
+                  </Stack>
 
-              <Box
-                display="grid"
-                gridTemplateColumns="repeat(2, 1fr)"
-                sx={{ py: 3, typography: 'subtitle1' }}
-              >
-                <div>
-                  <Typography variant="caption" component="div" sx={{ mb: 0.5, color: 'text.secondary' }}>
-                    Registration Date
-                  </Typography>
-                  {app["Registration Date"]}
-                </div>
+                  <Divider sx={{ borderStyle: "dashed" }} />
 
-                <div>
-                  <Typography variant="caption" component="div" sx={{ mb: 0.5, color: 'text.secondary' }}>
-                    Status
-                  </Typography>
-                  Active
-                </div>
-              </Box>
+                  <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" sx={{ py: 3, typography: "subtitle1" }}>
+                    <div>
+                      <Typography variant="caption" component="div" sx={{ mb: 0.5, color: "text.secondary" }}>
+                        Created at
+                      </Typography>
+                      {formatDate(app.created_at)}
+                    </div>
 
-              <Divider sx={{ borderStyle: 'dashed' }} />
+                    <div>
+                      <Typography variant="caption" component="div" sx={{ mb: 0.5, color: "text.secondary" }}>
+                        Country
+                      </Typography>
+                      {app.country || "N/A"}
+                    </div>
+                  </Box>
 
-              <Box sx={{ py: 2 }}>
-                <Button
-                  variant="contained"
-                  onClick={() => handleViewClick(app["Case No"], app["Gov Authority"])}
-                >
-                  View Details
-                </Button>
-              </Box>
-            </Card>
+                  <Divider sx={{ borderStyle: "dashed" }} />
+
+                  <Box sx={{ py: 2 }}>
+                    <Button variant="contained" onClick={() => handleViewClick(app)}>
+                      View Details
+                    </Button>
+                  </Box>
+                </Card>
+              </Grid>
+            ))}
           </Grid>
-        ))}
-      </Grid>
-    </Box>
-  );
-}
+        )}
+      </Box>
+    )
+  }
 

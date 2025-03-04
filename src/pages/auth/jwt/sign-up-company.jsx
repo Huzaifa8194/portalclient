@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
 
-import { JwtSignUpViewCompany } from 'src/auth/view/jwt';
+import { JwtSignUpViewCompany}  from 'src/auth/view/jwt/jwt-sign-up-view-company';
 
 // ----------------------------------------------------------------------
 
