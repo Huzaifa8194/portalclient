@@ -294,36 +294,10 @@ export function JwtSignUpView() {
 
   return (
     <Stack direction={{ xs: "column", md: "row" }} sx={{ minHeight: "100vh" }}>
-      {/* Left side - Partner SVG (40% width) */}
-      <Box
-        sx={{
-          display: { xs: "none", md: "flex" },
-          width: "40%",
-          alignItems: "center",
-          justifyContent: "center",
-          bgcolor: "background.paper",
-          position: "relative",
-        }}
-      >
-        <Box
-          component="img"
-          src="/partner.svg"
-          alt="Partner illustration"
-          sx={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            padding: 0,
-            margin: 0,
-          }}
-        />
-
-      </Box>
-
       {/* Right side - Form and Stepper (60% width) */}
       <Box
         sx={{
-          width: { xs: "100%", md: "60%" },
+          width: { xs: "100%", md: "100%" },
           p: { xs: 3, md: 5 },
           overflow: "auto",
           display: "flex",
