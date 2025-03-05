@@ -81,24 +81,26 @@ export function OverviewAnalyticsView({ caseNo, authority, application, onBack }
 
   // Change the _timeline definition to include unique IDs
   const _timeline =
-    application && application.comments && application.comments.length > 0
-      ? application.comments.map((c, index) => ({
-          id: c.id || `timeline-${index}`,
-          title: c.comments || "Status update",
-          type:
-            c.comments && c.comments.includes("approved")
-              ? "order1"
-              : c.comments && c.comments.includes("rejected")
-                ? "order4"
-                : "order3",
-        }))
-      : [
-          {
-            id: "timeline-empty",
-            title: "Timeline empty",
-            type: "order3",
-          },
-        ]
+  application && application.comments && application.comments.length > 0
+    ? application.comments.map((c, index) => ({
+        id: c.id || `timeline-${index}`,
+        subheader: "2-2",
+        title: c.comments || "Status update",
+        createdAt: c.created_at, // Add the created_at timestamp here
+        type:
+          c.comments && c.comments.includes("approved")
+            ? "order1"
+            : c.comments && c.comments.includes("rejected")
+              ? "order4"
+              : "order3",
+      }))
+    : [
+        {
+          id: "timeline-empty",
+          title: "Timeline empty",
+          type: "order3",
+        },
+      ]
 
   return (
     <DashboardContent maxWidth="xl">
