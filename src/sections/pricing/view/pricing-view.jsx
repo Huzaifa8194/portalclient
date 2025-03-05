@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box"
 import Container from "@mui/material/Container"
 import Typography from "@mui/material/Typography"
+import Link from "@mui/material/Link"
 
 import { _pricingPlans } from "src/_mock"
 
@@ -15,7 +16,10 @@ export function PricingView() {
       </Typography>
 
       <Typography align="center" sx={{ color: "text.secondary" }}>
-        Already have an account? login
+        Already have an account?{" "}
+        <Link href="/auth/jwt/sign-in-options" sx={{ color: "primary.main" }}>
+          login
+        </Link>
       </Typography>
 
       <Typography
