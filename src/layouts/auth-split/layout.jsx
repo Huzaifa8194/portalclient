@@ -84,44 +84,63 @@ export function AuthSplitLayout({ sx, section, children, header }) {
       sx={sx}
     >
       <Main layoutQuery={layoutQuery}>
-        <Section
-          title={section?.title}
-          layoutQuery={layoutQuery}
-          imgUrl={section?.imgUrl}
-          method={CONFIG.auth.method}
-          subtitle={section?.subtitle}
-          pageType={pageType}
-          methods={[
-            {
-              label: "Jwt",
-              path: paths.auth.jwt.signIn,
-              icon: `${CONFIG.assetsDir}/assets/icons/platforms/ic-jwt.svg`,
-            },
-            {
-              label: "Firebase",
-              path: paths.auth.firebase.signIn,
-              icon: `${CONFIG.assetsDir}/assets/icons/platforms/ic-firebase.svg`,
-            },
-            {
-              label: "Amplify",
-              path: paths.auth.amplify.signIn,
-              icon: `${CONFIG.assetsDir}/assets/icons/platforms/ic-amplify.svg`,
-            },
-            {
-              label: "Auth0",
-              path: paths.auth.auth0.signIn,
-              icon: `${CONFIG.assetsDir}/assets/icons/platforms/ic-auth0.svg`,
-            },
-            {
-              label: "Supabase",
-              path: paths.auth.supabase.signIn,
-              icon: `${CONFIG.assetsDir}/assets/icons/platforms/ic-supabase.svg`,
-            },
-          ]}
-        />
+      <Section
+  title={section?.title}
+  layoutQuery={layoutQuery}
+  imgUrl={section?.imgUrl}
+  method="social" // Dummy value to avoid disabling icons
+  subtitle={section?.subtitle}
+  pageType={pageType}
+  methods={[
+    // Social Media Icons
+    {
+      label: "Facebook",
+      path: "https://www.facebook.com/swedenrelocators", // Replace with your Facebook link
+      icon: "/socials/facebook.png",
+    },
+    {
+      label: "Instagram",
+      path: "https://www.instagram.com/swedenrelocators", // Replace with your Instagram link
+      icon: "/socials/insta.png",
+    },
+    {
+      label: "TikTok",
+      path: "https://www.tiktok.com/@swedenrelocators", // Replace with your TikTok link
+      icon: "/socials/tiktok.png",
+    },
+  ]}
+  slots={{
+    bottomArea: (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          gap: 2,
+        }}
+      >
+        {/* Play Store Icon */}
+        <Link href="https://play.google.com/store/apps/details?id=yourapp" target="_blank" rel="noopener noreferrer">
+          <img
+            src="/socials/play-store.png"
+            alt="Play Store"
+            style={{ width: "140px", height: "auto" }} // Increased width
+          />
+        </Link>
+        {/* App Store Icon */}
+        <Link href="https://apps.apple.com/app/yourapp" target="_blank" rel="noopener noreferrer">
+          <img
+            src="/socials/app-store.png"
+            alt="App Store"
+            style={{ width: "140px", height: "auto" }} // Increased width
+          />
+        </Link>
+      </Box>
+    ),
+  }}
+/>
+        
         <Content layoutQuery={layoutQuery}>{children}</Content>
       </Main>
     </LayoutSection>
   )
 }
-

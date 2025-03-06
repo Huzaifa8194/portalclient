@@ -146,6 +146,7 @@ export function JwtSignUpViewOptions() {
 
       <Divider sx={{ my: 3 }}>OR</Divider>
 
+      {/* Sign Up With BankID (Sweden) */}
       <LoadingButton
         fullWidth
         color="inherit"
@@ -176,6 +177,7 @@ export function JwtSignUpViewOptions() {
         </Box>
       </LoadingButton>
 
+      {/* Sign Up With MitID (Norway) */}
       <LoadingButton
         fullWidth
         color="inherit"
@@ -205,12 +207,74 @@ export function JwtSignUpViewOptions() {
           <Icon icon="twemoji:flag-norway" />
         </Box>
       </LoadingButton>
+
+      {/* Sign Up With BankID (Norway) */}
+      <LoadingButton
+        fullWidth
+        color="inherit"
+        size="large"
+        type="submit"
+        variant="contained"
+        loading={isSubmitting}
+        sx={{
+          backgroundColor: 'white',
+          color: 'black',
+          border: '2px solid #1976D2',
+          '&:hover': {
+            backgroundColor: '#f0f0f0',
+            borderColor: '#1565C0',
+          },
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%',
+          }}
+        >
+          <span>Sign Up With BankID </span>
+          <Icon icon="twemoji:flag-denmark" />
+        </Box>
+      </LoadingButton>
+
+      {/* Sign Up With eID (Finland) */}
+      <LoadingButton
+        fullWidth
+        color="inherit"
+        size="large"
+        type="submit"
+        variant="contained"
+        loading={isSubmitting}
+        sx={{
+          backgroundColor: 'white',
+          color: 'black',
+          border: '2px solid #1976D2',
+          '&:hover': {
+            backgroundColor: '#f0f0f0',
+            borderColor: '#1565C0',
+          },
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%',
+          }}
+        >
+          <span>Sign Up With eID </span>
+          <Icon icon="twemoji:flag-finland" />
+        </Box>
+      </LoadingButton>
     </Box>
   );
 
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ minHeight: '100vh' }}>
-      
+      {/* Right Side - Form (60%) */}
       <Box
         sx={{
           width: { xs: '100%', md: '90%' },

@@ -21,6 +21,7 @@ export function Section({
   title = "Complete Online Relocation Solution",
   imgUrl = `${CONFIG.assetsDir}/assets/illustrations/illustration-dashboard.webp`,
   subtitle = "We believe in transparency",
+  slots,
   ...other
 }) {
   const theme = useTheme()
@@ -41,11 +42,11 @@ export function Section({
     displaySubtitle = "Digital Tool for Global Workforce & Immigration Management"
     displayImgUrl = "/companySignup.png"
   } else if (isPartnerSignup) {
-    displayTitle = "Partner: Join Our Global Partner Network"
+    displayTitle = "Join Our Global Partner Network"
     displaySubtitle = "Accelerate Growth with Digital Client Solutions"
     displayImgUrl = "/partnerSignup.png"
   } else if (isPrivateSignup) {
-    displayTitle = "Private: Welcome To A New Digital World"
+    displayTitle = "Welcome To A New Digital World"
     displaySubtitle = "of Immigration & Relocation Services"
     displayImgUrl = "/privateSignup.png"
   }
@@ -59,7 +60,6 @@ export function Section({
             0.92,
           )}, ${varAlpha(theme.vars.palette.background.defaultChannel, 0.92)}`,
           imgUrl: `${CONFIG.assetsDir}/assets/background/background-3-blur.webp`,
-          
         }),
         px: 3,
         pb: 3,
@@ -85,13 +85,9 @@ export function Section({
         </Typography>
 
         {displaySubtitle && (
-          <Typography sx={{
-             color: "text.secondary",
-              textAlign: "center",
-              
-               mt: 2 }}>
-              {displaySubtitle}
-              </Typography>
+          <Typography sx={{ color: "text.secondary", textAlign: "center", mt: 2 }}>
+            {displaySubtitle}
+          </Typography>
         )}
       </div>
 
@@ -99,45 +95,47 @@ export function Section({
         component="img"
         alt="Dashboard illustration"
         src={displayImgUrl}
-        sx={{ width: 1,
-          
-           objectFit: "contain",
-           }}
+        sx={{ width: 1, objectFit: "contain" }}
       />
 
-      {!!methods?.length && method && (
+      {!!methods?.length && (
         <Box component="ul" gap={2} display="flex">
-          {methods.map((option) => {
-            const selected = method === option.label.toLowerCase()
+          {methods.map((option) => (
+            <Box
+              key={option.label}
+              component="li"
+            >
+              <Tooltip title={option.label} placement="top">
+                <Link
+                  component={RouterLink}
+                  href={option.path}
+                  target="_blank" // Open links in a new tab
+                  rel="noopener noreferrer" // Security best practice for target="_blank"
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Box
+                    component="img"
+                    alt={option.label}
+                    src={option.icon}
+                    sx={{ width: 48, height: 48 }} // Increased icon size
+                  />
+                </Link>
+              </Tooltip>
+            </Box>
+          ))}
+        </Box>
+      )}
 
-            return (
-              <Box
-                key={option.label}
-                component="li"
-                sx={{
-                  ...(!selected && {
-                    cursor: "not-allowed",
-                    filter: "grayscale(1)",
-                  }),
-                }}
-              >
-                <Tooltip title={option.label} placement="top">
-                  <Link
-                    component={RouterLink}
-                    href={option.path}
-                    sx={{
-                      ...(!selected && { pointerEvents: "none" }),
-                    }}
-                  >
-                    <Box component="img" alt={option.label} src={option.icon} sx={{ width: 32, height: 32 }} />
-                  </Link>
-                </Tooltip>
-              </Box>
-            )
-          })}
+      {/* Render App Store and Play Store icons */}
+      {slots?.bottomArea && (
+        <Box sx={{ width: "100%" }}> {/* Removed margin-top */}
+          {slots.bottomArea}
         </Box>
       )}
     </Box>
   )
 }
-

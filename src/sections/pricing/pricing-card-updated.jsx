@@ -17,10 +17,6 @@ import { varAlpha } from "src/theme/styles"
 import { AvatarShape } from "src/assets/illustrations"
 import { Image } from "src/components/image"
 
-import cap1 from "src/assets/images/cap1.PNG"
-import cap2 from "src/assets/images/cap2.PNG"
-import cap3 from "src/assets/images/cap3.PNG"
-
 // Define the grayish-black color
 const grayishBlack = "rgba(45, 45, 45, 0.9)"
 
@@ -56,13 +52,13 @@ export function PricingCardUpdated({ card }) {
   const getImage = () => {
     switch (price) {
       case "Private":
-        return cap1
+        return "/priv.png"
       case "Companies":
-        return cap2
+        return "/comp.png"
       case "Partners":
-        return cap3
+        return "/partner.png"
       default:
-        return cap1 // Default to cap1 if no match
+        return "/priv.png" // Default to priv.png if no match
     }
   }
 
@@ -115,6 +111,20 @@ export function PricingCardUpdated({ card }) {
     }
   }
 
+  // Get description based on the price
+  const getDescription = () => {
+    switch (price) {
+      case "Private":
+        return "Set up your account to apply for yourself and your family."
+      case "Companies":
+        return "Set up your company account for employees' immigration and relocation."
+      case "Partners":
+        return "Join our partner program from anywhere in the world."
+      default:
+        return "Description"
+    }
+  }
+
   return (
     <Card
       sx={{
@@ -151,8 +161,10 @@ export function PricingCardUpdated({ card }) {
             bottom: -32,
             mx: "auto",
             position: "absolute",
-            bgcolor: "black",
+            bgcolor: "black", // Black background
           }}
+          src="/logo.png" // Use the logo.png from the public folder
+          alt="Logo" // Alt text for accessibility
         >
           {avatarLetter}
         </Avatar>
@@ -185,6 +197,7 @@ export function PricingCardUpdated({ card }) {
               cursor: "pointer",
               textDecoration: "none",
               color: "inherit", // Keeps default text color
+              textTransform: "uppercase", // Make the heading uppercase
             }}
             href={getHref(labelAction)}
           >
@@ -194,7 +207,7 @@ export function PricingCardUpdated({ card }) {
         secondary={
           <>
             <Typography component="span" variant="body2">
-              {caption || "Description"}
+              {getDescription()}
             </Typography>
           </>
         }
@@ -280,4 +293,3 @@ export function PricingCardUpdated({ card }) {
     </Card>
   )
 }
-
