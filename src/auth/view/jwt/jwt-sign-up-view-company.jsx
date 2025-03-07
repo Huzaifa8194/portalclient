@@ -1,9 +1,12 @@
 "use client"
 
+import Button from "@mui/material/Button"
+
 import { z as zod } from "zod"
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import axios from "axios"
 
 import Box from "@mui/material/Box"
 import Link from "@mui/material/Link"
@@ -14,6 +17,8 @@ import Paper from "@mui/material/Paper"
 import Stepper from "@mui/material/Stepper"
 import Step from "@mui/material/Step"
 import StepLabel from "@mui/material/StepLabel"
+import Checkbox from "@mui/material/Checkbox"
+import FormControlLabel from "@mui/material/FormControlLabel"
 
 import { paths } from "src/routes/paths"
 import { useRouter } from "src/routes/hooks"
@@ -21,72 +26,96 @@ import { RouterLink } from "src/routes/components"
 
 import { useBoolean } from "src/hooks/use-boolean"
 import { Form, Field } from "src/components/hook-form"
+import { toast } from "src/components/snackbar"
 
-import { signUp } from "../../context/jwt"
+import { countries } from "src/assets/data"
 import { useAuthContext } from "../../hooks"
 import { FormHead } from "../../components/form-head"
 import { SignUpTerms } from "../../components/sign-up-terms"
-
 // ----------------------------------------------------------------------
 
 export const SignUpSchemaCompany = zod
   .object({
+    // Company Information
     name: zod.string().min(1, { message: "Company name is required!" }),
-
-    email: zod
-      .string()
-      .min(1, { message: "Email is required!" })
-      .email({ message: "Email must be a valid email address!" }),
-
-    password: zod
-      .string()
-      .min(1, { message: "Password is required!" })
-      .min(6, { message: "Password must be at least 6 characters!" }),
-
-    passwordConfirmation: zod.string().min(1, { message: "Password confirmation is required!" }),
-
+    company_web: zod.string().url({ message: "Company website must be a valid URL!" }),
     company_reg_no: zod.string().min(1, { message: "Company registration number is required!" }),
     company_reg_date: zod.string().refine((date) => !Number.isNaN(Date.parse(date)), {
       message: "Company registration date must be a valid date!",
     }),
-
-    company_business_code: zod.string().min(1, { message: "Business code is required!" }),
-    company_web: zod.string().url({ message: "Company website must be a valid URL!" }),
-
+    company_type_id: zod.string().min(1, { message: "Company type is required!" }),
+    company_business_type: zod.string().min(1, { message: "Company business type is required!" }),
     address: zod.string().min(1, { message: "Address is required!" }),
-    currently_residing: zod.string().min(1, { message: "Country residing in is required!" }),
+    city: zod.string().min(1, { message: "City is required!" }),
+    country_id: zod
+      .union([zod.string().min(1, { message: "Country is required!" }), zod.number().int().positive()])
+      .transform((value) => {
+        if (typeof value === "string") {
+          const numValue = Number.parseInt(value, 10)
+          return !Number.isNaN(numValue) ? numValue : value
+        }
+        return value
+      }),
+    postal_code: zod.string().min(1, { message: "Postal code is required!" }),
 
-    company_no_of_employees: zod.string().regex(/^\d+$/, { message: "Number of employees must be a number!" }),
-
-    company_certified_employer: zod
+    // Contact Details
+    company_contact_person_name: zod.string().min(1, { message: "Primary contact name is required!" }),
+    company_contact_person_role: zod.string().min(1, { message: "Role in company is required!" }),
+    email: zod
       .string()
-      .refine((value) => ["Yes", "No"].includes(value), { message: "Certified employer must be Yes or No!" }),
+      .min(1, { message: "Email is required!" })
+      .email({ message: "Email must be a valid email address!" }),
+    contact_number: zod.string().min(1, { message: "Phone number is required!" }),
+    company_contact_sec_person_name: zod.string().optional(),
+    company_contact_sec_person_email: zod.string().email().optional(),
 
-    company_job_arbetsformedlingen: zod
-      .string()
-      .refine((value) => ["Yes", "No"].includes(value), { message: "Job Arbetsförmedlingen must be Yes or No!" }),
+    // Company Operational Details
+    company_no_of_employees: zod.string().optional(),
+    company_certified_employer: zod.string().optional(),
+    company_collective_agreement: zod.string().optional(),
+    company_applied_work_permit: zod.string().optional(),
+    company_non_eu_hires: zod.string().optional(),
 
-    company_collective_agreement: zod
-      .string()
-      .refine((value) => ["Yes", "No"].includes(value), { message: "Collective agreement must be Yes or No!" }),
+    // Services Required
+    country_services: zod
+      .array(
+        zod.object({
+          country_id: zod
+            .union([zod.string().min(1, { message: "Country is required!" }), zod.number().int().positive()])
+            .transform((value) => {
+              if (typeof value === "string") {
+                const numValue = Number.parseInt(value, 10)
+                return !Number.isNaN(numValue) ? numValue : value
+              }
+              return value
+            }),
+          service_types: zod.array(zod.string()).optional(),
+        }),
+      )
+      .optional(),
 
-    company_applied_work_permit: zod
+    // Security & Account Setup
+    password: zod
       .string()
-      .refine((value) => ["Yes", "No"].includes(value), { message: "Applied for work permit must be Yes or No!" }),
-
-    company_hr_contact: zod
-      .string()
-      .regex(/^\+?\d{7,15}$/, { message: "HR contact number must be a valid phone number!" }),
+      .min(1, { message: "Password is required!" })
+      .min(8, { message: "Password must be at least 8 characters!" }),
+    password_confirmation: zod.string().min(1, { message: "Password confirmation is required!" }),
+    is_term_accepted: zod
+      .boolean()
+      .refine((val) => val === true, { message: "You must agree to the terms and conditions!" }),
+    is_information_accurate: zod
+      .boolean()
+      .refine((val) => val === true, { message: "You must confirm the information is accurate!" }),
   })
-  .refine((data) => data.password === data.passwordConfirmation, {
+  .refine((data) => data.password === data.password_confirmation, {
     message: "Passwords must match!",
-    path: ["passwordConfirmation"],
+    path: ["password_confirmation"],
   })
 
 // ----------------------------------------------------------------------
 
 export function JwtSignUpViewCompany() {
-  const { checkUserSession } = useAuthContext()
+  const { checkUserSession, setSession } = useAuthContext()
 
   const router = useRouter()
 
@@ -94,25 +123,87 @@ export function JwtSignUpViewCompany() {
 
   const [errorMsg, setErrorMsg] = useState("")
   const [activeStep, setActiveStep] = useState(0)
-  const steps = ["Company Information", "Additional Details"]
+  const [companyTypes, setCompanyTypes] = useState([])
+  const [businessTypes, setBusinessTypes] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [forceUpdate, setForceUpdate] = useState(0)
+  const [countryServicesCount, setCountryServicesCount] = useState(1)
+
+  const steps = [
+    "Company Information",
+    "Contact Details",
+    "Company Operational Details",
+    "Services Required",
+    "Security & Account Setup",
+  ]
+
+  // Fetch company types and business types on component mount
+  useEffect(() => {
+    const fetchCompanyTypes = async () => {
+      try {
+        const response = await axios.get("https://api.swedenrelocators.se/api/miscellaneous/companyTypes")
+        setCompanyTypes(response.data.data)
+      } catch (error) {
+        console.error("Error fetching company types:", error)
+        toast.error("Failed to load company types. Please refresh the page.")
+      }
+    }
+
+    const fetchBusinessTypes = async () => {
+      try {
+        const response = await axios.get("https://api.swedenrelocators.se/api/miscellaneous/businessTypes")
+        setBusinessTypes(response.data.data)
+      } catch (error) {
+        console.error("Error fetching business types:", error)
+        toast.error("Failed toload business types. Please refresh the page.")
+      }
+    }
+
+    fetchCompanyTypes()
+    fetchBusinessTypes()
+  }, [])
 
   const defaultValues = {
+    // Company Information
     name: "",
-    email: "",
-    password: "",
-    passwordConfirmation: "",
+    company_web: "",
     company_reg_no: "",
     company_reg_date: "",
-    company_business_code: "",
-    company_web: "",
+    company_business_type: "",
+    company_type_id: "",
     address: "",
-    currently_residing: "",
+    city: "",
+    country_id: null, // Changed from empty string to null to fix Autocomplete warning
+    postal_code: "",
+
+    // Contact Details
+    company_contact_person_name: "",
+    company_contact_person_role: "",
+    email: "",
+    contact_number: "+46",
+    company_contact_sec_person_name: "",
+    company_contact_sec_person_email: "",
+
+    // Company Operational Details
     company_no_of_employees: "",
     company_certified_employer: "",
-    company_job_arbetsformedlingen: "",
     company_collective_agreement: "",
     company_applied_work_permit: "",
-    company_hr_contact: "",
+    company_non_eu_hires: "",
+
+    // Services Required
+    country_services: [
+      {
+        country_id: " ", // Changed from empty string to null to fix Autocomplete warning
+        service_types: [],
+      },
+    ],
+
+    // Security & Account Setup
+    password: "",
+    password_confirmation: "",
+    is_term_accepted: false,
+    is_information_accurate: false,
   }
 
   const methods = useForm({
@@ -123,175 +214,736 @@ export function JwtSignUpViewCompany() {
   const {
     handleSubmit,
     formState: { isSubmitting },
+    watch,
+    setValue,
+    getValues,
+    trigger,
   } = methods
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await signUp(data)
-      await checkUserSession?.()
-      router.refresh()
+      setLoading(true)
+
+      // Find the numeric country ID from the country label
+      const countryId = findCountryIdByLabel(data.country_id)
+
+      if (!countryId) {
+        throw new Error(`Country not found: ${data.country_id}`)
+      }
+
+      // For Real Estate, set default values for skipped fields
+      if (isRealEstate) {
+        // Set default values for operational details
+        data.company_no_of_employees = data.company_no_of_employees || ""
+        data.company_certified_employer = data.company_certified_employer || ""
+        data.company_collective_agreement = data.company_collective_agreement || ""
+        data.company_applied_work_permit = data.company_applied_work_permit || ""
+        data.company_non_eu_hires = data.company_non_eu_hires || ""
+
+        // Set default values for services required
+        data.country_services = data.country_services || [
+          {
+            country_id: countryId,
+            service_types: ["3"], // Default to "Property Listing & Housing Solutions"
+          },
+        ]
+      }
+
+      // Format country_services properly by converting country names to integer IDs
+      const formattedCountryServices =
+        data.country_services?.map((service) => {
+          const serviceCountryId = findCountryIdByLabel(service.country_id)
+
+          if (!serviceCountryId) {
+            throw new Error(`Country not found in services: ${service.country_id}`)
+          }
+
+          return {
+            country_id: serviceCountryId,
+            service_types: service.service_types || [],
+          }
+        }) || []
+
+      // Format the data according to the API requirements
+      const formattedData = {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        password_confirmation: data.password_confirmation,
+        company_reg_no: data.company_reg_no,
+        company_reg_date: data.company_reg_date,
+        company_type_id: data.company_type_id,
+        company_business_type: data.company_business_type,
+        company_web: data.company_web,
+        address: data.address,
+        city: data.city,
+        postal_code: data.postal_code,
+        country_id: countryId,
+        contact_number: data.contact_number,
+        company_contact_person_name: data.company_contact_person_name,
+        company_contact_person_role: data.company_contact_person_role,
+        company_contact_sec_person_name: data.company_contact_sec_person_name,
+        company_contact_sec_person_email: data.company_contact_sec_person_email,
+        company_no_of_employees: data.company_no_of_employees,
+        company_certified_employer: data.company_certified_employer,
+        company_collective_agreement: data.company_collective_agreement,
+        company_applied_work_permit: data.company_applied_work_permit,
+        company_non_eu_hires: data.company_non_eu_hires,
+        is_information_accurate: data.is_information_accurate ? 1 : 0,
+        is_term_accepted: data.is_term_accepted ? 1 : 0,
+        country_services: formattedCountryServices,
+      }
+
+      console.log("Formatted data being sent:", formattedData)
+
+      // Send the data directly using axios
+      const response = await axios.post(
+        "https://api.swedenrelocators.se/api/companyClientRegistration",
+        formattedData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      )
+
+      console.log("API response", response)
+
+      if (response.data) {
+        // Show success toast
+
+        // Instead of calling signUp, directly set the session with the token from the response
+        if (response.data.data && response.data.data.token) {
+          localStorage.setItem("authToken", response.data.data.token)
+          setSession(response.data.data.token)
+          await checkUserSession?.()
+
+          // Short delay to allow the user to see the success message
+          setTimeout(() => {
+            router.refresh()
+          }, 1500)
+        } else {
+          // If there's no token in the response, just redirect to login
+          toast.success("Account created sucessfully")
+
+          // Short delay to allow the user to see the success message
+          setTimeout(() => {
+            router.push(paths.auth.jwt.signIn)
+          }, 1500)
+        }
+      }
     } catch (error) {
-      console.error(error)
-      setErrorMsg(typeof error === "string" ? error : error.message)
+      console.error("Error during sign-up:", error)
+
+      // Show error toast
+      const errorMessage =
+        error.response?.data?.message ||
+        (typeof error === "string" ? error : error.message) ||
+        "Registration failed. Please try again."
+
+      toast.error(errorMessage)
+      setErrorMsg(errorMessage)
+    } finally {
+      setLoading(false)
     }
   })
 
+  const [isRealEstate, setIsRealEstate] = useState(false)
+
+  const handleIndustryChange = (event) => {
+    const selectedIndustry = event.target.value
+    console.log(selectedIndustry)
+    setIsRealEstate(selectedIndustry === "15")
+    // Make sure to update the form value
+    setValue("company_business_type", selectedIndustry)
+    if (selectedIndustry === "15") {
+      // Set default values for skipped fields
+      setValue("company_no_of_employees", "1-10")
+      setValue("company_certified_employer", "No")
+      setValue("company_collective_agreement", "No")
+      setValue("company_applied_work_permit", "No")
+      setValue("company_non_eu_hires", "No")
+      setValue("country_services", [
+        {
+          country_id: getValues("country_id"),
+          service_types: ["3"],
+        },
+      ])
+    }
+  }
+
+  const handleNext = () => {
+    if (activeStep === 1 && isRealEstate) {
+      setActiveStep(4)
+    } else if (activeStep < steps.length - 1) {
+      setActiveStep((prevActiveStep) => prevActiveStep + 1)
+    }
+  }
+
+  const handleBack = () => {
+    if (activeStep === 4 && isRealEstate) {
+      // Skip back to step 1 for Real Estate industry
+      setActiveStep(1)
+    } else {
+      setActiveStep((prevActiveStep) => prevActiveStep - 1)
+    }
+  }
+
+  // Handle adding a service type to a country
+  const handleAddServiceType = (countryIndex, serviceType) => {
+    const currentServices = getValues(`country_services[${countryIndex}].service_types`) || []
+
+    // Check if the service type is already selected
+    if (!currentServices.includes(serviceType)) {
+      setValue(`country_services[${countryIndex}].service_types`, [...currentServices, serviceType], {
+        shouldValidate: true,
+      })
+    } else {
+      // Remove the service type if it's already selected
+      setValue(
+        `country_services[${countryIndex}].service_types`,
+        currentServices.filter((type) => type !== serviceType),
+        { shouldValidate: true },
+      )
+    }
+  }
+  const findCountryIdByLabel = useCallback((countryLabel) => {
+    if (!countryLabel) return null
+    const country = countries.find((c) => c.label === countryLabel)
+    return country ? Number(country.id) : null // Ensure it's a number
+  }, [])
+  const findCountryLabelById = (countryId) => {
+    const country = countries.find((c) => c.id === Number(countryId))
+    return country ? country.label : null
+  }
+
+  // Handle adding a new country service
+  const handleAddCountryService = () => {
+    const currentServices = getValues("country_services") || []
+    const updatedServices = [
+      ...currentServices,
+      {
+        country_id: null, // Changed from empty string to null to fix Autocomplete warning
+        service_types: [],
+      },
+    ]
+    setValue("country_services", updatedServices)
+    setCountryServicesCount((prev) => prev + 1)
+
+    // Show toast notification
+    toast.info("New country service added")
+  }
+
   const YES_NO_OPTIONS = [
-    { value: " ", label: "Choose Option" },
+    { value: "", label: "Choose Option" },
     { value: "Yes", label: "Yes" },
     { value: "No", label: "No" },
   ]
 
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1)
-  }
+  const EMPLOYEE_COUNT_OPTIONS = [
+    { value: "", label: "Select Number of Employees" },
+    { value: "1-10", label: "1-10" },
+    { value: "11-50", label: "11-50" },
+    { value: "51-100", label: "51-100" },
+    { value: "101-500", label: "101-500" },
+    { value: "500+", label: "500+" },
+  ]
 
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1)
+  const ROLE_OPTIONS = [
+    { value: "", label: "Select Role" },
+    { value: "HR", label: "HR" },
+    { value: "Manager", label: "Manager" },
+    { value: "Director", label: "Director" },
+    { value: "CEO", label: "CEO" },
+    { value: "Assistant", label: "Assistant" },
+    { value: "Other", label: "Other" },
+  ]
+
+  const SERVICE_OPTIONS = [
+    { value: "1", label: "Immigration Services for Employees" },
+    { value: "2", label: "Employer of Record (EOR) & Payroll Services" },
+    { value: "3", label: "Property Listing & Housing Solutions" },
+    { value: "4", label: "Logistics & Relocation Solutions" },
+    { value: "5", label: "Pet Relocation Assistance" },
+    { value: "6", label: "Financial & Tax Solutions" },
+    { value: "7", label: "Using as an Employee Management Tool" },
+  ]
+
+  // Custom isOptionEqualToValue function for Autocomplete
+  const isOptionEqualToValue = (option, value) => {
+    if (!value) return false
+    return option.label === value || option.label === value.label
   }
 
   const renderForm = (
     <Box gap={3} display="flex" flexDirection="column">
-      {activeStep === 0 ? (
+      {activeStep === 0 && (
         <>
-          {/* Page 1 fields */}
-          {/* Name and Email */}
+          {/* Company Information */}
           <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: "column", sm: "row" }}>
-            <Field.Text name="name" label="Company Name" InputLabelProps={{ shrink: true }} />
-            <Field.Text name="email" label="Email" InputLabelProps={{ shrink: true }} />
+            <Field.Text name="name" label="Company Name" />
+            <Field.Text name="company_web" label="Website" placeholder="https://example.com" />
           </Box>
 
-          {/* Password and Confirmation */}
+          <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: "column", sm: "row" }}>
+            <Field.Text name="company_reg_no" label="Registration Number/VAT" />
+            <Field.DatePicker name="company_reg_date" label="Registration Date" />
+          </Box>
+
+          <Field.Select
+            native
+            name="company_business_type"
+            label="Company Industry / Sector"
+            onChange={handleIndustryChange}
+            InputLabelProps={{ shrink: true }}
+            value={watch("company_business_type")}
+          >
+            <option value="">Select Industry</option>
+            {businessTypes.map((type) => (
+              <option key={type.id} value={type.id}>
+                {type.name}
+              </option>
+            ))}
+          </Field.Select>
+
+          <Field.Select native name="company_type_id" label="Company Type" InputLabelProps={{ shrink: true }}>
+            <option value="">Select Company Type</option>
+            {companyTypes.map((type) => (
+              <option key={type.id} value={type.id}>
+                {type.name}
+              </option>
+            ))}
+          </Field.Select>
+
+          <Field.Text name="address" label="Address" />
+
+          <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: "column", sm: "row" }}>
+            <Field.Text name="city" label="City" sx={{ flex: 1 }} />
+            <Field.CountrySelect
+              name="country_id"
+              label="Country"
+              sx={{ flex: 1 }}
+              isOptionEqualToValue={isOptionEqualToValue}
+            />
+          </Box>
+
+          <Field.Text name="postal_code" label="Postal Code" />
+        </>
+      )}
+
+      {activeStep === 1 && (
+        <>
+          {/* Contact Details */}
+          <Field.Text name="company_contact_person_name" label="Primary Contact Person Name" />
+
+          <Field.Select
+            native
+            name="company_contact_person_role"
+            label="Role in Company"
+            InputLabelProps={{ shrink: true }}
+          >
+            {ROLE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </Field.Select>
+
+          <Field.Text name="email" label="Email Address" type="email" />
+          <Field.Phone name="contact_number" label="Contact Number" />
+
+          <Field.Text name="company_contact_sec_person_name" label="Secondary Contact Person Name (Optional)" />
+
+          <Field.Text
+            name="company_contact_sec_person_email"
+            label="Secondary Contact Person Email (Optional)"
+            type="email"
+          />
+        </>
+      )}
+
+      {activeStep === 2 && !isRealEstate && (
+        <>
+          {/* Company Operational Details */}
+          <Field.Select
+            native
+            name="company_no_of_employees"
+            label="Number of Employees"
+            InputLabelProps={{ shrink: true }}
+          >
+            {EMPLOYEE_COUNT_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </Field.Select>
+
+          <Field.Select
+            native
+            name="company_certified_employer"
+            label="Has your company posted jobs on the EURES (European Employment Services) "
+            InputLabelProps={{ shrink: true }}
+          >
+            {YES_NO_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </Field.Select>
+
+          <Field.Select
+            native
+            name="company_collective_agreement"
+            label="Does your company have a collective agreement or employment insurance?"
+            InputLabelProps={{ shrink: true }}
+          >
+            {YES_NO_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </Field.Select>
+
+          <Field.Select
+            native
+            name="company_applied_work_permit"
+            label="Has the company previously applied for a work permit for any employee?"
+            InputLabelProps={{ shrink: true }}
+          >
+            {YES_NO_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </Field.Select>
+
+          <Field.Select
+            native
+            name="company_non_eu_hires"
+            label="Does your company require compliance support for non-EU hires?"
+            InputLabelProps={{ shrink: true }}
+          >
+            {YES_NO_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </Field.Select>
+        </>
+      )}
+      {activeStep === 3 && (
+        <>
+          {(getValues("country_services") || []).map((countryService, index) => (
+            <Box key={index} sx={{ mb: 4, p: 2, border: "1px solid", borderColor: "divider", borderRadius: 1 }}>
+              <Field.CountrySelect
+                name={`country_services[${index}].country_id`}
+                label={`Country ${index + 1}`}
+                isOptionEqualToValue={isOptionEqualToValue}
+              />
+
+              <Box sx={{ mt: 2 }}>
+                <Box component="p" sx={{ mb: 1, fontWeight: "medium" }}>
+                  What services are you looking for in this country? (Select all that apply)
+                </Box>
+
+                {SERVICE_OPTIONS.map((option) => {
+                  const serviceTypes = watch(`country_services[${index}].service_types`) || []
+                  const isChecked = serviceTypes.includes(option.value)
+
+                  return (
+                    <FormControlLabel
+                      key={option.value}
+                      control={
+                        <Checkbox
+                          checked={isChecked}
+                          onChange={() => {
+                            const currentServices = [...(getValues(`country_services[${index}].service_types`) || [])]
+
+                            const newServices = isChecked
+                              ? currentServices.filter((type) => type !== option.value)
+                              : [...currentServices, option.value]
+
+                            setValue(`country_services[${index}].service_types`, newServices, {
+                              shouldValidate: true,
+                              shouldDirty: true,
+                              shouldTouch: true,
+                            })
+
+                            trigger(`country_services[${index}].service_types`)
+                          }}
+                          name={`service_${index}_${option.value}`}
+                        />
+                      }
+                      label={option.label}
+                    />
+                  )
+                })}
+              </Box>
+            </Box>
+          ))}
+
+          <Button variant="outlined" onClick={handleAddCountryService} sx={{ alignSelf: "flex-start" }}>
+            Add Another Country
+          </Button>
+        </>
+      )}
+
+      {activeStep === 4 && (
+        <>
+          {/* Security & Account Setup */}
           <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: "column", sm: "row" }}>
             <Field.Text
               name="password"
-              label="Password"
-              placeholder="6+ characters"
+              label="Create Password"
               type={password.value ? "text" : "password"}
-              InputLabelProps={{ shrink: true }}
+              helperText="Min. 8 characters required"
             />
             <Field.Text
-              name="passwordConfirmation"
-              label="Confirm Password"
-              placeholder="6+ characters"
+              name="password_confirmation"
+              label="Repeat Password"
               type={password.value ? "text" : "password"}
-              InputLabelProps={{ shrink: true }}
             />
           </Box>
 
-          {/* Company Registration */}
-          <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: "column", sm: "row" }}>
-            <Field.Text name="company_reg_no" label="Company Registration Number" InputLabelProps={{ shrink: true }} />
-            <Field.DatePicker
-              name="company_reg_date"
-              label="Company Registration Date"
-              InputLabelProps={{ shrink: true }}
+          <Box sx={{ mt: 2 }}>
+            <Field.Checkbox
+              name="is_information_accurate"
+              label="I confirm that the information provided is accurate and truthful."
             />
+            <Field.Checkbox name="is_term_accepted" label="I agree to the Terms & Conditions and Privacy Policy." />
           </Box>
-
-          {/* Business Code and Website */}
-          <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: "column", sm: "row" }}>
-            <Field.Text name="company_business_code" label="Business Code" InputLabelProps={{ shrink: true }} />
-            <Field.Text name="company_web" label="Company Website" InputLabelProps={{ shrink: true }} />
-          </Box>
-        </>
-      ) : (
-        <>
-          {/* Page 2 fields */}
-          {/* Address and Location */}
-          <Field.CountrySelect
-            name="currently_residing"
-            label="Country Residing In"
-            InputLabelProps={{ shrink: true }}
-          />
-          <Field.Text name="address" label="Address" InputLabelProps={{ shrink: true }} />
-
-          {/* Number of Employees */}
-          <Field.Text name="company_no_of_employees" label="Number of Employees" InputLabelProps={{ shrink: true }} />
-
-          {/* Certified Employer and Job Arbetsförmedlingen */}
-          <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: "column", sm: "row" }}>
-            <Field.Select
-              native
-              name="company_certified_employer"
-              label="Certified Employer"
-              InputLabelProps={{ shrink: true }}
-            >
-              {YES_NO_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </Field.Select>
-
-            <Field.Select
-              native
-              name="company_job_arbetsformedlingen"
-              label="Job Posted on Arbetsförmedlingen"
-              InputLabelProps={{ shrink: true }}
-            >
-              {YES_NO_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </Field.Select>
-          </Box>
-
-          {/* Collective Agreement and Applied for Work Permit */}
-          <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: "column", sm: "row" }}>
-            <Field.Select
-              native
-              name="company_collective_agreement"
-              label="Collective Agreement"
-              InputLabelProps={{ shrink: true }}
-            >
-              {YES_NO_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </Field.Select>
-
-            <Field.Select
-              native
-              name="company_applied_work_permit"
-              label="Applied for Work Permit"
-              InputLabelProps={{ shrink: true }}
-            >
-              {YES_NO_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </Field.Select>
-          </Box>
-
-          {/* HR Contact */}
-          <Field.Text name="company_hr_contact" label="HR Contact Number" InputLabelProps={{ shrink: true }} />
         </>
       )}
 
       {/* Navigation buttons */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+      <Box sx={{ display: "flex", gap:2, mt: 2 }}>
         {activeStep > 0 && (
           <LoadingButton color="inherit" variant="outlined" onClick={handleBack}>
             Back
           </LoadingButton>
         )}
-        {activeStep === 0 ? (
-          <LoadingButton variant="contained" onClick={handleNext}>
+        {activeStep < steps.length - 1 ? (
+          <LoadingButton
+            variant="contained"
+            onClick={() => {
+              // Validate current step before proceeding
+              const fieldsToValidate = []
+
+              // Add fields to validate based on current step
+              if (activeStep === 0) {
+                fieldsToValidate.push(
+                  "name",
+                  "company_web",
+                  "company_reg_no",
+                  "company_reg_date",
+                  "company_type_id",
+                  "company_business_type",
+                  "address",
+                  "city",
+                  "country_id",
+                  "postal_code",
+                )
+              } else if (activeStep === 1) {
+                fieldsToValidate.push(
+                  "company_contact_person_name",
+                  "company_contact_person_role",
+                  "email",
+                  "contact_number",
+                )
+              } else if (activeStep === 2 && !isRealEstate) {
+                fieldsToValidate.push(
+                  "company_no_of_employees",
+                  "company_certified_employer",
+                  "company_collective_agreement",
+                  "company_applied_work_permit",
+                  "company_non_eu_hires",
+                )
+              } else if (activeStep === 3) {
+                // Validate country services
+                const countryServices = getValues("country_services") || []
+                let isValid = true
+
+                for (let i = 0; i < countryServices.length; i += 1) {
+                  if (!countryServices[i].country_id) {
+                    toast.warning(`Please select a country for Country ${i + 1}`)
+                    isValid = false
+                    break
+                  }
+
+                  if (!countryServices[i].service_types || countryServices[i].service_types.length === 0) {
+                    toast.warning(`Please select at least one service for Country ${i + 1}`)
+                    isValid = false
+                    break
+                  }
+                }
+
+                if (!isValid) return
+              }
+
+              // Validate the fields
+              trigger(fieldsToValidate).then((isValid) => {
+                if (isValid) {
+                  handleNext()
+                } else {
+                  toast.warning("Please fill in all required fields correctly")
+                }
+              })
+            }}
+          >
             Next
           </LoadingButton>
         ) : (
           <LoadingButton
-            halfwidth
+            fullWidth
             color="inherit"
             size="large"
-            type="submit"
+            type="button"
+            sx={{ flex: 1 }}
             variant="contained"
-            loading={isSubmitting}
+            loading={isSubmitting || loading}
             loadingIndicator="Creating account..."
+            onClick={async () => {
+              let isValid = true
+              const data = methods.getValues()
+
+              // Validate all fields except for skipped ones if Real Estate is selected
+              if (data.company_business_type === "15") {
+                isValid = await trigger([
+                  "name",
+                  "company_web",
+                  "company_reg_no",
+                  "company_reg_date",
+                  "company_type_id",
+                  "company_business_type",
+                  "address",
+                  "city",
+                  "country_id",
+                  "postal_code",
+                  "company_contact_person_name",
+                  "company_contact_person_role",
+                  "email",
+                  "contact_number",
+                  "password",
+                  "password_confirmation",
+                  "is_term_accepted",
+                  "is_information_accurate",
+                ])
+              } else {
+                isValid = await trigger()
+              }
+
+              if (isValid) {
+                try {
+                  setLoading(true)
+
+                  // Find the numeric country ID from the country label
+                  const countryId = findCountryIdByLabel(data.country_id)
+
+                  if (!countryId) {
+                    throw new Error(`Country not found: ${data.country_id}`)
+                  }
+
+                  // Format country_services properly by converting country names to integer IDs
+                  const formattedCountryServices =
+                    data.country_services?.map((service) => {
+                      const serviceCountryId = findCountryIdByLabel(service.country_id)
+
+                      if (!serviceCountryId) {
+                        throw new Error(`Country not found in services: ${service.country_id}`)
+                      }
+
+                      return {
+                        country_id: serviceCountryId,
+                        service_types: service.service_types || [],
+                      }
+                    }) || []
+
+                  // Format the data according to the API requirements
+                  const formattedData = {
+                    name: data.name,
+                    email: data.email,
+                    password: data.password,
+                    password_confirmation: data.password_confirmation,
+                    company_reg_no: data.company_reg_no,
+                    company_reg_date: data.company_reg_date,
+                    company_type_id: data.company_type_id,
+                    company_business_type: data.company_business_type,
+                    company_web: data.company_web,
+                    address: data.address,
+                    city: data.city,
+                    postal_code: data.postal_code,
+                    country_id: countryId,
+                    contact_number: data.contact_number,
+                    company_contact_person_name: data.company_contact_person_name,
+                    company_contact_person_role: data.company_contact_person_role,
+                    company_contact_sec_person_name: data.company_contact_sec_person_name,
+                    company_contact_sec_person_email: data.company_contact_sec_person_email,
+                    company_no_of_employees: data.company_no_of_employees,
+                    company_certified_employer: data.company_certified_employer,
+                    company_collective_agreement: data.company_collective_agreement,
+                    company_applied_work_permit: data.company_applied_work_permit,
+                    company_non_eu_hires: data.company_non_eu_hires,
+                    is_information_accurate: data.is_information_accurate ? 1 : 0,
+                    is_term_accepted: data.is_term_accepted ? 1 : 0,
+                    country_services: formattedCountryServices,
+                  }
+
+                  console.log("Formatted data being sent:", formattedData)
+
+                  // Send the data directly using axios
+                  const response = await axios.post(
+                    "https://api.swedenrelocators.se/api/companyClientRegistration",
+                    formattedData,
+                    {
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                    },
+                  )
+
+                  console.log("API response", response)
+                  const apiRes= response;
+                  if (response.data) {
+                    // Show success toast
+
+                    // Instead of calling signUp, directly set the session with the token from the response
+                    if (response.data.data && response.data.data.token) {
+                      localStorage.setItem("authToken", response.data.data.token)
+                      setSession(response.data.data.token)
+                      await checkUserSession?.()
+
+                      // Short delay to allow the user to see the success message
+                      setTimeout(() => {
+                        router.refresh()
+                      }, 1500)
+                    } else {
+                      // If there's no token in the response, just redirect to login
+                      toast.success(apiRes.data.message);
+
+                      // Short delay to allow the user to see the success message
+                      setTimeout(() => {
+                        router.push(paths.auth.jwt.signIn)
+                      }, 1500)
+                    }
+                  }
+                } catch (error) {
+                  console.error("Error during sign-up:", error)
+
+                  // Show error toast
+                  const errorMessage =
+                    error.response?.data?.message ||
+                    (typeof error === "string" ? error : error.message) ||
+                    "Registration failed. Please try again."
+
+                  toast.error(errorMessage)
+                  setErrorMsg(errorMessage)
+                } finally {
+                  setLoading(false)
+                }
+              } else {
+                toast.error("Please fill in all required fields correctly")
+              }
+            }}
           >
             Create account
           </LoadingButton>
@@ -313,7 +965,7 @@ export function JwtSignUpViewCompany() {
           p: 4,
         }}
       >
-        <Box sx={{ display: "flex", width: "100%", maxWidth: "800px" }}>
+        <Box sx={{ display: "flex", width: "100%", maxWidth: "1500px" }}>
           {/* Form */}
           <Paper
             sx={{
@@ -323,6 +975,7 @@ export function JwtSignUpViewCompany() {
               borderColor: "divider",
               borderRadius: 2,
               mr: 2,
+              maxWidth: "1000px", // Increased from 800px
             }}
           >
             <FormHead
@@ -344,9 +997,7 @@ export function JwtSignUpViewCompany() {
               </Alert>
             )}
 
-            <Form methods={methods} onSubmit={onSubmit}>
-              {renderForm}
-            </Form>
+            <Form methods={methods}>{renderForm}</Form>
 
             <SignUpTerms />
           </Paper>
@@ -364,11 +1015,19 @@ export function JwtSignUpViewCompany() {
             }}
           >
             <Stepper activeStep={activeStep} orientation="vertical">
-              {steps.map((label) => (
-                <Step key={label}>
-                  <StepLabel>{label}</StepLabel>
-                </Step>
-              ))}
+              {steps
+                .filter((_, index) => {
+                  // Hide steps 2 (index 2) and 3 (index 3) when Real Estate is selected
+                  if (watch("company_business_type") === "15" && (index === 2 || index === 3)) {
+                    return false
+                  }
+                  return true
+                })
+                .map((label) => (
+                  <Step key={label}>
+                    <StepLabel>{label}</StepLabel>
+                  </Step>
+                ))}
             </Stepper>
           </Paper>
         </Box>
@@ -376,3 +1035,4 @@ export function JwtSignUpViewCompany() {
     </Stack>
   )
 }
+
