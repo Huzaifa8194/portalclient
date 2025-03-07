@@ -912,7 +912,6 @@ export function JwtSignUpViewCompany() {
                       setSession(response.data.data.token)
                       await checkUserSession?.()
 
-                      // Short delay to allow the user to see the success message
                       setTimeout(() => {
                         router.refresh()
                       }, 1500)
