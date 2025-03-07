@@ -917,7 +917,6 @@ export function JwtSignUpViewCompany() {
                         router.refresh()
                       }, 1500)
                     } else {
-                      // If there's no token in the response, just redirect to login
                       toast.success(apiRes.data.message);
 
                       // Short delay to allow the user to see the success message
