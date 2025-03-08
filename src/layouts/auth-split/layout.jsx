@@ -6,8 +6,6 @@ import { useLocation } from "react-router-dom"
 import { paths } from "src/routes/paths"
 import { RouterLink } from "src/routes/components"
 
-import { CONFIG } from "src/config-global"
-
 import { Logo } from "src/components/logo"
 
 import { Section } from "./section"
@@ -22,10 +20,11 @@ export function AuthSplitLayout({ sx, section, children, header }) {
   const layoutQuery = "md"
   const location = useLocation()
 
-  // Determine if we're on the company signup, partner signup, or private signup page
+  // Determine if we're on the company signup, partner signup, private signup, or sign-in-options page
   const isCompanySignup = location.pathname.includes("sign-up-company")
   const isPartnerSignup = location.pathname.includes("sign-up-partner")
   const isPrivateSignup = location.pathname.includes("sign-up-options")
+  const isPrivateSignin = location.pathname.includes("sign-in-options")
 
   // Determine the page type for the Section component
   let pageType = ""
@@ -35,6 +34,8 @@ export function AuthSplitLayout({ sx, section, children, header }) {
     pageType = "partner-signup"
   } else if (isPrivateSignup) {
     pageType = "private-signup"
+  } else if (isPrivateSignin) {
+    pageType = "private-signin"
   }
 
   return (
@@ -84,63 +85,68 @@ export function AuthSplitLayout({ sx, section, children, header }) {
       sx={sx}
     >
       <Main layoutQuery={layoutQuery}>
-      <Section
-  title={section?.title}
-  layoutQuery={layoutQuery}
-  imgUrl={section?.imgUrl}
-  method="social" // Dummy value to avoid disabling icons
-  subtitle={section?.subtitle}
-  pageType={pageType}
-  methods={[
-    // Social Media Icons
-    {
-      label: "Facebook",
-      path: "https://www.facebook.com/swedenrelocators", // Replace with your Facebook link
-      icon: "/socials/facebook.png",
-    },
-    {
-      label: "Instagram",
-      path: "https://www.instagram.com/swedenrelocators", // Replace with your Instagram link
-      icon: "/socials/insta.png",
-    },
-    {
-      label: "TikTok",
-      path: "https://www.tiktok.com/@swedenrelocators", // Replace with your TikTok link
-      icon: "/socials/tiktok.png",
-    },
-  ]}
-  slots={{
-    bottomArea: (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          gap: 2,
-        }}
-      >
-        {/* Play Store Icon */}
-        <Link href="https://play.google.com/store/apps/details?id=yourapp" target="_blank" rel="noopener noreferrer">
-          <img
-            src="/socials/play-store.png"
-            alt="Play Store"
-            style={{ width: "140px", height: "auto" }} // Increased width
-          />
-        </Link>
-        {/* App Store Icon */}
-        <Link href="https://apps.apple.com/app/yourapp" target="_blank" rel="noopener noreferrer">
-          <img
-            src="/socials/app-store.png"
-            alt="App Store"
-            style={{ width: "140px", height: "auto" }} // Increased width
-          />
-        </Link>
-      </Box>
-    ),
-  }}
-/>
-        
+        <Section
+          title={section?.title}
+          layoutQuery={layoutQuery}
+          imgUrl={section?.imgUrl}
+          method="social" // Dummy value to avoid disabling icons
+          subtitle={section?.subtitle}
+          pageType={pageType}
+          methods={[
+            // Social Media Icons
+            {
+              label: "Facebook",
+              path: "https://www.facebook.com/swedenrelocators", // Replace with your Facebook link
+              icon: "/socials/facebook.png",
+            },
+            {
+              label: "Instagram",
+              path: "https://www.instagram.com/swedenrelocators", // Replace with your Instagram link
+              icon: "/socials/insta.png",
+            },
+            {
+              label: "TikTok",
+              path: "https://www.tiktok.com/@swedenrelocators", // Replace with your TikTok link
+              icon: "/socials/tiktok.png",
+            },
+          ]}
+          slots={{
+            bottomArea: (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: 2,
+                }}
+              >
+                {/* Play Store Icon */}
+                <Link
+                  href="https://play.google.com/store/apps/details?id=yourapp"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img
+                    src="/socials/play-store.png"
+                    alt="Play Store"
+                    style={{ width: "140px", height: "auto" }} // Increased width
+                  />
+                </Link>
+                {/* App Store Icon */}
+                <Link href="https://apps.apple.com/app/yourapp" target="_blank" rel="noopener noreferrer">
+                  <img
+                    src="/socials/app-store.png"
+                    alt="App Store"
+                    style={{ width: "140px", height: "auto" }} // Increased width
+                  />
+                </Link>
+              </Box>
+            ),
+          }}
+        />
+
         <Content layoutQuery={layoutQuery}>{children}</Content>
       </Main>
     </LayoutSection>
   )
 }
+
