@@ -1,9 +1,10 @@
 "use client"
 
 import { z as zod } from "zod"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import dayjs from "dayjs"
 
 import Box from "@mui/material/Box"
 import Link from "@mui/material/Link"
@@ -21,9 +22,9 @@ import StepLabel from "@mui/material/StepLabel"
 import { paths } from "src/routes/paths"
 import { useRouter } from "src/routes/hooks"
 import { RouterLink } from "src/routes/components"
+import { toast } from "src/components/snackbar"
 
 import { useBoolean } from "src/hooks/use-boolean"
-
 import { Iconify } from "src/components/iconify"
 import { Form, Field } from "src/components/hook-form"
 
@@ -41,9 +42,33 @@ export const SignUpSchema = zod
     dateOfBirth: zod
       .string()
       .refine((date) => !Number.isNaN(Date.parse(date)), { message: "Date of birth must be a valid date!" }),
-    nationality: zod.string().min(1, { message: "Nationality is required!" }),
-    placeofbirth: zod.string().min(1, { message: "Place of Birth is required!" }),
-    countryresiding: zod.string().min(1, { message: "Country Residing In is required!" }),
+    nationality: zod
+      .union([zod.string().min(1, { message: "Country is required!" }), zod.number().int().positive()])
+      .transform((value) => {
+        if (typeof value === "string") {
+          const numValue = Number.parseInt(value, 10)
+          return !Number.isNaN(numValue) ? numValue : value
+        }
+        return value
+      }),
+    placeofbirth: zod
+      .union([zod.string().min(1, { message: "Country is required!" }), zod.number().int().positive()])
+      .transform((value) => {
+        if (typeof value === "string") {
+          const numValue = Number.parseInt(value, 10)
+          return !Number.isNaN(numValue) ? numValue : value
+        }
+        return value
+      }),
+    countryresiding: zod
+      .union([zod.string().min(1, { message: "Country is required!" }), zod.number().int().positive()])
+      .transform((value) => {
+        if (typeof value === "string") {
+          const numValue = Number.parseInt(value, 10)
+          return !Number.isNaN(numValue) ? numValue : value
+        }
+        return value
+      }),
     address: zod.string().min(1, { message: "Address is required!" }),
     city: zod.string().min(1, { message: "City is required!" }),
     postalCode: zod.string().min(1, { message: "PostalCode is required!" }),
@@ -88,20 +113,38 @@ export function JwtSignUpView() {
   const [genderOptions, setGenderOptions] = useState([{ value: "Choose Option", label: "Choose Option" }])
   const [isLoadingGenders, setIsLoadingGenders] = useState(true)
   const [activeStep, setActiveStep] = useState(0)
-  const steps = ["Step 1", "Step 2", "Step 3"]
+  const [steps, setSteps] = useState(["Step 1", "Step 2", "Step 3"])
 
-  const handleNext = () => {
-    if (activeStep === 1) {
-      const { nationality, placeofbirth, countryresiding } = methods.getValues()
-      if (!nationality || !placeofbirth || !countryresiding) {
-        setErrorMsg("Please fill in all required fields before proceeding.")
-        return
-      }
+  const handleNext = (e) => {
+    // Prevent form submission
+    e.preventDefault()
+
+    if (activeStep === 0) {
+      // Validate step 1 fields
+      methods.trigger(["firstName", "lastName", "email", "password", "password_confirmation"]).then((isValid) => {
+        if (isValid) {
+          setActiveStep((prevActiveStep) => prevActiveStep + 1)
+        } else {
+          toast.error("Please fill in all required fields correctly")
+        }
+      })
+    } else if (activeStep === 1) {
+      // Validate step 2 fields
+      methods.trigger(["dateOfBirth", "nationality", "placeofbirth", "countryresiding", "gender"]).then((isValid) => {
+        if (isValid) {
+          setActiveStep((prevActiveStep) => prevActiveStep + 1)
+        } else {
+          toast.error("Please fill in all required fields correctly")
+        }
+      })
+    } else {
+      setActiveStep((prevActiveStep) => prevActiveStep + 1)
     }
-    setActiveStep((prevActiveStep) => prevActiveStep + 1)
   }
 
-  const handleBack = () => {
+  const handleBack = (e) => {
+    // Prevent form submission
+    e.preventDefault()
     setActiveStep((prevActiveStep) => prevActiveStep - 1)
   }
 
@@ -123,11 +166,11 @@ export function JwtSignUpView() {
           console.log(formattedOptions)
         } else {
           console.error("Unexpected API response structure:", result)
-          setErrorMsg("Failed to load gender options: Invalid response format")
+          toast.error("Failed to load gender options: Invalid response format")
         }
       } catch (error) {
         console.error("Error fetching gender options:", error)
-        setErrorMsg("Failed to load gender options")
+        toast.error("Failed to load gender options")
       } finally {
         setIsLoadingGenders(false)
       }
@@ -157,6 +200,7 @@ export function JwtSignUpView() {
   const methods = useForm({
     resolver: zodResolver(SignUpSchema),
     defaultValues,
+    mode: "onChange",
   })
 
   const {
@@ -164,35 +208,11 @@ export function JwtSignUpView() {
     formState: { isSubmitting },
   } = methods
 
-  const onSubmit = handleSubmit(async (data) => {
-    try {
-      const formData = {
-        name: `${data.firstName} ${data.lastName}`,
-        email: data.email,
-        password: data.password,
-        password_confirmation: data.password_confirmation,
-        dob: data.dateOfBirth,
-        nationality: data.nationality ? data.nationality : "",
-        place_of_birth: data.placeofbirth ? data.placeofbirth : "",
-        currently_residing: data.countryresiding ? data.countryresiding : "",
-        address: data.address,
-        contact_number: data.phonenumber,
-        city: data.city,
-        postal: data.postalCode,
-        gender: data.gender === "Choose Option" ? "" : data.gender.toString(),
-        is_term_accepted: data.is_term_accepted ? 1 : 0,
-      }
-
-      console.log("Submitting form data:", formData) // For debugging
-
-      await signUp(formData)
-      await checkUserSession?.()
-      router.refresh()
-    } catch (error) {
-      console.error("Submission error:", error)
-      setErrorMsg(typeof error === "string" ? error : error.message || "An error occurred during sign up")
-    }
-  })
+  const findCountryIdByLabel = useCallback((countryLabel) => {
+    if (!countryLabel) return null
+    // Just return the country label/name directly, as getCountryId will handle the conversion
+    return countryLabel
+  }, [])
 
   const renderForm = (
     <Box gap={3} display="flex" flexDirection="column">
@@ -238,7 +258,12 @@ export function JwtSignUpView() {
       {activeStep === 1 && (
         // Step 2 fields
         <>
-          <Field.DatePicker name="dateOfBirth" label="Date of birth" />
+          <Field.DatePicker
+            name="dateOfBirth"
+            label="Date of birth"
+            maxDate={dayjs().subtract(18, "year")}
+            helperText="You must be at least 18 years old to register"
+          />
           <Field.CountrySelect name="nationality" label="Nationality" helperText="Please select a country" />
           <Field.CountrySelect name="placeofbirth" label="Place of Birth" helperText="Please select a country" />
           <Field.CountrySelect
@@ -263,7 +288,7 @@ export function JwtSignUpView() {
           <Field.Text name="address" label="Address" />
           <Field.Text name="city" label="City" />
           <Field.Text name="postalCode" label="Postal Code" />
-          <Field.Text
+          <Field.Phone
             name="phonenumber"
             label="Phone number"
             placeholder="+1234567890"
@@ -275,16 +300,78 @@ export function JwtSignUpView() {
 
       <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
         {activeStep > 0 && (
-          <LoadingButton color="inherit" variant="outlined" onClick={handleBack}>
+          <LoadingButton
+            color="inherit"
+            variant="outlined"
+            onClick={handleBack}
+            type="button" // Explicitly set type to button to prevent form submission
+          >
             Back
           </LoadingButton>
         )}
         {activeStep < steps.length - 1 ? (
-          <LoadingButton variant="contained" onClick={handleNext}>
+          <LoadingButton
+            variant="contained"
+            onClick={handleNext}
+            type="button" // Explicitly set type to button to prevent form submission
+          >
             Next
           </LoadingButton>
         ) : (
-          <LoadingButton color="inherit" size="large" type="submit" variant="contained" loading={isSubmitting}>
+          <LoadingButton
+            color="inherit"
+            size="large"
+            type="button" // Changed from submit to button to prevent automatic form submission
+            variant="contained"
+            loading={isSubmitting}
+            onClick={async (e) => {
+              e.preventDefault() // Prevent any default form submission
+
+              try {
+                // Validate all fields
+                const isValid = await methods.trigger()
+                if (!isValid) {
+                  toast.error("Please fill in all required fields correctly")
+                  return
+                }
+
+                // Get the form data
+                const data = methods.getValues()
+
+                // Get country names - don't convert to IDs here, let action.js handle that
+                const Cnationality = findCountryIdByLabel(data.nationality)
+                const placeofbirth = findCountryIdByLabel(data.placeofbirth)
+                const currentlyResiding = findCountryIdByLabel(data.countryresiding)
+
+                const formData = {
+                  name: `${data.firstName} ${data.lastName}`,
+                  email: data.email,
+                  password: data.password,
+                  password_confirmation: data.password_confirmation,
+                  dob: data.dateOfBirth,
+                  nationality: Cnationality,
+                  place_of_birth: placeofbirth,
+                  currently_residing: currentlyResiding,
+                  address: data.address,
+                  contact_number: data.phonenumber,
+                  city: data.city,
+                  postal: data.postalCode,
+                  gender: data.gender === "Choose Option" ? "" : data.gender.toString(),
+                  is_term_accepted: data.is_term_accepted ? 1 : 0,
+                }
+
+                console.log("Submitting form data:", formData) // For debugging
+
+                await signUp(formData)
+                toast.success("Account created successfully!")
+                await checkUserSession?.()
+                // router.refresh()
+              } catch (error) {
+                console.error("Submission error:", error)
+                toast.error(typeof error === "string" ? error : error.message || "An error occurred during sign up")
+              }
+            }}
+          >
             Create account
           </LoadingButton>
         )}
@@ -334,7 +421,7 @@ export function JwtSignUpView() {
             </Alert>
           )}
 
-          <Form methods={methods} onSubmit={onSubmit}>
+          <Form methods={methods} onSubmit={(e) => e.preventDefault()}>
             {renderForm}
           </Form>
 

@@ -1,28 +1,20 @@
-import { useRef, useEffect, useCallback } from 'react';
+"use client"
 
-// ----------------------------------------------------------------------
+import { useRef, useEffect } from "react"
 
 export function useMessagesScroll(messages) {
-  const messagesEndRef = useRef(null);
+  const messagesEndRef = useRef(null)
 
-  const scrollToBottom = useCallback(() => {
-    if (!messages) {
-      return;
-    }
-
-    if (!messagesEndRef.current) {
-      return;
-    }
-
+  const scrollToBottom = () => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
     }
-  }, [messages]);
+  }
 
   useEffect(() => {
-    scrollToBottom();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages]);
+    scrollToBottom()
+  }, [messages])
 
-  return { messagesEndRef };
+  return { messagesEndRef, scrollToBottom }
 }
+

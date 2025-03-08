@@ -1,128 +1,93 @@
-import { useRef, useMemo, useState, useCallback } from 'react';
+"use client"
 
-import Stack from '@mui/material/Stack';
-import InputBase from '@mui/material/InputBase';
-import IconButton from '@mui/material/IconButton';
+import { useRef, useState, useCallback } from "react"
+import Box from "@mui/material/Box"
+import Stack from "@mui/material/Stack"
+import IconButton from "@mui/material/IconButton"
+import InputBase from "@mui/material/InputBase"
 
-import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hooks';
+import { Iconify } from "src/components/iconify"
 
-import { today } from 'src/utils/format-time';
-
-import { sendMessage, createConversation } from 'src/actions/chat';
-
-import { Iconify } from 'src/components/iconify';
-
-import { useMockedUser } from 'src/auth/hooks';
-
-import { initialConversation } from './utils/initial-conversation';
-
-// ----------------------------------------------------------------------
-
-export function ChatMessageInput({
-  disabled,
-  recipients,
-  onAddRecipients,
-  selectedConversationId,
-}) {
-  const router = useRouter();
-
-  const { user } = useMockedUser();
-
-  const fileRef = useRef(null);
-
-  const [message, setMessage] = useState('');
-
-  const myContact = useMemo(
-    () => ({
-      id: `${user?.id}`,
-      role: `${user?.role}`,
-      email: `${user?.email}`,
-      address: `${user?.address}`,
-      name: `${user?.displayName}`,
-      lastActivity: today(),
-      avatarUrl: `${user?.photoURL}`,
-      phoneNumber: `${user?.phoneNumber}`,
-      status: 'online',
-    }),
-    [user]
-  );
-
-  const { messageData, conversationData } = initialConversation({
-    message,
-    recipients,
-    me: myContact,
-  });
+export function ChatMessageInput({ disabled, onSendMessage }) {
+  const fileRef = useRef(null)
+  const [message, setMessage] = useState("")
 
   const handleAttach = useCallback(() => {
     if (fileRef.current) {
-      fileRef.current.click();
+      fileRef.current.click()
     }
-  }, []);
+  }, [])
 
   const handleChangeMessage = useCallback((event) => {
-    setMessage(event.target.value);
-  }, []);
+    setMessage(event.target.value)
+  }, [])
 
-  const handleSendMessage = useCallback(
-    async (event) => {
-      if (event.key !== 'Enter' || !message) return;
+  const handleSendMessage = useCallback(() => {
+    if (!message) return
 
-      try {
-        if (selectedConversationId) {
-          // If the conversation already exists
-          await sendMessage(selectedConversationId, messageData);
-        } else {
-          // If the conversation does not exist
-          const res = await createConversation(conversationData);
-          router.push(`${paths.dashboard.chat}?id=${res.conversation.id}`);
+    if (onSendMessage) {
+      onSendMessage(message)
+    }
+    setMessage("")
+  }, [message, onSendMessage])
 
-          onAddRecipients([]);
-        }
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setMessage('');
-      }
-    },
-    [conversationData, message, messageData, onAddRecipients, router, selectedConversationId]
-  );
+  const handleKeyUp = (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      handleSendMessage()
+    }
+  }
 
   return (
-    <>
-      <InputBase
-        name="chat-message"
-        id="chat-message-input"
-        value={message}
-        onKeyUp={handleSendMessage}
-        onChange={handleChangeMessage}
-        placeholder="Type a message"
-        disabled={disabled}
-        startAdornment={
-          <IconButton>
-            <Iconify icon="eva:smiling-face-fill" />
+    <Box
+      sx={{
+        p: 2,
+        borderTop: (theme) => `1px solid ${theme.palette.divider}`,
+        bgcolor: "background.default",
+      }}
+    >
+      <Stack direction="row" spacing={2} alignItems="center">
+        <InputBase
+          fullWidth
+          value={message}
+          disabled={disabled}
+          placeholder="Type a message"
+          onChange={handleChangeMessage}
+          onKeyUp={handleKeyUp}
+          sx={{
+            p: 1.5,
+            borderRadius: 1,
+            bgcolor: "background.neutral",
+            "&.Mui-disabled": {
+              bgcolor: "action.disabledBackground",
+            },
+          }}
+        />
+
+        <Stack direction="row" spacing={1}>
+          <IconButton onClick={handleAttach} disabled={disabled}>
+            <Iconify icon="solar:gallery-add-bold" />
           </IconButton>
-        }
-        endAdornment={
-          <Stack direction="row" sx={{ flexShrink: 0 }}>
-            <IconButton onClick={handleAttach}>
-              <Iconify icon="solar:gallery-add-bold" />
-            </IconButton>
-            <IconButton onClick={handleAttach}>
-              <Iconify icon="eva:attach-2-fill" />
-            </IconButton>
+          <IconButton onClick={handleAttach} disabled={disabled}>
+            <Iconify icon="eva:attach-2-fill" />
+          </IconButton>
+          <IconButton
+            onClick={handleSendMessage}
+            disabled={!message || disabled}
+            sx={{
+              bgcolor: (theme) => (message ? theme.palette.primary.main : "background.neutral"),
+              color: (theme) => (message ? theme.palette.primary.contrastText : "text.disabled"),
+              "&:hover": {
+                bgcolor: (theme) => (message ? theme.palette.primary.dark : "background.neutral"),
+              },
+            }}
+          >
+            <Iconify icon="solar:send-bold" />
+          </IconButton>
+        </Stack>
+      </Stack>
 
-          </Stack>
-        }
-        sx={{
-          px: 1,
-          height: 56,
-          flexShrink: 0,
-          borderTop: (theme) => `solid 1px ${theme.vars.palette.divider}`,
-        }}
-      />
-
-      <input type="file" ref={fileRef} style={{ display: 'none' }} />
-    </>
-  );
+      <input type="file" ref={fileRef} style={{ display: "none" }} accept="image/*,video/*,application/*" />
+    </Box>
+  )
 }
+

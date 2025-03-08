@@ -51,22 +51,13 @@ export function OverviewAnalyticsView({ caseNo, authority, application, onBack }
     }
   })
 
-  // Get application status from comments if available
+  // Get application status directly from the API data
   const getApplicationStatus = () => {
-    if (!application || !application.comments || !application.comments.length) {
+    if (!application || !application.status) {
       return "Pending"
     }
-
-    // Check the latest comment for status information
-    const latestComment = application.comments[0]
-    if (latestComment.comments && latestComment.comments.includes("approved")) {
-      return "Approved"
-    }
-    if (latestComment.comments && latestComment.comments.includes("rejected")) {
-      return "Rejected"
-    }
-
-    return "Pending"
+    
+    return application.status
   }
 
   // Get application type with proper formatting
@@ -76,8 +67,6 @@ export function OverviewAnalyticsView({ caseNo, authority, application, onBack }
     }
     return application.application_type
   }
-
-
 
   // Change the _timeline definition to include unique IDs
   const _timeline =
@@ -194,4 +183,3 @@ export function OverviewAnalyticsView({ caseNo, authority, application, onBack }
     </DashboardContent>
   )
 }
-

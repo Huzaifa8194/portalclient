@@ -1,27 +1,35 @@
-import { uuidv4 } from 'src/utils/uuidv4';
-import { fSub } from 'src/utils/format-time';
+import { uuidv4 as v4} from 'src/utils/uuidv4';
+import { today } from "src/utils/format-time"
 
 // ----------------------------------------------------------------------
 
-export function initialConversation({ message = '', recipients, me }) {
-  const isGroup = recipients.length > 1;
+export function initialConversation({ message, recipients, me }) {
+  const conversationId = v4()
+  const messageId = v4()
+
+  const createdAt = today()
 
   const messageData = {
-    id: uuidv4(),
-    attachments: [],
+    id: messageId,
     body: message,
-    contentType: 'text',
-    createdAt: fSub({ minutes: 1 }),
+    contentType: "text",
+    attachments: [],
+    createdAt,
     senderId: me.id,
-  };
+  }
 
   const conversationData = {
-    id: isGroup ? uuidv4() : recipients[0]?.id,
+    id: conversationId,
     messages: [messageData],
-    participants: [...recipients, me],
-    type: isGroup ? 'GROUP' : 'ONE_TO_ONE',
+    participants: [me, ...recipients],
+    type: recipients.length > 1 ? "GROUP" : "ONE_TO_ONE",
     unreadCount: 0,
-  };
+    createdAt,
+  }
 
-  return { messageData, conversationData };
+  return {
+    messageData,
+    conversationData,
+  }
 }
+
