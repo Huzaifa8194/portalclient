@@ -23,7 +23,7 @@ import { paths } from "src/routes/paths"
 import { useRouter } from "src/routes/hooks"
 import { RouterLink } from "src/routes/components"
 import { toast } from "src/components/snackbar"
-
+import { countries } from "src/assets/data"
 import { useBoolean } from "src/hooks/use-boolean"
 import { Iconify } from "src/components/iconify"
 import { Form, Field } from "src/components/hook-form"
@@ -209,9 +209,13 @@ export function JwtSignUpView() {
   } = methods
 
   const findCountryIdByLabel = useCallback((countryLabel) => {
-    if (!countryLabel) return null
-    // Just return the country label/name directly, as getCountryId will handle the conversion
-    return countryLabel
+    const country = countries.find((c) => c.label === countryLabel)
+    return country ? country.id : null
+  }, [])
+
+  const findCountryLabelById = useCallback((countryId) => {
+    const country = countries.find((c) => c.id === countryId)
+    return country ? country.label : null
   }, [])
 
   const renderForm = (
@@ -338,10 +342,10 @@ export function JwtSignUpView() {
                 // Get the form data
                 const data = methods.getValues()
 
-                // Get country names - don't convert to IDs here, let action.js handle that
-                const Cnationality = findCountryIdByLabel(data.nationality)
-                const placeofbirth = findCountryIdByLabel(data.placeofbirth)
-                const currentlyResiding = findCountryIdByLabel(data.countryresiding)
+                // Get country labels (names) instead of IDs
+                const nationalityLabel = findCountryLabelById(data.nationality)
+                const placeOfBirthLabel = findCountryLabelById(data.placeofbirth)
+                const currentlyResidingLabel = findCountryLabelById(data.countryresiding)
 
                 const formData = {
                   name: `${data.firstName} ${data.lastName}`,
@@ -349,9 +353,9 @@ export function JwtSignUpView() {
                   password: data.password,
                   password_confirmation: data.password_confirmation,
                   dob: data.dateOfBirth,
-                  nationality: Cnationality,
-                  place_of_birth: placeofbirth,
-                  currently_residing: currentlyResiding,
+                  nationality: data.nationality,
+                  place_of_birth: data.placeofbirth,
+                  currently_residing: data.countryresiding,
                   address: data.address,
                   contact_number: data.phonenumber,
                   city: data.city,
@@ -365,7 +369,7 @@ export function JwtSignUpView() {
                 await signUp(formData)
                 toast.success("Account created successfully!")
                 await checkUserSession?.()
-                // router.refresh()
+                router.push(paths.auth.jwt.signIn);
               } catch (error) {
                 console.error("Submission error:", error)
                 toast.error(typeof error === "string" ? error : error.message || "An error occurred during sign up")
@@ -452,4 +456,3 @@ export function JwtSignUpView() {
     </Stack>
   )
 }
-

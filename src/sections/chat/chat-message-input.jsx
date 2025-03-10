@@ -23,7 +23,7 @@ export function ChatMessageInput({ disabled, onSendMessage }) {
   }, [])
 
   const handleSendMessage = useCallback(() => {
-    if (!message) return
+    if (!message.trim()) return
 
     if (onSendMessage) {
       onSendMessage(message)
@@ -72,12 +72,12 @@ export function ChatMessageInput({ disabled, onSendMessage }) {
           </IconButton>
           <IconButton
             onClick={handleSendMessage}
-            disabled={!message || disabled}
+            disabled={!message.trim() || disabled}
             sx={{
-              bgcolor: (theme) => (message ? theme.palette.primary.main : "background.neutral"),
-              color: (theme) => (message ? theme.palette.primary.contrastText : "text.disabled"),
+              bgcolor: (theme) => (message.trim() ? theme.palette.primary.main : "background.neutral"),
+              color: (theme) => (message.trim() ? theme.palette.primary.contrastText : "text.disabled"),
               "&:hover": {
-                bgcolor: (theme) => (message ? theme.palette.primary.dark : "background.neutral"),
+                bgcolor: (theme) => (message.trim() ? theme.palette.primary.dark : "background.neutral"),
               },
             }}
           >

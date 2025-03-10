@@ -15,7 +15,7 @@ import { ChatMessageList } from "../chat-message-list"
 import { ChatMessageInput } from "../chat-message-input"
 import { initialConversation } from "../utils/initial-conversation"
 
-import { AppWidgetSummary} from "./app-widget-summary"
+import { AppWidgetSummary } from "./app-widget-summary"
 
 // ----------------------------------------------------------------------
 
@@ -25,6 +25,7 @@ export function ChatView() {
   const searchParams = useSearchParams()
   const selectedConversationId = searchParams.get("id") || ""
   const [recipients, setRecipients] = useState([])
+  const [localMessages, setLocalMessages] = useState([])
 
   const { conversations, conversationsLoading } = useGetConversations()
   const { conversation, conversationError, conversationLoading, mutateConversation } = useGetConversation(
@@ -34,6 +35,13 @@ export function ChatView() {
   const participants = conversation
     ? conversation.participants.filter((participant) => participant.id !== `${user?.id}`)
     : []
+
+  // Initialize local messages from conversation when it loads
+  useEffect(() => {
+    if (conversation && conversation.messages) {
+      setLocalMessages(conversation.messages)
+    }
+  }, [conversation])
 
   useEffect(() => {
     if (conversationError || !selectedConversationId) {
@@ -49,18 +57,20 @@ export function ChatView() {
     (message) => {
       if (!message.trim()) return
 
+      const newMessage = {
+        id: `temp-${Date.now()}`,
+        body: message,
+        contentType: "text",
+        attachments: [],
+        createdAt: new Date().toISOString(),
+        senderId: "me",
+      }
+
+      // Add message to local state immediately for UI update
+      setLocalMessages((prevMessages) => [...prevMessages, newMessage])
+
       if (selectedConversationId) {
         // Add message to existing conversation
-        const newMessage = {
-          id: `temp-${Date.now()}`,
-          body: message,
-          contentType: "text",
-          attachments: [],
-          createdAt: new Date().toISOString(),
-          senderId: "me",
-        }
-
-        // Optimistically update the UI
         if (conversation) {
           const updatedConversation = {
             ...conversation,
@@ -89,6 +99,9 @@ export function ChatView() {
     },
     [selectedConversationId, conversation, recipients, user, router, mutateConversation],
   )
+
+  // Use local messages for display instead of conversation.messages
+  const displayMessages = selectedConversationId ? localMessages : []
 
   return (
     <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
@@ -139,9 +152,9 @@ export function ChatView() {
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column", position: "relative" }}>
           {selectedConversationId ? (
             <ChatMessageList
-              messages={conversation?.messages ?? []}
+              messages={displayMessages}
               participants={participants}
-              loading={conversationLoading}
+              loading={conversationLoading && displayMessages.length === 0}
             />
           ) : (
             <Box

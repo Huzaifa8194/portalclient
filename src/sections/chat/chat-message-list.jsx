@@ -38,33 +38,43 @@ export function ChatMessageList({ messages = [], participants, loading }) {
         scrollBehavior: "smooth",
       }}
     >
-      {messages.map((message) => (
-        <Stack
-          key={message.id}
-          direction="row"
-          spacing={2}
-          sx={{
-            mb: 3,
-            ...(message.senderId === "me" && {
-              ml: "auto",
-              alignItems: "flex-end",
-            }),
-          }}
-        >
-          <Box
+      {messages.length === 0 ? (
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
+          <Typography variant="body2" color="text.secondary">
+            No messages yet. Start a conversation!
+          </Typography>
+        </Box>
+      ) : (
+        messages.map((message) => (
+          <Stack
+            key={message.id}
+            direction="row"
+            spacing={2}
             sx={{
-              p: 1.5,
-              borderRadius: 1,
-              bgcolor: (theme) =>
-                message.senderId === "me" ? theme.palette.primary.main : theme.palette.background.neutral,
-              color: (theme) =>
-                message.senderId === "me" ? theme.palette.primary.contrastText : theme.palette.text.primary,
+              mb: 3,
+              ...(message.senderId === "me" && {
+                ml: "auto",
+                alignItems: "flex-end",
+              }),
             }}
           >
-            <Typography variant="body2">{message.body}</Typography>
-          </Box>
-        </Stack>
-      ))}
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 1,
+                bgcolor: (theme) =>
+                  message.senderId === "me" ? theme.palette.primary.main : theme.palette.background.neutral,
+                color: (theme) =>
+                  message.senderId === "me" ? theme.palette.primary.contrastText : theme.palette.text.primary,
+                maxWidth: "75%",
+                wordBreak: "break-word",
+              }}
+            >
+              <Typography variant="body2">{message.body}</Typography>
+            </Box>
+          </Stack>
+        ))
+      )}
     </Box>
   )
 }
