@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMemo, useEffect, useState } from "react"
 import Grid from "@mui/material/Unstable_Grid2"
-import axios, { endpoints } from "src/utils/axios"
+import axios from "src/utils/axios"
 
 import Box from "@mui/material/Box"
 import Card from "@mui/material/Card"
@@ -87,10 +87,10 @@ export function PostNewEditForm({ currentPost }) {
   useEffect(() => {
     const fetchAppointmentData = async () => {
       try {
-        const [typeResponse, categoriesResponse, timeslotResponse] = await Promise.all([
-          axios.get(endpoints.appointment.type),
-          axios.get(endpoints.appointment.categories),
-          axios.get(endpoints.appointment.timeslot),
+        const [timeslotResponse, typeResponse, categoriesResponse] = await Promise.all([
+          axios.get("https://api.swedenrelocators.se/api/miscellaneous/appointmentTimeSlots"),
+          axios.get("https://api.swedenrelocators.se/api/miscellaneous/appointmentTypes"),
+          axios.get("https://api.swedenrelocators.se/api/miscellaneous/appointmentCategories"),
         ])
 
         console.log("Appointment Types:", typeResponse.data)
@@ -99,8 +99,6 @@ export function PostNewEditForm({ currentPost }) {
 
         setAppointmentTypes(typeResponse.data.data || [])
         setAppointmentCategories(categoriesResponse.data.data || [])
-
-        // Ensure we're setting the correct structure for time slots
         const timeSlots = timeslotResponse.data.data || []
         console.log("Time slots before setting state:", timeSlots)
         setAppointmentTimeSlots(timeSlots)
@@ -125,12 +123,29 @@ export function PostNewEditForm({ currentPost }) {
     }
   })
 
-  const handleApplyPromoCode = () => {
+  const handleApplyPromoCode = async () => {
     const promoCode = getValues("promocode")
-    if (promoCode) {
-      toast.success(`Promo code "${promoCode}" applied successfully!`)
-    } else {
+    if (!promoCode) {
       toast.error("Please enter a promo code.")
+      return
+    }
+
+    try {
+      const response = await axios.post("https://api.swedenrelocators.se/api/miscellaneous/coupon/validate", {
+        code: promoCode,
+        service: "Appointment",
+      })
+
+      if (response.data.success) {
+        toast.success(`Promo code "${promoCode}" applied successfully!`)
+        // might want to store the coupon details or discount amount
+        // in the form state or component state for later use
+      } else {
+        toast.error(response.data.message || "Invalid promo code.")
+      }
+    } catch (error) {
+      console.error("Error validating promo code:", error)
+      toast.error(error.response?.data?.message || "Invalid Promo Code")
     }
   }
 
@@ -158,14 +173,14 @@ export function PostNewEditForm({ currentPost }) {
           time_slot_id: formData.category4,
           description: formData.description,
           is_coupon: formData.promocode ? 1 : 0,
-          net_total_amount: 0, // You need to calculate this based on your business logic
-          total_amount: 0, // You need to calculate this based on your business logic
-          transaction_id: "PENDING", // You may need to generate this or get it from somewhere
-          vat: 0, // You need to calculate this based on your business logic
+          net_total_amount: 0, //  need to calculate this based on business logic
+          total_amount: 0, //  need to calculate this based on  business logic
+          transaction_id: "PENDING", //  may need to generate this or get it from somewhere
+          vat: 0, //  need to calculate this based on your business logic
         }
 
         console.log("Appointment data being sent:", appointmentData)
-        const response = await axios.post(endpoints.appointment.book, appointmentData)
+        const response = await axios.post("https://api.swedenrelocators.se/api/appointment/book", appointmentData)
         console.log("Appointment booked:", response.data)
         toast.success("Appointment booked successfully!")
       } catch (error) {
@@ -261,19 +276,18 @@ export function PostNewEditForm({ currentPost }) {
               <Field.Text name="description" label="Appointment Description" />
             </Box>
 
-            <Stack spacing={3} sx={{ mt: 1.5 }}>
-              <Field.Text name="promocode" label="Do you have a Promo Code" />
+            <Stack spacing={1.5} direction="row" alignItems="center" sx={{ mt: 1.5 }}>
+              <Field.Text name="promocode" label="Do you have a Promo Code?" sx={{ flex: 1, maxWidth: 350 }} />
+              <LoadingButton onClick={handleApplyPromoCode} variant="contained" loading={isSubmitting}>
+                Add Promo Code
+              </LoadingButton>
             </Stack>
 
             <Stack spacing={3} sx={{ mt: 1.5 }}>
               <Field.Checkbox name="agreement" label="I agree to the Appointment Terms & Conditions" sx={{ mt: 3 }} />
             </Stack>
 
-            <Stack spacing={3} direction="row" justifyContent="space-between" sx={{ mt: 3 }}>
-              <LoadingButton onClick={handleApplyPromoCode} variant="contained" loading={isSubmitting}>
-                Add Promo Code
-              </LoadingButton>
-
+            <Stack spacing={3} direction="row" justifyContent="flex-end" sx={{ mt: 3 }}>
               <LoadingButton onClick={handleBookAppointment} variant="contained" loading={isSubmitting}>
                 Book an Appointment
               </LoadingButton>

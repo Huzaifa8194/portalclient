@@ -27,10 +27,14 @@ export function Section({
   const theme = useTheme()
   const location = useLocation()
 
-  // Check if we're on the company signup, partner signup, or private signup page
+  // Check if we're on the company signup, partner signup, private signup, or sign-in-options page
   const isCompanySignup = pageType === "company-signup" || location.pathname.includes("sign-up-company")
   const isPartnerSignup = pageType === "partner-signup" || location.pathname.includes("sign-up-partner")
-  const isPrivateSignup = pageType === "private-signup" || location.pathname.includes("sign-up-options") || location.pathname.includes("sign-up")
+  const isPrivateSignup =
+    pageType === "private-signup" ||
+    location.pathname.includes("sign-up-options") ||
+    location.pathname.includes("sign-up")
+  const isPrivateSignin = location.pathname.includes("sign-in-options")
 
   // Set content based on the page type
   let displayTitle = title
@@ -49,6 +53,10 @@ export function Section({
     displayTitle = "Welcome To A New Digital World"
     displaySubtitle = "of Immigration & Relocation Services"
     displayImgUrl = "/privateSignup.png"
+  } else if (isPrivateSignin) {
+    displayTitle = "Continue Your Relocation Journey"
+    displaySubtitle = "You are entering the digital era of seamless Relocation & Immigration!"
+    displayImgUrl = "/privateSignin.png"
   }
 
   return (
@@ -85,26 +93,16 @@ export function Section({
         </Typography>
 
         {displaySubtitle && (
-          <Typography sx={{ color: "text.secondary", textAlign: "center", mt: 2 }}>
-            {displaySubtitle}
-          </Typography>
+          <Typography sx={{ color: "text.secondary", textAlign: "center", mt: 2 }}>{displaySubtitle}</Typography>
         )}
       </div>
 
-      <Box
-        component="img"
-        alt="Dashboard illustration"
-        src={displayImgUrl}
-        sx={{ width: 1, objectFit: "contain" }}
-      />
+      <Box component="img" alt="Dashboard illustration" src={displayImgUrl} sx={{ width: 1, objectFit: "contain" }} />
 
       {!!methods?.length && (
         <Box component="ul" gap={2} display="flex">
           {methods.map((option) => (
-            <Box
-              key={option.label}
-              component="li"
-            >
+            <Box key={option.label} component="li">
               <Tooltip title={option.label} placement="top">
                 <Link
                   component={RouterLink}
@@ -132,10 +130,13 @@ export function Section({
 
       {/* Render App Store and Play Store icons */}
       {slots?.bottomArea && (
-        <Box sx={{ width: "100%" }}> {/* Removed margin-top */}
+        <Box sx={{ width: "100%" }}>
+          {" "}
+          {/* Removed margin-top */}
           {slots.bottomArea}
         </Box>
       )}
     </Box>
   )
 }
+

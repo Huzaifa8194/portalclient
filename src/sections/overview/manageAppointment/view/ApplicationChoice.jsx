@@ -17,7 +17,7 @@ export function ApplicationChoice() {
 
   const options = [
     {
-      title: 'Government Authority Application',
+      title: 'Government Authority Appointment',
       value: 'Migrationsverket',
       icon: `${CONFIG.assetsDir}/assets/icons/glass/ic-glass-users.svg`,
       color: 'primary',
@@ -25,7 +25,7 @@ export function ApplicationChoice() {
     {
       title: (
         <>
-          Sweden Relocator <br /> Application
+          Sweden Relocator Appointment
         </>
       ),
       value: 'Skatteverket',
