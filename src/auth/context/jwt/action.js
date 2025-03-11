@@ -103,7 +103,7 @@ export const signUp = async ({
     })
 
     // Make the sign-up API call
-    const res = await axios.post(endpoints.auth.signUp, formData, {
+    const res = await axios.post("https://api.swedenrelocators.se/api/clientRegistration", formData, {
       headers: {
         Accept: "application/json",
         "Content-Type": "multipart/form-data",
