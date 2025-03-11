@@ -218,6 +218,12 @@ export function JwtSignUpView() {
     return country ? country.label : null
   }, [])
 
+  // Format date to YYYY-MM-DD
+  const formatDateForBackend = (date) => {
+    if (!date) return ""
+    return dayjs(date).format("YYYY-MM-DD")
+  }
+
   const renderForm = (
     <Box gap={3} display="flex" flexDirection="column">
       {activeStep === 0 && (
@@ -267,9 +273,10 @@ export function JwtSignUpView() {
             label="Date of birth"
             maxDate={dayjs().subtract(18, "year")}
             helperText="You must be at least 18 years old to register"
+            format="YYYY-MM-DD" // Set the display format to YYYY-MM-DD
           />
           <Field.CountrySelect name="nationality" label="Nationality" helperText="Please select a country" />
-          <Field.CountrySelect name="placeofbirth" label="Place of Birth" helperText="Please select a country" />
+          <Field.CountrySelect name="placeofbirth" label="Country of Birth" helperText="Please select a country" />
           <Field.CountrySelect
             name="countryresiding"
             label="Country Residing In"
@@ -342,6 +349,9 @@ export function JwtSignUpView() {
                 // Get the form data
                 const data = methods.getValues()
 
+                // Format the date of birth to YYYY-MM-DD
+                const formattedDob = formatDateForBackend(data.dateOfBirth)
+
                 // Get country labels (names) instead of IDs
                 const nationalityLabel = findCountryLabelById(data.nationality)
                 const placeOfBirthLabel = findCountryLabelById(data.placeofbirth)
@@ -352,7 +362,7 @@ export function JwtSignUpView() {
                   email: data.email,
                   password: data.password,
                   password_confirmation: data.password_confirmation,
-                  dob: data.dateOfBirth,
+                  dob: formattedDob, // Use the formatted date
                   nationality: data.nationality,
                   place_of_birth: data.placeofbirth,
                   currently_residing: data.countryresiding,
@@ -369,7 +379,7 @@ export function JwtSignUpView() {
                 await signUp(formData)
                 toast.success("Account created successfully!")
                 await checkUserSession?.()
-                router.push(paths.auth.jwt.signIn);
+                router.push(paths.auth.jwt.signIn)
               } catch (error) {
                 console.error("Submission error:", error)
                 toast.error(typeof error === "string" ? error : error.message || "An error occurred during sign up")
@@ -456,3 +466,4 @@ export function JwtSignUpView() {
     </Stack>
   )
 }
+

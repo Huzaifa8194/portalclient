@@ -41,7 +41,7 @@ export function CountrySelect({
           code={country.code}
           sx={{ mr: 1, width: 22, height: 22, borderRadius: '50%' }}
         />
-        {country.label} ({country.code}) +{country.phone}
+        {country.label}
       </li>
     );
   };

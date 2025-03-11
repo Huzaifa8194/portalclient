@@ -17,15 +17,6 @@ export function SignUpTerms({ sx, ...other }) {
       }}
       {...other}
     >
-      {'By signing up, I agree to '}
-      <Link underline="always" color="text.primary">
-        Terms of service
-      </Link>
-      {' and '}
-      <Link underline="always" color="text.primary">
-        Privacy policy
-      </Link>
-      .
     </Box>
   );
 }
