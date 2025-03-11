@@ -32,6 +32,7 @@ import { countries } from "src/assets/data"
 import { useAuthContext } from "../../hooks"
 import { FormHead } from "../../components/form-head"
 import { SignUpTerms } from "../../components/sign-up-terms"
+
 // ----------------------------------------------------------------------
 
 export const SignUpSchemaCompany = zod
@@ -130,11 +131,11 @@ export function JwtSignUpViewCompany() {
   const [countryServicesCount, setCountryServicesCount] = useState(1)
 
   const steps = [
-    "Company Information",
-    "Contact Details",
-    "Company Operational Details",
-    "Services Required",
-    "Security & Account Setup",
+    "Company Info.",
+    "Contact ",
+    "Details",
+    "Services",
+    "Setup",
   ]
 
   // Fetch company types and business types on component mount
@@ -155,7 +156,7 @@ export function JwtSignUpViewCompany() {
         setBusinessTypes(response.data.data)
       } catch (error) {
         console.error("Error fetching business types:", error)
-        toast.error("Failed toload business types. Please refresh the page.")
+        toast.error("Failed to load business types. Please refresh the page.")
       }
     }
 
@@ -324,7 +325,7 @@ export function JwtSignUpViewCompany() {
           }, 1500)
         } else {
           // If there's no token in the response, just redirect to login
-          toast.success("Account created sucessfully")
+          toast.success("Account created successfully")
 
           // Short delay to allow the user to see the success message
           setTimeout(() => {
@@ -716,7 +717,7 @@ export function JwtSignUpViewCompany() {
       )}
 
       {/* Navigation buttons */}
-      <Box sx={{ display: "flex", gap:2, mt: 2 }}>
+      <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
         {activeStep > 0 && (
           <LoadingButton color="inherit" variant="outlined" onClick={handleBack}>
             Back
@@ -902,7 +903,7 @@ export function JwtSignUpViewCompany() {
                   )
 
                   console.log("API response", response)
-                  const apiRes= response;
+                  const apiRes = response
                   if (response.data) {
                     // Show success toast
 
@@ -916,7 +917,7 @@ export function JwtSignUpViewCompany() {
                         router.refresh()
                       }, 1500)
                     } else {
-                      toast.success(apiRes.data.message);
+                      toast.success(apiRes.data.message)
 
                       // Short delay to allow the user to see the success message
                       setTimeout(() => {
@@ -976,6 +977,23 @@ export function JwtSignUpViewCompany() {
               maxWidth: "1000px", // Increased from 800px
             }}
           >
+            {/* Stepper */}
+            <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+              {steps
+                .filter((_, index) => {
+                  // Hide steps 2 (index 2) and 3 (index 3) when Real Estate is selected
+                  if (watch("company_business_type") === "15" && (index === 2 || index === 3)) {
+                    return false
+                  }
+                  return true
+                })
+                .map((label) => (
+                  <Step key={label}>
+                    <StepLabel>{label}</StepLabel>
+                  </Step>
+                ))}
+            </Stepper>
+
             <FormHead
               title="Get started absolutely free"
               description={
@@ -999,38 +1017,8 @@ export function JwtSignUpViewCompany() {
 
             <SignUpTerms />
           </Paper>
-
-          {/* Stepper */}
-          <Paper
-            elevation={3}
-            sx={{
-              width: "170px",
-              p: 2,
-              border: "1px solid",
-              borderColor: "divider",
-              borderRadius: 2,
-              height: "fit-content",
-            }}
-          >
-            <Stepper activeStep={activeStep} orientation="vertical">
-              {steps
-                .filter((_, index) => {
-                  // Hide steps 2 (index 2) and 3 (index 3) when Real Estate is selected
-                  if (watch("company_business_type") === "15" && (index === 2 || index === 3)) {
-                    return false
-                  }
-                  return true
-                })
-                .map((label) => (
-                  <Step key={label}>
-                    <StepLabel>{label}</StepLabel>
-                  </Step>
-                ))}
-            </Stepper>
-          </Paper>
         </Box>
       </Box>
     </Stack>
   )
 }
-

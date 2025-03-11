@@ -402,6 +402,7 @@ export function JwtSignUpView() {
           p: { xs: 3, md: 5 },
           overflow: "auto",
           display: "flex",
+          justifyContent: "center",
         }}
       >
         {/* Form */}
@@ -413,9 +414,20 @@ export function JwtSignUpView() {
             borderColor: "divider",
             borderRadius: 2,
             flexGrow: 1,
-            mr: 3,
+            maxWidth: "800px",
+            mx: "auto",
+           
           }}
         >
+          {/* Stepper */}
+          <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+            {steps.map((label) => (
+              <Step key={label}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+
           <FormHead
             title="Get started absolutely free"
             description={
@@ -441,29 +453,7 @@ export function JwtSignUpView() {
 
           <SignUpTerms />
         </Paper>
-
-        {/* Stepper */}
-        <Paper
-          elevation={3}
-          sx={{
-            p: 2,
-            border: "1px solid",
-            borderColor: "divider",
-            borderRadius: 2,
-            width: "140px",
-            height: "fit-content",
-          }}
-        >
-          <Stepper activeStep={activeStep} orientation="vertical">
-            {steps.map((label) => (
-              <Step key={label}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-        </Paper>
       </Box>
     </Stack>
   )
 }
-
