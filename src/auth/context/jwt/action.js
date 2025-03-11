@@ -39,7 +39,7 @@ export const signInWithPassword = async ({ email, password }) => {
 // Helper function to get country identifier
 const getCountryId = async (countryName) => {
   try {
-    const response = await axios.get(`${endpoints.auth.country}/${countryName}`, {
+    const response = await axios.get(`https://api.swedenrelocators.se/api/miscellaneous/countries/${countryName}`, {
       headers: {
         Accept: "application/json",
       },
