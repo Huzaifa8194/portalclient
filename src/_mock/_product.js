@@ -102,7 +102,7 @@ export const APPOINTMENT_CATEGORY_OPTIONS = [
 ];
 
 export const APPOINTMENT_COUNTRY_OPTIONS = [
-  { value: 'none', label: 'Choose Option' },
+  { value: 'none', label: 'Choose An Option' },
   { value: 'sweden', label: 'Mon-Thu - Sweden' },
   { value: 'denmark', label: 'Fri - Denmark' },
 ];

@@ -261,7 +261,54 @@ export function PostNewEditForm({ currentPost }) {
                 name="dateofbirth"
                 label="Appointment Date"
                 inputFormat="yyyy-MM-dd"
-                onChange={(date) => setValue("dateofbirth", date.toISOString().split("T")[0])}
+                disablePast
+                shouldDisableDate={(date) => {
+                  // Disable dates less than 24 hours from now
+                  const now = new Date()
+                  const tomorrow = new Date(now)
+                  tomorrow.setDate(tomorrow.getDate() + 1)
+                  tomorrow.setHours(0, 0, 0, 0)
+                  return date < tomorrow
+                }}
+                onChange={(date) => {
+                  if (date) {
+                    console.log("Date object type:", typeof date, date)
+
+                    // Handle the date object safely regardless of its type
+                    // This works with both native Date objects and library objects like dayjs
+                    let formattedDate
+
+                    // Check if it's a string (already formatted)
+                    if (typeof date === "string") {
+                      formattedDate = date
+                    }
+                    // Check if it has a format method (dayjs/moment)
+                    else if (typeof date.format === "function") {
+                      formattedDate = date.format("YYYY-MM-DD")
+                    }
+                    // Check if it has a toISOString method (native Date)
+                    else if (typeof date.toISOString === "function") {
+                      // Use a method that doesn't have timezone issues
+                      const d = new Date(date)
+                      const year = d.getFullYear()
+                      const month = String(d.getMonth() + 1).padStart(2, "0")
+                      const day = String(d.getDate()).padStart(2, "0")
+                      formattedDate = `${year}-${month}-${day}`
+                    }
+                    // Fallback
+                    else {
+                      formattedDate = String(date)
+                    }
+
+                    setValue("dateofbirth", formattedDate)
+                    console.log("Selected date formatted:", formattedDate)
+                  }
+                }}
+                slotProps={{
+                  textField: {
+                    helperText: "Appointments must be scheduled at least 24 hours in advance",
+                  },
+                }}
               />
 
               <Field.Select native name="category4" label="Appointment Time" InputLabelProps={{ shrink: true }}>

@@ -21,20 +21,11 @@ import DialogActions from "@mui/material/DialogActions"
 import { toast } from "src/components/snackbar"
 import { Form, Field } from "src/components/hook-form"
 import { useAuthContext } from "src/auth/hooks"
+import { APPOINTMENT_COUNTRY_OPTIONS } from "src/_mock"
 
 // ----------------------------------------------------------------------
 
-// Country options - typically these would come from an API
-const APPOINTMENT_COUNTRY_OPTIONS = [
-  { value: "Sweden", label: "Sweden" },
-  { value: "Norway", label: "Norway" },
-  { value: "Denmark", label: "Denmark" },
-  { value: "Finland", label: "Finland" },
-  { value: "Iceland", label: "Iceland" },
-  { value: "Other", label: "Other" },
-]
-
-// Language options - typically these would come from an API
+// Language options
 const LANGUAGE_OPTIONS = [
   { id: 1, name: "English" },
   { id: 2, name: "Swedish" },
@@ -54,9 +45,11 @@ export const RescheduleSchema = zod.object({
         const selectedDate = new Date(date)
         const today = new Date()
         today.setHours(0, 0, 0, 0)
-        return selectedDate >= today
+        const tomorrow = new Date(today)
+        tomorrow.setDate(tomorrow.getDate() + 1)
+        return selectedDate >= tomorrow
       },
-      { message: "Appointment date must be today or in the future!" },
+      { message: "Appointment date must be at least 24 hours in the future!" },
     ),
   country: zod.string().min(1, { message: "Country is required!" }),
   time_slot_id: zod.string().min(1, { message: "Appointment Time is required!" }),
@@ -78,6 +71,14 @@ export function RescheduleAppointmentForm({ appointment, onClose, onSuccess }) {
   const [rescheduleError, setRescheduleError] = useState("")
   const { user } = useAuthContext()
 
+
+  const getMinDate = () => {
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    tomorrow.setHours(0, 0, 0, 0)
+    return tomorrow
+  }
+
   const defaultValues = useMemo(
     () => ({
       type_id: appointment?.type_id?.toString() || "",
@@ -86,7 +87,7 @@ export function RescheduleAppointmentForm({ appointment, onClose, onSuccess }) {
       country: appointment?.country || "",
       time_slot_id: appointment?.time_slot_id?.toString() || "",
       description: appointment?.description || "",
-      language_id: appointment?.language_id?.toString() || "1", // Default to English (1) if not available
+      language_id: appointment?.language_id?.toString() || "1", 
       agreement: false,
     }),
     [appointment],
@@ -105,7 +106,6 @@ export function RescheduleAppointmentForm({ appointment, onClose, onSuccess }) {
     formState: { isSubmitting, isValid },
   } = methods
 
-  // Extract the check eligibility function to avoid dependency issues
   const checkRescheduleEligibility = useCallback(
     (slots) => {
       if (!appointment) return
@@ -154,7 +154,6 @@ export function RescheduleAppointmentForm({ appointment, onClose, onSuccess }) {
     if (appointment) {
       reset(defaultValues)
 
-      // Fetch all necessary data for the form
       const fetchAppointmentData = async () => {
         try {
           setLoading(true)
@@ -188,7 +187,6 @@ export function RescheduleAppointmentForm({ appointment, onClose, onSuccess }) {
         return
       }
 
-      // Prepare data for rescheduling with all required fields
       const rescheduleData = {
         type_id: data.type_id,
         category_id: data.category_id,
@@ -199,7 +197,6 @@ export function RescheduleAppointmentForm({ appointment, onClose, onSuccess }) {
         language_id: data.language_id,
       }
 
-      // Call the API to reschedule the appointment using the new endpoint format
       const response = await axios.post(
         `https://api.swedenrelocators.se/api/appointment/reschedule/${appointment.id}`,
         rescheduleData,
@@ -319,8 +316,55 @@ export function RescheduleAppointmentForm({ appointment, onClose, onSuccess }) {
 
                   <Field.DatePicker
                     name="appointment_date"
-                    label="Appointment Date (YYYY-MM-DD)"
-                    placeholder="YYYY-MM-DD"
+                    label="Appointment Date"
+                    inputFormat="yyyy-MM-dd"
+                    disablePast
+                    shouldDisableDate={(date) => {
+                      // Disable dates less than 24 hours from now
+                      const now = new Date()
+                      const tomorrow = new Date(now)
+                      tomorrow.setDate(tomorrow.getDate() + 1)
+                      tomorrow.setHours(0, 0, 0, 0)
+                      return date < tomorrow
+                    }}
+                    onChange={(date) => {
+                      if (date) {
+                        console.log("Date object type:", typeof date, date)
+
+                        // Handle the date object safely regardless of its type
+                        let formattedDate
+
+                        // Check if it's a string (already formatted)
+                        if (typeof date === "string") {
+                          formattedDate = date
+                        }
+                        // Check if it has a format method (dayjs/moment)
+                        else if (typeof date.format === "function") {
+                          formattedDate = date.format("YYYY-MM-DD")
+                        }
+                        // Check if it has a toISOString method (native Date)
+                        else if (typeof date.toISOString === "function") {
+                          // Use a method that doesn't have timezone issues
+                          const d = new Date(date)
+                          const year = d.getFullYear()
+                          const month = String(d.getMonth() + 1).padStart(2, "0")
+                          const day = String(d.getDate()).padStart(2, "0")
+                          formattedDate = `${year}-${month}-${day}`
+                        }
+                        // Fallback
+                        else {
+                          formattedDate = String(date)
+                        }
+
+                        setValue("appointment_date", formattedDate)
+                        console.log("Selected date formatted:", formattedDate)
+                      }
+                    }}
+                    slotProps={{
+                      textField: {
+                        helperText: "Appointments must be scheduled at least 24 hours in advance",
+                      },
+                    }}
                     disabled={!canReschedule}
                   />
 

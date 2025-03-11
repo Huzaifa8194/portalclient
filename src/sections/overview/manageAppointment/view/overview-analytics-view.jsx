@@ -32,7 +32,7 @@ export function OverviewAnalyticsView({ appointment, onBack }) {
     axios
       .get("https://api.swedenrelocators.se/api/miscellaneous/appointmentTimeSlots")
       .then((response) => {
-        setTimeSlots(response.data.data) // Store time slots in state
+        setTimeSlots(response.data.data)
         setLoading(false)
       })
       .catch((error) => {
@@ -41,7 +41,7 @@ export function OverviewAnalyticsView({ appointment, onBack }) {
       })
   }, [])
 
-  // Function to find time range by ID - fixed to use time_slot_id instead of time_slot
+
   const getTimeSlotLabel = (id) => {
     if (!id) return "Not specified" // If ID is missing, return fallback
     const timeSlot = timeSlots.find((slot) => slot.id === Number(id))
@@ -57,7 +57,7 @@ export function OverviewAnalyticsView({ appointment, onBack }) {
   }
 
   const handleRescheduleSuccess = (updatedData) => {
-    // Update the appointment data with the rescheduled information
+
     setUpdatedAppointment({
       ...updatedAppointment,
       ...updatedData,
@@ -93,19 +93,31 @@ export function OverviewAnalyticsView({ appointment, onBack }) {
     <DashboardContent maxWidth="xl">
       <Box sx={{ mb: 5 }}>
         <Typography variant="h4" gutterBottom>
-          Application Details
+          Manage Appointments
         </Typography>
         <CustomBreadcrumbs
           links={[
             { name: "Dashboard", href: "/" },
-            { name: "Application Status", href: "/applications" },
-            { name: "Application Detail" },
+            { name: "Manage Appointments", href: "/applications" },
+            { name: "Appointment Details" },
           ]}
           sx={{ mb: { xs: 3, md: 5 } }}
         />
-        <Button variant="outlined" onClick={onBack} sx={{ mb: 2, backgroundColor: "black", color: "white" }}>
-          Back to Applications
+        <Button
+          variant="outlined"
+          onClick={onBack}
+          sx={{
+            mb: 2,
+            backgroundColor: "black",
+            color: "white",
+            "&:hover": {
+              backgroundColor: "black",
+            },
+          }}
+        >
+          Back to Appointments
         </Button>
+
       </Box>
 
       <Grid container spacing={3}>
