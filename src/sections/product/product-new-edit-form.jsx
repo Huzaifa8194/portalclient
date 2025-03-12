@@ -1,60 +1,49 @@
-import { z as zod } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useMemo, useState, useEffect, useCallback } from 'react';
+"use client"
 
-import Box from '@mui/material/Box';
-import Chip from '@mui/material/Chip';
-import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
-import Switch from '@mui/material/Switch';
-import Divider from '@mui/material/Divider';
-import CardHeader from '@mui/material/CardHeader';
-import Typography from '@mui/material/Typography';
-import LoadingButton from '@mui/lab/LoadingButton';
-import InputAdornment from '@mui/material/InputAdornment';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
+import { z as zod } from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useMemo, useState, useEffect, useCallback } from "react"
+import axios from "axios"
 
-import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hooks';
+import Box from "@mui/material/Box"
+import Card from "@mui/material/Card"
+import Stack from "@mui/material/Stack"
+import Divider from "@mui/material/Divider"
+import CardHeader from "@mui/material/CardHeader"
+import Typography from "@mui/material/Typography"
+import LoadingButton from "@mui/lab/LoadingButton"
+import Dialog from "@mui/material/Dialog"
+import DialogActions from "@mui/material/DialogActions"
+import DialogContent from "@mui/material/DialogContent"
+import DialogTitle from "@mui/material/DialogTitle"
+import TextField from "@mui/material/TextField"
+import Button from "@mui/material/Button"
 
-import {
-  _tags,
-  PRODUCT_SIZE_OPTIONS,
-  PRODUCT_GENDER_OPTIONS,
-  PRODUCT_COLOR_NAME_OPTIONS,
-  PRODUCT_CATEGORY_GROUP_OPTIONS,
-  FAMILY_CATEGORY_OPTIONS,
-  PRODUCT_MOCK_DATA,
-  FOLDER_MOCK_DATA,
-  DOCUMENT_DETAILS_MOCK_DATA,
-  DOCUMENT_TYPE_MOCK_DATA
-} from 'src/_mock';
+import { paths } from "src/routes/paths"
+import { useRouter } from "src/routes/hooks"
+import { useAuthContext } from "src/auth/hooks"
 
-import { toast } from 'src/components/snackbar';
-import { Form, Field, schemaHelper } from 'src/components/hook-form';
+import { FOLDER_MOCK_DATA } from "src/_mock"
+
+import { toast } from "src/components/snackbar"
+import { Form, Field, schemaHelper } from "src/components/hook-form"
 
 // ----------------------------------------------------------------------
 
 export const NewProductSchema = zod.object({
-  name: zod.string().min(1, { message: 'Name is required!' }),
-  description: schemaHelper.editor({ message: { required_error: 'Description is required!' } }),
-  images: schemaHelper.files({ message: { required_error: 'Images are required!' }, min: 1, max: 10 }), // Ensure at least one image, with an optional maximum
-  code: zod.string().min(1, { message: 'Product code is required!' }),
-  sku: zod.string().min(1, { message: 'Product sku is required!' }),
-  quantity: zod.number().min(1, { message: 'Quantity is required!' }),
-  colors: zod.string().array().nonempty({ message: 'Choose at least one color!' }),
-  sizes: zod.string().array().nonempty({ message: 'Choose at least one size!' }),
-  tags: zod.string().array().min(2, { message: 'Must have at least 2 tag!' }), // Ensure at least one tag
-  gender: zod.string().array().nonempty({ message: 'Choose at least one gender!' }),
-  price: zod.number().min(1, { message: 'Price should not be $0.00' }),
-  
+  name: zod.string().min(1, { message: "Name is required!" }),
+  description: schemaHelper.editor({ message: { required_error: "Description is required!" } }),
+  images: schemaHelper.files({ message: { required_error: "Images are required!" }, min: 1, max: 10 }), // Ensure at least one image, with an optional maximum
+  code: zod.string().min(1, { message: "Product code is required!" }),
+  sku: zod.string().min(1, { message: "Product sku is required!" }),
+  quantity: zod.number().min(1, { message: "Quantity is required!" }),
+  colors: zod.string().array().nonempty({ message: "Choose at least one color!" }),
+  sizes: zod.string().array().nonempty({ message: "Choose at least one size!" }),
+  tags: zod.string().array().min(2, { message: "Must have at least 2 tag!" }), 
+  gender: zod.string().array().nonempty({ message: "Choose at least one gender!" }),
+  price: zod.number().min(1, { message: "Price should not be $0.00" }),
+
   // Optional fields
   category: zod.string().optional(),
   priceSale: zod.number().optional(),
@@ -62,27 +51,63 @@ export const NewProductSchema = zod.object({
   taxes: zod.number().optional(),
   saleLabel: zod.object({ enabled: zod.boolean(), content: zod.string() }).optional(),
   newLabel: zod.object({ enabled: zod.boolean(), content: zod.string() }).optional(),
-});
-
+})
 
 // ----------------------------------------------------------------------
 
 export function ProductNewEditForm({ currentProduct }) {
-  const router = useRouter();
+  const router = useRouter()
+  const { user } = useAuthContext()
 
-  const [includeTaxes, setIncludeTaxes] = useState(false);
-  const [openFolderDialog, setOpenFolderDialog] = useState(false);
-  const [folderName, setFolderName] = useState('');
+  const [includeTaxes, setIncludeTaxes] = useState(false)
+  const [openFolderDialog, setOpenFolderDialog] = useState(false)
+  const [folderName, setFolderName] = useState("")
+  const [familyMembers, setFamilyMembers] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [documentTypes, setDocumentTypes] = useState([])
+  const [documentSubTypes, setDocumentSubTypes] = useState([])
+  const [selectedDocumentType, setSelectedDocumentType] = useState(null)
+  const [isUploading, setIsUploading] = useState(false)
+
+  useEffect(() => {
+    const fetchFamilyMembers = async () => {
+      try {
+        setIsLoading(true)
+
+        
+        const response = await axios.get("https://api.swedenrelocators.se/api/client/familyMember/list", {
+          headers: {
+            Authorization: `Bearer ${user.accessToken}`,
+          },
+        })
+
+        if (response.data && response.data.data && response.data.data.length > 0) {
+          setFamilyMembers(response.data.data)
+        }
+      } catch (error) {
+        console.error("Error fetching family members:", error)
+        toast.error("Failed to load family members. Please try again.")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    if (user && user.accessToken) {
+      fetchFamilyMembers()
+    } else {
+      setIsLoading(false)
+    }
+  }, [user])
 
   const defaultValues = useMemo(
     () => ({
-      name: currentProduct?.name || '',
-      description: currentProduct?.description || '',
-      subDescription: currentProduct?.subDescription || '',
+      name: currentProduct?.name || "",
+      description: currentProduct?.description || "",
+      subDescription: currentProduct?.subDescription || "",
       images: currentProduct?.images || [],
-      code: currentProduct?.code || DOCUMENT_TYPE_MOCK_DATA[0]?.items[0]?.value, // Default to first item in Document Type
-      sku: currentProduct?.sku || DOCUMENT_DETAILS_MOCK_DATA[0]?.items[0]?.value, // Default to first item in Document Details
-      category: currentProduct?.category || FAMILY_CATEGORY_OPTIONS[0]?.classify[0], // Default to first option in Who is the Document for
+      code: currentProduct?.code || "",
+      sku: currentProduct?.sku || "",
+      category: currentProduct?.category || "",
       price: currentProduct?.price || 0,
       quantity: currentProduct?.quantity || 0,
       priceSale: currentProduct?.priceSale || 0,
@@ -91,17 +116,16 @@ export function ProductNewEditForm({ currentProduct }) {
       gender: currentProduct?.gender || [],
       colors: currentProduct?.colors || [],
       sizes: currentProduct?.sizes || [],
-      newLabel: currentProduct?.newLabel || { enabled: false, content: '' },
-      saleLabel: currentProduct?.saleLabel || { enabled: false, content: '' },
+      newLabel: currentProduct?.newLabel || { enabled: false, content: "" },
+      saleLabel: currentProduct?.saleLabel || { enabled: false, content: "" },
     }),
-    [currentProduct]
-  );
-  
+    [currentProduct],
+  )
 
   const methods = useForm({
     resolver: zodResolver(NewProductSchema),
     defaultValues,
-  });
+  })
 
   const {
     reset,
@@ -109,65 +133,104 @@ export function ProductNewEditForm({ currentProduct }) {
     setValue,
     handleSubmit,
     formState: { isSubmitting },
-  } = methods;
+  } = methods
 
-  const values = watch();
+  const values = watch()
+
+  useEffect(() => {
+    
+    const fetchDocumentTypes = async () => {
+      try {
+        const response = await axios.get("https://api.swedenrelocators.se/api/miscellaneous/documentTypes/Fee")
+
+        if (response.data && response.data.data && response.data.data.length > 0) {
+          setDocumentTypes(response.data.data)
+
+          
+          if (response.data.data.length > 0) {
+            setSelectedDocumentType(response.data.data[0].id)
+            setDocumentSubTypes(response.data.data[0].document_sub_types || [])
+
+            
+            if (response.data.data[0].name) {
+              setValue("code", response.data.data[0].name)
+            }
+
+            if (response.data.data[0].document_sub_types && response.data.data[0].document_sub_types.length > 0) {
+              setValue("sku", response.data.data[0].document_sub_types[0].name)
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching document types:", error)
+        toast.error("Failed to load document types. Please try again.")
+      }
+    }
+
+    fetchDocumentTypes()
+  }, [setValue])
+
+  useEffect(() => {
+    if (familyMembers.length > 0 && !values.category) {
+      setValue("category", familyMembers[0].name)
+    }
+  }, [familyMembers, setValue, values.category])
 
   useEffect(() => {
     if (currentProduct) {
-      reset(defaultValues);
+      reset(defaultValues)
     }
-  }, [currentProduct, defaultValues, reset]);
+  }, [currentProduct, defaultValues, reset])
 
   useEffect(() => {
     if (includeTaxes) {
-      setValue('taxes', 0);
+      setValue("taxes", 0)
     } else {
-      setValue('taxes', currentProduct?.taxes || 0);
+      setValue("taxes", currentProduct?.taxes || 0)
     }
-  }, [currentProduct?.taxes, includeTaxes, setValue]);
+  }, [currentProduct?.taxes, includeTaxes, setValue])
 
   const onSubmit = handleSubmit(async (data) => {
     try {
       if (!data.code || !data.sku || !data.category || data.images.length === 0) {
-        toast.error('Please fill in all fields');
-        return;
+        toast.error("Please fill in all fields")
+        return
       }
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      reset();
-      toast.success(currentProduct ? 'Update success!' : 'Create success!');
-      router.push(paths.dashboard.product.root);
-      console.info('DATA', data);
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      reset()
+      toast.success(currentProduct ? "Update success!" : "Create success!")
+      router.push(paths.dashboard.product.root)
+      console.info("DATA", data)
     } catch (error) {
-      console.error(error);
-      toast.error('An error occurred. Please try again.');
+      console.error(error)
+      toast.error("An error occurred. Please try again.")
     }
-  });
+  })
 
   const handleRemoveFile = useCallback(
     (inputFile) => {
-      const filtered = values.images && values.images?.filter((file) => file !== inputFile);
-      setValue('images', filtered);
+      const filtered = values.images && values.images?.filter((file) => file !== inputFile)
+      setValue("images", filtered)
     },
-    [setValue, values.images]
-  );
+    [setValue, values.images],
+  )
 
   const handleRemoveAllFiles = useCallback(() => {
-    setValue('images', [], { shouldValidate: true });
-  }, [setValue]);
+    setValue("images", [], { shouldValidate: true })
+  }, [setValue])
 
   const handleChangeIncludeTaxes = useCallback((event) => {
-    setIncludeTaxes(event.target.checked);
-  }, []);
+    setIncludeTaxes(event.target.checked)
+  }, [])
 
   const handleOpenFolderDialog = () => {
-    setOpenFolderDialog(true);
-  };
+    setOpenFolderDialog(true)
+  }
 
   const handleCloseFolderDialog = () => {
-    setOpenFolderDialog(false);
-    setFolderName('');
-  };
+    setOpenFolderDialog(false)
+    setFolderName("")
+  }
 
   const handleCreateFolder = () => {
     if (folderName.trim()) {
@@ -175,138 +238,252 @@ export function ProductNewEditForm({ currentProduct }) {
         id: String(FOLDER_MOCK_DATA.length + 1),
         name: folderName.trim(),
         createdAt: new Date().toISOString(),
-      };
-      FOLDER_MOCK_DATA.push(newFolder);
-      console.info('Creating folder:', newFolder);
-      toast.success(`Folder "${folderName}" created successfully!`);
-      handleCloseFolderDialog();
+      }
+      FOLDER_MOCK_DATA.push(newFolder)
+      console.info("Creating folder:", newFolder)
+      toast.success(`Folder "${folderName}" created successfully!`)
+      handleCloseFolderDialog()
     } else {
-      toast.error('Please enter a folder name.');
+      toast.error("Please enter a folder name.")
     }
-  };
+  }
 
   const handleAddDocument = () => {
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = '*'; // Accept all file types (adjust as needed)
-    fileInput.multiple = true; // Allow multiple files to be fetched
-  
+    const fileInput = document.createElement("input")
+    fileInput.type = "file"
+    fileInput.accept = "*" // Accept all file types (adjust as needed)
+    fileInput.multiple = true 
+
     fileInput.onchange = (event) => {
-      const selectedFiles = Array.from(event.target.files); // Convert FileList to Array
-      if (selectedFiles.length === 0) return; // Exit if no files are selected
-  
-      const currentFiles = methods.getValues('images') || [];
+      const selectedFiles = Array.from(event.target.files) 
+      if (selectedFiles.length === 0) return 
+
+      const currentFiles = methods.getValues("images") || []
+
       
-      // Check for duplicate files based on file name and type
-      const duplicates = selectedFiles.filter(newFile =>
-        currentFiles.some(existingFile =>
-          existingFile.name === newFile.name && existingFile.type === newFile.type
-        )
-      );
-  
+      const duplicates = selectedFiles.filter((newFile) =>
+        currentFiles.some((existingFile) => existingFile.name === newFile.name && existingFile.type === newFile.type),
+      )
+
       if (duplicates.length > 0) {
-        toast.error('This document is already added.');
-        return; // Exit the function if duplicates are found
+        toast.error("This document is already added.")
+        return
       }
-  
-      // If no duplicates, proceed with adding the file
-      const updatedFiles = [...currentFiles, ...selectedFiles];
-  
+
+      const updatedFiles = [...currentFiles, ...selectedFiles]
+
       if (updatedFiles.length > 5) {
-        toast.error('You can only add up to 5 documents.');
-        return;
+        toast.error("You can only add up to 5 documents.")
+        return
       }
-  
-      // Update the form with the selected files
-      methods.setValue('images', updatedFiles);
-  
-      toast.success(`${selectedFiles.length} document(s) fetched successfully!`);
-      console.info('Fetched Documents:', updatedFiles);
-    };
-  
-    fileInput.click(); // Trigger the file picker dialog
-  };
-  
-  
 
-  const handleUploadAllDocuments = () => {
-    const { code, sku, category, images } = methods.getValues();
-  
-    // Ensure there's at least one document uploaded
+      methods.setValue("images", updatedFiles)
+
+      toast.success(`${selectedFiles.length} document(s) fetched successfully!`)
+      console.info("Fetched Documents:", updatedFiles)
+    }
+
+    fileInput.click() 
+  }
+
+  const uploadSingleDocument = async (image, selectedType, selectedSubType, category) => {
+    
+    const formData = new FormData()
+
+    formData.append("file", image)
+    formData.append("document", image)
+    formData.append("user_family_id", "6") 
+    formData.append("document_type_id", selectedType.id.toString())
+    formData.append("document_sub_type_id", selectedSubType.id.toString())
+
+   
+    if (category) {
+      formData.append("details", category)
+    }
+
+    console.log("Uploading document:", image.name)
+    console.log("FormData keys:", [...formData.keys()])
+    console.log("Document type ID:", selectedType.id)
+    console.log("Document subtype ID:", selectedSubType.id)
+    console.log("User family ID:", "6")
+    console.log("Authorization token available:", !!user.accessToken)
+
+    try {
+      
+      const response = await axios({
+        method: "post",
+        url: "https://api.swedenrelocators.se/api/document/add",
+        data: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${user.accessToken}`,
+        },
+        validateStatus: (status) => status < 500, 
+      })
+
+      if (response.status >= 200 && response.status < 300) {
+        return { success: true, data: response.data }
+      }
+
+      const errorMessage = response.data?.message || `Failed to upload ${image.name} (Status: ${response.status})`
+      throw new Error(errorMessage)
+    } catch (error) {
+      console.error(`Error uploading ${image.name}:`, error)
+
+      let errorMessage = `Failed to upload ${image.name}`
+
+      if (error.response) {
+        
+        errorMessage = error.response.data?.message || `Server error (${error.response.status})`
+      } else if (error.request) {
+        errorMessage = "No response from server. Please check your connection."
+      } else {
+        errorMessage = error.message || "Unknown error occurred"
+      }
+
+      return {
+        success: false,
+        error,
+        message: errorMessage,
+      }
+    }
+  }
+
+  const mockSuccessfulUpload = async (image, selectedType, selectedSubType, category) => {
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    console.log("Mock uploading document:", image.name)
+    console.log("Document type:", selectedType.name)
+    console.log("Document subtype:", selectedSubType.name)
+
+    return {
+      success: true,
+      data: {
+        message: `Document ${image.name} uploaded successfully`,
+        document_id: Math.floor(Math.random() * 1000),
+      },
+    }
+  }
+
+  const handleUploadAllDocuments = async () => {
+    const { code, sku, category, images } = methods.getValues()
+
+    if (user && user.type === "Bronze") {
+      toast.error("You can't upload documents.")
+      return
+    }
+
     if (!images || images.length < 1) {
-      toast.error('Please upload at least one document.');
-      return; // Exit the function early
+      toast.error("Please upload at least one document.")
+      return 
     }
-  
-    // Check if there are more than 5 documents uploaded
-    if (images.length > 5) {
-      toast.error('You can upload a maximum of 5 documents at a time.');
-      return; // Exit the function early
-    }
-  
-    // Validate the required fields
-    if (!code || !sku || !category) {
-      toast.error('Please fill in all fields.');
-    } else {
-      // Process each document for upload
-      images.forEach((image, index) => {
-        const newDocument = {
-          id: String(PRODUCT_MOCK_DATA.length + 1 + index),
-          name: `${code} ${index + 1}`, // Append index for uniqueness
-          description: sku,
-          category,
-          images: [image], // Handle each image individually
-        };
-        PRODUCT_MOCK_DATA.push(newDocument);
-  
-        // Create a folder for the category if it doesn't exist
-        const existingFolder = FOLDER_MOCK_DATA.find(folder => folder.name === category);
-        if (!existingFolder) {
-          const newFolder = {
-            id: String(FOLDER_MOCK_DATA.length + 1),
-            name: category,
-            createdAt: new Date().toISOString(),
-          };
-          FOLDER_MOCK_DATA.push(newFolder);
-          console.log(`Created folder: ${category}`);
-        }
-  
-        console.log(`Uploaded document:`, newDocument);
-      });
-  
-      // Display success message
-      toast.success('All documents uploaded successfully!');
-      console.info('All Documents Uploaded:', images);
-    }
-  };
-  
-  
 
+    if (images.length > 5) {
+      toast.error("You can upload a maximum of 5 documents at a time.")
+      return
+    }
+
+    if (!code || !sku || !category) {
+      toast.error("Please fill in all fields.")
+      return
+    }
+
+    try {
+      setIsUploading(true)
+
+      const selectedType = documentTypes.find((type) => type.name === code)
+      const selectedSubType = documentSubTypes.find((subType) => subType.name === sku)
+
+      if (!selectedType || !selectedSubType) {
+        toast.error("Invalid document type or subtype.")
+        return
+      }
+
+      // Use Array.reduce to process uploads sequentially
+      const uploadResult = await images.reduce(async (previousPromise, image) => {
+        const results = await previousPromise
+
+        // Use the actual API call instead of the mock
+        console.log(`Uploading document: ${image.name} to API...`)
+        const result = await uploadSingleDocument(image, selectedType, selectedSubType, category)
+
+        // Log the complete API response for debugging
+        console.log(`API Response for ${image.name}:`, JSON.stringify(result, null, 2))
+
+        // If the upload failed, throw an error to stop the chain
+        if (!result.success) {
+          throw new Error(result.message || "Upload failed")
+        }
+
+        return [...results, result]
+      }, Promise.resolve([]))
+
+      console.log("All uploads completed. Results:", uploadResult)
+
+      if (uploadResult.length === images.length) {
+        toast.success(`Successfully uploaded ${uploadResult.length} document(s)!`)
+
+        uploadResult.forEach((result) => {
+          if (result.data && result.data.message) {
+            console.log(`Document upload confirmation: ${result.data.message}`)
+          }
+          if (result.data && result.data.document_id) {
+            console.log(`Document ID: ${result.data.document_id}`)
+          }
+        })
+
+        setValue("images", [])
+      } else {
+        toast.warning(`Only ${uploadResult.length} out of ${images.length} documents were uploaded.`)
+      }
+    } catch (error) {
+      console.error("Error uploading documents:", error)
+      toast.error(error.message || "Failed to upload documents. Please try again.")
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleDocumentTypeChange = (event) => {
+    const selectedTypeId = Number(event.target.value)
+    setSelectedDocumentType(selectedTypeId)
+
+    const selectedType = documentTypes.find((type) => type.id === selectedTypeId)
+
+    if (selectedType) {
+      
+      setValue("code", selectedType.name)
+
+      setDocumentSubTypes(selectedType.document_sub_types || [])
+
+      if (selectedType.document_sub_types && selectedType.document_sub_types.length > 0) {
+        setValue("sku", selectedType.document_sub_types[0].name)
+      } else {
+        setValue("sku", "")
+      }
+    }
+  }
 
   const renderDetails = (
     <Card>
       <CardHeader title="Files" subheader="Upload your documents." sx={{ mb: 3 }} />
       <Divider />
     </Card>
-  );
+  )
 
   const renderProperties = (
     <Card
       sx={{
-        width: '100%', // Make the Card span the full width of the container
-        maxWidth: '100vw', // Prevent overflow beyond the viewport
+        width: "100%", 
+        maxWidth: "100vw", 
       }}
     >
       <CardHeader
         title="Document Details"
         subheader="Give details about the Document"
-        sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+        sx={{ mb: 3, display: "flex", justifyContent: "space-between", alignItems: "center" }}
         action={
-          <LoadingButton
-            variant="contained"
-            size="medium"
-            onClick={handleUploadAllDocuments}
-          >
+          <LoadingButton variant="contained" size="medium" onClick={handleUploadAllDocuments} loading={isUploading}>
             Upload All Documents
           </LoadingButton>
         }
@@ -320,102 +497,107 @@ export function ProductNewEditForm({ currentProduct }) {
           alignItems="center"
           justifyContent="space-between"
           sx={{
-            columnGap: 2, // Spacing between the fields
-            flexWrap: 'wrap', // Allow wrapping on smaller screens
+            columnGap: 2, 
+            flexWrap: "wrap", 
           }}
         >
-
-          {/* Who is the Document for Dropdown - Remains unchanged */}
+          
           <Field.Select
             native
             name="category"
             label="Who is the Document for"
             InputLabelProps={{ shrink: true }}
             fullWidth
+            disabled={isLoading}
             sx={{
-              flex: 1, // Occupies equal space
-              minWidth: 150, // Ensures the dropdown has a minimum width
+              flex: 1, 
+              minWidth: 150, 
             }}
           >
-            {FAMILY_CATEGORY_OPTIONS.map((category) => (
-              <optgroup key={category.group} label={category.group}>
-                {category.classify.map((classify) => (
-                  <option key={classify} value={classify}>
-                    {classify}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
+            {isLoading ? (
+              <option value="">Loading family members...</option>
+            ) : familyMembers.length > 0 ? (
+              familyMembers.map((member) => (
+                <option key={member.id} value={member.name}>
+                  {member.name}
+                </option>
+              ))
+            ) : (
+              <option value="">No family members available</option>
+            )}
           </Field.Select>
 
-          {/* Document Type Dropdown - Updated with mapped data */}
           <Field.Select
-            native
             name="code"
             label="Document Type"
             InputLabelProps={{ shrink: true }}
             fullWidth
             sx={{
-              flex: 1, // Occupies equal space in the flex container
-              minWidth: 150, // Ensures the dropdown has a minimum width to avoid overflow
+              flex: 1,
+              minWidth: 150,
+            }}
+            SelectProps={{
+              native: true,
+              onChange: handleDocumentTypeChange,
+              value: selectedDocumentType || "",
             }}
           >
-            {DOCUMENT_TYPE_MOCK_DATA.map((type) => (
-              <optgroup key={type.group} label={type.group}>
-                {type.items.map((item) => (
-                  <option key={item.value} value={item.value}>
-                    {item.label}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
+            {documentTypes.length > 0 ? (
+              documentTypes.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.name}
+                </option>
+              ))
+            ) : (
+              <option value="">No document types available</option>
+            )}
           </Field.Select>
 
-          {/* Document Details Dropdown - Updated with mapped data */}
+          
           <Field.Select
-            native
             name="sku"
-            label="Document Name"
+            label="Document Sub Type"
             InputLabelProps={{ shrink: true }}
             fullWidth
             sx={{
               flex: 1,
-              minWidth: 150, // Ensures the dropdown has a minimum width to avoid overflow
+              minWidth: 150,
+            }}
+            SelectProps={{
+              native: true,
+              onChange: (e) => setValue("sku", e.target.value),
             }}
           >
-            {DOCUMENT_DETAILS_MOCK_DATA.map((detail) => (
-              <optgroup key={detail.group} label={detail.group}>
-                {detail.items.map((item) => (
-                  <option key={item.value} value={item.value}>
-                    {item.label}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
+            {documentSubTypes.length > 0 ? (
+              documentSubTypes.map((subType) => (
+                <option key={subType.id} value={subType.name}>
+                  {subType.name}
+                </option>
+              ))
+            ) : (
+              <option value="">No subtypes available</option>
+            )}
           </Field.Select>
-
-
         </Box>
 
-
         <Stack spacing={3}>
-          {/* Display Uploaded Files */}
-          {methods.watch('images')?.length > 0 && (
+          {/* Uploaded Files */}
+          {methods.watch("images")?.length > 0 && (
             <Box>
               <Typography variant="subtitle2" sx={{ mb: 1 }}>
                 Uploaded Documents
               </Typography>
               <Stack spacing={2}>
-                {methods.watch('images').map((file, index) => (
+                {methods.watch("images").map((file, index) => (
                   <Box
                     key={index}
                     display="flex"
                     alignItems="center"
                     sx={{
                       p: 2,
-                      border: '1px solid #ccc',
+                      border: "1px solid #ccc",
                       borderRadius: 2,
-                      backgroundColor: '#f9f9f9',
+                      backgroundColor: "#f9f9f9",
                     }}
                   >
                     {/* File Thumbnail */}
@@ -424,18 +606,18 @@ export function ProductNewEditForm({ currentProduct }) {
                         width: 50,
                         height: 50,
                         borderRadius: 1,
-                        overflow: 'hidden',
-                        backgroundColor: '#ddd',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        overflow: "hidden",
+                        backgroundColor: "#ddd",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                         mr: 2,
                       }}
                     >
                       <img
-                        src={URL.createObjectURL(file)} // Create an image preview
+                        src={URL.createObjectURL(file) || "/placeholder.svg"} 
                         alt={file.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
                       />
                     </Box>
                     {/* File Details */}
@@ -461,34 +643,29 @@ export function ProductNewEditForm({ currentProduct }) {
               maxSize={3145728}
               onRemove={handleRemoveFile}
               onRemoveAll={handleRemoveAllFiles}
-              onUpload={() => console.info('ON UPLOAD')}
-              sx={{ width: '100%' }} // Make upload span the full width
+              onUpload={() => console.info("ON UPLOAD")}
+              sx={{ width: "100%" }}
             />
-            <Box sx={{ textAlign: 'right', mt: 1 }}>
-              <LoadingButton
-                variant="contained"
-                size="medium"
-                onClick={handleAddDocument}
-              >
+            <Box sx={{ textAlign: "right", mt: 1 }}>
+              <LoadingButton variant="contained" size="medium" onClick={handleAddDocument}>
                 Add Document
               </LoadingButton>
             </Box>
           </Stack>
         </Stack>
-
       </Stack>
     </Card>
-  );
+  )
 
   return (
     <Form
       methods={methods}
       onSubmit={onSubmit}
       sx={{
-        width: '100%', // Make the Form span the full width
+        width: "100%", 
       }}
     >
-      <Stack spacing={{ xs: 3, md: 5 }} sx={{ mx: 'auto', maxWidth: '100%' }}>
+      <Stack spacing={{ xs: 3, md: 5 }} sx={{ mx: "auto", maxWidth: "100%" }}>
         {renderProperties}
       </Stack>
 
@@ -515,5 +692,6 @@ export function ProductNewEditForm({ currentProduct }) {
         </DialogActions>
       </Dialog>
     </Form>
-  );
-}  
+  )
+}
+
