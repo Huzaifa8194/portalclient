@@ -19,7 +19,7 @@ import Step from "@mui/material/Step"
 import StepLabel from "@mui/material/StepLabel"
 import Checkbox from "@mui/material/Checkbox"
 import FormControlLabel from "@mui/material/FormControlLabel"
-
+import dayjs from "dayjs"
 import { paths } from "src/routes/paths"
 import { useRouter } from "src/routes/hooks"
 import { RouterLink } from "src/routes/components"
@@ -32,6 +32,7 @@ import { countries } from "src/assets/data"
 import { useAuthContext } from "../../hooks"
 import { FormHead } from "../../components/form-head"
 import { SignUpTerms } from "../../components/sign-up-terms"
+
 // ----------------------------------------------------------------------
 
 export const SignUpSchemaCompany = zod
@@ -130,11 +131,11 @@ export function JwtSignUpViewCompany() {
   const [countryServicesCount, setCountryServicesCount] = useState(1)
 
   const steps = [
-    "Company Information",
-    "Contact Details",
-    "Company Operational Details",
-    "Services Required",
-    "Security & Account Setup",
+    "Company Info.",
+    "Contact ",
+    "Details",
+    "Services",
+    "Setup",
   ]
 
   // Fetch company types and business types on component mount
@@ -155,7 +156,7 @@ export function JwtSignUpViewCompany() {
         setBusinessTypes(response.data.data)
       } catch (error) {
         console.error("Error fetching business types:", error)
-        toast.error("Failed toload business types. Please refresh the page.")
+        toast.error("Failed to load business types. Please refresh the page.")
       }
     }
 
@@ -220,133 +221,7 @@ export function JwtSignUpViewCompany() {
     trigger,
   } = methods
 
-  const onSubmit = handleSubmit(async (data) => {
-    try {
-      setLoading(true)
 
-      // Find the numeric country ID from the country label
-      const countryId = findCountryIdByLabel(data.country_id)
-
-      if (!countryId) {
-        throw new Error(`Country not found: ${data.country_id}`)
-      }
-
-      // For Real Estate, set default values for skipped fields
-      if (isRealEstate) {
-        // Set default values for operational details
-        data.company_no_of_employees = data.company_no_of_employees || ""
-        data.company_certified_employer = data.company_certified_employer || ""
-        data.company_collective_agreement = data.company_collective_agreement || ""
-        data.company_applied_work_permit = data.company_applied_work_permit || ""
-        data.company_non_eu_hires = data.company_non_eu_hires || ""
-
-        // Set default values for services required
-        data.country_services = data.country_services || [
-          {
-            country_id: countryId,
-            service_types: ["3"], // Default to "Property Listing & Housing Solutions"
-          },
-        ]
-      }
-
-      // Format country_services properly by converting country names to integer IDs
-      const formattedCountryServices =
-        data.country_services?.map((service) => {
-          const serviceCountryId = findCountryIdByLabel(service.country_id)
-
-          if (!serviceCountryId) {
-            throw new Error(`Country not found in services: ${service.country_id}`)
-          }
-
-          return {
-            country_id: serviceCountryId,
-            service_types: service.service_types || [],
-          }
-        }) || []
-
-      // Format the data according to the API requirements
-      const formattedData = {
-        name: data.name,
-        email: data.email,
-        password: data.password,
-        password_confirmation: data.password_confirmation,
-        company_reg_no: data.company_reg_no,
-        company_reg_date: data.company_reg_date,
-        company_type_id: data.company_type_id,
-        company_business_type: data.company_business_type,
-        company_web: data.company_web,
-        address: data.address,
-        city: data.city,
-        postal_code: data.postal_code,
-        country_id: countryId,
-        contact_number: data.contact_number,
-        company_contact_person_name: data.company_contact_person_name,
-        company_contact_person_role: data.company_contact_person_role,
-        company_contact_sec_person_name: data.company_contact_sec_person_name,
-        company_contact_sec_person_email: data.company_contact_sec_person_email,
-        company_no_of_employees: data.company_no_of_employees,
-        company_certified_employer: data.company_certified_employer,
-        company_collective_agreement: data.company_collective_agreement,
-        company_applied_work_permit: data.company_applied_work_permit,
-        company_non_eu_hires: data.company_non_eu_hires,
-        is_information_accurate: data.is_information_accurate ? 1 : 0,
-        is_term_accepted: data.is_term_accepted ? 1 : 0,
-        country_services: formattedCountryServices,
-      }
-
-      console.log("Formatted data being sent:", formattedData)
-
-      // Send the data directly using axios
-      const response = await axios.post(
-        "https://api.swedenrelocators.se/api/companyClientRegistration",
-        formattedData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      )
-
-      console.log("API response", response)
-
-      if (response.data) {
-        // Show success toast
-
-        // Instead of calling signUp, directly set the session with the token from the response
-        if (response.data.data && response.data.data.token) {
-          localStorage.setItem("authToken", response.data.data.token)
-          setSession(response.data.data.token)
-          await checkUserSession?.()
-
-          // Short delay to allow the user to see the success message
-          setTimeout(() => {
-            router.refresh()
-          }, 1500)
-        } else {
-          // If there's no token in the response, just redirect to login
-          toast.success("Account created sucessfully")
-
-          // Short delay to allow the user to see the success message
-          setTimeout(() => {
-            router.push(paths.auth.jwt.signIn)
-          }, 1500)
-        }
-      }
-    } catch (error) {
-      console.error("Error during sign-up:", error)
-
-      // Show error toast
-      const errorMessage =
-        error.response?.data?.message ||
-        (typeof error === "string" ? error : error.message) ||
-        "Registration failed. Please try again."
-
-      toast.error(errorMessage)
-      setErrorMsg(errorMessage)
-    } finally {
-      setLoading(false)
-    }
-  })
 
   const [isRealEstate, setIsRealEstate] = useState(false)
 
@@ -412,10 +287,7 @@ export function JwtSignUpViewCompany() {
     const country = countries.find((c) => c.label === countryLabel)
     return country ? Number(country.id) : null // Ensure it's a number
   }, [])
-  const findCountryLabelById = (countryId) => {
-    const country = countries.find((c) => c.id === Number(countryId))
-    return country ? country.label : null
-  }
+  
 
   // Handle adding a new country service
   const handleAddCountryService = () => {
@@ -468,8 +340,10 @@ export function JwtSignUpViewCompany() {
     { value: "6", label: "Financial & Tax Solutions" },
     { value: "7", label: "Using as an Employee Management Tool" },
   ]
+  const formatDateForBackend = (date) => {
+    if (!date) return ""
+    return dayjs(date).format("YYYY-MM-DD")}
 
-  // Custom isOptionEqualToValue function for Autocomplete
   const isOptionEqualToValue = (option, value) => {
     if (!value) return false
     return option.label === value || option.label === value.label
@@ -487,7 +361,12 @@ export function JwtSignUpViewCompany() {
 
           <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: "column", sm: "row" }}>
             <Field.Text name="company_reg_no" label="Registration Number/VAT" />
-            <Field.DatePicker name="company_reg_date" label="Registration Date" />
+            <Field.DatePicker
+              name="company_reg_date"
+              label="Registration Date"
+              format="YYYY/MM/DD" // Changed date format to YY/MM/DD
+              maxDate={dayjs()}
+            />
           </Box>
 
           <Field.Select
@@ -519,15 +398,14 @@ export function JwtSignUpViewCompany() {
 
           <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: "column", sm: "row" }}>
             <Field.Text name="city" label="City" sx={{ flex: 1 }} />
-            <Field.CountrySelect
-              name="country_id"
-              label="Country"
-              sx={{ flex: 1 }}
-              isOptionEqualToValue={isOptionEqualToValue}
-            />
+            <Field.Text name="postal_code" label="Postal Code" sx={{ flex: 1 }} /> {/* Swapped position */}
           </Box>
 
-          <Field.Text name="postal_code" label="Postal Code" />
+          <Field.CountrySelect
+            name="country_id"
+            label="Country"
+            isOptionEqualToValue={isOptionEqualToValue}
+          />
         </>
       )}
 
@@ -716,7 +594,7 @@ export function JwtSignUpViewCompany() {
       )}
 
       {/* Navigation buttons */}
-      <Box sx={{ display: "flex", gap:2, mt: 2 }}>
+      <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
         {activeStep > 0 && (
           <LoadingButton color="inherit" variant="outlined" onClick={handleBack}>
             Back
@@ -835,7 +713,7 @@ export function JwtSignUpViewCompany() {
               if (isValid) {
                 try {
                   setLoading(true)
-
+                  const formattedCompanyReg = formatDateForBackend(data.company_reg_date)
                   // Find the numeric country ID from the country label
                   const countryId = findCountryIdByLabel(data.country_id)
 
@@ -865,7 +743,7 @@ export function JwtSignUpViewCompany() {
                     password: data.password,
                     password_confirmation: data.password_confirmation,
                     company_reg_no: data.company_reg_no,
-                    company_reg_date: data.company_reg_date,
+                    company_reg_date:formattedCompanyReg,
                     company_type_id: data.company_type_id,
                     company_business_type: data.company_business_type,
                     company_web: data.company_web,
@@ -902,7 +780,7 @@ export function JwtSignUpViewCompany() {
                   )
 
                   console.log("API response", response)
-                  const apiRes= response;
+                  const apiRes = response
                   if (response.data) {
                     // Show success toast
 
@@ -916,7 +794,7 @@ export function JwtSignUpViewCompany() {
                         router.refresh()
                       }, 1500)
                     } else {
-                      toast.success(apiRes.data.message);
+                      toast.success(apiRes.data.message)
 
                       // Short delay to allow the user to see the success message
                       setTimeout(() => {
@@ -976,6 +854,23 @@ export function JwtSignUpViewCompany() {
               maxWidth: "1000px", // Increased from 800px
             }}
           >
+            {/* Stepper */}
+            <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+              {steps
+                .filter((_, index) => {
+                  // Hide steps 2 (index 2) and 3 (index 3) when Real Estate is selected
+                  if (watch("company_business_type") === "15" && (index === 2 || index === 3)) {
+                    return false
+                  }
+                  return true
+                })
+                .map((label) => (
+                  <Step key={label}>
+                    <StepLabel>{label}</StepLabel>
+                  </Step>
+                ))}
+            </Stepper>
+
             <FormHead
               title="Get started absolutely free"
               description={
@@ -999,38 +894,8 @@ export function JwtSignUpViewCompany() {
 
             <SignUpTerms />
           </Paper>
-
-          {/* Stepper */}
-          <Paper
-            elevation={3}
-            sx={{
-              width: "170px",
-              p: 2,
-              border: "1px solid",
-              borderColor: "divider",
-              borderRadius: 2,
-              height: "fit-content",
-            }}
-          >
-            <Stepper activeStep={activeStep} orientation="vertical">
-              {steps
-                .filter((_, index) => {
-                  // Hide steps 2 (index 2) and 3 (index 3) when Real Estate is selected
-                  if (watch("company_business_type") === "15" && (index === 2 || index === 3)) {
-                    return false
-                  }
-                  return true
-                })
-                .map((label) => (
-                  <Step key={label}>
-                    <StepLabel>{label}</StepLabel>
-                  </Step>
-                ))}
-            </Stepper>
-          </Paper>
         </Box>
       </Box>
     </Stack>
   )
 }
-
