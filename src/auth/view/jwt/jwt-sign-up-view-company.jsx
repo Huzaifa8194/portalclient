@@ -488,7 +488,11 @@ export function JwtSignUpViewCompany() {
 
           <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: "column", sm: "row" }}>
             <Field.Text name="company_reg_no" label="Registration Number/VAT" />
-            <Field.DatePicker name="company_reg_date" label="Registration Date" />
+            <Field.DatePicker
+              name="company_reg_date"
+              label="Registration Date"
+              format="YY/MM/DD" // Changed date format to YY/MM/DD
+            />
           </Box>
 
           <Field.Select
@@ -520,15 +524,14 @@ export function JwtSignUpViewCompany() {
 
           <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: "column", sm: "row" }}>
             <Field.Text name="city" label="City" sx={{ flex: 1 }} />
-            <Field.CountrySelect
-              name="country_id"
-              label="Country"
-              sx={{ flex: 1 }}
-              isOptionEqualToValue={isOptionEqualToValue}
-            />
+            <Field.Text name="postal_code" label="Postal Code" sx={{ flex: 1 }} /> {/* Swapped position */}
           </Box>
 
-          <Field.Text name="postal_code" label="Postal Code" />
+          <Field.CountrySelect
+            name="country_id"
+            label="Country"
+            isOptionEqualToValue={isOptionEqualToValue}
+          />
         </>
       )}
 

@@ -93,23 +93,63 @@ export function AuthSplitLayout({ sx, section, children, header }) {
           subtitle={section?.subtitle}
           pageType={pageType}
           methods={[
-            // Social Media Icons
+            // Social Media Icons with improved styling
             {
               label: "Facebook",
-              path: "https://www.facebook.com/swedenrelocators", // Replace with your Facebook link
+              path: "https://www.facebook.com/swedenrelocators",
               icon: "/socials/facebook.png",
             },
             {
               label: "Instagram",
-              path: "https://www.instagram.com/swedenrelocators", // Replace with your Instagram link
+              path: "https://www.instagram.com/swedenrelocators",
               icon: "/socials/insta.png",
             },
             {
               label: "TikTok",
-              path: "https://www.tiktok.com/@swedenrelocators", // Replace with your TikTok link
+              path: "https://www.tiktok.com/@swedenrelocators",
               icon: "/socials/tiktok.png",
             },
+            {
+              label: "YouTube",
+              path: "https://www.youtube.com/channel/swedenrelocators", // Replace with your actual YouTube channel URL
+              icon: "/socials/youtube.png",
+            },
+            {
+              label: "X",
+              path: "https://x.com/swedenrelocators", // Replace with your actual X (Twitter) profile URL
+              icon: "/socials/X.png",
+            },
           ]}
+          // Add styling for social media icons to make them look more professional
+          sx={{
+            "& .social-icons-container": {
+              display: "flex",
+              justifyContent: "center",
+              gap: 2,
+              mt: 2,
+            },
+            "& .social-icon": {
+              width: 40,
+              height: 40,
+              padding: 1,
+              borderRadius: "50%",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+              backgroundColor: "background.paper",
+              transition: "transform 0.2s, box-shadow 0.2s",
+              "&:hover": {
+                transform: "translateY(-3px)",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+              },
+              "& img": {
+                width: 24,
+                height: 24,
+                objectFit: "contain",
+              },
+            },
+          }}
           slots={{
             bottomArea: (
               <Box

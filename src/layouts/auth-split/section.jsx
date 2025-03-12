@@ -88,7 +88,7 @@ export function Section({
       {...other}
     >
       <div>
-        <Typography variant="h4" sx={{ textAlign: "center" }}>
+        <Typography variant="h4" sx={{ textAlign: "center", pt:5 }}>
           {displayTitle}
         </Typography>
 

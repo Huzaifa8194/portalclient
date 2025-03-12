@@ -113,7 +113,7 @@ export function JwtSignUpView() {
   const [genderOptions, setGenderOptions] = useState([{ value: "Choose Option", label: "Choose Option" }])
   const [isLoadingGenders, setIsLoadingGenders] = useState(true)
   const [activeStep, setActiveStep] = useState(0)
-  const [steps, setSteps] = useState(["Step 1", "Step 2", "Step 3"])
+  const [steps, setSteps] = useState(["User Details", "Personal Information", "Address & Terms"])
 
   const handleNext = (e) => {
     // Prevent form submission
@@ -416,7 +416,6 @@ export function JwtSignUpView() {
             flexGrow: 1,
             maxWidth: "800px",
             mx: "auto",
-           
           }}
         >
           {/* Stepper */}
@@ -438,7 +437,7 @@ export function JwtSignUpView() {
                 </Link>
               </>
             }
-            sx={{ textAlign: { xs: "center", md: "left" } }}
+            sx={{ textAlign: "center" }} // Centered the text
           />
 
           {!!errorMsg && (

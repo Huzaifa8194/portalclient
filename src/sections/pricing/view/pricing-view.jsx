@@ -11,7 +11,7 @@ export function PricingView() {
   return (
     <Container sx={{ pt: { xs: 3, md: 5 }, pb: 10 }}>
       <Typography variant="h3" align="center" sx={{ mb: 2 }}>
-        Sign Up - Setup your account
+        Get Started-Set Up Your Account With Us!
         <br />
       </Typography>
 
@@ -22,24 +22,38 @@ export function PricingView() {
         </Link>
       </Typography>
 
-      {/* Centered black text in a professional way */}
+      {/* Black strip with reduced size for a more compact, professional look */}
       <Box
         sx={{
-          mt: 3,
-          mb: 3,
+          mt: 4,
+          mb: 4,
           textAlign: "center",
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
         }}
       >
-        <Typography
-          variant="subtitle1"
+        <Box
           sx={{
-            color: "text.primary", // Black text
-            fontWeight: "medium",
-            fontStyle: "italic", // Optional: Adds a professional touch
+            backgroundColor: "black",
+            borderRadius: "6px",
+            py: 1.5, // Reduced vertical padding
+            px: 3, // Reduced horizontal padding
+            maxWidth: "max-content",
+            boxShadow: "0 2px 10px rgba(0, 0, 0, 0.08)",
           }}
         >
-          Choose the type of account you want to create.
-        </Typography>
+          <Typography
+            variant="subtitle2" // Changed from subtitle1 to subtitle2 for smaller text
+            sx={{
+              color: "white",
+              fontWeight: 600,
+              letterSpacing: "0.5px", // Reduced letter spacing
+            }}
+          >
+            Choose the type of account you want to create
+          </Typography>
+        </Box>
       </Box>
 
       <Box
@@ -58,3 +72,4 @@ export function PricingView() {
     </Container>
   )
 }
+
