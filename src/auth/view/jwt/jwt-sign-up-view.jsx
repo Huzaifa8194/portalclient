@@ -113,7 +113,7 @@ export function JwtSignUpView() {
   const [genderOptions, setGenderOptions] = useState([{ value: "Choose Option", label: "Choose Option" }])
   const [isLoadingGenders, setIsLoadingGenders] = useState(true)
   const [activeStep, setActiveStep] = useState(0)
-  const [steps, setSteps] = useState(["Step 1", "Step 2", "Step 3"])
+  const [steps, setSteps] = useState(["User Details", "Personal Information", "Address & Terms"])
 
   const handleNext = (e) => {
     // Prevent form submission
@@ -402,6 +402,7 @@ export function JwtSignUpView() {
           p: { xs: 3, md: 5 },
           overflow: "auto",
           display: "flex",
+          justifyContent: "center",
         }}
       >
         {/* Form */}
@@ -413,9 +414,19 @@ export function JwtSignUpView() {
             borderColor: "divider",
             borderRadius: 2,
             flexGrow: 1,
-            mr: 3,
+            maxWidth: "800px",
+            mx: "auto",
           }}
         >
+          {/* Stepper */}
+          <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+            {steps.map((label) => (
+              <Step key={label}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+
           <FormHead
             title="Get started absolutely free"
             description={
@@ -426,7 +437,7 @@ export function JwtSignUpView() {
                 </Link>
               </>
             }
-            sx={{ textAlign: { xs: "center", md: "left" } }}
+            sx={{ textAlign: "center" }} // Centered the text
           />
 
           {!!errorMsg && (
@@ -441,29 +452,7 @@ export function JwtSignUpView() {
 
           <SignUpTerms />
         </Paper>
-
-        {/* Stepper */}
-        <Paper
-          elevation={3}
-          sx={{
-            p: 2,
-            border: "1px solid",
-            borderColor: "divider",
-            borderRadius: 2,
-            width: "140px",
-            height: "fit-content",
-          }}
-        >
-          <Stepper activeStep={activeStep} orientation="vertical">
-            {steps.map((label) => (
-              <Step key={label}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-        </Paper>
       </Box>
     </Stack>
   )
 }
-

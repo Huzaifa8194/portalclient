@@ -70,7 +70,7 @@ export function Section({
           imgUrl: `${CONFIG.assetsDir}/assets/background/background-3-blur.webp`,
         }),
         px: 3,
-        pb: 3,
+        pb: 10,
         width: 1,
         maxWidth: 480,
         display: "none",
@@ -88,12 +88,12 @@ export function Section({
       {...other}
     >
       <div>
-        <Typography variant="h3" sx={{ textAlign: "center" }}>
+        <Typography variant="h4" sx={{ textAlign: "center", pt:5 }}>
           {displayTitle}
         </Typography>
 
         {displaySubtitle && (
-          <Typography sx={{ color: "text.secondary", textAlign: "center", mt: 2 }}>{displaySubtitle}</Typography>
+          <Typography sx={{ color: "text.secondary", textAlign: "center", mt: 2 , fontWeight: "regular"}}>{displaySubtitle}</Typography>
         )}
       </div>
 

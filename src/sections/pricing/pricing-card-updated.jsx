@@ -161,7 +161,13 @@ export function PricingCardUpdated({ card }) {
             bottom: -32,
             mx: "auto",
             position: "absolute",
-            bgcolor: "black", // Black background
+           
+            backgroundColor: "black", // Ensure the background is white
+            "& img": {
+              objectFit: "contain", // Ensure the image fits inside the Avatar
+              width: "100%",
+              height: "100%",
+            },
           }}
           src="/logo.png" // Use the logo.png from the public folder
           alt="Logo" // Alt text for accessibility
@@ -218,7 +224,8 @@ export function PricingCardUpdated({ card }) {
 
       <Box sx={{ p: 3, display: "flex", alignItems: "center", gap: 1 }}>
         <Button sx={{ flex: 1 }} size="large" variant="contained" href={getHref(labelAction)}>
-          {labelAction}
+          Sign up 
+          {/* {labelAction} */}
         </Button>
 
         <IconButton
@@ -231,10 +238,10 @@ export function PricingCardUpdated({ card }) {
               bgcolor: grayishBlack,
               color: "white",
             },
-            width: 28,
-            height: 28,
-            fontSize: 16,
-            fontWeight: "bold",
+            width: 24,
+            height: 24,
+            fontSize: 12,
+            fontWeight: "regular",
             borderRadius: "50%",
           }}
           onClick={handleClick}
@@ -242,7 +249,7 @@ export function PricingCardUpdated({ card }) {
           aria-haspopup="true"
           aria-expanded={open ? "true" : undefined}
         >
-          ?
+          ▼
         </IconButton>
 
         <Menu

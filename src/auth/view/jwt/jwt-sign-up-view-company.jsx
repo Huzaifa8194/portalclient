@@ -7,7 +7,7 @@ import { useState, useEffect, useCallback } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import axios from "axios"
-
+import dayjs from "dayjs"
 import Box from "@mui/material/Box"
 import Link from "@mui/material/Link"
 import Alert from "@mui/material/Alert"
@@ -19,7 +19,7 @@ import Step from "@mui/material/Step"
 import StepLabel from "@mui/material/StepLabel"
 import Checkbox from "@mui/material/Checkbox"
 import FormControlLabel from "@mui/material/FormControlLabel"
-import dayjs from "dayjs"
+
 import { paths } from "src/routes/paths"
 import { useRouter } from "src/routes/hooks"
 import { RouterLink } from "src/routes/components"
@@ -130,13 +130,7 @@ export function JwtSignUpViewCompany() {
   const [forceUpdate, setForceUpdate] = useState(0)
   const [countryServicesCount, setCountryServicesCount] = useState(1)
 
-  const steps = [
-    "Company Info.",
-    "Contact ",
-    "Details",
-    "Services",
-    "Setup",
-  ]
+  const steps = ["Company Info.", "Contact ", "Details", "Services", "Setup"]
 
   // Fetch company types and business types on component mount
   useEffect(() => {
@@ -181,7 +175,7 @@ export function JwtSignUpViewCompany() {
     company_contact_person_name: "",
     company_contact_person_role: "",
     email: "",
-    contact_number: "+46",
+    contact_number: "",
     company_contact_sec_person_name: "",
     company_contact_sec_person_email: "",
 
@@ -195,7 +189,7 @@ export function JwtSignUpViewCompany() {
     // Services Required
     country_services: [
       {
-        country_id: " ", // Changed from empty string to null to fix Autocomplete warning
+        country_id: "", // Changed from empty string to null to fix Autocomplete warning
         service_types: [],
       },
     ],
@@ -221,30 +215,147 @@ export function JwtSignUpViewCompany() {
     trigger,
   } = methods
 
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      setLoading(true)
 
+      // Find the numeric country ID from the country label
+      const countryId = findCountryIdByLabel(data.country_id)
 
+      if (!countryId) {
+        throw new Error(`Country not found: ${data.country_id}`)
+      }
+
+      // For Real Estate, set default values for skipped fields
+      if (isRealEstate) {
+        // Set default values for operational details
+        data.company_no_of_employees = data.company_no_of_employees || ""
+        data.company_certified_employer = data.company_certified_employer || ""
+        data.company_collective_agreement = data.company_collective_agreement || ""
+        data.company_applied_work_permit = data.company_applied_work_permit || ""
+        data.company_non_eu_hires = data.company_non_eu_hires || ""
+
+        // Set default values for services required
+        data.country_services = data.country_services || [
+          {
+            country_id: countryId,
+            service_types: ["3"], // Default to "Property Listing & Housing Solutions"
+          },
+        ]
+      }
+
+      // Format country_services properly by converting country names to integer IDs
+      const formattedCountryServices =
+        data.country_services?.map((service) => {
+          // Check if country_id exists before trying to find it
+          if (!service.country_id) {
+            // Return a default object with empty service_types if country_id is missing
+            return {
+              country_id: "",
+              service_types: service.service_types || [],
+            }
+          }
+
+          const serviceCountryId = findCountryIdByLabel(service.country_id)
+
+          return {
+            country_id: serviceCountryId || "", // Use empty string as fallback if ID not found
+            service_types: service.service_types || [],
+          }
+        }) || []
+
+      // Format the data according to the API requirements
+      const formattedData = {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        password_confirmation: data.password_confirmation,
+        company_reg_no: data.company_reg_no,
+        company_reg_date: data.company_reg_date,
+        company_type_id: data.company_type_id,
+        company_business_type: data.company_business_type,
+        company_web: data.company_web,
+        address: data.address,
+        city: data.city,
+        postal_code: data.postal_code,
+        country_id: countryId,
+        contact_number: data.contact_number,
+        company_contact_person_name: data.company_contact_person_name,
+        company_contact_person_role: data.company_contact_person_role,
+        company_contact_sec_person_name: data.company_contact_sec_person_name,
+        company_contact_sec_person_email: data.company_contact_sec_person_email,
+        company_no_of_employees: data.company_no_of_employees,
+        company_certified_employer: data.company_certified_employer,
+        company_collective_agreement: data.company_collective_agreement,
+        company_applied_work_permit: data.company_applied_work_permit,
+        company_non_eu_hires: data.company_non_eu_hires,
+        is_information_accurate: data.is_information_accurate ? 1 : 0,
+        is_term_accepted: data.is_term_accepted ? 1 : 0,
+        country_services: formattedCountryServices,
+      }
+
+      console.log("Formatted data being sent:", formattedData)
+
+      // Send the data directly using axios
+      const response = await axios.post(
+        "https://api.swedenrelocators.se/api/companyClientRegistration",
+        formattedData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      )
+
+      console.log("API response", response)
+
+      if (response.data) {
+        // Show success toast
+
+        // Instead of calling signUp, directly set the session with the token from the response
+        if (response.data.data && response.data.data.token) {
+          localStorage.setItem("authToken", response.data.data.token)
+          setSession(response.data.data.token)
+          await checkUserSession?.()
+
+          // Short delay to allow the user to see the success message
+          setTimeout(() => {
+            router.refresh()
+          }, 1500)
+        } else {
+          // If there's no token in the response, just redirect to login
+          toast.success("Account created successfully")
+
+          // Short delay to allow the user to see the success message
+          setTimeout(() => {
+            router.push(paths.auth.jwt.signIn)
+          }, 1500)
+        }
+      }
+    } catch (error) {
+      console.error("Error during sign-up:", error)
+
+      // Show error toast
+      const errorMessage =
+        error.response?.data?.message ||
+        (typeof error === "string" ? error : error.message) ||
+        "Registration failed. Please try again."
+
+      toast.error(errorMessage)
+      setErrorMsg(errorMessage)
+    } finally {
+      setLoading(false)
+    }
+  })
+  const formatDateForBackend = (date) => {
+    if (!date) return ""
+    return dayjs(date).format("YYYY-MM-DD")
+  }
   const [isRealEstate, setIsRealEstate] = useState(false)
 
   const handleIndustryChange = (event) => {
     const selectedIndustry = event.target.value
     console.log(selectedIndustry)
-    setIsRealEstate(selectedIndustry === "15")
-    // Make sure to update the form value
-    setValue("company_business_type", selectedIndustry)
-    if (selectedIndustry === "15") {
-      // Set default values for skipped fields
-      setValue("company_no_of_employees", "1-10")
-      setValue("company_certified_employer", "No")
-      setValue("company_collective_agreement", "No")
-      setValue("company_applied_work_permit", "No")
-      setValue("company_non_eu_hires", "No")
-      setValue("country_services", [
-        {
-          country_id: getValues("country_id"),
-          service_types: ["3"],
-        },
-      ])
-    }
   }
 
   const handleNext = () => {
@@ -287,7 +398,10 @@ export function JwtSignUpViewCompany() {
     const country = countries.find((c) => c.label === countryLabel)
     return country ? Number(country.id) : null // Ensure it's a number
   }, [])
-  
+  const findCountryLabelById = (countryId) => {
+    const country = countries.find((c) => c.id === Number(countryId))
+    return country ? country.label : null
+  }
 
   // Handle adding a new country service
   const handleAddCountryService = () => {
@@ -340,10 +454,8 @@ export function JwtSignUpViewCompany() {
     { value: "6", label: "Financial & Tax Solutions" },
     { value: "7", label: "Using as an Employee Management Tool" },
   ]
-  const formatDateForBackend = (date) => {
-    if (!date) return ""
-    return dayjs(date).format("YYYY-MM-DD")}
 
+  // Custom isOptionEqualToValue function for Autocomplete
   const isOptionEqualToValue = (option, value) => {
     if (!value) return false
     return option.label === value || option.label === value.label
@@ -401,11 +513,7 @@ export function JwtSignUpViewCompany() {
             <Field.Text name="postal_code" label="Postal Code" sx={{ flex: 1 }} /> {/* Swapped position */}
           </Box>
 
-          <Field.CountrySelect
-            name="country_id"
-            label="Country"
-            isOptionEqualToValue={isOptionEqualToValue}
-          />
+          <Field.CountrySelect name="country_id" label="Country" isOptionEqualToValue={isOptionEqualToValue} />
         </>
       )}
 
@@ -724,14 +832,19 @@ export function JwtSignUpViewCompany() {
                   // Format country_services properly by converting country names to integer IDs
                   const formattedCountryServices =
                     data.country_services?.map((service) => {
-                      const serviceCountryId = findCountryIdByLabel(service.country_id)
-
-                      if (!serviceCountryId) {
-                        throw new Error(`Country not found in services: ${service.country_id}`)
+                      // Check if country_id exists before trying to find it
+                      if (!service.country_id) {
+                        // Return a default object with empty service_types if country_id is missing
+                        return {
+                          country_id: "",
+                          service_types: service.service_types || [],
+                        }
                       }
 
+                      const serviceCountryId = findCountryIdByLabel(service.country_id)
+
                       return {
-                        country_id: serviceCountryId,
+                        country_id: serviceCountryId || "", // Use empty string as fallback if ID not found
                         service_types: service.service_types || [],
                       }
                     }) || []
@@ -743,7 +856,7 @@ export function JwtSignUpViewCompany() {
                     password: data.password,
                     password_confirmation: data.password_confirmation,
                     company_reg_no: data.company_reg_no,
-                    company_reg_date:formattedCompanyReg,
+                    company_reg_date: formattedCompanyReg,
                     company_type_id: data.company_type_id,
                     company_business_type: data.company_business_type,
                     company_web: data.company_web,
@@ -899,3 +1012,4 @@ export function JwtSignUpViewCompany() {
     </Stack>
   )
 }
+

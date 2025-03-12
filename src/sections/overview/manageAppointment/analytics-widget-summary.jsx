@@ -17,7 +17,7 @@ import { Chart, useChart } from "src/components/chart"
 export function AnalyticsWidgetSummary({ icon, title, total, chart, percent, color = "primary", sx, ...other }) {
   const theme = useTheme()
 
-  // Convert title to string if it's not already a string
+  
   const displayTitle = typeof title === "string" ? title : String(title || "")
 
   const chartColors = [theme.palette[color].dark]
@@ -129,14 +129,14 @@ AnalyticsWidgetSummary.propTypes = {
   chart: PropTypes.shape({
     series: PropTypes.arrayOf(PropTypes.number),
     categories: PropTypes.arrayOf(PropTypes.string),
-    options: PropTypes.shape({}), // Empty shape as a fallback for any chart options
+    options: PropTypes.shape({}), 
   }),
   percent: PropTypes.number,
   color: PropTypes.oneOf(["primary", "secondary", "info", "success", "warning", "error"]),
   sx: PropTypes.oneOfType([
     PropTypes.func,
     PropTypes.shape({
-      // Common MUI sx properties
+      
       m: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
       mt: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
       mr: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
@@ -147,7 +147,7 @@ AnalyticsWidgetSummary.propTypes = {
       pr: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
       pb: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
       pl: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-      // Add other common properties as needed
+      
     }),
   ]),
 }
