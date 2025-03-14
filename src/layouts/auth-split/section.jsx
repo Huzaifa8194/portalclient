@@ -1,3 +1,5 @@
+"use client"
+
 import Box from "@mui/material/Box"
 import Link from "@mui/material/Link"
 import Tooltip from "@mui/material/Tooltip"
@@ -59,6 +61,9 @@ export function Section({
     displayImgUrl = "/privateSignin.png"
   }
 
+  // Check if this is the "International Talent & Employee Management" section
+  const isInternationalTalent = displayTitle === "International Talent & Employee Management"
+
   return (
     <Box
       sx={{
@@ -69,15 +74,16 @@ export function Section({
           )}, ${varAlpha(theme.vars.palette.background.defaultChannel, 0.92)}`,
           imgUrl: `${CONFIG.assetsDir}/assets/background/background-3-blur.webp`,
         }),
-        px: 3,
-        pb: 10,
+        // Apply different styling based on whether it's the International Talent section
+        px: isInternationalTalent ? 3 : 2,
+        pb: isInternationalTalent ? 10 : undefined,
         width: 1,
-        maxWidth: 480,
+        maxWidth: isInternationalTalent ? 480 : 450,
         display: "none",
         position: "relative",
-        pt: "var(--layout-header-desktop-height)",
+        pt: isInternationalTalent ? "var(--layout-header-desktop-height)" : undefined,
         [theme.breakpoints.up(layoutQuery)]: {
-          gap: 8,
+          gap: isInternationalTalent ? 8 : 4,
           display: "flex",
           alignItems: "center",
           flexDirection: "column",
@@ -88,27 +94,52 @@ export function Section({
       {...other}
     >
       <div>
-        <Typography variant="h4" sx={{ textAlign: "center", pt:5 }}>
+        <Typography
+          variant={isInternationalTalent ? "h4" : "h3"}
+          sx={{
+            textAlign: "center",
+            mb: isInternationalTalent ? undefined : 1,
+            pt: isInternationalTalent ? 5 : undefined,
+          }}
+        >
           {displayTitle}
         </Typography>
 
         {displaySubtitle && (
-          <Typography sx={{ color: "text.secondary", textAlign: "center", mt: 2 , fontWeight: "regular"}}>{displaySubtitle}</Typography>
+          <Typography
+            sx={{
+              color: "text.secondary",
+              textAlign: "center",
+              fontWeight: "regular",
+              mt: isInternationalTalent ? 2 : undefined,
+            }}
+          >
+            {displaySubtitle}
+          </Typography>
         )}
       </div>
 
-      <Box component="img" alt="Dashboard illustration" src={displayImgUrl} sx={{ width: 1, objectFit: "contain" }} />
+      <Box
+        component="img"
+        alt="Dashboard illustration"
+        src={displayImgUrl}
+        sx={{
+          width: 1,
+          objectFit: "contain",
+          maxHeight: isInternationalTalent ? undefined : { xs: 200, md: 300 },
+        }}
+      />
 
       {!!methods?.length && (
-        <Box component="ul" gap={2} display="flex">
+        <Box component="ul" gap={isInternationalTalent ? 2 : 1.5} display="flex">
           {methods.map((option) => (
             <Box key={option.label} component="li">
               <Tooltip title={option.label} placement="top">
                 <Link
                   component={RouterLink}
                   href={option.path}
-                  target="_blank" // Open links in a new tab
-                  rel="noopener noreferrer" // Security best practice for target="_blank"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   sx={{
                     display: "flex",
                     alignItems: "center",
@@ -119,7 +150,10 @@ export function Section({
                     component="img"
                     alt={option.label}
                     src={option.icon}
-                    sx={{ width: 48, height: 48 }} // Increased icon size
+                    sx={{
+                      width: isInternationalTalent ? 48 : 40,
+                      height: isInternationalTalent ? 48 : 40,
+                    }}
                   />
                 </Link>
               </Tooltip>
@@ -128,14 +162,7 @@ export function Section({
         </Box>
       )}
 
-      {/* Render App Store and Play Store icons */}
-      {slots?.bottomArea && (
-        <Box sx={{ width: "100%" }}>
-          {" "}
-          {/* Removed margin-top */}
-          {slots.bottomArea}
-        </Box>
-      )}
+      {slots?.bottomArea && <Box sx={{ width: "100%" }}>{slots.bottomArea}</Box>}
     </Box>
   )
 }

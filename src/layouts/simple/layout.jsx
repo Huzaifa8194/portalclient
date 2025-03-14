@@ -5,7 +5,7 @@ import Alert from '@mui/material/Alert';
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 
-import { Logo } from 'src/components/logo';
+import { Logo2 } from 'src/components/logo/logo2';
 
 import { Main, CompactContent } from './main';
 import { LayoutSection } from '../core/layout-section';
@@ -33,7 +33,12 @@ export function SimpleLayout({ sx, children, header, content }) {
                 This is an info Alert.
               </Alert>
             ),
-            leftArea: <Logo />,
+            leftArea: (
+              <Box sx={{ paddingy: 4, display: "flex", alignItems: "center" }}>
+                {/* -- Logo -- */}
+                <Logo2 sx={{ width: 150, height: "auto" }} /> {/* Adjust width as needed */}
+              </Box>
+            ),
             rightArea: (
               <Box display="flex" alignItems="center" gap={{ xs: 1, sm: 1.5 }}>
                 {/* -- Help link -- */}

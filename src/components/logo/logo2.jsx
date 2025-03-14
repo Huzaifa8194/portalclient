@@ -9,7 +9,7 @@ import { logoClasses } from './classes';
 
 // ----------------------------------------------------------------------
 
-export const Logo = forwardRef(
+export const Logo2 = forwardRef(
   (
     { width, href = '/', height, isSingle = true, disableLink = false, className, sx, ...other },
     ref
@@ -74,7 +74,7 @@ export const Logo = forwardRef(
       >
          <Box
         component="img"
-        src="/logo.png"
+        src="/logo1.png"
         alt="Logo"
         sx={{ width: '100%', height: '100%', objectFit: 'contain' }}
       />

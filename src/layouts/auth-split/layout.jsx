@@ -6,7 +6,7 @@ import { useLocation } from "react-router-dom"
 import { paths } from "src/routes/paths"
 import { RouterLink } from "src/routes/components"
 
-import { Logo } from "src/components/logo"
+import { Logo2 } from "src/components/logo/logo2"
 
 import { Section } from "./section"
 import { Main, Content } from "./main"
@@ -56,10 +56,10 @@ export function AuthSplitLayout({ sx, section, children, header }) {
               </Alert>
             ),
             leftArea: (
-              <>
+              <Box sx={{ paddingy: 4, display: "flex", alignItems: "center" }}>
                 {/* -- Logo -- */}
-                <Logo />
-              </>
+                <Logo2 sx={{ width: 150, height: "auto" }} /> {/* Adjust width as needed */}
+              </Box>
             ),
             rightArea: (
               <Box display="flex" alignItems="center" gap={{ xs: 1, sm: 1.5 }}>
@@ -72,6 +72,7 @@ export function AuthSplitLayout({ sx, section, children, header }) {
               </Box>
             ),
           }}
+
         />
       }
       /** **************************************
@@ -144,8 +145,8 @@ export function AuthSplitLayout({ sx, section, children, header }) {
                 boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
               },
               "& img": {
-                width: 24,
-                height: 24,
+                width: 15,
+                height: 15,
                 objectFit: "contain",
               },
             },

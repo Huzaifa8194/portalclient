@@ -9,8 +9,8 @@ import { PricingCardUpdated } from "../pricing-card-updated"
 
 export function PricingView() {
   return (
-    <Container sx={{ pt: { xs: 3, md: 5 }, pb: 10 }}>
-      <Typography variant="h3" align="center" sx={{ mb: 2 }}>
+    <Container sx={{ pt: { xs: 1, md: 2}, pb: 10 }}>
+      <Typography variant="h5" align="center" sx={{ mb: 2 }}>
         Get Started-Set Up Your Account With Us!
         <br />
       </Typography>

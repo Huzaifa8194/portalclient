@@ -3,7 +3,7 @@ import { useTheme } from '@mui/material/styles';
 
 import { varAlpha, hideScrollY } from 'src/theme/styles';
 
-import { Logo } from 'src/components/logo';
+import { Logo2 } from 'src/components/logo/logo2';
 import { Scrollbar } from 'src/components/scrollbar';
 import { NavSectionMini, NavSectionVertical } from 'src/components/nav-section';
 
@@ -19,7 +19,7 @@ export function NavVertical({ sx, data, slots, isNavMini, layoutQuery, onToggleN
     <>
       {slots?.topArea ?? (
         <Box sx={{ pl: 3.5}}>
-          <Logo />
+          <Logo2 />
         </Box>
       )}
 
@@ -35,7 +35,7 @@ export function NavVertical({ sx, data, slots, isNavMini, layoutQuery, onToggleN
     <>
       {slots?.topArea ?? (
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-          <Logo />
+          <Logo2 />
         </Box>
       )}
 

@@ -15,7 +15,7 @@ import {
   InstagramIcon,
 } from 'src/assets/icons';
 
-import { Logo } from 'src/components/logo';
+import { Logo2 } from 'src/components/logo/logo2';
 import { SvgColor } from 'src/components/svg-color';
 import { Iconify, FlagIcon } from 'src/components/iconify';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
@@ -41,8 +41,8 @@ export function IconsView() {
 
       <ComponentContainer>
         <ComponentBlock title="Logo">
-          <Logo disableLink width={64} height={64} />
-          <Logo disableLink isSingle={false} width={180} height={64} />
+          <Logo2 disableLink width={64} height={64} />
+          <Logo2 disableLink isSingle={false} width={180} height={64} />
         </ComponentBlock>
 
         <ComponentBlock title="Material">

@@ -8,7 +8,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import { allLangs } from 'src/locales';
 import { _contacts, _notifications } from 'src/_mock';
 
-import { Logo } from 'src/components/logo';
+import { Logo2 } from 'src/components/logo/logo2';
 import { useSettingsContext } from 'src/components/settings';
 
 import { Main } from './main';
@@ -113,7 +113,7 @@ export function DashboardLayout({ sx, children, header, data }) {
                 />
                 {/* -- Logo -- */}
                 {isNavHorizontal && (
-                  <Logo
+                  <Logo2
                     sx={{
                       display: 'none',
                       [theme.breakpoints.up(layoutQuery)]: {

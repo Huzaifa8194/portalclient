@@ -8,7 +8,7 @@ import { usePathname } from 'src/routes/hooks';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import { Logo } from 'src/components/logo';
+import { Logo2 } from 'src/components/logo/logo2';
 
 import { Main } from './main';
 import { NavMobile } from './nav/mobile';
@@ -34,85 +34,12 @@ export function MainLayout({ sx, data, children, header }) {
 
   const layoutQuery = 'md';
 
-  const navData = data?.nav ?? mainNavData;
 
   return (
     <LayoutSection
       /** **************************************
        * Header
-       *************************************** */
-      headerSection={
-        <HeaderSection
-          layoutQuery={layoutQuery}
-          sx={header?.sx}
-          slots={{
-            topArea: (
-              <Alert severity="info" sx={{ display: 'none', borderRadius: 0 }}>
-                This is an info Alert.
-              </Alert>
-            ),
-            leftArea: (
-              <>
-                {/* -- Nav mobile -- */}
-                <MenuButton
-                  onClick={mobileNavOpen.onTrue}
-                  sx={{
-                    mr: 1,
-                    ml: -1,
-                    [theme.breakpoints.up(layoutQuery)]: { display: 'none' },
-                  }}
-                />
-                <NavMobile
-                  data={navData}
-                  open={mobileNavOpen.value}
-                  onClose={mobileNavOpen.onFalse}
-                />
-                {/* -- Logo -- */}
-                <Logo />
-              </>
-            ),
-            rightArea: (
-              <>
-                {/* -- Nav desktop -- */}
-                <NavDesktop
-                  data={navData}
-                  sx={{
-                    display: 'none',
-                    [theme.breakpoints.up(layoutQuery)]: { mr: 2.5, display: 'flex' },
-                  }}
-                />
-                <Box display="flex" alignItems="center" gap={{ xs: 1, sm: 1.5 }}>
-                  {/* -- Settings button -- */}
-                  <SettingsButton />
-                  {/* -- Sign in button -- */}
-                  <SignInButton />
-                  {/* -- Purchase button -- */}
-                  <Button
-                    variant="contained"
-                    rel="noopener"
-                    target="_blank"
-                    href={paths.minimalStore}
-                    sx={{
-                      display: 'none',
-                      [theme.breakpoints.up(layoutQuery)]: { display: 'inline-flex' },
-                    }}
-                  >
-                    Purchase
-                  </Button>
-                </Box>
-              </>
-            ),
-          }}
-        />
-      }
-      /** **************************************
-       * Footer
-       *************************************** */
-      footerSection={homePage ? <HomeFooter /> : <Footer layoutQuery={layoutQuery} />}
-      /** **************************************
-       * Style
-       *************************************** */
-      sx={sx}
+       *************************************** */ 
     >
       <Main>{children}</Main>
     </LayoutSection>

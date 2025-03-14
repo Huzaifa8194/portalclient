@@ -8,7 +8,7 @@ import { RouterLink } from 'src/routes/components';
 import { CONFIG } from 'src/config-global';
 import { stylesMode } from 'src/theme/styles';
 
-import { Logo } from 'src/components/logo';
+import { Logo2 } from 'src/components/logo/logo2';
 
 import { Main } from './main';
 import { HeaderSection } from '../core/header-section';
@@ -40,7 +40,7 @@ export function AuthCenteredLayout({ sx, children, header }) {
             leftArea: (
               <>
                 {/* -- Logo -- */}
-                <Logo />
+                <Logo2 />
               </>
             ),
             rightArea: (

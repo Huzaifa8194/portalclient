@@ -7,7 +7,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 
 import { CONFIG } from 'src/config-global';
 
-import { Logo } from 'src/components/logo';
+import { Logo2 } from 'src/components/logo/logo2';
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { SvgColor } from 'src/components/svg-color';
@@ -73,7 +73,7 @@ export function NavBasic() {
         PaperProps={{ sx: { width: 280 } }}
       >
         <Box sx={{ pl: 2.5, py: 2 }}>
-          <Logo />
+          <Logo2 />
         </Box>
         <NavBasicMobile
           sx={{ px: 1.5 }}

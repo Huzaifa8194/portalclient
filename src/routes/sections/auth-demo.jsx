@@ -96,6 +96,16 @@ const authCentered = {
 
 export const authDemoRoutes = [
   {
+    path: '/',
+    element: (
+      <Suspense fallback={<SplashScreen />}>
+        <AuthSplitLayout section={{ title: 'Hi, Welcome back' }}>
+          <SplitLayout.SignInPage />
+        </AuthSplitLayout>
+      </Suspense>
+    ),
+  },
+  {
     path: 'auth-demo',
     element: (
       <Suspense fallback={<SplashScreen />}>
@@ -105,3 +115,4 @@ export const authDemoRoutes = [
     children: [authSplit, authCentered],
   },
 ];
+
