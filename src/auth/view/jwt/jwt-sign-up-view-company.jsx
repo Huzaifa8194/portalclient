@@ -356,6 +356,15 @@ export function JwtSignUpViewCompany() {
   const handleIndustryChange = (event) => {
     const selectedIndustry = event.target.value
     console.log(selectedIndustry)
+    setValue("company_business_type", selectedIndustry, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    })
+
+    // Update isRealEstate state if the selected industry is Real Estate (id: 15)
+    setIsRealEstate(selectedIndustry === "15")
+    setForceUpdate((prev) => prev + 1) // Force a re-render to reflect the change
   }
 
   const handleNext = () => {
