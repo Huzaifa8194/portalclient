@@ -25,6 +25,7 @@ export function AuthSplitLayout({ sx, section, children, header }) {
   const isPartnerSignup = location.pathname.includes("sign-up-partner")
   const isPrivateSignup = location.pathname.includes("sign-up-options")
   const isPrivateSignin = location.pathname.includes("sign-in-options")
+  const isSignin = location.pathname.includes("sign-in")
 
   // Determine the page type for the Section component
   let pageType = ""
