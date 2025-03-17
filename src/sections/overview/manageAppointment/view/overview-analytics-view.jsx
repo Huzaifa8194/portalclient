@@ -9,7 +9,6 @@ import Box from "@mui/material/Box"
 import Card from "@mui/material/Card"
 import CardContent from "@mui/material/CardContent"
 import { styled } from "@mui/material/styles"
-import List from "@mui/material/List"
 
 import { CONFIG } from "src/config-global"
 import { DashboardContent } from "src/layouts/dashboard"
@@ -20,6 +19,22 @@ import { RescheduleAppointmentForm } from "./reschedule-appointment-form"
 const StyledCard = styled(Card)(({ theme }) => ({
   backgroundColor: theme.palette.background.neutral,
   boxShadow: theme.customShadows.z16,
+  borderRadius: theme.shape.borderRadius * 2,
+  overflow: "hidden",
+  position: "relative",
+  // Removed the &::after pseudo-element that was creating the green shadow
+}))
+
+const DetailCard = styled(Card)(({ theme }) => ({
+  height: "100%",
+  transition: "transform 0.2s, box-shadow 0.2s",
+  "&:hover": {
+    transform: "translateY(-4px)",
+    boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
+  },
+  background: "linear-gradient(to bottom right, #ffffff, #f5f5f5)",
+  overflow: "hidden",
+  position: "relative",
 }))
 
 export function OverviewAnalyticsView({ appointment, onBack }) {
@@ -41,7 +56,6 @@ export function OverviewAnalyticsView({ appointment, onBack }) {
       })
   }, [])
 
-
   const getTimeSlotLabel = (id) => {
     if (!id) return "Not specified" // If ID is missing, return fallback
     const timeSlot = timeSlots.find((slot) => slot.id === Number(id))
@@ -57,7 +71,6 @@ export function OverviewAnalyticsView({ appointment, onBack }) {
   }
 
   const handleRescheduleSuccess = (updatedData) => {
-
     setUpdatedAppointment({
       ...updatedAppointment,
       ...updatedData,
@@ -66,27 +79,38 @@ export function OverviewAnalyticsView({ appointment, onBack }) {
   }
 
   const appointmentDetails = [
-    { label: "Appointment Date", content: updatedAppointment.appointment_date },
+    {
+      label: "Appointment Date",
+      content: updatedAppointment.appointment_date,
+    },
     {
       label: "Appointment Time",
       content: loading ? "Loading..." : getTimeSlotLabel(updatedAppointment.time_slot_id),
     },
-    { label: "Category", content: updatedAppointment.category_name },
-    { label: "Type", content: updatedAppointment.type_name },
-    { label: "Country", content: updatedAppointment.country },
-    { label: "Language", content: updatedAppointment.language },
-    { label: "Description", content: updatedAppointment.description },
-    { label: "Invoice No", content: updatedAppointment.invoice.invoice_no },
-    { label: "Payment Type", content: updatedAppointment.invoice.payment_type },
+    {
+      label: "Country",
+      content: updatedAppointment.country,
+    },
+    {
+      label: "Language",
+      content: updatedAppointment.language,
+    },
+    {
+      label: "Description",
+      content: updatedAppointment.description,
+    },
+    {
+      label: "Payment Type",
+      content: updatedAppointment.invoice.payment_type,
+    },
     {
       label: "Total Amount",
       content: `${updatedAppointment.invoice.total_amount} ${updatedAppointment.invoice.currency_name}`,
     },
-    { label: "Status", content: updatedAppointment.invoice.status },
-    {
-      label: "Rescheduled",
-      content: updatedAppointment.is_rescheduled === 1 ? "Yes" : "No",
-    },
+    // {
+    //   label: "Rescheduled",
+    //   content: updatedAppointment.is_rescheduled === 1 ? "Yes" : "No",
+    // },
   ]
 
   return (
@@ -117,7 +141,6 @@ export function OverviewAnalyticsView({ appointment, onBack }) {
         >
           Back to Appointments
         </Button>
-
       </Box>
 
       <Grid container spacing={3}>
@@ -126,6 +149,7 @@ export function OverviewAnalyticsView({ appointment, onBack }) {
             title="Application Type"
             total={updatedAppointment.category_name}
             icon={<img alt="icon" src={`${CONFIG.assetsDir}/assets/icons/glass/ic-glass-bag.svg`} />}
+            sx={{ height: 240 }}
           />
         </Grid>
 
@@ -135,6 +159,7 @@ export function OverviewAnalyticsView({ appointment, onBack }) {
             total={updatedAppointment.type_name}
             color="info"
             icon={<img alt="icon" src={`${CONFIG.assetsDir}/assets/icons/glass/ic-glass-users.svg`} />}
+            sx={{ height: 240 }}
           />
         </Grid>
 
@@ -144,6 +169,7 @@ export function OverviewAnalyticsView({ appointment, onBack }) {
             total={updatedAppointment.invoice.invoice_no}
             color="warning"
             icon={<img alt="icon" src={`${CONFIG.assetsDir}/assets/icons/glass/ic-glass-buy.svg`} />}
+            sx={{ height: 240 }}
           />
         </Grid>
 
@@ -153,49 +179,108 @@ export function OverviewAnalyticsView({ appointment, onBack }) {
             total={updatedAppointment.invoice.status}
             color="error"
             icon={<img alt="icon" src={`${CONFIG.assetsDir}/assets/icons/glass/ic-glass-message.svg`} />}
+            sx={{ height: 240 }}
           />
         </Grid>
 
         <Grid xs={12} md={12} lg={12}>
           <StyledCard>
             <CardContent>
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-                <Typography variant="h6" fontWeight="bold">
-                  Appointment Details
-                </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mb: 3,
+                  pb: 2,
+                  borderBottom: "1px solid",
+                  borderColor: "divider",
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Box
+                    sx={{
+                      width: 4,
+                      height: 24,
+                      
+                      borderRadius: 1,
+                    }}
+                  />
+                  <Typography variant="h6" fontWeight="bold">
+                    Appointment Details
+                  </Typography>
+                </Box>
                 <Button
                   variant="contained"
                   onClick={handleRescheduleClick}
                   disabled={updatedAppointment.is_rescheduled === 1}
+                  sx={{
+                    boxShadow: "none",
+                    "&:hover": {
+                      boxShadow: "none",
+                    },
+                  }}
                 >
                   Reschedule Appointment
                 </Button>
               </Box>
 
-              <List sx={{ p: 2, backgroundColor: "#f9f9f9", borderRadius: 2 }}>
-                <Grid container spacing={2}>
-                  {appointmentDetails.map((detail, index) => (
-                    <Grid key={index} xs={12} sm={6} md={4} lg={3}>
-                      <Box
-                        sx={{
-                          p: 2,
-                          borderRadius: 2,
-                          backgroundColor: "white",
-                          boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
-                          textAlign: "center",
-                        }}
-                      >
-                        <Typography variant="body2" fontWeight="bold" color="text.secondary">
-                          {detail.label}
-                        </Typography>
-                        <Typography variant="body2" color="text.primary">
-                          {detail.content}
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  ))}
+              <Box sx={{ p: 3, backgroundColor: "#f9f9f9", borderRadius: 2 }}>
+                <Grid container spacing={3}>
+                  {Array.from({ length: Math.ceil(appointmentDetails.length / 3) }).map((_, groupIndex) => {
+                    const startIdx = groupIndex * 3
+                    const groupDetails = appointmentDetails.slice(startIdx, startIdx + 3)
+
+                    return (
+                      <Grid key={groupIndex} xs={12} md={4}>
+                        <DetailCard elevation={2}>
+                          <CardContent sx={{ p: 3 }}>
+                            {groupDetails.map((detail, detailIndex) => (
+                              <Box
+                                key={detailIndex}
+                                sx={{
+                                  mb: detailIndex < groupDetails.length - 1 ? 3 : 0,
+                                  pl: 1,
+                                }}
+                              >
+                                <Box sx={{ mb: 0.5 }}>
+                                  <Typography
+                                    variant="subtitle2"
+                                    fontWeight="600"
+                                    color="text.secondary"
+                                    sx={{
+                                      textTransform: "uppercase",
+                                      fontSize: "0.75rem",
+                                      letterSpacing: "0.5px",
+                                    }}
+                                  >
+                                    {detail.label}
+                                  </Typography>
+                                </Box>
+                                <Box>
+                                  <Typography
+                                    variant="body1"
+                                    fontWeight="500"
+                                    sx={{
+                                      color: "text.primary",
+                                      wordBreak: "break-word",
+                                    }}
+                                  >
+                                    {detail.content || "—"}
+                                  </Typography>
+                                </Box>
+                                {detailIndex < groupDetails.length - 1 && (
+                                  <Box sx={{ borderBottom: "1px dashed rgba(0,0,0,0.1)", my: 2 }} />
+                                )}
+                              </Box>
+                            ))}
+                          </CardContent>
+                        </DetailCard>
+                      </Grid>
+                    )
+                  })}
                 </Grid>
-              </List>
+              </Box>
             </CardContent>
           </StyledCard>
         </Grid>

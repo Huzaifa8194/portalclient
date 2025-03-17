@@ -40,7 +40,7 @@ export const NewProductSchema = zod.object({
   quantity: zod.number().min(1, { message: "Quantity is required!" }),
   colors: zod.string().array().nonempty({ message: "Choose at least one color!" }),
   sizes: zod.string().array().nonempty({ message: "Choose at least one size!" }),
-  tags: zod.string().array().min(2, { message: "Must have at least 2 tag!" }), 
+  tags: zod.string().array().min(2, { message: "Must have at least 2 tag!" }),
   gender: zod.string().array().nonempty({ message: "Choose at least one gender!" }),
   price: zod.number().min(1, { message: "Price should not be $0.00" }),
 
@@ -74,7 +74,6 @@ export function ProductNewEditForm({ currentProduct }) {
       try {
         setIsLoading(true)
 
-        
         const response = await axios.get("https://api.swedenrelocators.se/api/client/familyMember/list", {
           headers: {
             Authorization: `Bearer ${user.accessToken}`,
@@ -138,7 +137,6 @@ export function ProductNewEditForm({ currentProduct }) {
   const values = watch()
 
   useEffect(() => {
-    
     const fetchDocumentTypes = async () => {
       try {
         const response = await axios.get("https://api.swedenrelocators.se/api/miscellaneous/documentTypes/Fee")
@@ -146,12 +144,10 @@ export function ProductNewEditForm({ currentProduct }) {
         if (response.data && response.data.data && response.data.data.length > 0) {
           setDocumentTypes(response.data.data)
 
-          
           if (response.data.data.length > 0) {
             setSelectedDocumentType(response.data.data[0].id)
             setDocumentSubTypes(response.data.data[0].document_sub_types || [])
 
-            
             if (response.data.data[0].name) {
               setValue("code", response.data.data[0].name)
             }
@@ -252,15 +248,14 @@ export function ProductNewEditForm({ currentProduct }) {
     const fileInput = document.createElement("input")
     fileInput.type = "file"
     fileInput.accept = "*" // Accept all file types (adjust as needed)
-    fileInput.multiple = true 
+    fileInput.multiple = true
 
     fileInput.onchange = (event) => {
-      const selectedFiles = Array.from(event.target.files) 
-      if (selectedFiles.length === 0) return 
+      const selectedFiles = Array.from(event.target.files)
+      if (selectedFiles.length === 0) return
 
       const currentFiles = methods.getValues("images") || []
 
-      
       const duplicates = selectedFiles.filter((newFile) =>
         currentFiles.some((existingFile) => existingFile.name === newFile.name && existingFile.type === newFile.type),
       )
@@ -283,20 +278,19 @@ export function ProductNewEditForm({ currentProduct }) {
       console.info("Fetched Documents:", updatedFiles)
     }
 
-    fileInput.click() 
+    fileInput.click()
   }
 
   const uploadSingleDocument = async (image, selectedType, selectedSubType, category) => {
-    
     const formData = new FormData()
 
     formData.append("file", image)
     formData.append("document", image)
-    formData.append("user_family_id", "6") 
+    formData.append("user_family_id", "6")
     formData.append("document_type_id", selectedType.id.toString())
     formData.append("document_sub_type_id", selectedSubType.id.toString())
+    formData.append("coupon_id", "")
 
-   
     if (category) {
       formData.append("details", category)
     }
@@ -309,7 +303,6 @@ export function ProductNewEditForm({ currentProduct }) {
     console.log("Authorization token available:", !!user.accessToken)
 
     try {
-      
       const response = await axios({
         method: "post",
         url: "https://api.swedenrelocators.se/api/document/add",
@@ -318,7 +311,7 @@ export function ProductNewEditForm({ currentProduct }) {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${user.accessToken}`,
         },
-        validateStatus: (status) => status < 500, 
+        validateStatus: (status) => status < 500,
       })
 
       if (response.status >= 200 && response.status < 300) {
@@ -333,7 +326,6 @@ export function ProductNewEditForm({ currentProduct }) {
       let errorMessage = `Failed to upload ${image.name}`
 
       if (error.response) {
-        
         errorMessage = error.response.data?.message || `Server error (${error.response.status})`
       } else if (error.request) {
         errorMessage = "No response from server. Please check your connection."
@@ -375,7 +367,7 @@ export function ProductNewEditForm({ currentProduct }) {
 
     if (!images || images.length < 1) {
       toast.error("Please upload at least one document.")
-      return 
+      return
     }
 
     if (images.length > 5) {
@@ -451,7 +443,6 @@ export function ProductNewEditForm({ currentProduct }) {
     const selectedType = documentTypes.find((type) => type.id === selectedTypeId)
 
     if (selectedType) {
-      
       setValue("code", selectedType.name)
 
       setDocumentSubTypes(selectedType.document_sub_types || [])
@@ -464,6 +455,77 @@ export function ProductNewEditForm({ currentProduct }) {
     }
   }
 
+  const getFileIcon = (file) => {
+    const fileType = file.type.toLowerCase()
+    const fileName = file.name.toLowerCase()
+
+    // Return SVG icons based on file type
+    if (fileType.includes("pdf")) {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="#f44336">
+          <path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v1.25c0 .41-.34.75-.75.75s-.75-.34-.75-.75V8c0-.55.45-1 1-1H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2c-.28 0-.5-.22-.5-.5v-5c0-.28.22-.5.5-.5h2c.83 0 1.5.67 1.5 1.5v3zm4-3.75c0 .41-.34.75-.75.75H19v1h.75c.41 0 .75.34.75.75s-.34.75-.75.75H19v1.25c0 .41-.34.75-.75.75s-.75-.34-.75-.75V8c0-.55.45-1 1-1h1.25c.41 0 .75.34.75.75zM9 9.5h1v-1H9v1zM3 6c-.55 0-1 .45-1 1v13c0 1.1.9 2 2 2h13c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1-.45-1-1V7c0-.55-.45-1-1-1zm11 5.5h1v-3h-1v3z" />
+        </svg>
+      )
+    }
+
+    if (fileType.includes("word") || fileName.endsWith(".doc") || fileName.endsWith(".docx")) {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="#2196f3">
+          <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+        </svg>
+      )
+    }
+
+    if (
+      fileType.includes("excel") ||
+      fileType.includes("spreadsheet") ||
+      fileName.endsWith(".xls") ||
+      fileName.endsWith(".xlsx")
+    ) {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="#4caf50">
+          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1.99 6H17L14.5 14h2.51l-1.99 3H7.5l2.49-3H7.5L10 9h7.01z" />
+        </svg>
+      )
+    }
+
+    if (fileType.includes("image")) {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="#ff9800">
+          <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+        </svg>
+      )
+    }
+
+    if (fileType.includes("text")) {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="#607d8b">
+          <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+        </svg>
+      )
+    }
+
+    if (
+      fileType.includes("javascript") ||
+      fileType.includes("json") ||
+      fileType.includes("html") ||
+      fileType.includes("css")
+    ) {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="#9c27b0">
+          <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z" />
+        </svg>
+      )
+    }
+
+    // Default case (fallback)
+    return (
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="#757575">
+        <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z" />
+      </svg>
+    )
+  }
+
   const renderDetails = (
     <Card>
       <CardHeader title="Files" subheader="Upload your documents." sx={{ mb: 3 }} />
@@ -474,8 +536,8 @@ export function ProductNewEditForm({ currentProduct }) {
   const renderProperties = (
     <Card
       sx={{
-        width: "100%", 
-        maxWidth: "100vw", 
+        width: "100%",
+        maxWidth: "100vw",
       }}
     >
       <CardHeader
@@ -497,11 +559,10 @@ export function ProductNewEditForm({ currentProduct }) {
           alignItems="center"
           justifyContent="space-between"
           sx={{
-            columnGap: 2, 
-            flexWrap: "wrap", 
+            columnGap: 2,
+            flexWrap: "wrap",
           }}
         >
-          
           <Field.Select
             native
             name="category"
@@ -510,8 +571,8 @@ export function ProductNewEditForm({ currentProduct }) {
             fullWidth
             disabled={isLoading}
             sx={{
-              flex: 1, 
-              minWidth: 150, 
+              flex: 1,
+              minWidth: 150,
             }}
           >
             {isLoading ? (
@@ -553,7 +614,6 @@ export function ProductNewEditForm({ currentProduct }) {
             )}
           </Field.Select>
 
-          
           <Field.Select
             name="sku"
             label="Document Sub Type"
@@ -606,19 +666,13 @@ export function ProductNewEditForm({ currentProduct }) {
                         width: 50,
                         height: 50,
                         borderRadius: 1,
-                        overflow: "hidden",
-                        backgroundColor: "#ddd",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         mr: 2,
                       }}
                     >
-                      <img
-                        src={URL.createObjectURL(file) || "/placeholder.svg"} 
-                        alt={file.name}
-                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                      />
+                      {getFileIcon(file)}
                     </Box>
                     {/* File Details */}
                     <Box sx={{ flex: 1 }}>
@@ -662,7 +716,7 @@ export function ProductNewEditForm({ currentProduct }) {
       methods={methods}
       onSubmit={onSubmit}
       sx={{
-        width: "100%", 
+        width: "100%",
       }}
     >
       <Stack spacing={{ xs: 3, md: 5 }} sx={{ mx: "auto", maxWidth: "100%" }}>
