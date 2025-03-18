@@ -215,138 +215,6 @@ export function JwtSignUpViewCompany() {
     trigger,
   } = methods
 
-  const onSubmit = handleSubmit(async (data) => {
-    try {
-      setLoading(true)
-
-      // Find the numeric country ID from the country label
-      const countryId = findCountryIdByLabel(data.country_id)
-
-      if (!countryId) {
-        throw new Error(`Country not found: ${data.country_id}`)
-      }
-
-      // For Real Estate, set default values for skipped fields
-      if (isRealEstate) {
-        // Set default values for operational details
-        data.company_no_of_employees = data.company_no_of_employees || ""
-        data.company_certified_employer = data.company_certified_employer || ""
-        data.company_collective_agreement = data.company_collective_agreement || ""
-        data.company_applied_work_permit = data.company_applied_work_permit || ""
-        data.company_non_eu_hires = data.company_non_eu_hires || ""
-
-        // Set default values for services required
-        data.country_services = data.country_services || [
-          {
-            country_id: countryId,
-            service_types: ["3"], // Default to "Property Listing & Housing Solutions"
-          },
-        ]
-      }
-
-      // Format country_services properly by converting country names to integer IDs
-      const formattedCountryServices =
-        data.country_services?.map((service) => {
-          // Check if country_id exists before trying to find it
-          if (!service.country_id) {
-            // Return a default object with empty service_types if country_id is missing
-            return {
-              country_id: "",
-              service_types: service.service_types || [],
-            }
-          }
-
-          const serviceCountryId = findCountryIdByLabel(service.country_id)
-
-          return {
-            country_id: serviceCountryId || "", // Use empty string as fallback if ID not found
-            service_types: service.service_types || [],
-          }
-        }) || []
-
-      // Format the data according to the API requirements
-      const formattedData = {
-        name: data.name,
-        email: data.email,
-        password: data.password,
-        password_confirmation: data.password_confirmation,
-        company_reg_no: data.company_reg_no,
-        company_reg_date: data.company_reg_date,
-        company_type_id: data.company_type_id,
-        company_business_type: data.company_business_type,
-        company_web: data.company_web,
-        address: data.address,
-        city: data.city,
-        postal_code: data.postal_code,
-        country_id: countryId,
-        contact_number: data.contact_number,
-        company_contact_person_name: data.company_contact_person_name,
-        company_contact_person_role: data.company_contact_person_role,
-        company_contact_sec_person_name: data.company_contact_sec_person_name,
-        company_contact_sec_person_email: data.company_contact_sec_person_email,
-        company_no_of_employees: data.company_no_of_employees,
-        company_certified_employer: data.company_certified_employer,
-        company_collective_agreement: data.company_collective_agreement,
-        company_applied_work_permit: data.company_applied_work_permit,
-        company_non_eu_hires: data.company_non_eu_hires,
-        is_information_accurate: data.is_information_accurate ? 1 : 0,
-        is_term_accepted: data.is_term_accepted ? 1 : 0,
-        country_services: formattedCountryServices,
-      }
-
-      console.log("Formatted data being sent:", formattedData)
-
-      // Send the data directly using axios
-      const response = await axios.post(
-        "https://api.swedenrelocators.se/api/companyClientRegistration",
-        formattedData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      )
-
-      console.log("API response", response)
-
-      if (response.data) {
-        // Show success toast
-
-        // Instead of calling signUp, directly set the session with the token from the response
-        if (response.data.data && response.data.data.token) {
-          localStorage.setItem("authToken", response.data.data.token)
-          setSession(response.data.data.token)
-          await checkUserSession?.()
-
-          // Short delay to allow the user to see the success message
-          setTimeout(() => {
-            router.refresh()
-          }, 1500)
-        } else {
-          // If there's no token in the response, just redirect to login
-          toast.success("Account created successfully")
-
-          // Short delay to allow the user to see the success message
-          setTimeout(() => {
-            router.push(paths.auth.jwt.signIn)
-          }, 1500)
-        }
-      }
-    } catch (error) {
-      console.error("Error during sign-up:", error)
-
-      // Show error toast
-      const errorMessage =
-        error.response?.data?.message ||
-        (typeof error === "string" ? error : error.message) ||
-        "Registration failed. Please try again."
-
-      toast.error(errorMessage)
-      setErrorMsg(errorMessage)
-    } finally {
-      setLoading(false)
-    }
-  })
   const formatDateForBackend = (date) => {
     if (!date) return ""
     return dayjs(date).format("YYYY-MM-DD")
@@ -951,30 +819,26 @@ export function JwtSignUpViewCompany() {
   )
 
   return (
-    <Stack direction={{ xs: "column", md: "row" }} sx={{ minHeight: "100vh" }}>
-      {/* Right Side - Form and Stepper (60%) */}
       <Box
-        sx={{
-          width: { xs: "100%", md: "100%" },
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "center",
-          bgcolor: "background.default",
-          p: 4,
-        }}
+      sx={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
       >
-        <Box sx={{ display: "flex", width: "100%", maxWidth: "1500px" }}>
+        <Box sx={{ display: "flex", width: "100%" }}>
           {/* Form */}
           <Paper
-            sx={{
-              flexGrow: 1,
-              p: 4,
-              border: "1px solid",
-              borderColor: "divider",
-              borderRadius: 2,
-              mr: 2,
-              maxWidth: "1000px", // Increased from 800px
-            }}
+          sx={{
+            width: "100%",
+            maxWidth: { xs: "100%", sm: 400, md: 700, xl:1000 },
+            p: { xs: 3, sm: 4 },
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: 2,
+          }}
           >
             {/* Stepper */}
             <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
@@ -1018,7 +882,6 @@ export function JwtSignUpViewCompany() {
           </Paper>
         </Box>
       </Box>
-    </Stack>
   )
 }
 

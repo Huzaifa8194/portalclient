@@ -1,4 +1,4 @@
-import axios, { endpoints } from "src/utils/axios"
+import axios from "src/utils/axios"
 import { setSession, jwtDecode } from "./utils"
 
 /** **************************************
@@ -6,31 +6,31 @@ import { setSession, jwtDecode } from "./utils"
  *************************************** */
 export const signInWithPassword = async ({ email, password }) => {
   try {
-    const params = { email, password };
+    const params = { email, password }
 
     // Include params in the request body
-    const res = await axios.post("https://api.swedenrelocators.se/api/clientLogin", params);
+    const res = await axios.post("https://api.swedenrelocators.se/api/clientLogin", params)
 
-    const { token } = res.data.data;
+    const { token } = res.data.data
     if (!token) {
-      throw new Error("Access token not found in response");
+      throw new Error("Access token not found in response")
     }
 
-    const decodedToken = jwtDecode(token);
+    const decodedToken = jwtDecode(token)
     if (!decodedToken) {
-      console.error("Failed to decode token:", token);
-      throw new Error("Invalid token received from server");
+      console.error("Failed to decode token:", token)
+      throw new Error("Invalid token received from server")
     }
 
-    localStorage.setItem("authToken", token);
-    setSession(token);
-    console.log("Login Token: ", token);
-    return { ...decodedToken, accessToken: token };
+    localStorage.setItem("authToken", token)
+    setSession(token)
+    console.log("Login Token: ", token)
+    return { ...decodedToken, accessToken: token }
   } catch (error) {
-    console.error("Error during sign in:", error);
-    throw error;
+    console.error("Error during sign in:", error)
+    throw error
   }
-};
+}
 
 /** **************************************
  * Sign up
@@ -77,7 +77,7 @@ export const signUp = async ({
     const placeOfBirthId = await getCountryId(place_of_birth)
     const currentlyResidingId = await getCountryId(currently_residing)
 
-    console.log(gender);
+    console.log("Gender received:", gender)
     // Prepare the form data
     const formData = new FormData()
     formData.append("name", name)
@@ -93,9 +93,17 @@ export const signUp = async ({
     formData.append("postal_code", postal)
     formData.append("contact_number", contact_number)
     formData.append("is_term_accepted", is_term_accepted ? "1" : "0")
-    console.log("Gender (before conversion):", gender)
-    formData.append("gender_id", gender.toString())
-    console.log("Gender (after conversion):", gender.toString())
+
+    // Fix: Check if gender is defined before calling toString()
+    if (gender !== undefined && gender !== null) {
+      console.log("Gender (before conversion):", gender)
+      formData.append("gender_id", gender.toString())
+      console.log("Gender (after conversion):", gender.toString())
+    } else {
+      console.warn("Gender is undefined or null")
+      formData.append("gender_id", "")
+    }
+
     // Log form data for debugging
     console.log("Form Data:")
     ;[...formData.entries()].forEach(([key, value]) => {

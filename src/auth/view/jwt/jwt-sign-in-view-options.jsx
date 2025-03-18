@@ -1,96 +1,90 @@
-import { z as zod } from 'zod';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+"use client"
 
-import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
-import Alert from '@mui/material/Alert';
-import IconButton from '@mui/material/IconButton';
-import LoadingButton from '@mui/lab/LoadingButton';
-import InputAdornment from '@mui/material/InputAdornment';
-import { Divider } from '@mui/material';
-import { Icon } from '@iconify/react';
-import Paper from '@mui/material/Paper'; // Import Paper component
-import Stack from '@mui/material/Stack'; // Import Stack component
+import { z as zod } from "zod"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 
-import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hooks';
-import { RouterLink } from 'src/routes/components';
+import Box from "@mui/material/Box"
+import Link from "@mui/material/Link"
+import Alert from "@mui/material/Alert"
+import LoadingButton from "@mui/lab/LoadingButton"
+import { Divider } from "@mui/material"
+import { Icon } from "@iconify/react"
+import Paper from "@mui/material/Paper" // Import Paper component
 
-import { useBoolean } from 'src/hooks/use-boolean';
+import { paths } from "src/routes/paths"
+import { useRouter } from "src/routes/hooks"
+import { RouterLink } from "src/routes/components"
 
-import { Iconify } from 'src/components/iconify';
-import { Form, Field } from 'src/components/hook-form';
+import { useBoolean } from "src/hooks/use-boolean"
+import { Form } from "src/components/hook-form"
 
-import { signUp } from '../../context/jwt';
-import { useAuthContext } from '../../hooks';
-import { FormHead } from '../../components/form-head';
-import { SignUpTerms } from '../../components/sign-up-terms';
+import { signUp } from "../../context/jwt"
+import { useAuthContext } from "../../hooks"
+import { FormHead } from "../../components/form-head"
+import { SignUpTerms } from "../../components/sign-up-terms"
 
 // ----------------------------------------------------------------------
 
 export const SignUpSchemaTemp2 = zod.object({
-  firstName: zod.string().min(1, { message: 'First name is required!' }),
-  lastName: zod.string().min(1, { message: 'Last name is required!' }),
+  firstName: zod.string().min(1, { message: "First name is required!" }),
+  lastName: zod.string().min(1, { message: "Last name is required!" }),
 
   dateOfBirth: zod
     .string()
-    .refine(
-      (date) => !Number.isNaN(Date.parse(date)),
-      { message: 'Date of birth must be a valid date!' }
-    ),
+    .refine((date) => !Number.isNaN(Date.parse(date)), { message: "Date of birth must be a valid date!" }),
 
-  nationality: zod.string().min(1, { message: 'Nationality is required!' }),
-  placeofbirth: zod.string().min(1, { message: 'Place of Birth is required!' }),
-  countryresiding: zod.string().min(1, { message: 'Country Residing In is required!' }),
+  nationality: zod.string().min(1, { message: "Nationality is required!" }),
+  placeofbirth: zod.string().min(1, { message: "Place of Birth is required!" }),
+  countryresiding: zod.string().min(1, { message: "Country Residing In is required!" }),
 
-  address: zod.string().min(1, { message: 'Address is required!' }),
-  city: zod.string().min(1, { message: 'City is required!' }),
+  address: zod.string().min(1, { message: "Address is required!" }),
+  city: zod.string().min(1, { message: "City is required!" }),
 
   zipCode: zod
     .string()
-    .regex(/^\d{4,6}$/, { message: 'Zip Code must be 4 to 6 digits!' })
-    .min(1, { message: 'Zip Code is required!' }),
+    .regex(/^\d{4,6}$/, { message: "Zip Code must be 4 to 6 digits!" })
+    .min(1, { message: "Zip Code is required!" }),
 
   email: zod
     .string()
-    .min(1, { message: 'Email is required!' })
-    .email({ message: 'Email must be a valid email address!' }),
+    .min(1, { message: "Email is required!" })
+    .email({ message: "Email must be a valid email address!" }),
 
   password: zod
     .string()
-    .min(1, { message: 'Password is required!' })
-    .min(6, { message: 'Password must be at least 6 characters!' }),
-});
+    .min(1, { message: "Password is required!" })
+    .min(6, { message: "Password must be at least 6 characters!" }),
+})
 
 // ----------------------------------------------------------------------
 
 export function JwtSignInViewOptions() {
-  const { checkUserSession } = useAuthContext();
+  const { checkUserSession } = useAuthContext()
 
-  const router = useRouter();
+  const router = useRouter()
 
-  const password = useBoolean();
+  const password = useBoolean()
 
-  const [errorMsg, setErrorMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState("")
 
   const defaultValues = {
-    firstName: 'Hello',
-    lastName: 'Friend',
-    email: 'hello@gmail.com',
-    password: '@demo1',
-  };
+    firstName: "Hello",
+    lastName: "Friend",
+    email: "hello@gmail.com",
+    password: "@demo1",
+  }
 
   const methods = useForm({
     resolver: zodResolver(SignUpSchemaTemp2),
     defaultValues,
-  });
+  })
 
   const {
     handleSubmit,
     formState: { isSubmitting },
-  } = methods;
+  } = methods
 
   const onSubmit = handleSubmit(async (data) => {
     try {
@@ -107,16 +101,16 @@ export function JwtSignInViewOptions() {
         city: data.city,
         zipCode: data.zipCode,
         contactNumber: data.phonenumber,
-      });
+      })
 
-      await checkUserSession?.();
+      await checkUserSession?.()
 
-      router.refresh();
+      router.refresh()
     } catch (error) {
-      console.error(error);
-      setErrorMsg(typeof error === 'string' ? error : error.message);
+      console.error(error)
+      setErrorMsg(typeof error === "string" ? error : error.message)
     }
-  });
+  })
 
   const renderForm = (
     <Box gap={3} display="flex" flexDirection="column">
@@ -132,10 +126,10 @@ export function JwtSignInViewOptions() {
         >
           <Box
             sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              width: '100%',
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              width: "100%",
             }}
           >
             <span>Login With Email</span>
@@ -155,21 +149,21 @@ export function JwtSignInViewOptions() {
         variant="contained"
         loading={isSubmitting}
         sx={{
-          backgroundColor: 'white',
-          color: 'black',
-          border: '2px solid #1976D2',
-          '&:hover': {
-            backgroundColor: '#f0f0f0',
-            borderColor: '#1565C0',
+          backgroundColor: "white",
+          color: "black",
+          border: "2px solid #1976D2",
+          "&:hover": {
+            backgroundColor: "#f0f0f0",
+            borderColor: "#1565C0",
           },
         }}
       >
         <Box
           sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            width: '100%',
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%",
           }}
         >
           <span>Login With BankID</span>
@@ -186,21 +180,21 @@ export function JwtSignInViewOptions() {
         variant="contained"
         loading={isSubmitting}
         sx={{
-          backgroundColor: 'white',
-          color: 'black',
-          border: '2px solid #1976D2',
-          '&:hover': {
-            backgroundColor: '#f0f0f0',
-            borderColor: '#1565C0',
+          backgroundColor: "white",
+          color: "black",
+          border: "2px solid #1976D2",
+          "&:hover": {
+            backgroundColor: "#f0f0f0",
+            borderColor: "#1565C0",
           },
         }}
       >
         <Box
           sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            width: '100%',
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%",
           }}
         >
           <span>Login With MitID</span>
@@ -217,21 +211,21 @@ export function JwtSignInViewOptions() {
         variant="contained"
         loading={isSubmitting}
         sx={{
-          backgroundColor: 'white',
-          color: 'black',
-          border: '2px solid #1976D2',
-          '&:hover': {
-            backgroundColor: '#f0f0f0',
-            borderColor: '#1565C0',
+          backgroundColor: "white",
+          color: "black",
+          border: "2px solid #1976D2",
+          "&:hover": {
+            backgroundColor: "#f0f0f0",
+            borderColor: "#1565C0",
           },
         }}
       >
         <Box
           sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            width: '100%',
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%",
           }}
         >
           <span>Login With BankID </span>
@@ -248,21 +242,21 @@ export function JwtSignInViewOptions() {
         variant="contained"
         loading={isSubmitting}
         sx={{
-          backgroundColor: 'white',
-          color: 'black',
-          border: '2px solid #1976D2',
-          '&:hover': {
-            backgroundColor: '#f0f0f0',
-            borderColor: '#1565C0',
+          backgroundColor: "white",
+          color: "black",
+          border: "2px solid #1976D2",
+          "&:hover": {
+            backgroundColor: "#f0f0f0",
+            borderColor: "#1565C0",
           },
         }}
       >
         <Box
           sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            width: '100%',
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%",
           }}
         >
           <span>Login With eID </span>
@@ -270,64 +264,61 @@ export function JwtSignInViewOptions() {
         </Box>
       </LoadingButton>
     </Box>
-  );
+  )
 
   return (
-    <Stack direction={{ xs: 'column', md: 'row' }} sx={{ minHeight: '100vh' }}>
-      {/* Right Side - Form (60%) */}
-      <Box
+    <Box
+    sx={{
+      width: "100%",
+      height: "100%",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    }}
+    >
+      <Paper
+        elevation={3}
         sx={{
-          width: { xs: '100%', md: '90%' },
-          display: 'flex',
-          alignItems: 'start',
-          justifyContent: 'center',
-          bgcolor: 'background.default',
-          p: 4,
+          width: "100%",
+          maxWidth: { xs: "100%", sm: 480, md: 960, lg: 1280 }, // Increased from { xs: "100%", sm: 400, md: 900, lg:1200 }
+          p: { xs: 3, sm: 4 },
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 2,
         }}
       >
-        <Paper
-          elevation={3}
-          sx={{
-            width: '100%',
-            maxWidth: '800px',
-            p: 4,
-            border: '1px solid',
-            borderColor: 'divider',
-            borderRadius: 2,
-          }}
-        >
-          {/* Form Header */}
-          <FormHead
-            title="Get started absolutely free"
-            description={
-              <>
-                {`Create an account? `}
-                <Link component={RouterLink} href={paths.presignup} variant="subtitle2">
-                  Get started
-                </Link>
-              </>
-            }
-            sx={{ textAlign: { xs: 'center', md: 'left' }, mb: 3 }}
-          />
+        {/* Form Header */}
+        <FormHead
+          title="Get started absolutely free"
+          description={
+            <>
+              {`Create an account? `}
+              <Link component={RouterLink} href={paths.presignup} variant="subtitle2">
+                Get started
+              </Link>
+            </>
+          }
+          sx={{ textAlign: "center", mb: 3 }}
+        />
 
-          {/* Error Message */}
-          {!!errorMsg && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              {errorMsg}
-            </Alert>
-          )}
+        {/* Error Message */}
+        {!!errorMsg && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {errorMsg}
+          </Alert>
+        )}
 
-          {/* Form */}
-          <Form methods={methods} onSubmit={onSubmit}>
-            {renderForm}
-          </Form>
+        {/* Form */}
+        <Form methods={methods} onSubmit={onSubmit}>
+          {renderForm}
+        </Form>
 
-          {/* Terms Component */}
-          <Box sx={{ mt: 3 }}>
-            <SignUpTerms />
-          </Box>
-        </Paper>
-      </Box>
-    </Stack>
-  );
+        {/* Terms Component */}
+        <Box sx={{ mt: 3 }}>
+          <SignUpTerms />
+        </Box>
+      </Paper>
+    </Box>
+  )
 }
+

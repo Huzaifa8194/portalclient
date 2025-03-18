@@ -124,27 +124,24 @@ export function JwtSignInView() {
   );
 
   return (
-    <Stack direction={{ xs: 'column', md: 'row' }} sx={{ minHeight: '100vh' }}>
       
-      {/* Right Side - Form (60%) */}
       <Box
-        sx={{
-          width: { xs: '100%', md: '90%' },
-          display: 'flex',
-          alignItems: 'start',
-          justifyContent: 'center',
-          bgcolor: 'background.default',
-          p: 4,
-        }}
+      sx={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
       >
         <Paper
           elevation={3}
           sx={{
-            width: '100%',
-            maxWidth: '800px',
-            p: 4,
-            border: '1px solid',
-            borderColor: 'divider',
+            width: "100%",
+            maxWidth: { xs: "100%", sm: 400, md: 700, xl:1000 },
+            p: { xs: 3, sm: 4 },
+            border: "1px solid",
+            borderColor: "divider",
             borderRadius: 2,
           }}
         >
@@ -182,6 +179,5 @@ export function JwtSignInView() {
           </Form>
         </Paper>
       </Box>
-    </Stack>
   );
 }

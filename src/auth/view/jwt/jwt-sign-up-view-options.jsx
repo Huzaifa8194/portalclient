@@ -22,7 +22,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 
 import { Iconify } from 'src/components/iconify';
 import { Form, Field } from 'src/components/hook-form';
-
+import { AuthSplitLayout } from 'src/layouts/auth-split';
 import { signUp } from '../../context/jwt';
 import { useAuthContext } from '../../hooks';
 import { FormHead } from '../../components/form-head';
@@ -273,26 +273,23 @@ export function JwtSignUpViewOptions() {
   );
 
   return (
-    <Stack direction={{ xs: 'column', md: 'row' }} sx={{ minHeight: '100vh' }}>
-      {/* Right Side - Form (60%) */}
       <Box
-        sx={{
-          width: { xs: '100%', md: '90%' },
-          p: { xs: 3, md: 5 },
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          bgcolor: 'background.default',
-        }}
+      sx={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
       >
         <Paper
           elevation={3}
           sx={{
-            width: '100%',
-            maxWidth: '800px',
-            p: 4,
-            border: '1px solid',
-            borderColor: 'divider',
+            width: "100%",
+            maxWidth: { xs: "100%", sm: 480, md: 960, lg: 1280 }, // Increased from { xs: "100%", sm: 400, md: 900, lg:1200 }
+            p: { xs: 3, sm: 4 },
+            border: "1px solid",
+            borderColor: "divider",
             borderRadius: 2,
           }}
         >
@@ -328,6 +325,5 @@ export function JwtSignUpViewOptions() {
           </Box>
         </Paper>
       </Box>
-    </Stack>
   );
 }

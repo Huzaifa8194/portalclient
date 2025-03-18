@@ -113,15 +113,15 @@ export function JwtSignUpView() {
   const [genderOptions, setGenderOptions] = useState([{ value: "Choose Option", label: "Choose Option" }])
   const [isLoadingGenders, setIsLoadingGenders] = useState(true)
   const [activeStep, setActiveStep] = useState(0)
-  const [steps, setSteps] = useState(["User Details", "Personal Information", "Address & Terms"])
+  const [steps, setSteps] = useState(["Personal Details", "Location & Address", "Password & Confirmation"])
 
   const handleNext = (e) => {
     // Prevent form submission
     e.preventDefault()
 
     if (activeStep === 0) {
-      // Validate step 1 fields
-      methods.trigger(["firstName", "lastName", "email", "password", "password_confirmation"]).then((isValid) => {
+      // Validate step 1 fields - Personal Details
+      methods.trigger(["firstName", "lastName", "dateOfBirth", "gender"]).then((isValid) => {
         if (isValid) {
           setActiveStep((prevActiveStep) => prevActiveStep + 1)
         } else {
@@ -129,14 +129,16 @@ export function JwtSignUpView() {
         }
       })
     } else if (activeStep === 1) {
-      // Validate step 2 fields
-      methods.trigger(["dateOfBirth", "nationality", "placeofbirth", "countryresiding", "gender"]).then((isValid) => {
-        if (isValid) {
-          setActiveStep((prevActiveStep) => prevActiveStep + 1)
-        } else {
-          toast.error("Please fill in all required fields correctly")
-        }
-      })
+      // Validate step 2 fields - Location & Address
+      methods
+        .trigger(["placeofbirth", "nationality", "countryresiding", "address", "city", "postalCode"])
+        .then((isValid) => {
+          if (isValid) {
+            setActiveStep((prevActiveStep) => prevActiveStep + 1)
+          } else {
+            toast.error("Please fill in all required fields correctly")
+          }
+        })
     } else {
       setActiveStep((prevActiveStep) => prevActiveStep + 1)
     }
@@ -227,12 +229,53 @@ export function JwtSignUpView() {
   const renderForm = (
     <Box gap={3} display="flex" flexDirection="column">
       {activeStep === 0 && (
-        // Step 1 fields
+        // Step 1 - Account Information
         <>
-          <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: "column", sm: "row" }}>
-            <Field.Text name="firstName" label="First name" />
-            <Field.Text name="lastName" label="Last name" />
-          </Box>
+          <Field.Text name="firstName" label="First name" />
+          <Field.Text name="lastName" label="Last name" />
+          <Field.DatePicker
+            name="dateOfBirth"
+            label="Date of birth"
+            maxDate={dayjs().subtract(18, "year")}
+            helperText="You must be at least 18 years old to register"
+            format="YYYY-MM-DD"
+          />
+          <Field.Select name="gender" label="Gender" select defaultValue="" disabled={isLoadingGenders}>
+            <MenuItem value="">Choose Option</MenuItem>
+            {genderOptions.map((option) => (
+              <MenuItem key={option.value} value={option.value.toString()}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Field.Select>
+        </>
+      )}
+
+      {activeStep === 1 && (
+        // Step 2 - Personal Details
+        <>
+          <Field.CountrySelect name="placeofbirth" label="Country of Birth" helperText="Please select a country" />
+          <Field.CountrySelect name="nationality" label="Nationality" helperText="Please select a country" />
+          <Field.CountrySelect
+            name="countryresiding"
+            label="Country Residing In"
+            helperText="Please select a country"
+          />
+          <Field.Text name="address" label="Address" />
+          <Field.Text name="city" label="City" />
+          <Field.Text name="postalCode" label="Postal Code" />
+        </>
+      )}
+
+      {activeStep === 2 && (
+        // Step 3 - Location & Terms
+        <>
+          <Field.Phone
+            name="phonenumber"
+            label="Phone number"
+            placeholder="+1234567890"
+            helperText="Must start with + followed by 7-14 digits"
+          />
           <Field.Text name="email" label="Email" />
           <Field.Text
             name="password"
@@ -262,119 +305,59 @@ export function JwtSignUpView() {
               ),
             }}
           />
-        </>
-      )}
-
-      {activeStep === 1 && (
-        // Step 2 fields
-        <>
-          <Field.DatePicker
-            name="dateOfBirth"
-            label="Date of birth"
-            maxDate={dayjs().subtract(18, "year")}
-            helperText="You must be at least 18 years old to register"
-            format="YYYY-MM-DD" // Set the display format to YYYY-MM-DD
-          />
-          <Field.CountrySelect name="nationality" label="Nationality" helperText="Please select a country" />
-          <Field.CountrySelect name="placeofbirth" label="Country of Birth" helperText="Please select a country" />
-          <Field.CountrySelect
-            name="countryresiding"
-            label="Country Residing In"
-            helperText="Please select a country"
-          />
-          <Field.Select name="gender" label="Gender" select defaultValue="" disabled={isLoadingGenders}>
-            <MenuItem value="">Choose Option</MenuItem>
-            {genderOptions.map((option) => (
-              <MenuItem key={option.value} value={option.value.toString()}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </Field.Select>
-        </>
-      )}
-
-      {activeStep === 2 && (
-        // Step 3 fields
-        <>
-          <Field.Text name="address" label="Address" />
-          <Field.Text name="city" label="City" />
-          <Field.Text name="postalCode" label="Postal Code" />
-          <Field.Phone
-            name="phonenumber"
-            label="Phone number"
-            placeholder="+1234567890"
-            helperText="Must start with + followed by 7-14 digits"
-          />
           <Field.Checkbox name="is_term_accepted" label="I accept the terms and conditions" />
         </>
       )}
 
       <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
         {activeStep > 0 && (
-          <LoadingButton
-            color="inherit"
-            variant="outlined"
-            onClick={handleBack}
-            type="button" // Explicitly set type to button to prevent form submission
-          >
+          <LoadingButton color="inherit" variant="outlined" onClick={handleBack} type="button">
             Back
           </LoadingButton>
         )}
         {activeStep < steps.length - 1 ? (
-          <LoadingButton
-            variant="contained"
-            onClick={handleNext}
-            type="button" // Explicitly set type to button to prevent form submission
-          >
+          <LoadingButton variant="contained" onClick={handleNext} type="button">
             Next
           </LoadingButton>
         ) : (
           <LoadingButton
             color="inherit"
             size="large"
-            type="button" // Changed from submit to button to prevent automatic form submission
+            type="button"
             variant="contained"
             loading={isSubmitting}
             onClick={async (e) => {
-              e.preventDefault() // Prevent any default form submission
+              e.preventDefault()
 
               try {
-                // Validate all fields
                 const isValid = await methods.trigger()
                 if (!isValid) {
                   toast.error("Please fill in all required fields correctly")
                   return
                 }
 
-                // Get the form data
                 const data = methods.getValues()
-
-                // Format the date of birth to YYYY-MM-DD
                 const formattedDob = formatDateForBackend(data.dateOfBirth)
 
-                // Get country labels (names) instead of IDs
-                const nationalityLabel = findCountryLabelById(data.nationality)
-                const placeOfBirthLabel = findCountryLabelById(data.placeofbirth)
-                const currentlyResidingLabel = findCountryLabelById(data.countryresiding)
-
+                // Fix: Match property names with what the signUp function expects
                 const formData = {
                   name: `${data.firstName} ${data.lastName}`,
+                  dob: formattedDob,
+                  gender: data.gender === "Choose Option" ? "" : data.gender,
+                  place_of_birth: data.placeofbirth,
+                  nationality: data.nationality,
+                  address: data.address,
+                  city: data.city,
+                  postal: data.postalCode,
+                  currently_residing: data.countryresiding,
+                  contact_number: data.phonenumber,
                   email: data.email,
                   password: data.password,
                   password_confirmation: data.password_confirmation,
-                  dob: formattedDob, // Use the formatted date
-                  nationality: data.nationality,
-                  place_of_birth: data.placeofbirth,
-                  currently_residing: data.countryresiding,
-                  address: data.address,
-                  contact_number: data.phonenumber,
-                  city: data.city,
-                  postal: data.postalCode,
-                  gender: data.gender === "Choose Option" ? "" : data.gender.toString(),
                   is_term_accepted: data.is_term_accepted ? 1 : 0,
                 }
 
-                console.log("Submitting form data:", formData) // For debugging
+                console.log("Submitting form data:", formData)
 
                 await signUp(formData)
                 toast.success("Account created successfully!")
@@ -394,28 +377,25 @@ export function JwtSignUpView() {
   )
 
   return (
-    <Stack direction={{ xs: "column", md: "row" }} sx={{ minHeight: "100vh" }}>
-      {/* Right side - Form and Stepper (60% width) */}
       <Box
-        sx={{
-          width: { xs: "100%", md: "100%" },
-          p: { xs: 3, md: 5 },
-          overflow: "auto",
-          display: "flex",
-          justifyContent: "center",
-        }}
+      sx={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
       >
         {/* Form */}
         <Paper
           elevation={3}
           sx={{
-            p: 4,
+            width: "100%",
+            maxWidth: { xs: "100%", sm: 500, md: 600, lg:800 },
+            p: { xs: 3, sm: 4 },
             border: "1px solid",
             borderColor: "divider",
             borderRadius: 2,
-            flexGrow: 1,
-            maxWidth: "800px",
-            mx: "auto",
           }}
         >
           {/* Stepper */}
@@ -453,6 +433,6 @@ export function JwtSignUpView() {
           <SignUpTerms />
         </Paper>
       </Box>
-    </Stack>
   )
 }
+

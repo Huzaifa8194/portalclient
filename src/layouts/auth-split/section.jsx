@@ -12,8 +12,6 @@ import { RouterLink } from "src/routes/components"
 import { CONFIG } from "src/config-global"
 import { varAlpha, bgGradient } from "src/theme/styles"
 
-// ----------------------------------------------------------------------
-
 export function Section({
   sx,
   method,
@@ -21,7 +19,7 @@ export function Section({
   methods,
   pageType,
   title = "Complete Online Relocation Solution",
-  imgUrl = `${CONFIG.assetsDir}/assets/illustrations/illustration-dashboard.webp`,
+  imgUrl = `/privateSignin.png`,
   subtitle = "We believe in transparency",
   slots,
   ...other
@@ -29,7 +27,6 @@ export function Section({
   const theme = useTheme()
   const location = useLocation()
 
-  // Check if we're on the company signup, partner signup, private signup, or sign-in-options page
   const isCompanySignup = pageType === "company-signup" || location.pathname.includes("sign-up-company")
   const isPartnerSignup = pageType === "partner-signup" || location.pathname.includes("sign-up-partner")
   const isPrivateSignup =
@@ -38,7 +35,6 @@ export function Section({
     location.pathname.includes("sign-up")
   const isPrivateSignin = location.pathname.includes("sign-in-options")
 
-  // Set content based on the page type
   let displayTitle = title
   let displaySubtitle = subtitle
   let displayImgUrl = imgUrl
@@ -61,77 +57,66 @@ export function Section({
     displayImgUrl = "/privateSignin.png"
   }
 
-  // Check if this is the "International Talent & Employee Management" section
   const isInternationalTalent = displayTitle === "International Talent & Employee Management"
 
   return (
     <Box
       sx={{
-        ...bgGradient({
-          color: `0deg, ${varAlpha(
-            theme.vars.palette.background.defaultChannel,
-            0.92,
-          )}, ${varAlpha(theme.vars.palette.background.defaultChannel, 0.92)}`,
-          imgUrl: `${CONFIG.assetsDir}/assets/background/background-3-blur.webp`,
-        }),
-        // Apply different styling based on whether it's the International Talent section
-        px: isInternationalTalent ? 3 : 2,
-        pb: isInternationalTalent ? 10 : undefined,
-        width: 1,
-        maxWidth: isInternationalTalent ? 480 : 450,
-        display: "none",
+        px: 3,
+        pt:2,
+        pb: 2,
+        width: "100%",
+        maxWidth: isInternationalTalent ? 600 : 480,
+                display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center",
         position: "relative",
-        pt: isInternationalTalent ? "var(--layout-header-desktop-height)" : undefined,
-        [theme.breakpoints.up(layoutQuery)]: {
-          gap: isInternationalTalent ? 8 : 4,
-          display: "flex",
-          alignItems: "center",
-          flexDirection: "column",
-          justifyContent: "center",
-        },
+        gap: isInternationalTalent ? 10 : 10,
         ...sx,
       }}
       {...other}
     >
-      <div>
-        <Typography
-          variant={isInternationalTalent ? "h4" : "h3"}
-          sx={{
-            textAlign: "center",
-            mb: isInternationalTalent ? undefined : 1,
-            pt: isInternationalTalent ? 5 : undefined,
-          }}
-        >
-          {displayTitle}
+      <Box>
+      <Typography
+        variant={isInternationalTalent ? "h4" : "h4"}
+        sx={{ textAlign: "center", mb: 1, pt: isInternationalTalent ? 5 : undefined }}
+      >
+        {displayTitle}
+      </Typography>
+
+      {displaySubtitle && (
+        <Typography sx={{ color: "text.secondary", textAlign: "center", fontWeight: "regular" }}>
+          {displaySubtitle}
         </Typography>
-
-        {displaySubtitle && (
-          <Typography
-            sx={{
-              color: "text.secondary",
-              textAlign: "center",
-              fontWeight: "regular",
-              mt: isInternationalTalent ? 2 : undefined,
-            }}
-          >
-            {displaySubtitle}
-          </Typography>
-        )}
-      </div>
-
+      )}
+</Box>
       <Box
         component="img"
         alt="Dashboard illustration"
         src={displayImgUrl}
         sx={{
-          width: 1,
+          width: "100%",
+          maxWidth: isInternationalTalent ? 400 : 300,
           objectFit: "contain",
-          maxHeight: isInternationalTalent ? undefined : { xs: 200, md: 300 },
         }}
       />
 
       {!!methods?.length && (
-        <Box component="ul" gap={isInternationalTalent ? 2 : 1.5} display="flex">
+        <Box
+          component="ul"
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 2,
+            p: 0,
+            m: 0,
+            listStyle: "none",
+          }}
+        >
           {methods.map((option) => (
             <Box key={option.label} component="li">
               <Tooltip title={option.label} placement="top">
@@ -151,8 +136,20 @@ export function Section({
                     alt={option.label}
                     src={option.icon}
                     sx={{
-                      width: isInternationalTalent ? 48 : 40,
-                      height: isInternationalTalent ? 48 : 40,
+                      width: 60,
+                      height: 60,
+                      padding: 1,
+                      borderRadius: "50%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                      backgroundColor: "background.paper",
+                      transition: "transform 0.2s, box-shadow 0.2s",
+                      "&:hover": {
+                        transform: "translateY(-3px)",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                      },
                     }}
                   />
                 </Link>
@@ -162,8 +159,9 @@ export function Section({
         </Box>
       )}
 
-      {slots?.bottomArea && <Box sx={{ width: "100%" }}>{slots.bottomArea}</Box>}
+      {slots?.bottomArea && (
+        <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>{slots.bottomArea}</Box>
+      )}
     </Box>
   )
 }
-
