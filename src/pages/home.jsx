@@ -71,7 +71,7 @@ export default function Page() {
           <Box
             sx={{
               width: "100%",
-              maxWidth: { xs: "100%", sm: 500, md: 600, lg:800 },
+              maxWidth: { xs: "100%", sm: 500, md: 650, lg:800 },
               mx: "auto",
               p: { xs: 2, sm: 3 },
               overflowX: "hidden",
