@@ -33,7 +33,7 @@ export function Section({
     pageType === "private-signup" ||
     location.pathname.includes("sign-up-options") ||
     location.pathname.includes("sign-up")
-  const isPrivateSignin = location.pathname.includes("sign-in-options")
+  const isPrivateSignin = location.pathname.includes("sign-in-options") || location.pathname.includes("sign-in")
 
   let displayTitle = title
   let displaySubtitle = subtitle

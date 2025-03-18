@@ -1,4 +1,4 @@
-"use client"
+
 
 import { useState, useEffect, useCallback } from "react"
 import { z as zod } from "zod"
@@ -9,7 +9,7 @@ import Button from "@mui/material/Button"
 import axios from "src/utils/axios"
 import dayjs from "dayjs"
 import { useAuthContext } from "src/auth/hooks"
-import { MenuItem, Dialog, DialogContent } from "@mui/material"
+import { MenuItem, Dialog, DialogContent, Divider } from "@mui/material"
 import { toast } from "src/components/snackbar"
 
 import Box from "@mui/material/Box"
@@ -28,7 +28,7 @@ import { ManagerDetails } from "./ManagerDetails"
 
 // Define the schema as a constant
 const UpdateUserSchema = zod.object({
-  gender: zod.string().refine((value) => value !== "Choose Option" && value !== "", {
+  gender: zod.string().refine((value) => value !== "Choose an option" && value !== "", {
     message: "Please select a gender",
   }),
   email: zod
@@ -71,9 +71,8 @@ export function AccountGeneral() {
   const [isLoading, setIsLoading] = useState(true)
   const { user } = useAuthContext()
   const [errorMsg, setErrorMsg] = useState("")
-  const [genderOptions, setGenderOptions] = useState([{ value: "Choose Option", label: "Choose Option" }])
+  const [genderOptions, setGenderOptions] = useState([{ value: "Choose an option", label: "Choose an option" }])
   const [isLoadingGenders, setIsLoadingGenders] = useState(true)
-  const [openManagerDetails, setOpenManagerDetails] = useState(false)
   const [nationalityId, setNationalityId] = useState(null)
   const [placeOfBirthId, setPlaceOfBirthId] = useState(null)
   const [currentlyResidingId, setCurrentlyResidingId] = useState(null)
@@ -93,7 +92,7 @@ export function AccountGeneral() {
         // console.log(result)
         if (result.data) {
           const formattedOptions = [
-            { value: "Choose Option", label: "Choose Option" },
+            { value: "Choose an option", label: "Choose an option" },
             ...result.data.map((gender) => ({
               value: gender.id,
               label: gender.name,
@@ -303,52 +302,54 @@ export function AccountGeneral() {
           />
         </Grid>
       </Grid>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-        <Button
-          variant="contained"
-          onClick={() => setOpenManagerDetails(true)}
-          sx={{ backgroundColor: "black", color: "white", "&:hover": { backgroundColor: "#333" } }}
-        >
-          My Case Manager
-        </Button>
-      </Box>
       <Form methods={methods} sx={{ mt: 10 }}>
         <Grid container spacing={3}>
           <Grid xs={12} md={4}>
-            <Card
-              sx={{
-                pt: 10,
-                pb: 5,
-                px: 3,
-                textAlign: "center",
-              }}
-            >
-              <Field.UploadAvatar
-                name="photoURL"
-                maxSize={3145728}
-                helperText={
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      mt: 3,
-                      mx: "auto",
-                      display: "block",
-                      textAlign: "center",
-                      color: "text.disabled",
-                    }}
-                  >
-                    Allowed *.jpeg, *.jpg, *.png, *.gif
-                    <br /> max size of {fData(3145728)}
-                  </Typography>
-                }
-              />
-              <Button variant="soft" color="success" sx={{ mt: 3, mr: 1 }}>
-                Update password
-              </Button>
-              <Button variant="soft" color="error" sx={{ mt: 3 }}>
-                Delete user
-              </Button>
-            </Card>
+            <Stack spacing={3} sx={{ height: '100%' }}>
+              {/* First Card - Avatar and Buttons */}
+              <Card
+                sx={{
+                  pt: 10,
+                  pb: 5,
+                  px: 3,
+                  textAlign: "center",
+                  flex: '0 0 auto',
+                }}
+              >
+                <Field.UploadAvatar
+                  name="photoURL"
+                  maxSize={3145728}
+                  helperText={
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        mt: 3,
+                        mx: "auto",
+                        display: "block",
+                        textAlign: "center",
+                        color: "text.disabled",
+                      }}
+                    >
+                      Allowed *.jpeg, *.jpg, *.png, *.gif
+                      <br /> max size of {fData(3145728)}
+                    </Typography>
+                  }
+                />
+                
+                {/* Buttons */}
+                <Button variant="soft" color="success" sx={{ mt: 3, mr: 1 }}>
+                  Update password
+                </Button>
+                <Button variant="soft" color="error" sx={{ mt: 3 }}>
+                  Delete user
+                </Button>
+              </Card>
+              
+              {/* Second Card - Manager Details */}
+              <Box sx={{ flex: '1 1 auto' }}>
+                <ManagerDetails />
+              </Box>
+            </Stack>
           </Grid>
           <Grid xs={12} md={8}>
             <Card sx={{ p: 3 }}>
@@ -362,7 +363,7 @@ export function AccountGeneral() {
                 }}
               >
                 <Field.Select name="gender" label="Gender" select defaultValue="" disabled={isLoadingGenders}>
-                  <MenuItem value="">Choose Option</MenuItem>
+                  <MenuItem value="">Choose an option</MenuItem>
                   {genderOptions.map((option) => (
                     <MenuItem key={option.value} value={option.value.toString()}>
                       {option.label}
@@ -390,8 +391,20 @@ export function AccountGeneral() {
                   placeholder="Choose a country"
                 />
 
-                <Field.Text name="address" label="Address" />
-                <Field.Text name="secondaryAddress" label="Secondary Address" />
+                {/* Address field taking full row */}
+                <Field.Text 
+                  name="address" 
+                  label="Address" 
+                  sx={{ gridColumn: 'span 2' }} 
+                />
+                
+                {/* Secondary Address field taking full row */}
+                <Field.Text 
+                  name="secondaryAddress" 
+                  label="Secondary Address" 
+                  sx={{ gridColumn: 'span 2' }} 
+                />
+                
                 <Field.Text name="city" label="City" variant="outlined" />
                 <Field.Text name="postalCode" label="Postal Code" variant="outlined" />
                 <Field.Text name="passportNo" label="Passport Number" variant="outlined" />
@@ -431,7 +444,7 @@ export function AccountGeneral() {
                         passport_no: formData.passportNo,
                         postal_code: formData.postalCode,
                         secondary_address: formData.secondaryAddress,
-                        gender_id: formData.gender === "Choose Option" ? "" : formData.gender,
+                        gender_id: formData.gender === "Choose an option" ? "" : formData.gender,
                       }
 
                       console.log("API data prepared", apiData)
@@ -474,16 +487,6 @@ export function AccountGeneral() {
           </Grid>
         </Grid>
       </Form>
-      <Dialog
-        open={openManagerDetails}
-        onClose={() => setOpenManagerDetails(false)}
-        PaperProps={{ style: { borderRadius: 16 } }}
-      >
-        <DialogContent sx={{ p: 0 }}>
-          <ManagerDetails onClose={() => setOpenManagerDetails(false)} />
-        </DialogContent>
-      </Dialog>
     </>
   )
 }
-
