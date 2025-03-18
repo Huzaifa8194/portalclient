@@ -12,7 +12,6 @@ import Box from "@mui/material/Box"
 import Link from "@mui/material/Link"
 import Alert from "@mui/material/Alert"
 import LoadingButton from "@mui/lab/LoadingButton"
-import Stack from "@mui/material/Stack"
 import Paper from "@mui/material/Paper"
 import Stepper from "@mui/material/Stepper"
 import Step from "@mui/material/Step"
@@ -130,7 +129,7 @@ export function JwtSignUpViewCompany() {
   const [forceUpdate, setForceUpdate] = useState(0)
   const [countryServicesCount, setCountryServicesCount] = useState(1)
 
-  const steps = ["Company Info.", "Contact ", "Details", "Services", "Setup"]
+  const steps = ["Company", "Contact", "Details", "Services", "Setup"]
 
   // Fetch company types and business types on component mount
   useEffect(() => {
@@ -298,7 +297,7 @@ export function JwtSignUpViewCompany() {
   }
 
   const YES_NO_OPTIONS = [
-    { value: "", label: "Choose Option" },
+    { value: "", label: "Choose an Option" },
     { value: "Yes", label: "Yes" },
     { value: "No", label: "No" },
   ]
@@ -744,8 +743,7 @@ export function JwtSignUpViewCompany() {
                     contact_number: data.contact_number,
                     company_contact_person_name: data.company_contact_person_name,
                     company_contact_person_role: data.company_contact_person_role,
-                    company_contact_sec_person_name: data.company_contact_sec_person_name,
-                    company_contact_sec_person_email: data.company_contact_sec_person_email,
+                    company_contact_sec_person_name: data.company_contact_sec_person_email,
                     company_no_of_employees: data.company_no_of_employees,
                     company_certified_employer: data.company_certified_employer,
                     company_collective_agreement: data.company_collective_agreement,
@@ -819,7 +817,7 @@ export function JwtSignUpViewCompany() {
   )
 
   return (
-      <Box
+    <Box
       sx={{
         width: "100%",
         height: "100%",
@@ -827,61 +825,74 @@ export function JwtSignUpViewCompany() {
         alignItems: "center",
         justifyContent: "center",
       }}
-      >
-        <Box sx={{ display: "flex", width: "100%" }}>
-          {/* Form */}
-          <Paper
+    >
+      <Box sx={{ display: "flex", width: "100%" }}>
+        {/* Form */}
+        <Paper
           sx={{
             width: "100%",
-            maxWidth: { xs: "100%", sm: 400, md: 700, xl:1000 },
-            p: { xs: 3, sm: 4 },
+            maxWidth: { xs: "100%", sm: 500, md: 600, lg: 800 },
+            p: { xs: 2, sm: 4 },
             border: "1px solid",
             borderColor: "divider",
             borderRadius: 2,
           }}
+        >
+          {/* Stepper */}
+          <Stepper
+            activeStep={activeStep}
+            sx={{
+              mb: 4,
+              overflowX: { xs: "auto", sm: "visible" },
+              "& .MuiStepLabel-label": {
+                fontSize: { xs: "0.7rem", sm: "0.875rem" },
+                whiteSpace: "nowrap",
+              },
+              "& .MuiStepper-root": {
+                padding: { xs: "0 8px" },
+              },
+            }}
+            alternativeLabel
           >
-            {/* Stepper */}
-            <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-              {steps
-                .filter((_, index) => {
-                  // Hide steps 2 (index 2) and 3 (index 3) when Real Estate is selected
-                  if (watch("company_business_type") === "15" && (index === 2 || index === 3)) {
-                    return false
-                  }
-                  return true
-                })
-                .map((label) => (
-                  <Step key={label}>
-                    <StepLabel>{label}</StepLabel>
-                  </Step>
-                ))}
-            </Stepper>
+            {steps
+              .filter((_, index) => {
+                // Hide steps 2 (index 2) and 3 (index 3) when Real Estate is selected
+                if (watch("company_business_type") === "15" && (index === 2 || index === 3)) {
+                  return false
+                }
+                return true
+              })
+              .map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+          </Stepper>
 
-            <FormHead
-              title="Get started absolutely free"
-              description={
-                <>
-                  {`Already have an account? `}
-                  <Link component={RouterLink} href={paths.auth.jwt.signIn} variant="subtitle2">
-                    Sign in
-                  </Link>
-                </>
-              }
-              sx={{ mb: 4, textAlign: "center" }}
-            />
+          <FormHead
+            description={
+              <>
+                {`Already have an account? `}
+                <Link component={RouterLink} href={paths.auth.jwt.signIn} variant="subtitle2">
+                  Sign in
+                </Link>
+              </>
+            }
+            sx={{ mb: 4, textAlign: "center" }}
+          />
 
-            {!!errorMsg && (
-              <Alert severity="error" sx={{ mb: 3 }}>
-                {errorMsg}
-              </Alert>
-            )}
+          {!!errorMsg && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {errorMsg}
+            </Alert>
+          )}
 
-            <Form methods={methods}>{renderForm}</Form>
+          <Form methods={methods}>{renderForm}</Form>
 
-            <SignUpTerms />
-          </Paper>
-        </Box>
+          <SignUpTerms />
+        </Paper>
       </Box>
+    </Box>
   )
 }
 

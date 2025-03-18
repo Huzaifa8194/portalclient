@@ -87,7 +87,7 @@ export const SignUpSchema = zod
       .min(1, { message: "Phone number is required!" })
       .regex(/^\+\d{7,14}$/, { message: "Phone number must start with + and be followed by 7 to 14 digits" }),
 
-    gender: zod.string().refine((value) => value !== "Choose Option" && value !== "", {
+    gender: zod.string().refine((value) => value !== "Choose an option" && value !== "", {
       message: "Please select a gender",
     }),
     is_term_accepted: zod.boolean().refine((value) => value === true, {
@@ -110,7 +110,7 @@ export function JwtSignUpView() {
   const passwordConfirmation = useBoolean()
 
   const [errorMsg, setErrorMsg] = useState("")
-  const [genderOptions, setGenderOptions] = useState([{ value: "Choose Option", label: "Choose Option" }])
+  const [genderOptions, setGenderOptions] = useState([{ value: "Choose an option", label: "Choose an option" }])
   const [isLoadingGenders, setIsLoadingGenders] = useState(true)
   const [activeStep, setActiveStep] = useState(0)
   const [steps, setSteps] = useState(["Personal Details", "Location & Address", "Password & Confirmation"])
@@ -158,7 +158,7 @@ export function JwtSignUpView() {
         console.log(result)
         if (result.data) {
           const formattedOptions = [
-            { value: "Choose Option", label: "Choose Option" },
+            { value: "Choose an option", label: "Choose an option" },
             ...result.data.map((gender) => ({
               value: gender.id,
               label: gender.name,
@@ -195,7 +195,7 @@ export function JwtSignUpView() {
     postalCode: "",
     city: "",
     phonenumber: "",
-    gender: "Choose Option",
+    gender: "Choose an option",
     is_term_accepted: false,
   }
 
@@ -241,7 +241,7 @@ export function JwtSignUpView() {
             format="YYYY-MM-DD"
           />
           <Field.Select name="gender" label="Gender" select defaultValue="" disabled={isLoadingGenders}>
-            <MenuItem value="">Choose Option</MenuItem>
+            <MenuItem value="">Choose an option</MenuItem>
             {genderOptions.map((option) => (
               <MenuItem key={option.value} value={option.value.toString()}>
                 {option.label}
@@ -343,7 +343,7 @@ export function JwtSignUpView() {
                 const formData = {
                   name: `${data.firstName} ${data.lastName}`,
                   dob: formattedDob,
-                  gender: data.gender === "Choose Option" ? "" : data.gender,
+                  gender: data.gender === "Choose an option" ? "" : data.gender,
                   place_of_birth: data.placeofbirth,
                   nationality: data.nationality,
                   address: data.address,

@@ -129,6 +129,7 @@ export function JwtSignInView() {
       sx={{
         width: "100%",
         height: "100%",
+        minHeight:"600px",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -141,7 +142,12 @@ export function JwtSignInView() {
             maxWidth: { xs: "100%", sm: 400, md: 700, xl:1000 },
             p: { xs: 3, sm: 4 },
             border: "1px solid",
+            minHeight:"600px",
             borderColor: "divider",
+            gap:5,
+            display: "flex",
+            flexDirection: "column",
+             justifyContent: "center",
             borderRadius: 2,
           }}
         >

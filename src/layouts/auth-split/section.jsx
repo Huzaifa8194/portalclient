@@ -73,32 +73,52 @@ export function Section({
         justifyContent: "center",
         textAlign: "center",
         position: "relative",
-        gap: isInternationalTalent ? 10 : 10,
+        gap: isInternationalTalent ? 7 : 10,
         ...sx,
       }}
       {...other}
     >
-      <Box>
-      <Typography
-        variant={isInternationalTalent ? "h4" : "h4"}
-        sx={{ textAlign: "center", mb: 1, pt: isInternationalTalent ? 5 : undefined }}
-      >
-        {displayTitle}
-      </Typography>
+     {isInternationalTalent ? (
+    <Box>
+    <Typography
+      variant="h4"
+      sx={{ textAlign: "center", mb: 5, pt: isInternationalTalent ? 0 : undefined }}
+    >
+      {displayTitle}
+    </Typography>
 
-      {displaySubtitle && (
-        <Typography sx={{ color: "text.secondary", textAlign: "center", fontWeight: "regular" }}>
-          {displaySubtitle}
-        </Typography>
-      )}
-</Box>
+    {displaySubtitle && (
+      <Typography sx={{ color: "text.secondary", textAlign: "center", fontWeight: "regular" }}>
+        {displaySubtitle}
+      </Typography>
+    )}
+    </Box>
+) : (
+  <Box>
+    <Typography
+      variant="h4"
+      sx={{ textAlign: "center", mb: 1, pt: isInternationalTalent ? 5 : undefined }}
+    >
+      {displayTitle}
+    </Typography>
+
+    {displaySubtitle && (
+      <Typography sx={{ color: "text.secondary", textAlign: "center", fontWeight: "regular" }}>
+        {displaySubtitle}
+      </Typography>
+    )}
+  </Box>
+
+)}
+
+
       <Box
         component="img"
         alt="Dashboard illustration"
         src={displayImgUrl}
         sx={{
           width: "100%",
-          maxWidth: isInternationalTalent ? 400 : 300,
+          maxWidth: isInternationalTalent ? 520 : 300,
           objectFit: "contain",
         }}
       />
