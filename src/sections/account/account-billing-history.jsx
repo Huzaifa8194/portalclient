@@ -1,4 +1,4 @@
-import Card from "@mui/material/Card"
+
 import Stack from "@mui/material/Stack"
 import Button from "@mui/material/Button"
 import Divider from "@mui/material/Divider"
@@ -17,19 +17,19 @@ export function AccountBillingHistory({ referrals }) {
 
   // Dummy data for accepted referrals
   const acceptedReferrals = [
-    { id: 1, name: "John Doe", status: "accepted", date: "2023-05-15" },
-    { id: 2, name: "Jane Smith", status: "accepted", date: "2023-05-20" },
+    { id: 1, name: "John Doe", status: "Accepted", date: "2023-05-15" },
+    { id: 2, name: "Jane Smith", status: "Accepted", date: "2023-05-20" },
   ]
 
   // Combine accepted and pending referrals
   const allReferrals = [...acceptedReferrals, ...referrals]
 
   return (
-    <Card>
-      <CardHeader title="Referral Status" />
+    <>
+      <CardHeader title="Referral Status:" />
 
-      <Stack spacing={1.5} sx={{ px: 3, pt: 3 }}>
-        {(showMore.value ? allReferrals : allReferrals.slice(0, 8)).map((referral) => (
+      <Stack spacing={1.5} sx={{ px: 3, pt: 1 }}>
+        {(showMore.value ? allReferrals : allReferrals.slice(0, 4)).map((referral) => (
           <Stack key={referral.id} direction="row" alignItems="center" justifyContent="space-between">
             <ListItemText
               primary={referral.name}
@@ -43,7 +43,7 @@ export function AccountBillingHistory({ referrals }) {
               }}
             />
 
-            <Chip label={referral.status} color={referral.status === "accepted" ? "success" : "warning"} size="small" />
+            <Chip label={referral.status} color={referral.status === "Accepted" ? "success" : "warning"} size="small" />
           </Stack>
         ))}
 
@@ -66,7 +66,7 @@ export function AccountBillingHistory({ referrals }) {
           Show {showMore.value ? "less" : "more"}
         </Button>
       </Stack>
-    </Card>
+    </>
   )
 }
 

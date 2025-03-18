@@ -1,4 +1,4 @@
-
+"use client"
 
 import { useState, useEffect, useCallback } from "react"
 import { z as zod } from "zod"
@@ -9,7 +9,7 @@ import Button from "@mui/material/Button"
 import axios from "src/utils/axios"
 import dayjs from "dayjs"
 import { useAuthContext } from "src/auth/hooks"
-import { MenuItem, Dialog, DialogContent, Divider } from "@mui/material"
+import { MenuItem } from "@mui/material"
 import { toast } from "src/components/snackbar"
 
 import Box from "@mui/material/Box"
@@ -23,7 +23,6 @@ import { fData } from "src/utils/format-number"
 
 import { Form, Field, schemaHelper } from "src/components/hook-form"
 import { countries } from "src/assets/data"
-import { AppWidgetSummary } from "./app-widget-summary"
 import { ManagerDetails } from "./ManagerDetails"
 
 // Define the schema as a constant
@@ -58,13 +57,35 @@ const UpdateUserSchema = zod.object({
     .refine((date) => !Number.isNaN(Date.parse(date)), { message: "Date of birth must be a valid date!" }),
   NID: zod.string().min(1, { message: "NID is required!" }),
   passport: zod.string().min(1, { message: "NID is required!" }),
-  nationality:  zod.string().optional(),
-  placeOfBirth:  zod.string().optional(),
-  currentlyResiding:  zod.string().optional(),
+  nationality: zod.string().optional(),
+  placeOfBirth: zod.string().optional(),
+  currentlyResiding: zod.string().optional(),
 })
 
 // Export the schema separately to fix Fast Refresh issues
 export { UpdateUserSchema }
+
+// Widget Summary Component
+const AppWidgetSummary = (props) => {
+  const { title, total, codeicon, extratext } = props
+
+  return (
+    <Card sx={{ p: 3, height: "100%" }}>
+      <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Box sx={{ mr: 3 }}>{codeicon}</Box>
+        <Box>
+          <Typography variant="subtitle2" sx={{ color: "text.secondary" }}>
+            {title}
+          </Typography>
+          <Typography variant="h4">{total}</Typography>
+          <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }}>
+            {extratext}
+          </Typography>
+        </Box>
+      </Box>
+    </Card>
+  )
+}
 
 export function AccountGeneral() {
   const [userData, setUserData] = useState(null)
@@ -89,7 +110,6 @@ export function AccountGeneral() {
       try {
         const response = await fetch("https://api.swedenrelocators.se/api/miscellaneous/gender")
         const result = await response.json()
-        // console.log(result)
         if (result.data) {
           const formattedOptions = [
             { value: "Choose an option", label: "Choose an option" },
@@ -99,7 +119,6 @@ export function AccountGeneral() {
             })),
           ]
           setGenderOptions(formattedOptions)
-          // console.log(formattedOptions)
         } else {
           console.error("Unexpected API response structure:", result)
           setErrorMsg("Failed to load gender options: Invalid response format")
@@ -155,7 +174,6 @@ export function AccountGeneral() {
   useEffect(() => {
     const fetchUserData = async () => {
       if (user?.accessToken) {
-        console.log(user?.accessToken)
         try {
           const response = await axios.get("https://api.swedenrelocators.se/api/client/profile", {
             headers: {
@@ -164,7 +182,6 @@ export function AccountGeneral() {
           })
           const userDataResponse = response.data.data
           setUserData(userDataResponse)
-          console.log(userDataResponse)
 
           // Define the function inside the effect
           const findCountryLabelById = (countryId) => {
@@ -190,7 +207,6 @@ export function AccountGeneral() {
           setPlaceOfBirthLabel(placeOfBirthLbl)
           setCountryResidingLabel(countryResidingLbl)
 
-          console.log(nationalityLbl, placeOfBirthLbl, countryResidingLbl)
           reset({
             photoURL: userDataResponse.profile?.profile_pic || null,
             phoneNumber: userDataResponse.profile?.contact_number || "",
@@ -302,18 +318,20 @@ export function AccountGeneral() {
           />
         </Grid>
       </Grid>
-      <Form methods={methods} sx={{ mt: 10 }}>
+
+      <Form methods={methods}>
         <Grid container spacing={3}>
-          <Grid xs={12} md={4}>
-            <Stack spacing={3} sx={{ height: '100%' }}>
-              {/* First Card - Avatar and Buttons */}
+          {/* Left column - 40% width */}
+          <Grid xs={12} md={5}>
+            <Stack spacing={3} sx={{ height: "100%" }}>
+              {/* First row - 60% height - Avatar and buttons */}
               <Card
                 sx={{
                   pt: 10,
                   pb: 5,
                   px: 3,
                   textAlign: "center",
-                  flex: '0 0 auto',
+                  height: "60%",
                 }}
               >
                 <Field.UploadAvatar
@@ -335,7 +353,7 @@ export function AccountGeneral() {
                     </Typography>
                   }
                 />
-                
+
                 {/* Buttons */}
                 <Button variant="soft" color="success" sx={{ mt: 3, mr: 1 }}>
                   Update password
@@ -344,14 +362,16 @@ export function AccountGeneral() {
                   Delete user
                 </Button>
               </Card>
-              
-              {/* Second Card - Manager Details */}
-              <Box sx={{ flex: '1 1 auto' }}>
+
+              {/* Second row - 40% height - Manager details */}
+              <Box sx={{ height: "40%" }}>
                 <ManagerDetails />
               </Box>
             </Stack>
           </Grid>
-          <Grid xs={12} md={8}>
+
+          {/* Right column - 60% width - Form */}
+          <Grid xs={12} md={7}>
             <Card sx={{ p: 3 }}>
               <Box
                 rowGap={3}
@@ -392,19 +412,11 @@ export function AccountGeneral() {
                 />
 
                 {/* Address field taking full row */}
-                <Field.Text 
-                  name="address" 
-                  label="Address" 
-                  sx={{ gridColumn: 'span 2' }} 
-                />
-                
+                <Field.Text name="address" label="Address" sx={{ gridColumn: "span 2" }} />
+
                 {/* Secondary Address field taking full row */}
-                <Field.Text 
-                  name="secondaryAddress" 
-                  label="Secondary Address" 
-                  sx={{ gridColumn: 'span 2' }} 
-                />
-                
+                <Field.Text name="secondaryAddress" label="Secondary Address" sx={{ gridColumn: "span 2" }} />
+
                 <Field.Text name="city" label="City" variant="outlined" />
                 <Field.Text name="postalCode" label="Postal Code" variant="outlined" />
                 <Field.Text name="passportNo" label="Passport Number" variant="outlined" />
@@ -471,7 +483,6 @@ export function AccountGeneral() {
 
                       console.log("API response", response)
                       toast.success("Update success!")
-
                     } catch (error) {
                       console.error("Error updating profile:", error)
                       // Make sure we're showing the actual error message from the API if available
@@ -490,3 +501,4 @@ export function AccountGeneral() {
     </>
   )
 }
+

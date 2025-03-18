@@ -92,16 +92,7 @@ export function ReferralForm({ onSuccess }) {
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
         />
-        <TextField
-          margin="dense"
-          label="Address"
-          type="text"
-          fullWidth
-          multiline
-          rows={3}
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-        />
+        
         <Button
           type="submit"
           variant="contained"
