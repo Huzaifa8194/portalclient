@@ -5,6 +5,7 @@ import { useLocation } from "react-router-dom"
 import { paths } from "src/routes/paths"
 import { RouterLink } from "src/routes/components"
 import { Logo2 } from "src/components/logo/logo2"
+import { FacebookIcon } from "src/assets/icons/social-icons"
 import { Section } from "./section"
 import { Main, Content } from "./main"
 import { HeaderSection } from "../core/header-section"
@@ -135,22 +136,22 @@ export function AuthSplitLayout({ sx, section, children, header }) {
             {
               label: "Instagram",
               path: "https://www.instagram.com/swedenrelocators",
-              icon: "/socials/insta.png",
+              icon: "/socials/instagram.png",
             },
             {
               label: "X",
               path: "https://x.com/swedenrelocators",
-              icon: "/socials/X.png",
+              icon: "/socials/twitter.png",
             },
             {
               label: "Apple Store",
               path: "https://x.com/swedenrelocators",
-              icon: "/socials/Apple.png",
+              icon: "/socials/app-store.png",
             },
             {
               label: "Play Store",
               path: "https://x.com/swedenrelocators",
-              icon: "/socials/playstore.png",
+              icon: "/socials/app.png",
             },
           ]}
           sx={{
@@ -173,8 +174,8 @@ export function AuthSplitLayout({ sx, section, children, header }) {
               width: "100%", // Ensures container takes full width
             },
             "& .social-icon": {
-              width: { xs: 36, sm: 60 },
-              height: { xs: 36, sm: 60 },
+              width: { xs: 36, sm: 45 },
+              height: { xs: 36, sm: 45 },
               padding: 1,
               borderRadius: "50%",
               display: "flex",
@@ -188,9 +189,9 @@ export function AuthSplitLayout({ sx, section, children, header }) {
                 boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
               },
               "& img": {
-                width: { xs: 18, sm: 45 }, // Slightly increased for better visibility
-                height: { xs: 18, sm: 45 },
-                objectFit: "contain",
+                width: { xs: 18, sm: 30 }, // Slightly increased for better visibility
+                height: { xs: 18, sm: 30 },
+                objectFit: "fit",
               },
             },
           }}

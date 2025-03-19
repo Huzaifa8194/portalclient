@@ -137,18 +137,37 @@ export function Section({
             listStyle: "none",
           }}
         >
-          {methods.map((option) => (
-            <Box key={option.label} component="li">
-              <Tooltip title={option.label} placement="top">
-                <Link
-                  component={RouterLink}
-                  href={option.path}
-                  target="_blank"
-                  rel="noopener noreferrer"
+      <Box component="ul" sx={{ display: "flex", gap: 2, listStyle: "none", padding: 0 }}>
+        {methods.map((option) => (
+          <Box key={option.label} component="li">
+            <Tooltip title={option.label} placement="top">
+              <Link
+                component={RouterLink}
+                href={option.path}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Box
                   sx={{
+                    width: 55,
+                    height: 55,
+                    padding: 1,
+                    borderRadius: "50%",
                     display: "flex",
-                    alignItems: "center",
                     justifyContent: "center",
+                    alignItems: "center",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                    backgroundColor: "background.paper",
+                    transition: "transform 0.2s, box-shadow 0.2s",
+                    "&:hover": {
+                      transform: "translateY(-3px)",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                    },
                   }}
                 >
                   <Box
@@ -156,31 +175,18 @@ export function Section({
                     alt={option.label}
                     src={option.icon}
                     sx={{
-                      width: 60,
-                      height: 60,
-                      padding: 1,
-                      borderRadius: "50%",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                      backgroundColor: "background.paper",
-                      transition: "transform 0.2s, box-shadow 0.2s",
-                      "&:hover": {
-                        transform: "translateY(-3px)",
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                      },
+                      width: 24,
+                      height: 24,
+                      objectFit: "contain",
                     }}
                   />
-                </Link>
-              </Tooltip>
-            </Box>
-          ))}
+                </Box>
+              </Link>
+            </Tooltip>
+          </Box>
+        ))}
+      </Box>
         </Box>
-      )}
-
-      {slots?.bottomArea && (
-        <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>{slots.bottomArea}</Box>
       )}
     </Box>
   )
