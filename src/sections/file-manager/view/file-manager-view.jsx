@@ -1,18 +1,19 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useContext } from 'react';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import axios from 'axios';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useSetState } from 'src/hooks/use-set-state';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { PRODUCT_MOCK_DATA } from 'src/_mock';
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
 import { EmptyContent } from 'src/components/empty-content';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useTable, getComparator } from 'src/components/table';
+import { AuthContext } from 'src/auth/context/auth-context'; // Import your auth context
 import { FileManagerFilters } from '../file-manager-filters';
 import { FileManagerGridView } from '../file-manager-grid-view';
 import { FileManagerFiltersResult } from '../file-manager-filters-result';
@@ -26,7 +27,12 @@ export function FileManagerView() {
   const createFolder = useBoolean();
   const [tableData, setTableData] = useState([]);
   const [selectedFolder, setSelectedFolder] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const fileInputRef = React.useRef(null);
+  
+  // Use your auth context to get the user and access token
+  const { user } = useContext(AuthContext);
 
   const filters = useSetState({
     name: '',
@@ -36,34 +42,72 @@ export function FileManagerView() {
   });
 
   useEffect(() => {
-    const fetchData = () => {
-      const folderMap = new Map();
-
-      PRODUCT_MOCK_DATA.forEach(product => {
-        if (!folderMap.has(product.category)) {
-          folderMap.set(product.category, {
-            id: `folder-${product.category}`,
-            name: product.category,
-            type: 'folder',
-            size: 0,
-            modifiedAt: new Date().toISOString(),
-            shared: [],
-            isFavorited: false,
-            images: [],
-          });
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        if (!user || !user.accessToken) {
+          throw new Error('No access token available');
         }
         
-        const folder = folderMap.get(product.category);
-        folder.images = [...folder.images, ...product.images];
-        folder.size += product.images.reduce((total, image) => total + image.size, 0);
-      });
-
-      const folderData = Array.from(folderMap.values());
-      setTableData(folderData);
+        const response = await axios.get('https://api.swedenrelocators.se/api/miscellaneous/documents/familyMembers', {
+          headers: {
+            Authorization: `Bearer ${user.accessToken}`,
+          },
+        });
+        
+        const result = response.data;
+        const folderData = result.data.map(familyMember => ({
+          id: `folder-${familyMember.family_member_id}`,
+          name: familyMember.family_member_name,
+          directory: familyMember.directory_name,
+          type: 'folder',
+          size: familyMember.documents.length,
+          modifiedAt: familyMember.documents.length > 0 
+            ? familyMember.documents[0].uploaded_at 
+            : new Date().toISOString(),
+          shared: [],
+          isFavorited: false,
+          images: familyMember.documents.map(doc => ({
+            id: doc.id,
+            name: doc.document_sub_type,
+            type: doc.document_type,
+            size: 1024, 
+            modifiedAt: doc.uploaded_at,
+            url: doc.url,
+            uploadedBy: doc.uploaded_by,
+            uploaded_at: doc.uploaded_at, 
+            uploaded_by: doc.uploaded_by, 
+            isFavorited: false,
+            shared: []
+          }))
+        }));
+        
+        setTableData(folderData);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        
+        if (err.response && err.response.status === 401) {
+          setError('Authentication required. Please log in to access documents.');
+          toast.error('Authentication required');
+        } else if (err.response && err.response.status === 404) {
+          setError('The requested resource was not found.');
+          toast.error('Resource not found');
+        } else if (err.message === 'No access token available') {
+          setError('You need to log in to access this feature.');
+          toast.error('Login required');
+        } else {
+          setError('Failed to fetch documents. Please try again later.');
+          toast.error('Failed to fetch documents');
+        }
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData();
-  }, []);
+  }, [user]);
 
   const dateError = filters.state.startDate && filters.state.endDate
     ? filters.state.startDate.getTime() > filters.state.endDate.getTime()
@@ -89,29 +133,40 @@ export function FileManagerView() {
 
   const handleDeleteItem = useCallback(
     (id) => {
-      const updatedData = tableData.map(folder => ({
-        ...folder,
-        images: folder.images.filter(image => image.id !== id),
-        size: folder.images.filter(image => image.id !== id).reduce((total, image) => total + image.size, 0),
-      })).filter(folder => folder.images.length > 0);
-
+      setTableData(prevData =>
+        prevData
+          .map(folder => ({
+            ...folder,
+            images: folder.images.filter(image => image.id !== id),
+            size: folder.images.filter(image => image.id !== id).length,
+          }))
+          .filter(folder => folder.images.length > 0) 
+      );
+      
+  
+      setSelectedFolder(prevFolder => {
+        if (!prevFolder) return null;
+        const updatedImages = prevFolder.images.filter(image => image.id !== id);
+        return {
+          ...prevFolder,
+          images: updatedImages,
+          size: updatedImages.length,
+        };
+      });
+  
       toast.success('Delete success!');
-
-      setTableData(updatedData);
-      if (selectedFolder) {
-        setSelectedFolder(updatedData.find(folder => folder.id === selectedFolder.id) || null);
-      }
-
       table.onUpdatePageDeleteRow(dataFiltered.length);
     },
-    [dataFiltered.length, table, tableData, selectedFolder]
+    [dataFiltered.length, table]
   );
+  
+  
 
   const handleDeleteItems = useCallback(() => {
     const updatedData = tableData.map(folder => ({
       ...folder,
       images: folder.images.filter(image => !table.selected.includes(image.id)),
-      size: folder.images.filter(image => !table.selected.includes(image.id)).reduce((total, image) => total + image.size, 0),
+      size: folder.images.filter(image => !table.selected.includes(image.id)).length,
     })).filter(folder => folder.images.length > 0);
 
     toast.success('Delete success!');
@@ -140,6 +195,7 @@ export function FileManagerView() {
     const newFolder = {
       id: `folder-${Date.now()}`,
       name: folderName,
+      directory: folderName.toLowerCase().replace(/\s+/g, '_'),
       type: 'folder',
       size: 0,
       modifiedAt: new Date().toISOString(),
@@ -155,15 +211,32 @@ export function FileManagerView() {
   const handleUploadFiles = useCallback((event) => {
     if (selectedFolder) {
       const files = Array.from(event.target.files);
+      const currentDate = new Date();
+      const formattedDate = `${currentDate.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+      
+      const newImages = files.map((file, index) => ({
+        id: `file-${Date.now()}-${index}`,
+        name: file.name,
+        type: file.type.split('/')[1] || 'document',
+        size: file.size,
+        modifiedAt: formattedDate,
+        url: URL.createObjectURL(file),
+        uploadedBy: user?.name || 'Current User',
+        uploaded_at: formattedDate, 
+        uploaded_by: user?.name || 'Current User',
+        isFavorited: false,
+        shared: []
+      }));
+      
       const updatedFolder = {
         ...selectedFolder,
-        images: [...selectedFolder.images, ...files],
-        size: selectedFolder.size + files.reduce((total, file) => total + file.size, 0),
+        images: [...selectedFolder.images, ...newImages],
+        size: selectedFolder.images.length + newImages.length,
       };
       handleFolderUpdate(updatedFolder);
       toast.success('Files uploaded successfully!');
     }
-  }, [selectedFolder, handleFolderUpdate]);
+  }, [selectedFolder, handleFolderUpdate, user]);
 
   const handleDeleteFolder = useCallback(
     (folderId) => {
@@ -200,11 +273,65 @@ export function FileManagerView() {
     />
   );
 
+  // Custom renderer for folder view to display document details
+  const renderFolderView = () => {
+    if (!selectedFolder) return null;
+    
+    // Add directory name to the folder view
+    const folderWithDirectory = {
+      ...selectedFolder,
+      // Add custom props for the folder view component
+      directoryName: selectedFolder.directory,
+      documents: selectedFolder.images.map(image => ({
+        ...image,
+        document_type: image.type,
+        document_sub_type: image.name,
+        // Use the original uploaded_at and uploaded_by from the API
+        uploaded_at: image.uploaded_at || image.modifiedAt,
+        uploaded_by: image.uploaded_by || 'Unknown',
+        // Ensure URL is properly formatted for API URLs
+        fullUrl: image.url.startsWith('/') 
+          ? `https://api.swedenrelocators.se${image.url}` 
+          : image.url
+      }))
+    };
+    
+    return (
+      <FileManagerFolderView 
+        folder={folderWithDirectory}
+        onFileClick={(file) => {
+          // If it's an API URL, open in new tab
+          if (file.url && file.url.startsWith('/')) {
+            window.open(`https://api.swedenrelocators.se${file.url}`, '_blank');
+          } else {
+            console.log('File clicked:', file);
+          }
+        }}
+        onFolderUpdate={handleFolderUpdate}
+        onBack={() => setSelectedFolder(null)}
+      />
+    );
+  };
+
+  // Custom renderer for grid view to display upload info
+  const renderGridView = () => (
+    <FileManagerGridView
+      table={table}
+      dataFiltered={dataFiltered}
+      onDeleteItem={handleDeleteFolder}
+      onOpenConfirm={confirm.onTrue}
+      onFolderClick={handleFolderClick}
+      showDirectoryName
+      // Add props to display upload info in the grid view
+      showUploadInfo
+    />
+  );
+
   return (
     <>
       <DashboardContent>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Typography variant="h4">File manager</Typography>
+          <Typography variant="h4">Family Documents</Typography>
           {selectedFolder ? (
             <>
               <input
@@ -237,7 +364,7 @@ export function FileManagerView() {
           links={[
             { name: 'Dashboard' },
             { name: 'Documents' },
-            { name: 'All Document' },
+            { name: selectedFolder ? selectedFolder.name : 'All Family Members' },
           ]}
           sx={{ my: { xs: 3, md: 2 } }}
         />
@@ -248,25 +375,40 @@ export function FileManagerView() {
           {canReset && renderResults}
         </Stack>
 
-        {notFound ? (
-          <EmptyContent filled sx={{ py: 10 }} />
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+            <Typography>Loading documents...</Typography>
+          </Box>
+        ) : error ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 10 }}>
+            <Typography color="error" gutterBottom>{error}</Typography>
+            {(error.includes('Authentication') || error.includes('log in')) && (
+              <Button 
+                variant="contained" 
+                color="primary" 
+                sx={{ mt: 2 }}
+                onClick={() => {
+                  // Redirect to login page or open login modal
+                  window.location.href = '/login';
+                }}
+              >
+                Login
+              </Button>
+            )}
+          </Box>
+        ) : notFound ? (
+          <EmptyContent 
+            filled 
+            title="No Documents Found" 
+            description="No documents match your current filters or no documents are available."
+            sx={{ py: 10 }} 
+          />
         ) : (
           <>
             {selectedFolder ? (
-              <FileManagerFolderView 
-                folder={selectedFolder} 
-                onFileClick={(file) => console.log('File clicked:', file)}
-                onFolderUpdate={handleFolderUpdate}
-                onBack={() => setSelectedFolder(null)}
-              />
+              renderFolderView()
             ) : (
-              <FileManagerGridView
-                table={table}
-                dataFiltered={dataFiltered}
-                onDeleteItem={handleDeleteFolder}
-                onOpenConfirm={confirm.onTrue}
-                onFolderClick={handleFolderClick}
-              />
+              renderGridView()
             )}
           </>
         )}
@@ -339,4 +481,3 @@ function applyFilter({ inputData, comparator, filters, dateError }) {
 
   return inputData;
 }
-
