@@ -143,10 +143,14 @@ export function JobList() {
                   name: member.name,
                   logo: member.profile_picture || "/placeholder.svg",
                 },
+                email: member.email,
+                country: member.place_of_birth,
                 relation: member.relationship,
                 nic: member.nic,
                 dob: member.dob,
                 passport: member.passport_no,
+                contact: member.contact_number,
+                
               }}
               onEdit={() => handleEdit(member)}
               onDelete={() => handleDelete(member.id)}

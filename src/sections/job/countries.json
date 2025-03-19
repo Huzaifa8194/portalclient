@@ -1,0 +1,22 @@
+{
+    "pakistan": {
+      "code": "pk",
+      "display": "Pakistan"
+    },
+    "lesotho": {
+      "code": "ls",
+      "display": "Lesotho"
+    },
+    "united states": {
+      "code": "us",
+      "display": "United States"
+    },
+    "united kingdom": {
+      "code": "gb",
+      "display": "United Kingdom"
+    },
+    "canada": {
+      "code": "ca",
+      "display": "Canada"
+    }
+  }
