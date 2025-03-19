@@ -97,6 +97,7 @@ export function ProductNewEditForm({ currentProduct }) {
       setIsLoading(false)
     }
   }, [user])
+  
 
   const defaultValues = useMemo(
     () => ({
@@ -139,21 +140,24 @@ export function ProductNewEditForm({ currentProduct }) {
   useEffect(() => {
     const fetchDocumentTypes = async () => {
       try {
-        const response = await axios.get("https://api.swedenrelocators.se/api/miscellaneous/documentTypes/Fee")
+        const response = await axios.get(
+          "https://api.swedenrelocators.se/api/miscellaneous/documentTypes" // Correct endpoint
+        )
 
-        if (response.data && response.data.data && response.data.data.length > 0) {
+        if (response.data?.data?.length > 0) {
           setDocumentTypes(response.data.data)
 
-          if (response.data.data.length > 0) {
-            setSelectedDocumentType(response.data.data[0].id)
-            setDocumentSubTypes(response.data.data[0].document_sub_types || [])
+          // Set initial values using IDs instead of names
+          const firstType = response.data.data[0]
+          if (firstType) {
+            setSelectedDocumentType(firstType.id)
+            setDocumentSubTypes(firstType.document_sub_types || [])
 
-            if (response.data.data[0].name) {
-              setValue("code", response.data.data[0].name)
-            }
+            // Store IDs instead of names
+            setValue("code", firstType.id) // Store document type ID
 
-            if (response.data.data[0].document_sub_types && response.data.data[0].document_sub_types.length > 0) {
-              setValue("sku", response.data.data[0].document_sub_types[0].name)
+            if (firstType.document_sub_types?.length > 0) {
+              setValue("sku", firstType.document_sub_types[0].id) // Store sub-type ID
             }
           }
         }
@@ -383,8 +387,8 @@ export function ProductNewEditForm({ currentProduct }) {
     try {
       setIsUploading(true)
 
-      const selectedType = documentTypes.find((type) => type.name === code)
-      const selectedSubType = documentSubTypes.find((subType) => subType.name === sku)
+      const selectedType = documentTypes.find((type) => type.id === code); // Find by ID
+      const selectedSubType = documentSubTypes.find((subType) => subType.id === sku); // Find by ID
 
       if (!selectedType || !selectedSubType) {
         toast.error("Invalid document type or subtype.")
@@ -443,12 +447,13 @@ export function ProductNewEditForm({ currentProduct }) {
     const selectedType = documentTypes.find((type) => type.id === selectedTypeId)
 
     if (selectedType) {
-      setValue("code", selectedType.name)
+      setValue("code", selectedType.id);
+
 
       setDocumentSubTypes(selectedType.document_sub_types || [])
 
-      if (selectedType.document_sub_types && selectedType.document_sub_types.length > 0) {
-        setValue("sku", selectedType.document_sub_types[0].name)
+      if (selectedType.document_sub_types?.length > 0) {
+        setValue("sku", selectedType.document_sub_types[0].id);
       } else {
         setValue("sku", "")
       }
@@ -603,7 +608,7 @@ export function ProductNewEditForm({ currentProduct }) {
               value: selectedDocumentType || "",
             }}
           >
-            {documentTypes.length > 0 ? (
+            {/* {documentTypes.length > 0 ? (
               documentTypes.map((type) => (
                 <option key={type.id} value={type.id}>
                   {type.name}
@@ -611,7 +616,12 @@ export function ProductNewEditForm({ currentProduct }) {
               ))
             ) : (
               <option value="">No document types available</option>
-            )}
+            )} */}
+            {documentTypes.map((type) => (
+              <option key={type.id} value={type.id}> {/* Value is ID */}
+                {type.name}
+              </option>
+            ))}
           </Field.Select>
 
           <Field.Select
@@ -628,7 +638,7 @@ export function ProductNewEditForm({ currentProduct }) {
               onChange: (e) => setValue("sku", e.target.value),
             }}
           >
-            {documentSubTypes.length > 0 ? (
+            {/* {documentSubTypes.length > 0 ? (
               documentSubTypes.map((subType) => (
                 <option key={subType.id} value={subType.name}>
                   {subType.name}
@@ -636,7 +646,12 @@ export function ProductNewEditForm({ currentProduct }) {
               ))
             ) : (
               <option value="">No subtypes available</option>
-            )}
+            )} */}
+            {documentSubTypes.map((subType) => (
+              <option key={subType.id} value={subType.id}> {/* Value is ID */}
+                {subType.name}
+              </option>
+            ))}
           </Field.Select>
         </Box>
 
