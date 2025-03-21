@@ -84,6 +84,7 @@ export function ApplicationChoice() {
                     '&:last-child': { pb: 0 },
                     height: '100%',
                     display: 'flex',
+                    
                   }}
                 >
                   <AnalyticsWidgetSummary

@@ -32,6 +32,7 @@ import { useAuthContext } from "src/auth/hooks"
 import { OverviewAnalyticsView } from "./overview-analytics-view"
 
 // Table head configuration
+
 const TABLE_HEAD = [
   { id: "category", label: "Category" },
   { id: "type", label: "Type" },

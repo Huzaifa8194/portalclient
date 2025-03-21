@@ -18,6 +18,7 @@ import { Label } from "src/components/label"
 import { AnalyticsWidgetSummary } from "../analytics-widget-summary"
 import { RescheduleAppointmentForm } from "./reschedule-appointment-form"
 
+
 const StyledCard = styled(Card)(({ theme }) => ({
   backgroundColor: theme.palette.background.neutral,
   boxShadow: theme.customShadows.z16,
