@@ -443,7 +443,7 @@ export function AccountGeneral() {
 
               {/* Second row - 40% height - Manager details */}
               <Box sx={{ height: "40%" }}>
-                <ManagerDetails />
+                <ManagerDetails case_manager={userData?.case_manager} />
               </Box>
             </Stack>
           </Grid>

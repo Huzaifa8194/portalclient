@@ -1,27 +1,25 @@
-// ManagerDetails.jsx
 import { Box, Typography, Avatar, Divider, Grid, Link, Card } from "@mui/material"
+import { _mock } from "src/_mock"
 
-export function ManagerDetails({ onClose }) {
-  const manager = {
+export function ManagerDetails({ case_manager }) {
+  // Use the passed case_manager prop or fallback to default values if not provided
+  const manager = case_manager || {
     name: "Naufil",
-    title: "Senior Case Manager",
-    profilePicture: "https://example.com/manager-profile.jpg",
+    designation: "Senior Case Manager",
+    profile_pic: "https://example.com/manager-profile.jpg",
     phone: "+92 (345) 123-4567",
     email: "naufil@gmail.com",
-    address: "G11/2, Islamabad, 12345, Pakistan",
-    website: "www.naufil.com",
-    linkedin: "linkedin.com/in/naufil",
   }
 
   return (
-    <Card sx={{ width: "100%", px: 3, pb: 8,  pt:2}}>
-      <Typography variant="h6" align="center" sx={{ mb: 2, fontWeight: 500 }}>
+    <Card sx={{ width: "100%", px: 3, pb: 8, pt: 2, mt:2 }}>
+      <Typography variant="h6" align="center" sx={{ mb: 2, pt:2, fontWeight: 500 }}>
         Your Case Manager
       </Typography>
 
       <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
         <Avatar
-          src={manager.profilePicture}
+          src={_mock.image.avatar(24)}
           alt={manager.name}
           sx={{
             width: 60,
@@ -34,7 +32,7 @@ export function ManagerDetails({ onClose }) {
             {manager.name}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {manager.title}
+            {manager.designation}
           </Typography>
         </Box>
       </Box>
@@ -63,18 +61,6 @@ export function ManagerDetails({ onClose }) {
             </Link>
           </Box>
         </Grid>
-
-        <Grid item xs={12}>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <Typography variant="body2" color="text.secondary" sx={{ minWidth: 70 }}>
-              Address:
-            </Typography>
-            <Typography variant="body2">{manager.address}</Typography>
-          </Box>
-        </Grid>
-
-        
-        
       </Grid>
     </Card>
   )

@@ -1,54 +1,89 @@
 "use client"
 
 import { useState } from "react"
-import { Button, TextField, Typography, Box, Paper } from "@mui/material"
+import { Button, Typography, Box, Paper, CircularProgress, Stack } from "@mui/material"
+import axios from "axios"
+import { toast } from "src/components/snackbar"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z as zod } from "zod"
+import { Form, Field } from "src/components/hook-form"
+
+// Define the schema for form validation
+const ReferralSchema = zod.object({
+  name: zod.string().min(1, { message: "Name is required" }),
+  email: zod.string().min(1, { message: "Email is required" }).email({ message: "Invalid email format" }),
+  phoneNumber: zod.string().min(1, { message: "Phone number is required" }),
+})
 
 export function ReferralForm({ onSuccess }) {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [phone, setPhone] = useState("")
-  const [address, setAddress] = useState("")
-  const [emailError, setEmailError] = useState("")
+  const [loading, setLoading] = useState(false)
 
-  const validateEmail = () => {
-    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-    return re.test(String(email).toLowerCase())
-  }
+  // Initialize form with React Hook Form
+  const methods = useForm({
+    resolver: zodResolver(ReferralSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phoneNumber: "",
+    },
+  })
 
-  const handleEmailChange = (e) => {
-    const newEmail = e.target.value
-    setEmail(newEmail)
-    if (!newEmail) {
-      setEmailError("Email is required")
-    } else if (!validateEmail(newEmail)) {
-      setEmailError("Invalid email format")
-    } else {
-      setEmailError("")
-    }
-  }
+  const { handleSubmit, reset, formState } = methods
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    if (!email) {
-      setEmailError("Email is required")
-      return
-    }
-    if (!validateEmail(email)) {
-      setEmailError("Invalid email format")
-      return
-    }
-    if (email && validateEmail(email)) {
-      onSuccess(name, email)
+  const onSubmit = async (data) => {
+    setLoading(true)
+    const token = localStorage.getItem("authToken")
+
+    try {
+      // Prepare data for API
+      const referralData = {
+        name: data.name,
+        email: data.email,
+        phone_number: data.phoneNumber,
+      }
+
+      // Send POST request to API
+      const response = await axios.post("https://api.swedenrelocators.se/api/client/referral/add", referralData, {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      // Handle successful response
+      console.log("Referral added successfully:", response.data)
+      toast.success(response.data.message || "Referral added successfully!")
+
+      // Call the onSuccess callback with the response data
+      if (typeof onSuccess === "function") {
+        // Pass name and email as separate parameters
+        onSuccess(data.name, data.email)
+      }
+
       // Reset form fields
-      setName("")
-      setEmail("")
-      setPhone("")
-      setAddress("")
-      setEmailError("")
+      reset()
+    } catch (err) {
+      console.error("Error adding referral:", err)
+
+      // Handle error response
+      let errorMessage = "Failed to add referral. Please try again."
+
+      if (err.response?.status === 401) {
+        errorMessage = "Authentication failed. Please log in again."
+        console.log("Auth token issue:", token ? "Token exists" : "No token provided")
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message
+      } else if (err.message) {
+        errorMessage = err.message
+      }
+
+      toast.error(errorMessage)
+    } finally {
+      setLoading(false)
     }
   }
-
-  const isFormEmpty = !name && !email && !phone && !address
 
   return (
     <Paper
@@ -60,55 +95,37 @@ export function ReferralForm({ onSuccess }) {
         borderColor: "grey.300",
       }}
     >
-      <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
+      <Form methods={methods} onSubmit={handleSubmit(onSubmit)}>
         <Typography variant="h6" gutterBottom>
           Add Referral
         </Typography>
-        <TextField
-          autoFocus
-          margin="dense"
-          label="Name"
-          type="text"
-          fullWidth
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <TextField
-          margin="dense"
-          label="Email"
-          type="email"
-          fullWidth
-          required
-          value={email}
-          onChange={handleEmailChange}
-          error={!!emailError}
-          helperText={emailError}
-        />
-        <TextField
-          margin="dense"
-          label="Phone Number"
-          type="tel"
-          fullWidth
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-        />
-        
-        <Button
-          type="submit"
-          variant="contained"
-          sx={{
-            mt: 2,
-            backgroundColor: "black",
-            color: "white",
-            "&:hover": {
-              backgroundColor: "#333",
-            },
-          }}
-          disabled={isFormEmpty || !!emailError}
-        >
-          Send Referral
-        </Button>
-      </Box>
+
+        <Stack spacing={3} sx={{ mb: 3 }}>
+          <Field.Text name="name" label="Name" autoFocus />
+
+          <Field.Text name="email" label="Email" type="email" />
+
+          <Field.Phone name="phoneNumber" label="Contact Number" />
+        </Stack>
+
+        <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            type="submit"
+            variant="contained"
+            sx={{
+              backgroundColor: "black",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "#333",
+              },
+            }}
+            disabled={loading}
+            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+          >
+            {loading ? "Sending..." : "Send Referral"}
+          </Button>
+        </Box>
+      </Form>
     </Paper>
   )
 }
