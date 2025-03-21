@@ -1,71 +1,76 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import Grid from "@mui/material/Unstable_Grid2";
-import Typography from "@mui/material/Typography";
-import Avatar from "@mui/material/Avatar";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import IconButton from "@mui/material/IconButton";
-import { Iconify } from "src/components/iconify";
-import { toast } from "src/components/snackbar";
-import { _mock } from "src/_mock";
+"use client"
+
+import { useEffect, useState, useCallback } from "react"
+import axios from "axios"
+import Box from "@mui/material/Box"
+import Card from "@mui/material/Card"
+import Grid from "@mui/material/Unstable_Grid2"
+import Typography from "@mui/material/Typography"
+import Avatar from "@mui/material/Avatar"
+import Dialog from "@mui/material/Dialog"
+import DialogContent from "@mui/material/DialogContent"
+import DialogTitle from "@mui/material/DialogTitle"
+import IconButton from "@mui/material/IconButton"
+import { Iconify } from "src/components/iconify"
+import { toast } from "src/components/snackbar"
+import { _mock } from "src/_mock"
 
 export default function CoApplicantProfile({ applicantId, open, onClose }) {
-  const [applicantData, setApplicantData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [applicantData, setApplicantData] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Fetch applicant data
-  useEffect(() => {
-    const fetchApplicantData = async () => {
-      try {
-        setIsLoading(true);
-        const token = localStorage.getItem("authToken");
-        if (!token) {
-          throw new Error("No authentication token found");
-        }
-        const response = await axios.get(
-          `https://api.swedenrelocators.se/api/client/familyMember/show/${applicantId}`,
-          {
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setApplicantData(response.data.data);
-      } catch (error) {
-        console.error("Error fetching applicant data:", error);
-        toast.error("Failed to load applicant data");
-      } finally {
-        setIsLoading(false);
+  // Create a memoized fetch function to avoid recreating it on every render
+  const fetchApplicantData = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const token = localStorage.getItem("authToken")
+      if (!token) {
+        throw new Error("No authentication token found")
       }
-    };
-
-    if (open && applicantId) {
-      fetchApplicantData();
+      const response = await axios.get(`https://api.swedenrelocators.se/api/client/familyMember/show/${applicantId}`, {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      setApplicantData(response.data.data)
+    } catch (error) {
+      console.error("Error fetching applicant data:", error)
+      toast.error("Failed to load applicant data")
+    } finally {
+      setIsLoading(false)
     }
-  }, [open, applicantId]);
+  }, [applicantId])
+
+  // Only fetch data when the dialog opens and we have an applicantId
+  // and we don't already have data for this applicant
+  useEffect(() => {
+    if (open && applicantId && (!applicantData || applicantData.id !== applicantId)) {
+      fetchApplicantData()
+    }
+  }, [open, applicantId, applicantData, fetchApplicantData])
+
+  if (!open) {
+    return null
+  }
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>Loading...</div>
   }
 
   if (!applicantData) {
-    return <div>No data available</div>;
+    return <div>No data available</div>
   }
 
-  const femaleRelationships = ['Mother', 'Sister', 'Wife', 'Daughter'];
-  const maleRelationships = ['Father', 'Brother', 'Husband', 'Son'];
+  const femaleRelationships = ["Mother", "Sister", "Wife", "Daughter"]
+  const maleRelationships = ["Father", "Brother", "Husband", "Son"]
 
   const avatarImage = femaleRelationships.includes(applicantData.relationship)
     ? _mock.image.avatar(2)
     : maleRelationships.includes(applicantData.relationship)
-    ? _mock.image.avatar(24)
-    : _mock.image.avatar(24);
+      ? _mock.image.avatar(24)
+      : _mock.image.avatar(24)
 
   const details = [
     {
@@ -132,7 +137,7 @@ export default function CoApplicantProfile({ applicantId, open, onClose }) {
         </svg>
       ),
     },
-  ];
+  ]
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md" scroll="paper">
@@ -249,7 +254,7 @@ export default function CoApplicantProfile({ applicantId, open, onClose }) {
                 <Typography variant="subtitle2">Place of Birth:</Typography>
                 <Typography variant="body2">{applicantData.place_of_birth}</Typography>
               </Grid>
-              
+
               <Grid xs={12} sm={6}>
                 <Typography variant="subtitle2">Issue Date:</Typography>
                 <Typography variant="body2">{applicantData.issue_date}</Typography>
@@ -263,5 +268,6 @@ export default function CoApplicantProfile({ applicantId, open, onClose }) {
         </>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
+

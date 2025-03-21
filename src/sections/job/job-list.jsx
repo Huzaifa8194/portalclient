@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import Box from "@mui/material/Box"
 import Typography from "@mui/material/Typography"
 import CircularProgress from "@mui/material/CircularProgress"
@@ -20,46 +20,51 @@ export function JobList() {
   const [familyMembers, setFamilyMembers] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
+  const dataFetchedRef = useRef(false)
+
+  const fetchFamilyMembers = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const token = localStorage.getItem("authToken")
+      if (!token) {
+        throw new Error("No authentication token found")
+      }
+
+      console.log("API URL:", endpoints.management.getCoApplicant)
+      const response = await axios.get("https://api.swedenrelocators.se/api/client/familyMember/list", {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        validateStatus: (status) => status >= 200 && status < 300,
+      })
+      if (response.data && Array.isArray(response.data.data)) {
+        setFamilyMembers(response.data.data)
+      } else {
+        console.error("Unexpected API response structure:", response.data)
+        setError("Unexpected data format received from the server.")
+      }
+      setError(null)
+    } catch (err) {
+      console.error("Error fetching family members:", err)
+      if (err.response) {
+        console.log("Error response status:", err.response.status)
+        console.log("Error response data:", err.response.data)
+      }
+      setError("Failed to fetch family members. Please try again later.")
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
-    const fetchFamilyMembers = async () => {
-      try {
-        setIsLoading(true)
-        const token = localStorage.getItem("authToken")
-        if (!token) {
-          throw new Error("No authentication token found")
-        }
-
-        console.log("API URL:", endpoints.management.getCoApplicant)
-        const response = await axios.get("https://api.swedenrelocators.se/api/client/familyMember/list", {
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          validateStatus: (status) => status >= 200 && status < 300,
-        })
-        if (response.data && Array.isArray(response.data.data)) {
-          setFamilyMembers(response.data.data)
-        } else {
-          console.error("Unexpected API response structure:", response.data)
-          setError("Unexpected data format received from the server.")
-        }
-        setError(null)
-      } catch (err) {
-        console.error("Error fetching family members:", err)
-        if (err.response) {
-          console.log("Error response status:", err.response.status)
-          console.log("Error response data:", err.response.data)
-        }
-        setError("Failed to fetch family members. Please try again later.")
-      } finally {
-        setIsLoading(false)
-      }
+    // Only fetch data once when the component mounts
+    if (!dataFetchedRef.current) {
+      dataFetchedRef.current = true
+      fetchFamilyMembers()
     }
-
-    fetchFamilyMembers()
-  }, [])
+  }, [fetchFamilyMembers])
 
   const handleEdit = (member) => {
     console.log(member) // Log the selected member
@@ -89,6 +94,11 @@ export function JobList() {
       toast.error("Failed to delete family member!")
     }
   }, [])
+
+  // Function to refresh data after operations like delete
+  const refreshData = useCallback(() => {
+    fetchFamilyMembers()
+  }, [fetchFamilyMembers])
 
   if (isLoading) {
     return (
@@ -143,6 +153,7 @@ export function JobList() {
                   name: member.name,
                   logo: member.profile_picture || "/placeholder.svg",
                 },
+                nationality: member.nationality,
                 email: member.email,
                 country: member.place_of_birth,
                 relation: member.relationship,
@@ -150,10 +161,13 @@ export function JobList() {
                 dob: member.dob,
                 passport: member.passport_no,
                 contact: member.contact_number,
-                
               }}
               onEdit={() => handleEdit(member)}
-              onDelete={() => handleDelete(member.id)}
+              onDelete={() => {
+                handleDelete(member.id)
+                  .then(() => refreshData())
+                  .catch((err) => console.error("Error during delete operation:", err))
+              }}
             />
           ))}
         </Box>
