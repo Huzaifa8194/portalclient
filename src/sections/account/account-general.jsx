@@ -9,7 +9,7 @@ import Button from "@mui/material/Button"
 import axios from "src/utils/axios"
 import dayjs from "dayjs"
 import { useAuthContext } from "src/auth/hooks"
-import { MenuItem } from "@mui/material"
+import { MenuItem, IconButton } from "@mui/material"
 import { toast } from "src/components/snackbar"
 
 import Box from "@mui/material/Box"
@@ -18,11 +18,18 @@ import Stack from "@mui/material/Stack"
 import Grid from "@mui/material/Unstable_Grid2"
 import Typography from "@mui/material/Typography"
 import LoadingButton from "@mui/lab/LoadingButton"
-
+import InputAdornment from "@mui/material/InputAdornment"
+import { Iconify } from "src/components/iconify"
 import { fData } from "src/utils/format-number"
-
+import { useBoolean } from "src/hooks/use-boolean"
 import { Form, Field, schemaHelper } from "src/components/hook-form"
 import { countries } from "src/assets/data"
+
+import Dialog from "@mui/material/Dialog"
+import DialogActions from "@mui/material/DialogActions"
+import DialogContent from "@mui/material/DialogContent"
+import DialogTitle from "@mui/material/DialogTitle"
+import TextField from "@mui/material/TextField"
 import { ManagerDetails } from "./ManagerDetails"
 
 // Define the schema as a constant
@@ -99,11 +106,22 @@ export function AccountGeneral() {
   const [currentlyResidingId, setCurrentlyResidingId] = useState(null)
   const [countryList, setCountryList] = useState([])
   const [isLoadingCountries, setIsLoadingCountries] = useState(true)
+  const [openPasswordDialog, setOpenPasswordDialog] = useState(false)
+  const currentPassword = useBoolean()
+  const newPassword = useBoolean()
+  const newConfirmPassword = useBoolean()
 
   // State variables to store country labels
   const [nationalityLabel, setNationalityLabel] = useState(null)
   const [placeOfBirthLabel, setPlaceOfBirthLabel] = useState(null)
   const [countryResidingLabel, setCountryResidingLabel] = useState(null)
+
+  // Add these state variables after the other state declarations (around line 75)
+  const [currentPasswordValue, setCurrentPasswordValue] = useState("")
+  const [newPasswordValue, setNewPasswordValue] = useState("")
+  const [confirmPasswordValue, setConfirmPasswordValue] = useState("")
+  const [passwordLoading, setPasswordLoading] = useState(false)
+  const [passwordError, setPasswordError] = useState("")
 
   useEffect(() => {
     const fetchGenderOptions = async () => {
@@ -237,6 +255,66 @@ export function AccountGeneral() {
     fetchUserData()
   }, [user, reset])
 
+  const handleOpenPasswordDialog = () => {
+    setOpenPasswordDialog(true)
+  }
+
+  const handleClosePasswordDialog = () => {
+    setOpenPasswordDialog(false)
+  }
+
+  // Replace the handleUpdatePassword function with this implementation
+  const handleUpdatePassword = async () => {
+    // Reset error state
+    setPasswordError("")
+
+    // Validate passwords
+    if (!currentPasswordValue || !newPasswordValue || !confirmPasswordValue) {
+      setPasswordError("All password fields are required")
+      return
+    }
+
+    if (newPasswordValue !== confirmPasswordValue) {
+      setPasswordError("New password and confirmation do not match")
+      return
+    }
+
+    setPasswordLoading(true)
+
+    try {
+      const response = await axios.post(
+        "https://api.swedenrelocators.se/api/client/reset/password",
+        {
+          current_password: currentPasswordValue,
+          new_password: newPasswordValue,
+          new_password_confirmation: confirmPasswordValue,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${user.accessToken}`,
+          },
+        },
+      )
+
+      console.log("Password update response:", response)
+      toast.success("Password updated successfully!")
+
+      // Reset form fields
+      setCurrentPasswordValue("")
+      setNewPasswordValue("")
+      setConfirmPasswordValue("")
+
+      handleClosePasswordDialog()
+    } catch (error) {
+      console.error("Error updating password:", error)
+      const errorMessage = error.response?.data?.message || error.message || "Failed to update password"
+      setPasswordError(errorMessage)
+      toast.error(errorMessage)
+    } finally {
+      setPasswordLoading(false)
+    }
+  }
+
   if (isLoading) {
     return <div>Loading...</div>
   }
@@ -355,7 +433,7 @@ export function AccountGeneral() {
                 />
 
                 {/* Buttons */}
-                <Button variant="soft" color="success" sx={{ mt: 3, mr: 1 }}>
+                <Button variant="soft" color="success" sx={{ mt: 3, mr: 1 }} onClick={handleOpenPasswordDialog}>
                   Update password
                 </Button>
                 <Button variant="soft" color="error" sx={{ mt: 3 }}>
@@ -390,7 +468,7 @@ export function AccountGeneral() {
                     </MenuItem>
                   ))}
                 </Field.Select>
-                <Field.DatePicker name="dateOfBirth" label="Date of birth" />
+                <Field.DatePicker name="dateOfBirth" label="Date of birth" format="YYYY-MM-DD" />
                 <Field.Text name="NID" label="Social Security Number" />
                 <Field.CountrySelect
                   name="nationality"
@@ -420,8 +498,8 @@ export function AccountGeneral() {
                 <Field.Text name="city" label="City" variant="outlined" />
                 <Field.Text name="postalCode" label="Postal Code" variant="outlined" />
                 <Field.Text name="passportNo" label="Passport Number" variant="outlined" />
-                <Field.DatePicker name="Issue" label="Issue Date" />
-                <Field.DatePicker name="Expiry" label="Expiry Date" />
+                <Field.DatePicker name="Issue" label="Issue Date" format="YYYY-MM-DD" />
+                <Field.DatePicker name="Expiry" label="Expiry Date" format="YYYY-MM-DD" />
                 <Field.Phone name="phoneNumber" label="Contact Number" />
               </Box>
               <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>
@@ -498,6 +576,97 @@ export function AccountGeneral() {
           </Grid>
         </Grid>
       </Form>
+
+      {/* Password Update Dialog */}
+      <Dialog
+        open={openPasswordDialog}
+        onClose={handleClosePasswordDialog}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            width: "90%", // Adjust width for better responsiveness
+            maxWidth: "500px", // Set a reasonable max width
+          },
+        }}
+      >
+        <DialogTitle>Update Password</DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ mt: 1 }}>
+            {passwordError && (
+              <Typography color="error" variant="body2">
+                {passwordError}
+              </Typography>
+            )}
+            <TextField
+              margin="dense"
+              id="currentPassword"
+              label="Current Password"
+              placeholder="6+ characters"
+              type={currentPassword.value ? "text" : "password"}
+              fullWidth
+              variant="outlined"
+              value={currentPasswordValue}
+              onChange={(e) => setCurrentPasswordValue(e.target.value)}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={currentPassword.onToggle} edge="end">
+                      <Iconify icon={currentPassword.value ? "solar:eye-bold" : "solar:eye-closed-bold"} />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <TextField
+              margin="dense"
+              id="newPassword"
+              label="New Password"
+              type={newPassword.value ? "text" : "password"}
+              fullWidth
+              variant="outlined"
+              value={newPasswordValue}
+              onChange={(e) => setNewPasswordValue(e.target.value)}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={newPassword.onToggle} edge="end">
+                      <Iconify icon={newPassword.value ? "solar:eye-bold" : "solar:eye-closed-bold"} />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <TextField
+              margin="dense"
+              id="confirmPassword"
+              label="Confirm Password"
+              type={newConfirmPassword.value ? "text" : "password"}
+              fullWidth
+              variant="outlined"
+              value={confirmPasswordValue}
+              onChange={(e) => setConfirmPasswordValue(e.target.value)}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={newConfirmPassword.onToggle} edge="end">
+                      <Iconify icon={newConfirmPassword.value ? "solar:eye-bold" : "solar:eye-closed-bold"} />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClosePasswordDialog} color="inherit">
+            Cancel
+          </Button>
+          <LoadingButton onClick={handleUpdatePassword} variant="contained" color="primary" loading={passwordLoading}>
+            Update Password
+          </LoadingButton>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }
