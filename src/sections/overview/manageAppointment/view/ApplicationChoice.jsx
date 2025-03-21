@@ -4,6 +4,7 @@ import { Box, Card, CardContent, Grid } from '@mui/material';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 import { paths } from 'src/routes/paths';
+import scheduling from 'src/assets/images/scheduling.png'
 import { ApplicationTable } from './ApplicationTable';
 import { GovernmentAuthorityComponent } from './GovernmentAuthority';
 import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
@@ -23,15 +24,17 @@ export function ApplicationChoice() {
 
   const options = [
     {
-      title: 'Sweden Relocator Appointment',
+      title: 'Appointment',
       value: 'Migrationsverket',
-      icon: `${CONFIG.assetsDir}/assets/icons/glass/ic-glass-users.svg`,
+      total: 'Sweden Relocators',
+      icon: scheduling,
       color: 'primary',
     },
     {
-      title: 'Government Authority Appointment',
+      title: 'Appointment',
       value: 'GovernmentAuthority',
-      icon: `${CONFIG.assetsDir}/assets/icons/glass/ic-glass-users.svg`,
+      total: 'Government Authority',
+      icon: scheduling,
       color: 'secondary',
     }
   ];
@@ -75,14 +78,25 @@ export function ApplicationChoice() {
                   },
                 }}
               >
-                <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+                <CardContent 
+                  sx={{ 
+                    p: 0,
+                    '&:last-child': { pb: 0 },
+                    height: '100%',
+                    display: 'flex',
+                  }}
+                >
                   <AnalyticsWidgetSummary
                     title={option.title}
-                    total="Select"
+                    total={option.total}
                     color={option.color}
                     icon={<img alt="icon" src={option.icon} />}
                     chart={{
                       series: [8, 9, 31, 8, 16, 37, 8, 33, 46, 31],
+                    }}
+                    sx={{ 
+                      height: '100%', 
+                      width: '100%' 
                     }}
                   />
                 </CardContent>

@@ -9,10 +9,12 @@ import Box from "@mui/material/Box"
 import Card from "@mui/material/Card"
 import CardContent from "@mui/material/CardContent"
 import { styled } from "@mui/material/styles"
+import Stack from "@mui/material/Stack"
 
 import { CONFIG } from "src/config-global"
 import { DashboardContent } from "src/layouts/dashboard"
 import { CustomBreadcrumbs } from "src/components/custom-breadcrumbs"
+import { Label } from "src/components/label"
 import { AnalyticsWidgetSummary } from "../analytics-widget-summary"
 import { RescheduleAppointmentForm } from "./reschedule-appointment-form"
 
@@ -78,6 +80,16 @@ export function OverviewAnalyticsView({ appointment, onBack }) {
     })
   }
 
+  // Check if appointment is passed (before current date) or due (future date)
+  const isAppointmentPassed = (appointmentDate) => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0) // Set to beginning of day for fair comparison
+    const appDate = new Date(appointmentDate)
+    return appDate < today
+  }
+
+  const isPassed = isAppointmentPassed(updatedAppointment.appointment_date)
+
   const appointmentDetails = [
     {
       label: "Appointment Date",
@@ -95,17 +107,29 @@ export function OverviewAnalyticsView({ appointment, onBack }) {
       label: "Language",
       content: updatedAppointment.language,
     },
+
     {
-      label: "Description",
-      content: updatedAppointment.description,
-    },
-    {
-      label: "Payment Type",
-      content: updatedAppointment.invoice.payment_type,
+      label: "Payment Status",
+      content: (
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Label variant="soft" color={isPassed ? "success" : "warning"}>
+            {isPassed ? "Passed" : "Due"}
+          </Label>
+          {!isPassed && (
+            <Button size="small" variant="contained" color="primary" sx={{ fontSize: "0.75rem", py: 0.5 }}>
+              Pay Now
+            </Button>
+          )}
+        </Stack>
+      ),
     },
     {
       label: "Total Amount",
       content: `${updatedAppointment.invoice.total_amount} ${updatedAppointment.invoice.currency_name}`,
+    },
+    {
+      label: "Description",
+      content: updatedAppointment.description,
     },
     // {
     //   label: "Rescheduled",
@@ -202,7 +226,7 @@ export function OverviewAnalyticsView({ appointment, onBack }) {
                     sx={{
                       width: 4,
                       height: 24,
-                      
+
                       borderRadius: 1,
                     }}
                   />
@@ -258,16 +282,20 @@ export function OverviewAnalyticsView({ appointment, onBack }) {
                                   </Typography>
                                 </Box>
                                 <Box>
-                                  <Typography
-                                    variant="body1"
-                                    fontWeight="500"
-                                    sx={{
-                                      color: "text.primary",
-                                      wordBreak: "break-word",
-                                    }}
-                                  >
-                                    {detail.content || "—"}
-                                  </Typography>
+                                  {typeof detail.content === "object" ? (
+                                    detail.content
+                                  ) : (
+                                    <Typography
+                                      variant="body1"
+                                      fontWeight="500"
+                                      sx={{
+                                        color: "text.primary",
+                                        wordBreak: "break-word",
+                                      }}
+                                    >
+                                      {detail.content || "—"}
+                                    </Typography>
+                                  )}
                                 </Box>
                                 {detailIndex < groupDetails.length - 1 && (
                                   <Box sx={{ borderBottom: "1px dashed rgba(0,0,0,0.1)", my: 2 }} />

@@ -231,7 +231,7 @@ export function PostNewEditForm({ currentPost }) {
               }}
             >
               <Field.Select native name="category" label="Appointment Type" InputLabelProps={{ shrink: true }}>
-                <option value="">Select Appointment Type</option>
+                <option value="">Choose An Option</option>
                 {appointmentTypes.map((option) => (
                   <option key={option.id} value={option.id}>
                     {option.name}
@@ -240,7 +240,7 @@ export function PostNewEditForm({ currentPost }) {
               </Field.Select>
 
               <Field.Select native name="category2" label="Appointment Category" InputLabelProps={{ shrink: true }}>
-                <option value="">Select Appointment Category</option>
+                <option value="">Choose An Option</option>
                 {appointmentCategories.map((option) => (
                   <option key={option.id} value={option.id}>
                     {option.name}
@@ -249,7 +249,7 @@ export function PostNewEditForm({ currentPost }) {
               </Field.Select>
 
               <Field.Select native name="category3" label="Appointment Country" InputLabelProps={{ shrink: true }}>
-                <option value="">Select Appointment Country</option>
+                <option value="">Choose An Option</option>
                 {APPOINTMENT_COUNTRY_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -260,7 +260,8 @@ export function PostNewEditForm({ currentPost }) {
               <Field.DatePicker
                 name="dateofbirth"
                 label="Appointment Date"
-                inputFormat="yyyy-MM-dd"
+                format="YYYY-MM-DD"
+                inputFormat="YYYY-MM-DD"
                 disablePast
                 shouldDisableDate={(date) => {
                   // Disable dates less than 24 hours from now
@@ -306,13 +307,21 @@ export function PostNewEditForm({ currentPost }) {
                 }}
                 slotProps={{
                   textField: {
-                    helperText: "Appointments must be scheduled at least 24 hours in advance",
+                    inputProps: {
+                      placeholder: "YYYY-MM-DD",
+                    },
                   },
                 }}
               />
 
-              <Field.Select native name="category4" label="Appointment Time" InputLabelProps={{ shrink: true }}>
-                <option value="">Select Appointment Time</option>
+              <Field.Select
+                native
+                name="category4"
+                label="Appointment Time"
+                InputLabelProps={{ shrink: true }}
+                // sx={{ gridColumn: '1 / -1' }} // Full width
+              >
+                <option value="">Choose An Option</option>
                 {appointmentTimeSlots.map((option) => (
                   <option key={option.id} value={option.id}>
                     {option.time_range}
@@ -320,11 +329,22 @@ export function PostNewEditForm({ currentPost }) {
                 ))}
               </Field.Select>
 
-              <Field.Text name="description" label="Appointment Description" />
+              <Field.Text
+                name="description"
+                label="Appointment Description"
+                multiline
+                rows={3}
+                sx={{ gridColumn: "1 / -1" }} // New line with full width
+              />
             </Box>
 
-            <Stack spacing={1.5} direction="row" alignItems="center" sx={{ mt: 1.5 }}>
-              <Field.Text name="promocode" label="Do you have a Promo Code?" sx={{ flex: 1, maxWidth: 350 }} />
+            <Stack spacing={1.5} direction="row" alignItems="center" sx={{ mt: 3 }}>
+              <Field.Text
+                name="promocode"
+                label="Do you have a Promo Code?"
+                rowGap={3}
+                sx={{ flex: 1, maxWidth: 350 }}
+              />
               <LoadingButton onClick={handleApplyPromoCode} variant="contained" loading={isSubmitting}>
                 Add Promo Code
               </LoadingButton>
