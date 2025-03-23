@@ -14,18 +14,7 @@ export default function Page() {
       <Helmet>
         <title> {metadata.title}</title>
       </Helmet>
-         <DashboardContent>
-            <CustomBreadcrumbs
-              heading="Co-Applicant"
-              links={[
-                { name: 'Dashboard', href: paths.dashboard.root },
-                { name: 'Profile', href: paths.dashboard.user.root },
-                { name: 'Co-applicant' },
-              ]}
-              sx={{ mb: { xs: 3, md: 5 } }}
-            />
-                 <ApplicationTable/>
-          </DashboardContent>
+      <ApplicationTable/>
     </>
   );
 }

@@ -194,7 +194,8 @@ function AppointmentDetailView({ appointment, onBack }) {
   )
 }
 
-export function GovernmentAuthorityComponent() {
+export function AppointmentGovernment() {
+  // This was previously named GovernmentAuthorityComponent
   const theme = useTheme()
   const [selectedAppointment, setSelectedAppointment] = useState(null)
   const [page, setPage] = useState(0)

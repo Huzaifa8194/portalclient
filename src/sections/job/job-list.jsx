@@ -118,22 +118,7 @@ export function JobList() {
 
   return (
     <>
-      <Typography
-  variant="body2"
-  sx={{
-    mt: 3,
-    mb: 3,
-    mx: 0, 
-    textAlign: "left",
-    backgroundColor: "text.primary",
-    padding: 0.5,
-    color: "white",
-    borderRadius: 1,
-    width: "fit-content",
-  }}
->
-  Kindly add your family members here who are going to apply with you now or they are willing to apply in the future.
-</Typography>
+
 
 
       {familyMembers.length === 0 ? (

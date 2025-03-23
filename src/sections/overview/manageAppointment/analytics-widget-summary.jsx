@@ -20,32 +20,6 @@ export function AnalyticsWidgetSummary({ icon, title, total, chart, percent, col
   
   const displayTitle = typeof title === "string" ? title : String(title || "")
 
-  const chartColors = [theme.palette[color].dark]
-
-  const chartOptions = useChart(
-    chart
-      ? {
-          chart: { sparkline: { enabled: true } },
-          colors: chartColors,
-          xaxis: { categories: chart?.categories || [] },
-          grid: {
-            padding: {
-              top: 6,
-              left: 6,
-              right: 6,
-              bottom: 6,
-            },
-          },
-          tooltip: {
-            y: { formatter: (value) => fNumber(value), title: { formatter: () => "" } },
-          },
-          ...(chart.options || {}),
-        }
-      : {
-          chart: { sparkline: { enabled: true } },
-        },
-  )
-
   const renderTrending = percent !== undefined && (
     <Box
       sx={{
@@ -94,12 +68,6 @@ export function AnalyticsWidgetSummary({ icon, title, total, chart, percent, col
           <Box sx={{ mb: 1, typography: "subtitle2" }}>{displayTitle}</Box>
           <Box sx={{ typography: "h4" }}>{total}</Box>
         </Box>
-
-        {chart && (
-          <Box sx={{ mt: 3, mr: 3 }}>
-            <Chart type="line" series={[{ data: chart.series }]} options={chartOptions} width={60} height={36} />
-          </Box>
-        )}
       </Box>
 
       {renderTrending}

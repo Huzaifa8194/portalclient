@@ -1,13 +1,13 @@
+"use client"
+
 import Grid from "@mui/material/Unstable_Grid2"
 import Typography from "@mui/material/Typography"
 import Button from "@mui/material/Button"
-import Box from "@mui/material/Box"
 
 import { CONFIG } from "src/config-global"
-import { DashboardContent } from "src/layouts/dashboard"
+import { paths } from "src/routes/paths"
 import { CustomBreadcrumbs } from "src/components/custom-breadcrumbs"
-
-import { AnalyticsTasks } from "../analytics-tasks"
+import { DashboardContent } from "src/layouts/dashboard"
 import { AnalyticsOrderTimeline } from "../analytics-order-timeline"
 import { AnalyticsWidgetSummary } from "../analytics-widget-summary"
 
@@ -34,29 +34,13 @@ export function OverviewAnalyticsView({ caseNo, authority, application, onBack }
         ]
 
   // Add dummy time to each task exactly as in the original file
-  const tasksWithTime = _analyticTasks.map((task, index) => {
-    const date = new Date()
-    date.setHours(9 + index, Math.floor(Math.random() * 60), 0)
-    return {
-      ...task,
-      content: (
-        <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
-          <Typography variant="body2">{task.content}</Typography>
-          <Typography variant="body2" sx={{ ml: 2, color: "text.secondary", whiteSpace: "nowrap" }}>
-            {date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-          </Typography>
-        </Box>
-      ),
-      time: date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    }
-  })
 
   // Get application status directly from the API data
   const getApplicationStatus = () => {
     if (!application || !application.status) {
       return "Pending"
     }
-    
+
     return application.status
   }
 
@@ -70,29 +54,39 @@ export function OverviewAnalyticsView({ caseNo, authority, application, onBack }
 
   // Change the _timeline definition to include unique IDs
   const _timeline =
-  application && application.comments && application.comments.length > 0
-    ? application.comments.map((c, index) => ({
-        id: c.id || `timeline-${index}`,
-        subheader: "2-2",
-        title: c.comments || "Status update",
-        createdAt: c.created_at, // Add the created_at timestamp here
-        type:
-          c.comments && c.comments.includes("approved")
-            ? "order1"
-            : c.comments && c.comments.includes("rejected")
-              ? "order4"
-              : "order3",
-      }))
-    : [
-        {
-          id: "timeline-empty",
-          title: "Timeline empty",
-          type: "order3",
-        },
-      ]
+    application && application.comments && application.comments.length > 0
+      ? application.comments.map((c, index) => ({
+          id: c.id || `timeline-${index}`,
+          subheader: "2-2",
+          title: c.comments || "Status update",
+          createdAt: c.created_at, // Add the created_at timestamp here
+          comment: c.comment, // Add the comment field to pass to the timeline
+          type:
+            c.comments && c.comments.includes("approved")
+              ? "order1"
+              : c.comments && c.comments.includes("rejected")
+                ? "order4"
+                : "order3",
+        }))
+      : [
+          {
+            id: "timeline-empty",
+            title: "Timeline empty",
+            type: "order3",
+          },
+        ]
 
   return (
-    <DashboardContent maxWidth="xl">
+    <DashboardContent sx={{ px: 5 }}>
+             <CustomBreadcrumbs
+                        heading="Co-Applicant"
+                        links={[
+                          { name: 'Dashboard', href: paths.dashboard.root },
+                          { name: 'Profile', href: paths.dashboard.user.root },
+                          { name: 'Co-applicant' },
+                        ]}
+                        sx={{ mb: { xs: 3, md: 5 } }}
+                      />
       <Grid container sx={{ mb: 3, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Grid xs={6}>
           <Typography variant="h4">Your Application Status</Typography>
@@ -103,10 +97,6 @@ export function OverviewAnalyticsView({ caseNo, authority, application, onBack }
           </Button>
         </Grid>
       </Grid>
-      <CustomBreadcrumbs
-        links={[{ name: "Dashboard" }, { name: "Application Status" }, { name: "Application Detail  " }]}
-        sx={{ mb: { xs: 3, md: 3 } }}
-      />
 
       <Grid container spacing={3}>
         <Grid xs={12} sm={6} md={3}>
@@ -118,6 +108,8 @@ export function OverviewAnalyticsView({ caseNo, authority, application, onBack }
               categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
               series: [22, 8, 35, 50, 82, 84, 77, 12],
             }}
+            sx={{ height: 220 }}
+
           />
         </Grid>
 
@@ -131,6 +123,8 @@ export function OverviewAnalyticsView({ caseNo, authority, application, onBack }
               categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
               series: [56, 47, 40, 62, 73, 30, 23, 54],
             }}
+            sx={{ height: 220 }}
+
           />
         </Grid>
 
@@ -144,6 +138,8 @@ export function OverviewAnalyticsView({ caseNo, authority, application, onBack }
               categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
               series: [40, 70, 50, 28, 70, 75, 7, 64],
             }}
+            sx={{ height: 220 }}
+
           />
         </Grid>
 
@@ -163,23 +159,17 @@ export function OverviewAnalyticsView({ caseNo, authority, application, onBack }
               categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
               series: [56, 30, 23, 54, 47, 40, 62, 73],
             }}
+            sx={{ height: 220 }}
+
           />
+
         </Grid>
 
-        <Grid xs={12} md={6} lg={8}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-            <Typography variant="h6">Comments</Typography>
-            <Button variant="contained" onClick={handlePrintLogs}>
-              Print File
-            </Button>
-          </Box>
-          <AnalyticsTasks list={tasksWithTime} />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
+        <Grid xs={12} md={12} lg={12}>
           <AnalyticsOrderTimeline title="Application Timeline" list={_timeline} />
         </Grid>
       </Grid>
     </DashboardContent>
   )
 }
+

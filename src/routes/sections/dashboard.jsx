@@ -7,7 +7,8 @@ import { DashboardLayout } from 'src/layouts/dashboard';
 import { LoadingScreen } from 'src/components/loading-screen';
 
 import { AuthGuard } from 'src/auth/guard';
-
+import { AppointmentSweden } from 'src/sections/overview/manageAppointment/view/ApplicationTable';
+import { AppointmentGovernment } from 'src/sections/overview/manageAppointment/view/GovernmentAuthority';
 // ----------------------------------------------------------------------
 
 // Overview
@@ -143,6 +144,8 @@ const PetRelocationList=lazy(() => import('src/pages/dashboard/PetRelocationList
 const LogisticsList=lazy(() => import('src/pages/dashboard/LogisticsSolutionList/new'));
 const POAList=lazy(() => import('src/pages/dashboard/POAList/new'));
 
+// const Government=lazy(() => import('src/sections/overview/analytics/view/'));
+
 // ----------------------------------------------------------------------
 
 const layoutContent = (
@@ -258,6 +261,8 @@ export const dashboardRoutes = [
         ],
       },
       { path: 'file-manager', element: <FileManagerPage /> },
+      { path: 'appointment-sweden-relocators', element: <AppointmentSweden /> },
+      { path: 'appointment-government', element: <AppointmentGovernment /> },
 
 
 

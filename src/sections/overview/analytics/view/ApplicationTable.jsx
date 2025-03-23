@@ -11,11 +11,14 @@ import Divider from "@mui/material/Divider"
 import Typography from "@mui/material/Typography"
 import Button from "@mui/material/Button"
 import ListItemText from "@mui/material/ListItemText"
+import { paths } from "src/routes/paths"
+import { CustomBreadcrumbs } from "src/components/custom-breadcrumbs"
 import Container from "@mui/material/Container"
 import { Image } from "src/components/image"
 import { varAlpha } from "src/theme/styles"
 import { AvatarShape } from "src/assets/illustrations"
 import { toast } from "src/components/snackbar"
+import { DashboardContent } from "src/layouts/dashboard"
 import { OverviewAnalyticsView } from "./overview-analytics-view"
 
 export function ApplicationTable() {
@@ -90,7 +93,20 @@ export function ApplicationTable() {
   }
 
   return (
-    <Container maxWidth="xl">
+    <>
+    <DashboardContent
+    >
+      
+                <CustomBreadcrumbs
+                  heading="Co-Applicant"
+                  links={[
+                    { name: 'Dashboard', href: paths.dashboard.root },
+                    { name: 'Profile', href: paths.dashboard.user.root },
+                    { name: 'Co-applicant' },
+                  ]}
+                  sx={{ mb: { xs: 3, md: 5 } }}
+                />
+
       {loading ? (
         <Typography variant="body1" sx={{textAlign: "center" }}>
           Loading applications...
@@ -102,7 +118,7 @@ export function ApplicationTable() {
       ) : (
         <Grid container spacing={3}>
           {applications.map((app, index) => (
-            <Grid item xs={12} sm={12} md={4} lg={4} key={index}>
+            <Grid item xs={12} sm={6} md={4} lg={4} key={index}>
               <Card sx={{ textAlign: "center", display: "flex", flexDirection: "column" }}>
                 <Box sx={{ position: "relative" }}>
                   <AvatarShape
@@ -187,7 +203,9 @@ export function ApplicationTable() {
           ))}
         </Grid>
       )}
-    </Container>
+      </DashboardContent>
+      </>
   )
+
 }
 

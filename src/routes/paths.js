@@ -133,7 +133,8 @@ export const paths = {
     PetRelocationList:`${ROOTS.DASHBOARD}/pet-relocation-List`,
     logisticsSolutionList:`${ROOTS.DASHBOARD}/logistics-solution-List`,
     POAList:`${ROOTS.DASHBOARD}/POA-List`,
-
+    appointmentSweden:`${ROOTS.DASHBOARD}/appointment-sweden-relocators`,
+    appointmentGovernment:`${ROOTS.DASHBOARD}/appointment-government`,
     globalEvisaInfo:`${ROOTS.DASHBOARD}/immigration-global-Evisa-info`,
     globalServices:`${ROOTS.DASHBOARD}/global-services`,
     petRelocation: `${ROOTS.DASHBOARD}/pet-relocation`,

@@ -15,7 +15,11 @@ import { fDateTime } from "src/utils/format-time"
 export function AnalyticsOrderTimeline({ title, subheader, list, ...other }) {
   return (
     <Card {...other}>
-      <CardHeader title={title} subheader={subheader} />
+<CardHeader
+  title={title}
+  subheader={subheader}
+  titleTypographyProps={{ variant: "h4" }}
+/>
 
       <Timeline
         sx={{
@@ -52,13 +56,17 @@ function Item({ item, lastItem, ...other }) {
       </TimelineSeparator>
 
       <TimelineContent>
-        <Typography variant="subtitle2">{item.title}</Typography>
+        <Typography variant="h5">{item.title}</Typography>
 
-        <Typography variant="caption" sx={{ color: "text.disabled", display: "block", mt: 0.5 }}>
+        <Typography variant="h7" sx={{ color: "text.disabled", display: "block", mt: 0.5 }}>
           {item.createdAt && fDateTime(item.createdAt)}
+        </Typography>
+        <Typography variant="h6" sx={{ color: "text.disabled", display: "block", mt: 0.5 }}>
+          {item.comment || "No additional comments"}
         </Typography>
       </TimelineContent>
     </TimelineItem>
   )
 }
 
+  
