@@ -3,27 +3,38 @@ import Card from "@mui/material/Card"
 import Avatar from "@mui/material/Avatar"
 import CardHeader from "@mui/material/CardHeader"
 import Typography from "@mui/material/Typography"
+import Button from "@mui/material/Button"
 import { Scrollbar } from "src/components/scrollbar"
+import { useState } from "react"
+import Collapse from "@mui/material/Collapse"
+import IconButton from "@mui/material/IconButton"
+import { Iconify } from "src/components/iconify"
 
 // ----------------------------------------------------------------------
 
-export function AppTopRelated({ title, subheader, list, ...other }) {
+export function AppTopRelated({ title, subheader, list, sx = {}, ...other }) {
+  const [expanded, setExpanded] = useState(false)
+
   const handleItemClick = (item) => {
     console.log(`Clicked on ${item.name}`)
     // Implement your click handler logic here
   }
 
-  return (
-    <Card {...other}>
-      <CardHeader title={title} subheader={subheader} sx={{mb:2.5}} />
+  const toggleExpand = () => {
+    setExpanded(!expanded)
+  }
 
-      <Scrollbar sx={{ minHeight: 384 }}>
-        <Box sx={{ p: 3, minWidth: 360, display: "flex", flexDirection: "column" }}>
-          {list.map((item) => (
-            <Item key={item.id} item={item} onClick={() => handleItemClick(item)} />
-          ))}
-        </Box>
-      </Scrollbar>
+  return (
+    <Card sx={{ height: '100%', ...sx }} {...other}>
+      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Scrollbar sx={{ flex: 1 }}>
+          <Box sx={{ p: 3, minWidth: 360, display: "flex", flexDirection: "column" }}>
+            {list.map((item) => (
+              <Item key={item.id} item={item} onClick={() => handleItemClick(item)} />
+            ))}
+          </Box>
+        </Scrollbar>
+      </Box>
     </Card>
   )
 }
@@ -41,6 +52,7 @@ function Item({ item, onClick, sx, ...other }) {
         },
         borderRadius: 1,
         p: 1,
+        mb: 1,
         ...sx,
       }}
       onClick={onClick}
@@ -67,4 +79,3 @@ function Item({ item, onClick, sx, ...other }) {
     </Box>
   )
 }
-

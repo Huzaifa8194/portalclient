@@ -38,7 +38,7 @@ export function AppFeatured({ list, sx, ...other }) {
   }
 
   return (
-    <Card sx={{ bgcolor: "common.black", ...sx }} {...other}>
+    <Card sx={{ bgcolor: "common.black",...sx }} {...other}>
       <CarouselDotButtons
         scrollSnaps={carousel.dots.scrollSnaps}
         selectedIndex={carousel.dots.selectedIndex}
@@ -86,7 +86,11 @@ function CarouselItem({ item, onButtonClick, ...other }) {
         <Typography variant="body2" sx={{ wordWrap: "break-word" }}>
           {item.description}
         </Typography>
-        <Button variant="contained" color="primary" onClick={onButtonClick}>
+        <Button variant="contained" color="primary" onClick={onButtonClick}
+        sx={{
+          my:{ xs: 1, sm: 1,lg: 1, xl: 5 },
+         
+        }}>
           Go now
         </Button>
       </Box>

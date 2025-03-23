@@ -1,10 +1,11 @@
+"use client"
+
 import Box from "@mui/material/Box"
 import { useTheme } from "@mui/material/styles"
 import Grid from "@mui/material/Unstable_Grid2"
 import { DashboardContent } from "src/layouts/dashboard"
 import { SeoIllustration, AvatarShape } from "src/assets/illustrations"
 import { _appAuthors, _appRelated, _appFeatured, _appInstalled } from "src/_mock"
-import { svgColorClasses } from "src/components/svg-color"
 import { useMockedUser } from "src/auth/hooks"
 import Divider from "@mui/material/Divider"
 import Typography from "@mui/material/Typography"
@@ -15,9 +16,10 @@ import { varAlpha } from "src/theme/styles"
 import Card from "@mui/material/Card"
 import Avatar from "@mui/material/Avatar"
 import Stack from "@mui/material/Stack"
+import { useState, useEffect, useRef } from "react"
+import CardHeader from "@mui/material/CardHeader"
+import { Iconify } from "src/components/iconify"
 import { AppWidgetButton } from "../app-widget-button"
-
-import { AppWidget } from "../app-widget"
 import { AppWelcome } from "../app-welcome"
 import { AppFeatured } from "../app-featured"
 import { AppNewInvoice } from "../app-new-invoice"
@@ -88,6 +90,59 @@ export function OverviewAppView() {
   const { user } = useMockedUser()
   const theme = useTheme()
 
+  // First, let's create a state to track the Business Permit Card height
+  const [businessCardHeight, setBusinessCardHeight] = useState(0)
+  const businessCardRef = useRef(null)
+
+  // Add useEffect to measure and update the height
+  useEffect(() => {
+    const updateHeight = () => {
+      if (businessCardRef.current) {
+        const height = businessCardRef.current.clientHeight
+        setBusinessCardHeight(height)
+      }
+    }
+
+    // Initial measurement
+    updateHeight()
+
+    // Update on window resize
+    window.addEventListener("resize", updateHeight)
+    return () => window.removeEventListener("resize", updateHeight)
+  }, [])
+
+  // State for expanded/collapsed content - all set to true by default
+  const [expandedSections, setExpandedSections] = useState({
+    messages: false,
+    invoices: false,
+    related: false,
+    installed: false,
+    authors: false,
+  })
+
+  // State for expanded summary widgets - all set to true by default
+  const [expandedWidgets, setExpandedWidgets] = useState({
+    coApplicants: true,
+    documents: true,
+    appointment: true,
+  })
+
+  // Toggle expanded state for a section
+  const toggleExpand = (section) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }))
+  }
+
+  // Toggle expanded state for a widget
+  const toggleWidgetExpand = (widget) => {
+    setExpandedWidgets((prev) => ({
+      ...prev,
+      [widget]: !prev[widget],
+    }))
+  }
+
   // Use dummy data if user.appointment is not available
   const appointment = user.appointment || dummyAppointment
 
@@ -106,61 +161,107 @@ export function OverviewAppView() {
     // Add your logic here
   }
 
+  // Common styles for grid items to ensure consistent heights
+  const gridItemStyles = {
+    display: "flex",
+    flexDirection: "column",
+  }
+
+  // Row-specific heights - increased summaryRow height
+  const rowHeights = {
+    welcomeRow: "280px",
+    summaryRow: "500px", // Increased from 450px to 500px to show more content
+    contentRow: "auto",
+    bottomRow: "320px",
+  }
+
   return (
     <DashboardContent maxWidth="xl">
       <Grid container spacing={3}>
-        <Grid xs={12} md={8}>
-          <AppWelcome
-            title={`Welcome\n ${user?.displayName} 👋`}
-            description="This all-in-one platform streamlines immigration and relocation worldwide for you and your family."
-            img={<SeoIllustration hideBackground />}
-          />
+        {/* Welcome and Featured Row */}
+        <Grid xs={12} md={8} sx={gridItemStyles}>
+          <Box sx={{ height: rowHeights.welcomeRow, display: "flex", flexDirection: "column" }}>
+            <AppWelcome
+              title={`Welcome\n ${user?.displayName} 👋`}
+              description="This all-in-one platform streamlines immigration and relocation worldwide for you and your family."
+              img={<SeoIllustration hideBackground />}
+              sx={{ flex: 1 }}
+            />
+          </Box>
         </Grid>
 
-        <Grid xs={12} md={4}>
-          <AppFeatured list={_appFeatured} />
+        <Grid xs={12} md={4} sx={gridItemStyles}>
+          <Box sx={{ height: rowHeights.welcomeRow, display: "flex", flexDirection: "column" }}>
+            <AppFeatured list={_appFeatured} sx={{ flex: 1 }} />
+          </Box>
         </Grid>
 
-        <Grid xs={12} md={4}>
-          <AppWidgetSummary
-            title="Co-applicants"
-            total={5}
-            chart={{
-              categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
-              series: [15, 18, 12, 51, 68, 11, 39, 37],
+        {/* Summary Widgets Row - with increased height and default expanded state */}
+        <Grid xs={12} md={4} sx={gridItemStyles}>
+          <Box sx={{ height: rowHeights.summaryRow, display: "flex", flexDirection: "column" }}>
+            <AppWidgetSummary
+              title="Co-applicants"
+              total={5}
+              chart={{
+                categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
+                series: [15, 18, 12, 51, 68, 11, 39, 37],
+              }}
+              initialExpanded={expandedWidgets.coApplicants}
+              onToggleExpand={() => toggleWidgetExpand("coApplicants")}
+              sx={{ flex: 1 }}
+            />
+          </Box>
+        </Grid>
+
+        <Grid xs={12} md={4} sx={gridItemStyles}>
+          <Box sx={{ height: rowHeights.summaryRow, display: "flex", flexDirection: "column" }}>
+            <AppWidgetSummary
+              title="Documents"
+              percent={0.2}
+              total={4876}
+              chart={{
+                colors: [theme.vars.palette.info.main],
+                categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
+                series: [20, 41, 63, 33, 28, 35, 50, 46],
+              }}
+              initialExpanded={expandedWidgets.documents}
+              onToggleExpand={() => toggleWidgetExpand("documents")}
+              sx={{ flex: 1 }}
+            />
+          </Box>
+        </Grid>
+
+        <Grid xs={12} md={4} sx={gridItemStyles}>
+          <Box sx={{ height: rowHeights.summaryRow, display: "flex", flexDirection: "column" }}>
+            <AppWidgetAppointment
+              title="Appointment"
+              percent={-0.1}
+              total={678}
+              chart={{
+                colors: [theme.vars.palette.error.main],
+                categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
+                series: [18, 19, 31, 8, 16, 37, 12, 33],
+              }}
+              appointment={appointment}
+              initialExpanded={expandedWidgets.appointment}
+              onToggleExpand={() => toggleWidgetExpand("appointment")}
+              sx={{ flex: 1 }}
+            />
+          </Box>
+        </Grid>
+
+        {/* Business Permit Card */}
+        <Grid xs={12} sm={6} md={4} sx={gridItemStyles}>
+          <Card
+            ref={businessCardRef}
+            sx={{
+              textAlign: "center",
+              height: "auto",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
             }}
-          />
-        </Grid>
-
-        <Grid xs={12} md={4}>
-          <AppWidgetSummary
-            title="Documents"
-            percent={0.2}
-            total={4876}
-            chart={{
-              colors: [theme.vars.palette.info.main],
-              categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
-              series: [20, 41, 63, 33, 28, 35, 50, 46],
-            }}
-          />
-        </Grid>
-
-        <Grid xs={12} md={4}>
-          <AppWidgetAppointment
-            title="Appointment"
-            percent={-0.1}
-            total={678}
-            chart={{
-              colors: [theme.vars.palette.error.main],
-              categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
-              series: [18, 19, 31, 8, 16, 37, 12, 33],
-            }}
-            appointment={appointment}
-          />
-        </Grid>
-
-        <Grid xs={12} sm={6} md={4}>
-          <Card sx={{ textAlign: "center" }}>
+          >
             <Box sx={{ position: "relative" }}>
               <AvatarShape
                 sx={{
@@ -234,66 +335,320 @@ export function OverviewAppView() {
 
             <Divider sx={{ borderStyle: "dashed" }} />
 
-            <Box sx={{ py: 2 }}>
+            {/* <Box sx={{ py: 2, mt: "auto" }}>
               <Button variant="contained" onClick={() => handleViewClick("Not Assigned", "Migrationsverket")}>
                 View Details
               </Button>
+            </Box> */}
+          </Card>
+        </Grid>
+
+        {/* Direct Messages */}
+        <Grid xs={12} md={6} lg={8} sx={gridItemStyles}>
+          <Card
+            sx={{
+              height: businessCardHeight > 0 ? `${businessCardHeight}px` : "auto",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <CardHeader
+              title="Direct Messages"
+              subheader="Recent messages from your contacts"
+              action={
+                <Button variant="text" size="small" onClick={() => toggleExpand("messages")}>
+                  {expandedSections.messages ? (
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      Show Less <Iconify icon="eva:chevron-up-fill" width={16} height={16} sx={{ ml: 0.5 }} />
+                    </Box>
+                  ) : (
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      Show More <Iconify icon="eva:chevron-down-fill" width={16} height={16} sx={{ ml: 0.5 }} />
+                    </Box>
+                  )}
+                </Button>
+              }
+            />
+            <Box
+              sx={{
+                flex: 1,
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <Box
+                sx={{
+                  flex: 1,
+                  overflow: expandedSections.messages ? "auto" : "auto",
+                  maxHeight: expandedSections.messages ? "none" : "none",
+                }}
+              >
+                <AppDirectMessages
+                  sx={{
+                    height: "100%",
+                    boxShadow: "none",
+                    border: "none",
+                  }}
+                />
+              </Box>
             </Box>
           </Card>
         </Grid>
 
-        <Grid xs={12} md={6} lg={8}>
-          <AppDirectMessages title="Direct Messages" subheader="Recent messages from your contacts" />
+        {/* Invoices */}
+        <Grid xs={12} lg={8} sx={gridItemStyles}>
+          <Card
+            sx={{
+              height: rowHeights.bottomRow,
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <CardHeader
+              title="Invoices"
+              action={
+                <Button variant="text" size="small" onClick={() => toggleExpand("invoices")}>
+                  {expandedSections.invoices ? (
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      Show Less <Iconify icon="eva:chevron-up-fill" width={16} height={16} sx={{ ml: 0.5 }} />
+                    </Box>
+                  ) : (
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      Show More <Iconify icon="eva:chevron-down-fill" width={16} height={16} sx={{ ml: 0.5 }} />
+                    </Box>
+                  )}
+                </Button>
+              }
+            />
+            <Box
+              sx={{
+                flex: 1,
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <Box
+                sx={{
+                  flex: 1,
+                  overflow: expandedSections.invoices ? "auto" : "hidden",
+                  maxHeight: expandedSections.invoices ? "none" : "220px",
+                }}
+              >
+                <AppNewInvoice
+                  tableData={_appInvoices}
+                  tableLabels={[
+                    { id: "invoiceNumber", label: "Invoice Number" },
+                    { id: "paymentMethod", label: "Payment Method" },
+                    { id: "amount", label: "Amount" },
+                    { id: "status", label: "Status" },
+                    { id: "deadline", label: "Deadline" },
+                    { id: "action", label: "Action" },
+                  ]}
+                  sx={{
+                    height: "100%",
+                    boxShadow: "none",
+                    border: "none",
+                  }}
+                />
+              </Box>
+            </Box>
+          </Card>
         </Grid>
 
-        <Grid xs={12} lg={8}>
-          <AppNewInvoice
-            title="Invoices"
-            tableData={_appInvoices}
-            tableLabels={[
-              { id: "invoiceNumber", label: "Invoice Number" },
-              { id: "paymentMethod", label: "Payment Method" },
-              { id: "amount", label: "Amount" },
-              { id: "status", label: "Status" },
-              { id: "deadline", label: "Deadline" },
-              { id: "action", label: "Action" },
-            ]}
-          />
+        {/* Related Applications */}
+        <Grid xs={12} md={6} lg={4} sx={gridItemStyles}>
+          <Card
+            sx={{
+              height: rowHeights.bottomRow,
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <CardHeader
+              title="Related applications"
+              action={
+                <Button variant="text" size="small" onClick={() => toggleExpand("related")}>
+                  {expandedSections.related ? (
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      Show Less <Iconify icon="eva:chevron-up-fill" width={16} height={16} sx={{ ml: 0.5 }} />
+                    </Box>
+                  ) : (
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      Show More <Iconify icon="eva:chevron-down-fill" width={16} height={16} sx={{ ml: 0.5 }} />
+                    </Box>
+                  )}
+                </Button>
+              }
+            />
+            <Box
+              sx={{
+                flex: 1,
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <Box
+                sx={{
+                  flex: 1,
+                  overflow: expandedSections.related ? "auto" : "hidden",
+                  maxHeight: expandedSections.related ? "none" : "220px",
+                }}
+              >
+                <AppTopRelated
+                  list={_appRelated}
+                  sx={{
+                    height: "100%",
+                    boxShadow: "none",
+                    border: "none",
+                  }}
+                />
+              </Box>
+            </Box>
+          </Card>
         </Grid>
 
-        <Grid xs={12} md={6} lg={4}>
-          <AppTopRelated title="Related applications" list={_appRelated} />
+        {/* Top Installed Countries */}
+        <Grid xs={12} md={6} lg={4} sx={gridItemStyles}>
+          <Card
+            sx={{
+              height: rowHeights.bottomRow,
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <CardHeader
+              title="Top installed countries"
+              action={
+                <Button variant="text" size="small" onClick={() => toggleExpand("installed")}>
+                  {expandedSections.installed ? (
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      Show Less <Iconify icon="eva:chevron-up-fill" width={16} height={16} sx={{ ml: 0.5 }} />
+                    </Box>
+                  ) : (
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      Show More <Iconify icon="eva:chevron-down-fill" width={16} height={16} sx={{ ml: 0.5 }} />
+                    </Box>
+                  )}
+                </Button>
+              }
+            />
+            <Box
+              sx={{
+                flex: 1,
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <Box
+                sx={{
+                  flex: 1,
+                  overflow: expandedSections.installed ? "auto" : "hidden",
+                  maxHeight: expandedSections.installed ? "none" : "220px",
+                }}
+              >
+                <AppTopInstalledCountries
+                  list={_appInstalled}
+                  sx={{
+                    height: "100%",
+                    boxShadow: "none",
+                    border: "none",
+                  }}
+                />
+              </Box>
+            </Box>
+          </Card>
         </Grid>
 
-        <Grid xs={12} md={6} lg={4}>
-          <AppTopInstalledCountries title="Top installed countries" list={_appInstalled} />
+        {/* Referrals */}
+        <Grid xs={12} md={6} lg={4} sx={gridItemStyles}>
+          <Card
+            sx={{
+              height: rowHeights.bottomRow,
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <CardHeader
+              title="Referrals"
+              action={
+                <Button variant="text" size="small" onClick={() => toggleExpand("authors")}>
+                  {expandedSections.authors ? (
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      Show Less <Iconify icon="eva:chevron-up-fill" width={16} height={16} sx={{ ml: 0.5 }} />
+                    </Box>
+                  ) : (
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      Show More <Iconify icon="eva:chevron-down-fill" width={16} height={16} sx={{ ml: 0.5 }} />
+                    </Box>
+                  )}
+                </Button>
+              }
+            />
+            <Box
+              sx={{
+                flex: 1,
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <Box
+                sx={{
+                  flex: 1,
+                  overflow: expandedSections.authors ? "auto" : "hidden",
+                  maxHeight: expandedSections.authors ? "none" : "220px",
+                }}
+              >
+                <AppTopAuthors
+                  list={_appAuthors}
+                  sx={{
+                    height: "100%",
+                    boxShadow: "none",
+                    border: "none",
+                  }}
+                />
+              </Box>
+            </Box>
+          </Card>
         </Grid>
 
-        <Grid xs={12} md={6} lg={4}>
-          <AppTopAuthors title="Referrals" list={_appAuthors} />
+        {/* Widget Buttons */}
+        <Grid xs={12} md={6} lg={4} sx={{ ...gridItemStyles, mb: 3 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              height: "100%",
+              justifyContent: "space-between",
+            }}
+          >
+            <AppWidgetButton
+              title="Host Family"
+              icon="fluent:people-community-24-filled"
+              onClick={handleHostFamilyClick}
+              sx={{
+                bgcolor: "info.dark",
+                color: "info.light",
+                mb: 2,
+                flex: 1,
+              }}
+            />
+            <AppWidgetButton
+              title="I am au pair"
+              icon="mdi:account-child-outline"
+              onClick={handleAuPairClick}
+              sx={{
+                bgcolor: "success.dark",
+                color: "success.light",
+                flex: 1,
+              }}
+            />
+          </Box>
         </Grid>
-        <Grid xs={12} md={6} lg={4} sx={{ mb: 3 }}>
-  <AppWidgetButton
-    title="Host Family"
-    icon="fluent:people-community-24-filled"
-    onClick={handleHostFamilyClick}
-    sx={{
-      bgcolor: "info.dark",
-      color: "info.light",
-      mb: 2, // Added margin-bottom to create spacing
-    }}
-  />
-  <AppWidgetButton
-    title="I am au pair"
-    icon="mdi:account-child-outline"
-    onClick={handleAuPairClick}
-    sx={{
-      bgcolor: "success.dark",
-      color: "success.light",
-    }}
-  />
-</Grid>
-
       </Grid>
     </DashboardContent>
   )

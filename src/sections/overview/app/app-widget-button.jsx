@@ -28,6 +28,10 @@ export function AppWidgetButton({ title, icon, onClick, sx, ...other }) {
           bgcolor: "primary.darker",
           boxShadow: theme.customShadows.z8,
         },
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
         ...sx,
       }}
       {...other}
@@ -64,4 +68,3 @@ export function AppWidgetButton({ title, icon, onClick, sx, ...other }) {
     </Box>
   )
 }
-

@@ -1,8 +1,9 @@
+"use client"
+
 import { useState } from "react"
 
 import Card from "@mui/material/Card"
 import { useTheme } from "@mui/material/styles"
-import CardHeader from "@mui/material/CardHeader"
 import List from "@mui/material/List"
 import ListItem from "@mui/material/ListItem"
 import ListItemText from "@mui/material/ListItemText"
@@ -10,7 +11,7 @@ import ListItemAvatar from "@mui/material/ListItemAvatar"
 import Avatar from "@mui/material/Avatar"
 import Typography from "@mui/material/Typography"
 import Divider from "@mui/material/Divider"
-import Button from "@mui/material/Button"
+import Box from "@mui/material/Box"
 
 import { fToNow } from "src/utils/format-time"
 
@@ -44,51 +45,45 @@ const dummyMessages = [
     message: "Please submit the required documents by Friday.",
     timestamp: new Date(2023, 5, 3, 11, 45),
   },
-  
 ]
 
-export function AppDirectMessages({ title, subheader, ...other }) {
+export function AppDirectMessages({ title, subheader, sx = {}, ...other }) {
   const theme = useTheme()
   const [messages] = useState(dummyMessages)
+  const [expanded, setExpanded] = useState(false)
+
+  const toggleExpand = () => {
+    setExpanded(!expanded)
+  }
 
   return (
-    <Card {...other}   sx={{
-      minHeight: "86vh", // Ensures the card takes at least 40% of the viewport height
-    }}>
-      <CardHeader
-        title={title}
-        subheader={subheader}
-        action={
-          <Button variant="outlined" size="small">
-            View All
-          </Button>
-        }
-      />
-
-      <List sx={{ p: 0 }}>
-        {messages.map((message, index) => (
-          <div key={message.id}>
-            <ListItem alignItems="flex-start" sx={{ px: 3, py: 2.5 }}>
-              <ListItemAvatar>
-                <Avatar alt={message.sender} src={message.avatar} />
-              </ListItemAvatar>
-              <ListItemText
-                primary={message.sender}
-                secondary={
-                  <>
-                    <Typography sx={{ display: "inline" }} component="span" variant="body2" color="text.primary">
-                      {message.message}
-                    </Typography>
-                    {" — "}
-                    {fToNow(message.timestamp)}
-                  </>
-                }
-              />
-            </ListItem>
-            {index < messages.length - 1 && <Divider variant="inset" component="li" />}
-          </div>
-        ))}
-      </List>
+    <Card sx={{ height: "100%", ...sx }} {...other}>
+      <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+        <List sx={{ p: 0, flex: 1, overflow: "auto" }}>
+          {messages.map((message, index) => (
+            <div key={message.id}>
+              <ListItem alignItems="flex-start" sx={{ px: 3, py: 2.5 }}>
+                <ListItemAvatar>
+                  <Avatar alt={message.sender} src={message.avatar} />
+                </ListItemAvatar>
+                <ListItemText
+                  primary={message.sender}
+                  secondary={
+                    <>
+                      <Typography sx={{ display: "inline" }} component="span" variant="body2" color="text.primary">
+                        {message.message}
+                      </Typography>
+                      {" — "}
+                      {fToNow(message.timestamp)}
+                    </>
+                  }
+                />
+              </ListItem>
+              {index < messages.length - 1 && <Divider variant="inset" component="li" />}
+            </div>
+          ))}
+        </List>
+      </Box>
     </Card>
   )
 }
