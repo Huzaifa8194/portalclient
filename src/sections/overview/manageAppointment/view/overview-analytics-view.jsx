@@ -25,7 +25,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius * 2,
   overflow: "hidden",
   position: "relative",
-  // Removed the &::after pseudo-element that was creating the green shadow
+
 }))
 
 const DetailCard = styled(Card)(({ theme }) => ({
@@ -113,15 +113,25 @@ export function OverviewAnalyticsView({ appointment, onBack }) {
       label: "Payment Status",
       content: (
         <Stack direction="row" spacing={1} alignItems="center">
-          <Label variant="soft" color={isPassed ? "success" : "warning"}>
+          <Label
+            variant="soft"
+            color={isPassed ? "success" : "warning"}
+            sx={{ fontSize: "0.75rem", py: 0.5, px: 1.5, height: 32, display: "flex", alignItems: "center" }}
+          >
             {isPassed ? "Passed" : "Due"}
           </Label>
           {!isPassed && (
-            <Button size="small" variant="contained" color="primary" sx={{ fontSize: "0.75rem", py: 0.5 }}>
+            <Button
+              size="small"
+              variant="contained"
+              color="primary"
+              sx={{ fontSize: "0.75rem", py: 0.5, height: 32 }}
+            >
               Pay Now
             </Button>
           )}
         </Stack>
+
       ),
     },
     {

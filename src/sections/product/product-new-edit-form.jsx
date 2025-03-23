@@ -97,7 +97,6 @@ export function ProductNewEditForm({ currentProduct }) {
       setIsLoading(false)
     }
   }, [user])
-  
 
   const defaultValues = useMemo(
     () => ({
@@ -141,7 +140,7 @@ export function ProductNewEditForm({ currentProduct }) {
     const fetchDocumentTypes = async () => {
       try {
         const response = await axios.get(
-          "https://api.swedenrelocators.se/api/miscellaneous/documentTypes" // Correct endpoint
+          "https://api.swedenrelocators.se/api/miscellaneous/documentTypes", // Correct endpoint
         )
 
         if (response.data?.data?.length > 0) {
@@ -171,10 +170,10 @@ export function ProductNewEditForm({ currentProduct }) {
   }, [setValue])
 
   useEffect(() => {
-    if (familyMembers.length > 0 && !values.category) {
-      setValue("category", familyMembers[0].name)
+    if (!values.category) {
+      setValue("category", user.name || "Myself")
     }
-  }, [familyMembers, setValue, values.category])
+  }, [setValue, values.category, user.name])
 
   useEffect(() => {
     if (currentProduct) {
@@ -290,7 +289,10 @@ export function ProductNewEditForm({ currentProduct }) {
 
     formData.append("file", image)
     formData.append("document", image)
-    formData.append("user_family_id", "6")
+    // Get the selected family member ID based on the selected name
+    const selectedFamilyMember = familyMembers.find((member) => member.name === category)
+    const familyMemberId = selectedFamilyMember ? selectedFamilyMember.id.toString() : user.id.toString()
+    formData.append("user_family_id", familyMemberId)
     formData.append("document_type_id", selectedType.id.toString())
     formData.append("document_sub_type_id", selectedSubType.id.toString())
     formData.append("coupon_id", "")
@@ -303,7 +305,7 @@ export function ProductNewEditForm({ currentProduct }) {
     console.log("FormData keys:", [...formData.keys()])
     console.log("Document type ID:", selectedType.id)
     console.log("Document subtype ID:", selectedSubType.id)
-    console.log("User family ID:", "6")
+    console.log("User family ID:", familyMemberId)
     console.log("Authorization token available:", !!user.accessToken)
 
     try {
@@ -387,8 +389,8 @@ export function ProductNewEditForm({ currentProduct }) {
     try {
       setIsUploading(true)
 
-      const selectedType = documentTypes.find((type) => type.id === code); // Find by ID
-      const selectedSubType = documentSubTypes.find((subType) => subType.id === sku); // Find by ID
+      const selectedType = documentTypes.find((type) => type.id === code) // Find by ID
+      const selectedSubType = documentSubTypes.find((subType) => subType.id === sku) // Find by ID
 
       if (!selectedType || !selectedSubType) {
         toast.error("Invalid document type or subtype.")
@@ -447,13 +449,12 @@ export function ProductNewEditForm({ currentProduct }) {
     const selectedType = documentTypes.find((type) => type.id === selectedTypeId)
 
     if (selectedType) {
-      setValue("code", selectedType.id);
-
+      setValue("code", selectedType.id)
 
       setDocumentSubTypes(selectedType.document_sub_types || [])
 
       if (selectedType.document_sub_types?.length > 0) {
-        setValue("sku", selectedType.document_sub_types[0].id);
+        setValue("sku", selectedType.document_sub_types[0].id)
       } else {
         setValue("sku", "")
       }
@@ -582,14 +583,19 @@ export function ProductNewEditForm({ currentProduct }) {
           >
             {isLoading ? (
               <option value="">Loading family members...</option>
-            ) : familyMembers.length > 0 ? (
-              familyMembers.map((member) => (
-                <option key={member.id} value={member.name}>
-                  {member.name}
-                </option>
-              ))
             ) : (
-              <option value="">No family members available</option>
+              <>
+                <option value={user.name || "Myself"}>Myself</option>
+                {familyMembers.length > 0 ? (
+                  familyMembers.map((member) => (
+                    <option key={member.id} value={member.name}>
+                      {member.name}
+                    </option>
+                  ))
+                ) : (
+                  <option value="">No family members available</option>
+                )}
+              </>
             )}
           </Field.Select>
 
@@ -608,17 +614,10 @@ export function ProductNewEditForm({ currentProduct }) {
               value: selectedDocumentType || "",
             }}
           >
-            {/* {documentTypes.length > 0 ? (
-              documentTypes.map((type) => (
-                <option key={type.id} value={type.id}>
-                  {type.name}
-                </option>
-              ))
-            ) : (
-              <option value="">No document types available</option>
-            )} */}
             {documentTypes.map((type) => (
-              <option key={type.id} value={type.id}> {/* Value is ID */}
+              <option key={type.id} value={type.id}>
+                {" "}
+                {/* Value is ID */}
                 {type.name}
               </option>
             ))}
@@ -638,17 +637,10 @@ export function ProductNewEditForm({ currentProduct }) {
               onChange: (e) => setValue("sku", e.target.value),
             }}
           >
-            {/* {documentSubTypes.length > 0 ? (
-              documentSubTypes.map((subType) => (
-                <option key={subType.id} value={subType.name}>
-                  {subType.name}
-                </option>
-              ))
-            ) : (
-              <option value="">No subtypes available</option>
-            )} */}
             {documentSubTypes.map((subType) => (
-              <option key={subType.id} value={subType.id}> {/* Value is ID */}
+              <option key={subType.id} value={subType.id}>
+                {" "}
+                {/* Value is ID */}
                 {subType.name}
               </option>
             ))}

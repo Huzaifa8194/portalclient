@@ -249,7 +249,7 @@ export function PostNewEditForm({ currentPost }) {
               </Field.Select>
 
               <Field.Select native name="category3" label="Appointment Country" InputLabelProps={{ shrink: true }}>
-                <option value="">Choose An Option</option>
+                {/* <option value="">Choose An Option</option> */}
                 {APPOINTMENT_COUNTRY_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}

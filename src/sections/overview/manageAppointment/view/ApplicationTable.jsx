@@ -31,8 +31,6 @@ import axios from "axios"
 import { useAuthContext } from "src/auth/hooks"
 import { OverviewAnalyticsView } from "./overview-analytics-view"
 
-// Table head configuration
-
 const TABLE_HEAD = [
   { id: "category", label: "Category" },
   { id: "type", label: "Type" },
@@ -42,7 +40,6 @@ const TABLE_HEAD = [
   { id: "actions", label: "Actions", align: "right" },
 ]
 
-// Analytic component similar to InvoiceAnalytic but simplified for appointments
 function AppointmentAnalytic({ title, total, icon, color, percent }) {
   return (
     <Stack spacing={2.5} direction="row" alignItems="center" justifyContent="center" sx={{ width: 1, minWidth: 200 }}>
@@ -77,9 +74,7 @@ function AppointmentAnalytic({ title, total, icon, color, percent }) {
   )
 }
 
-// Change the export name to match what's being imported
 export function AppointmentSweden() {
-  // This was previously named ApplicationTable
   const theme = useTheme()
   const [selectedApplication, setSelectedApplication] = useState(null)
   const [appointments, setAppointments] = useState([])
@@ -102,7 +97,6 @@ export function AppointmentSweden() {
           },
         })
 
-        // Check if data exists and has appointments
         if (response.data && response.data.data && Array.isArray(response.data.data)) {
           const appointmentsWithTimeSlotId = response.data.data.map((appointment) => ({
             ...appointment,
@@ -148,19 +142,27 @@ export function AppointmentSweden() {
     setPage(0)
   }
 
-  // Check if appointment is passed (before current date) or due (future date)
   const isAppointmentPassed = (appointmentDate) => {
     const today = new Date()
-    today.setHours(0, 0, 0, 0) // Set to beginning of day for fair comparison
+    today.setHours(0, 0, 0, 0) 
     const appDate = new Date(appointmentDate)
     return appDate < today
   }
 
-  // Filter appointments based on status
+  const isAppointmentDue = (app) => app.invoice && app.invoice.remaining_balance > 0;
+
+  const isAppointmentUpcoming = (app) => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0) 
+    const appDate = new Date(app.appointment_date)
+    return appDate > today
+  }
+
   const filteredAppointments = appointments.filter((app) => {
     if (statusFilter === "all") return true
+    if (statusFilter === "upcoming") return isAppointmentUpcoming(app)
     if (statusFilter === "passed") return isAppointmentPassed(app.appointment_date)
-    if (statusFilter === "due") return !isAppointmentPassed(app.appointment_date)
+    if (statusFilter === "due") return isAppointmentDue(app)
     return false
   })
 
@@ -171,19 +173,20 @@ export function AppointmentSweden() {
     return dateA - dateB // Ascending order (earliest first)
   })
 
-  // Get appointment count by status
+  // Update the appointment count functions:
   const getPassedAppointments = () => appointments.filter((app) => isAppointmentPassed(app.appointment_date)).length
-
-  const getDueAppointments = () => appointments.filter((app) => !isAppointmentPassed(app.appointment_date)).length
+  const getDueAppointments = () => appointments.filter((app) => isAppointmentDue(app)).length
+  const getUpcomingAppointments = () => appointments.filter((app) => isAppointmentUpcoming(app)).length
 
   // Calculate percentage
   const getPercentByStatus = (count) => (appointments.length ? (count / appointments.length) * 100 : 0)
 
-  // Define tabs for filtering
+  // Update the TABS array to include the new "upcoming" tab:
   const TABS = [
     { value: "all", label: "All", color: "default", count: appointments.length },
+    { value: "upcoming", label: "Upcoming", color: "info", count: getUpcomingAppointments() },
     { value: "passed", label: "Passed", color: "success", count: getPassedAppointments() },
-    { value: "due", label: "Due", color: "warning", count: getDueAppointments() },
+    { value: "due", label: "Due", color: "error", count: getDueAppointments() },
   ]
 
   if (selectedApplication) {
@@ -246,6 +249,14 @@ export function AppointmentSweden() {
               />
 
               <AppointmentAnalytic
+                title="Upcoming"
+                total={getUpcomingAppointments()}
+                percent={getPercentByStatus(getUpcomingAppointments())}
+                icon="solar:file-check-bold-duotone"
+                color={theme.vars.palette.info.main}
+              />
+
+              <AppointmentAnalytic
                 title="Passed"
                 total={getPassedAppointments()}
                 percent={getPercentByStatus(getPassedAppointments())}
@@ -254,11 +265,11 @@ export function AppointmentSweden() {
               />
 
               <AppointmentAnalytic
-                title="Upcoming"
+                title="Due"
                 total={getDueAppointments()}
                 percent={getPercentByStatus(getDueAppointments())}
                 icon="solar:sort-by-time-bold-duotone"
-                color={theme.vars.palette.warning.main}
+                color={theme.vars.palette.error.main}
               />
             </Stack>
           </Scrollbar>
@@ -350,12 +361,23 @@ export function AppointmentSweden() {
                           <TableCell sx={{ typography: "body2" }}>{app.type_name}</TableCell>
                           <TableCell sx={{ typography: "body2" }}>{app.invoice.invoice_no}</TableCell>
                           <TableCell sx={{ typography: "body2" }}>{app.appointment_date}</TableCell>
+                          {/* Update the TableCell for status to show the correct status based on the new categories: */}
                           <TableCell>
                             <Stack direction="row" spacing={1} alignItems="center">
-                              <Label variant="soft" color={isPassed ? "success" : "warning"}>
-                                {isPassed ? "Passed" : "Due"}
-                              </Label>
-                              {!isPassed && (
+                              {isAppointmentDue(app) ? (
+                                <Label variant="soft" color="error">
+                                  Due
+                                </Label>
+                              ) : isAppointmentUpcoming(app) ? (
+                                <Label variant="soft" color="info">
+                                  Upcoming
+                                </Label>
+                              ) : (
+                                <Label variant="soft" color="success">
+                                  Passed
+                                </Label>
+                              )}
+                              {isAppointmentDue(app) && (
                                 <Button
                                   size="small"
                                   variant="contained"

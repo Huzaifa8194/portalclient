@@ -1,11 +1,11 @@
 "use client"
 
+import { CONFIG } from 'src/config-global';
 import { useState, useEffect } from "react"
 import { Box, Card, CardContent, Grid } from "@mui/material"
 import { DashboardContent } from "src/layouts/dashboard"
 import { CustomBreadcrumbs } from "src/components/custom-breadcrumbs"
 import { paths } from "src/routes/paths"
-import scheduling from "src/assets/images/scheduling.png"
 import { useNavigate } from "react-router-dom"
 import { AnalyticsWidgetSummary } from "../analytics-widget-summary"
 
@@ -28,14 +28,14 @@ export function ApplicationChoice() {
       title: "Appointment",
       value: "Migrationsverket",
       total: "Sweden Relocators",
-      icon: scheduling,
+      icon: `${CONFIG.assetsDir}/assets/icons/glass/ic-glass-users.svg`,
       color: "primary",
     },
     {
       title: "Appointment",
       value: "GovernmentAuthority",
       total: "Government Authority",
-      icon: scheduling,
+      icon: `${CONFIG.assetsDir}/assets/icons/glass/ic-glass-users.svg`,
       color: "secondary",
     },
   ]

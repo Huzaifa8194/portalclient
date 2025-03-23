@@ -21,6 +21,7 @@ import TableContainer from "@mui/material/TableContainer"
 import TablePagination from "@mui/material/TablePagination"
 import Grid from "@mui/material/Grid"
 import CardContent from "@mui/material/CardContent"
+import Button from "@mui/material/Button"
 
 import { varAlpha } from "src/theme/styles"
 import { CustomBreadcrumbs } from "src/components/custom-breadcrumbs"
@@ -40,7 +41,7 @@ const TABLE_HEAD = [
   { id: "actions", label: "Actions", align: "right" },
 ]
 
-// Dummy data for appointments
+// Dummy data for appointments - adding remaining_balance property to match the due logic
 const DUMMY_APPOINTMENTS = [
   {
     id: 1,
@@ -49,6 +50,7 @@ const DUMMY_APPOINTMENTS = [
     reference_no: "GA-2023-001",
     appointment_date: "2023-05-15",
     status: "passed",
+    remaining_balance: 0,
   },
   {
     id: 2,
@@ -57,6 +59,7 @@ const DUMMY_APPOINTMENTS = [
     reference_no: "GA-2023-002",
     appointment_date: "2023-06-20",
     status: "passed",
+    remaining_balance: 0,
   },
   {
     id: 3,
@@ -65,6 +68,7 @@ const DUMMY_APPOINTMENTS = [
     reference_no: "GA-2023-003",
     appointment_date: "2023-08-10",
     status: "passed",
+    remaining_balance: 0,
   },
   {
     id: 4,
@@ -73,6 +77,7 @@ const DUMMY_APPOINTMENTS = [
     reference_no: "GA-2023-004",
     appointment_date: "2023-12-05",
     status: "due",
+    remaining_balance: 500,
   },
   {
     id: 5,
@@ -81,6 +86,7 @@ const DUMMY_APPOINTMENTS = [
     reference_no: "GA-2023-005",
     appointment_date: "2023-12-15",
     status: "due",
+    remaining_balance: 300,
   },
   {
     id: 6,
@@ -89,6 +95,7 @@ const DUMMY_APPOINTMENTS = [
     reference_no: "GA-2023-006",
     appointment_date: "2023-12-20",
     status: "due",
+    remaining_balance: 200,
   },
 ]
 
@@ -129,6 +136,18 @@ function AppointmentAnalytic({ title, total, icon, color, percent }) {
 
 // Detail view component
 function AppointmentDetailView({ appointment, onBack }) {
+  // Add these new functions for due and upcoming appointments
+  const isAppointmentDue = (app) =>
+    app.remaining_balance > 0
+
+
+  const isAppointmentUpcoming = (app) => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0) // Set to beginning of day for fair comparison
+    const appDate = new Date(app.appointment_date)
+    return appDate > today
+  }
+
   return (
     <Box sx={{ padding: "20px 24px" }}>
       <CustomBreadcrumbs
@@ -183,9 +202,31 @@ function AppointmentDetailView({ appointment, onBack }) {
               <Typography variant="subtitle1" gutterBottom>
                 Status
               </Typography>
-              <Label variant="soft" color={appointment.status === "passed" ? "success" : "warning"}>
-                {appointment.status === "passed" ? "Passed" : "Due"}
-              </Label>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Label
+                  variant="soft"
+                  color={
+                    isAppointmentDue(appointment) ? "error" : isAppointmentUpcoming(appointment) ? "info" : "success"
+                  }
+                >
+                  {isAppointmentDue(appointment) ? "Due" : isAppointmentUpcoming(appointment) ? "Upcoming" : "Passed"}
+                </Label>
+                {isAppointmentDue(appointment) && (
+                  <Button
+                    size="small"
+                    variant="contained"
+                    color="primary"
+                    sx={{
+                      fontSize: "0.75rem",
+                      py: 0.5,
+                      height: 24, // Match the height of the Label component
+                      minWidth: "auto",
+                    }}
+                  >
+                    Pay Now
+                  </Button>
+                )}
+              </Stack>
             </Grid>
           </Grid>
         </CardContent>
@@ -202,7 +243,7 @@ export function AppointmentGovernment() {
   const [rowsPerPage, setRowsPerPage] = useState(5)
   const [statusFilter, setStatusFilter] = useState("all")
 
-  // Check if appointment is passed (before current date) or due (future date)
+  // Check if appointment is passed (before current date)
   const isAppointmentPassed = (appointmentDate) => {
     const today = new Date()
     today.setHours(0, 0, 0, 0) // Set to beginning of day for fair comparison
@@ -210,10 +251,24 @@ export function AppointmentGovernment() {
     return appDate < today
   }
 
+  // Add these new functions for due and upcoming appointments
+  const isAppointmentDue = (app) =>
+    app.remaining_balance > 0
+
+  const isAppointmentUpcoming = (app) => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0) // Set to beginning of day for fair comparison
+    const appDate = new Date(app.appointment_date)
+    return appDate > today
+  }
+
   // Filter appointments based on status
   const filteredAppointments = DUMMY_APPOINTMENTS.filter((app) => {
     if (statusFilter === "all") return true
-    return app.status === statusFilter
+    if (statusFilter === "upcoming") return isAppointmentUpcoming(app)
+    if (statusFilter === "passed") return isAppointmentPassed(app.appointment_date)
+    if (statusFilter === "due") return isAppointmentDue(app)
+    return false
   })
 
   // Sort appointments by date (earliest first)
@@ -224,18 +279,20 @@ export function AppointmentGovernment() {
   })
 
   // Get appointment count by status
-  const getPassedAppointments = () => DUMMY_APPOINTMENTS.filter((app) => app.status === "passed").length
-
-  const getDueAppointments = () => DUMMY_APPOINTMENTS.filter((app) => app.status === "due").length
+  const getPassedAppointments = () =>
+    DUMMY_APPOINTMENTS.filter((app) => isAppointmentPassed(app.appointment_date)).length
+  const getDueAppointments = () => DUMMY_APPOINTMENTS.filter((app) => isAppointmentDue(app)).length
+  const getUpcomingAppointments = () => DUMMY_APPOINTMENTS.filter((app) => isAppointmentUpcoming(app)).length
 
   // Calculate percentage
   const getPercentByStatus = (count) => (DUMMY_APPOINTMENTS.length ? (count / DUMMY_APPOINTMENTS.length) * 100 : 0)
 
-  // Define tabs for filtering
+  // Define tabs for filtering - add the upcoming tab
   const TABS = [
     { value: "all", label: "All", color: "default", count: DUMMY_APPOINTMENTS.length },
+    { value: "upcoming", label: "Upcoming", color: "info", count: getUpcomingAppointments() },
     { value: "passed", label: "Passed", color: "success", count: getPassedAppointments() },
-    { value: "due", label: "Due", color: "warning", count: getDueAppointments() },
+    { value: "due", label: "Due", color: "error", count: getDueAppointments() },
   ]
 
   const handleViewClick = (appointment) => {
@@ -285,8 +342,6 @@ export function AppointmentGovernment() {
           sx={{ mb: { xs: 3, md: 3 } }}
         />
 
-        {/*  */}
-
         {/* Analytics Section */}
         <Card sx={{ mb: { xs: 3, md: 5 } }}>
           <Scrollbar sx={{ minHeight: 108 }}>
@@ -304,6 +359,14 @@ export function AppointmentGovernment() {
               />
 
               <AppointmentAnalytic
+                title="Upcoming"
+                total={getUpcomingAppointments()}
+                percent={getPercentByStatus(getUpcomingAppointments())}
+                icon="solar:file-check-bold-duotone"
+                color={theme.vars.palette.info.main}
+              />
+
+              <AppointmentAnalytic
                 title="Passed"
                 total={getPassedAppointments()}
                 percent={getPercentByStatus(getPassedAppointments())}
@@ -316,7 +379,7 @@ export function AppointmentGovernment() {
                 total={getDueAppointments()}
                 percent={getPercentByStatus(getDueAppointments())}
                 icon="solar:sort-by-time-bold-duotone"
-                color={theme.vars.palette.warning.main}
+                color={theme.vars.palette.error.main}
               />
             </Stack>
           </Scrollbar>
@@ -390,9 +453,29 @@ export function AppointmentGovernment() {
                       <TableCell sx={{ typography: "body2" }}>{app.reference_no}</TableCell>
                       <TableCell sx={{ typography: "body2" }}>{app.appointment_date}</TableCell>
                       <TableCell>
-                        <Label variant="soft" color={app.status === "passed" ? "success" : "warning"}>
-                          {app.status === "passed" ? "Passed" : "Due"}
-                        </Label>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Label
+                            variant="soft"
+                            color={isAppointmentDue(app) ? "error" : isAppointmentUpcoming(app) ? "info" : "success"}
+                          >
+                            {isAppointmentDue(app) ? "Due" : isAppointmentUpcoming(app) ? "Upcoming" : "Passed"}
+                          </Label>
+                          {isAppointmentDue(app) && (
+                            <Button
+                              size="small"
+                              variant="contained"
+                              color="primary"
+                              sx={{
+                                fontSize: "0.75rem",
+                                py: 0.5,
+                                height: 24, // Match the height of the Label component
+                                minWidth: "auto",
+                              }}
+                            >
+                              Pay Now
+                            </Button>
+                          )}
+                        </Stack>
                       </TableCell>
                       <TableCell align="right">
                         <Tooltip title="View Details">
