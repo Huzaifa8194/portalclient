@@ -111,7 +111,7 @@ export function OverviewAppView() {
     return () => window.removeEventListener("resize", updateHeight)
   }, [])
 
-  // State for expanded/collapsed content - all set to true by default
+  // State for expanded/collapsed content - all set to false by default
   const [expandedSections, setExpandedSections] = useState({
     messages: false,
     invoices: false,
@@ -120,11 +120,18 @@ export function OverviewAppView() {
     authors: false,
   })
 
-  // State for expanded summary widgets - all set to true by default
+  // State for expanded summary widgets - all set to false by default
   const [expandedWidgets, setExpandedWidgets] = useState({
-    coApplicants: true,
-    documents: true,
-    appointment: true,
+    coApplicants: false,
+    documents: false,
+    appointment: false,
+  })
+
+  // State to track if content is displayed - all set to false by default
+  const [displayContent, setDisplayContent] = useState({
+    coApplicants: false,
+    documents: false,
+    appointment: false,
   })
 
   // Toggle expanded state for a section
@@ -138,6 +145,14 @@ export function OverviewAppView() {
   // Toggle expanded state for a widget
   const toggleWidgetExpand = (widget) => {
     setExpandedWidgets((prev) => ({
+      ...prev,
+      [widget]: !prev[widget],
+    }))
+  }
+
+  // Toggle display content for a widget
+  const toggleDisplayContent = (widget) => {
+    setDisplayContent((prev) => ({
       ...prev,
       [widget]: !prev[widget],
     }))
@@ -167,20 +182,12 @@ export function OverviewAppView() {
     flexDirection: "column",
   }
 
-  // Row-specific heights - increased summaryRow height
-  const rowHeights = {
-    welcomeRow: "280px",
-    summaryRow: "500px", // Increased from 450px to 500px to show more content
-    contentRow: "auto",
-    bottomRow: "320px",
-  }
-
   return (
     <DashboardContent maxWidth="xl">
       <Grid container spacing={3}>
         {/* Welcome and Featured Row */}
         <Grid xs={12} md={8} sx={gridItemStyles}>
-          <Box sx={{ height: rowHeights.welcomeRow, display: "flex", flexDirection: "column" }}>
+          <Box sx={{ height: "280px", display: "flex", flexDirection: "column" }}>
             <AppWelcome
               title={`Welcome\n ${user?.displayName} 👋`}
               description="This all-in-one platform streamlines immigration and relocation worldwide for you and your family."
@@ -191,14 +198,14 @@ export function OverviewAppView() {
         </Grid>
 
         <Grid xs={12} md={4} sx={gridItemStyles}>
-          <Box sx={{ height: rowHeights.welcomeRow, display: "flex", flexDirection: "column" }}>
+          <Box sx={{ height: "280px", display: "flex", flexDirection: "column" }}>
             <AppFeatured list={_appFeatured} sx={{ flex: 1 }} />
           </Box>
         </Grid>
 
-        {/* Summary Widgets Row - with increased height and default expanded state */}
+        {/* Summary Widgets Row - with auto height */}
         <Grid xs={12} md={4} sx={gridItemStyles}>
-          <Box sx={{ height: rowHeights.summaryRow, display: "flex", flexDirection: "column" }}>
+          <Box sx={{ height: "auto", display: "flex", flexDirection: "column" }}>
             <AppWidgetSummary
               title="Co-applicants"
               total={5}
@@ -208,13 +215,15 @@ export function OverviewAppView() {
               }}
               initialExpanded={expandedWidgets.coApplicants}
               onToggleExpand={() => toggleWidgetExpand("coApplicants")}
+              displayContent={displayContent.coApplicants}
+              onToggleDisplayContent={() => toggleDisplayContent("coApplicants")}
               sx={{ flex: 1 }}
             />
           </Box>
         </Grid>
 
         <Grid xs={12} md={4} sx={gridItemStyles}>
-          <Box sx={{ height: rowHeights.summaryRow, display: "flex", flexDirection: "column" }}>
+          <Box sx={{ height: "auto", display: "flex", flexDirection: "column" }}>
             <AppWidgetSummary
               title="Documents"
               percent={0.2}
@@ -226,13 +235,15 @@ export function OverviewAppView() {
               }}
               initialExpanded={expandedWidgets.documents}
               onToggleExpand={() => toggleWidgetExpand("documents")}
+              displayContent={displayContent.documents}
+              onToggleDisplayContent={() => toggleDisplayContent("documents")}
               sx={{ flex: 1 }}
             />
           </Box>
         </Grid>
 
         <Grid xs={12} md={4} sx={gridItemStyles}>
-          <Box sx={{ height: rowHeights.summaryRow, display: "flex", flexDirection: "column" }}>
+          <Box sx={{ height: "auto", display: "flex", flexDirection: "column" }}>
             <AppWidgetAppointment
               title="Appointment"
               percent={-0.1}
@@ -245,6 +256,8 @@ export function OverviewAppView() {
               appointment={appointment}
               initialExpanded={expandedWidgets.appointment}
               onToggleExpand={() => toggleWidgetExpand("appointment")}
+              displayContent={displayContent.appointment}
+              onToggleDisplayContent={() => toggleDisplayContent("appointment")}
               sx={{ flex: 1 }}
             />
           </Box>
@@ -400,7 +413,7 @@ export function OverviewAppView() {
         <Grid xs={12} lg={8} sx={gridItemStyles}>
           <Card
             sx={{
-              height: rowHeights.bottomRow,
+              height: "320px",
               display: "flex",
               flexDirection: "column",
             }}
@@ -461,7 +474,7 @@ export function OverviewAppView() {
         <Grid xs={12} md={6} lg={4} sx={gridItemStyles}>
           <Card
             sx={{
-              height: rowHeights.bottomRow,
+              height: "320px",
               display: "flex",
               flexDirection: "column",
             }}
@@ -514,7 +527,7 @@ export function OverviewAppView() {
         <Grid xs={12} md={6} lg={4} sx={gridItemStyles}>
           <Card
             sx={{
-              height: rowHeights.bottomRow,
+              height: "320px",
               display: "flex",
               flexDirection: "column",
             }}
@@ -567,7 +580,7 @@ export function OverviewAppView() {
         <Grid xs={12} md={6} lg={4} sx={gridItemStyles}>
           <Card
             sx={{
-              height: rowHeights.bottomRow,
+              height: "320px",
               display: "flex",
               flexDirection: "column",
             }}

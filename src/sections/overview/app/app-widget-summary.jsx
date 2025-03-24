@@ -1,3 +1,5 @@
+"use client"
+
 import Box from "@mui/material/Box"
 import Card from "@mui/material/Card"
 import { useTheme } from "@mui/material/styles"
@@ -5,9 +7,6 @@ import Button from "@mui/material/Button"
 import { useState, useEffect } from "react"
 import Tabs from "@mui/material/Tabs"
 import Tab from "@mui/material/Tab"
-import Collapse from "@mui/material/Collapse"
-import IconButton from "@mui/material/IconButton"
-import Typography from "@mui/material/Typography"
 
 import { fNumber } from "src/utils/format-number"
 import { useNavigate } from "react-router-dom"
@@ -16,18 +15,20 @@ import { Iconify } from "src/components/iconify"
 
 // ----------------------------------------------------------------------
 
-export function AppWidgetSummary({ 
-  title, 
-  percent, 
-  total, 
-  chart, 
-  sx, 
-  renderCustomContent, 
-  coApplicants = [], 
-  documents = [], 
-  initialExpanded = true,
+export function AppWidgetSummary({
+  title,
+  percent,
+  total,
+  chart,
+  sx,
+  renderCustomContent,
+  coApplicants = [],
+  documents = [],
+  initialExpanded = false,
   onToggleExpand,
-  ...other 
+  displayContent = false, // New prop to control if content is displayed
+  onToggleDisplayContent, // New prop to toggle display content
+  ...other
 }) {
   const theme = useTheme()
   const [showDropdown, setShowDropdown] = useState(true) // Default to true to show content
@@ -37,8 +38,8 @@ export function AppWidgetSummary({
 
   // Update expanded state when initialExpanded prop changes
   useEffect(() => {
-    setExpanded(initialExpanded);
-  }, [initialExpanded]);
+    setExpanded(initialExpanded)
+  }, [initialExpanded])
 
   const dummyCoApplicants = ["John Doe", "Jane Smith", "Michael Johnson", "Emily Davis", "David Brown"]
   const dummyDocuments = [
@@ -46,7 +47,7 @@ export function AppWidgetSummary({
     { name: "Aisha", count: 32 },
     { name: "Rahul", count: 21 },
     { name: "Sophia", count: 40 },
-    { name: "Liam", count: 15 }
+    { name: "Liam", count: 15 },
   ]
 
   const chartColors = chart.colors ?? [theme.palette.primary.main]
@@ -83,10 +84,16 @@ export function AppWidgetSummary({
   }
 
   const toggleExpand = () => {
-    const newExpandedState = !expanded;
-    setExpanded(newExpandedState);
+    const newExpandedState = !expanded
+    setExpanded(newExpandedState)
+
+    // If user is collapsing and clicking "Show Less", hide the content completely
+    if (!newExpandedState && onToggleDisplayContent) {
+      onToggleDisplayContent()
+    }
+
     if (onToggleExpand) {
-      onToggleExpand(newExpandedState);
+      onToggleExpand(newExpandedState)
     }
   }
 
@@ -111,9 +118,9 @@ export function AppWidgetSummary({
             </Box>
           )}
         </Box>
-      );
+      )
     }
-    
+
     if (title === "Documents") {
       return (
         <Box sx={{ mt: 2 }}>
@@ -130,9 +137,9 @@ export function AppWidgetSummary({
             </Box>
           )}
         </Box>
-      );
+      )
     }
-    
+
     if (title === "Appointment") {
       return (
         <Box sx={{ mt: 2 }}>
@@ -141,11 +148,11 @@ export function AppWidgetSummary({
             <Tab label="Authority" />
           </Tabs>
         </Box>
-      );
+      )
     }
-    
-    return null;
-  };
+
+    return null
+  }
 
   return (
     <Card
@@ -153,14 +160,14 @@ export function AppWidgetSummary({
         display: "flex",
         flexDirection: "column",
         p: 3,
-        height: '100%',
-        position: 'relative',
+        height: "100%",
+        position: "relative",
         ...sx,
       }}
       {...other}
     >
       {/* Header with title, total, and chart */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
         <Box>
           <Box sx={{ typography: "subtitle2" }}>{title}</Box>
           <Box sx={{ mt: 1.5, typography: "h3" }}>{fNumber(total)}</Box>
@@ -169,65 +176,96 @@ export function AppWidgetSummary({
       </Box>
 
       {/* Action button */}
-      <Button 
-        variant="outlined" 
+      <Button
+        variant="outlined"
         onClick={() => handleButtonClick(getPath(title))}
-        sx={{ mb: hasExpandableContent ? 2 : 0 }}
+        sx={{
+          mb: hasExpandableContent ? 2 : 0,
+          maxWidth: "auto", // Decrease width
+          mr: "auto", // Center horizontally
+          display: "block", // Ensure it takes the full width for centering
+        }}
       >
         {title === "Co-applicants"
-          ? "Add"
+          ? "Add Co-applicant"
           : title === "Documents"
-            ? "Upload"
+            ? "Upload Document"
             : title === "Appointment"
               ? "Book Now"
               : "Go now"}
       </Button>
 
-      {/* Expandable content */}
-      {hasExpandableContent && (
-        <Box sx={{ 
-          mt: 1, 
-          flex: 1, 
-          display: 'flex', 
-          flexDirection: 'column',
-          overflow: 'hidden',
-          position: 'relative'
-        }}>
-          <Collapse 
-            in={expanded} 
-            collapsedSize={0}
-            sx={{ 
-              overflow: 'auto',
-              maxHeight: expanded ? 250 : 0, // Increased max height when expanded
-              transition: 'max-height 0.3s ease-in-out',
-              display: 'flex',
-              flexDirection: 'column'
+      {/* Display Content Button - Only show if content is not displayed */}
+      {hasExpandableContent && !displayContent && (
+        <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
+          <Button
+            variant="text"
+            size="small"
+            onClick={onToggleDisplayContent}
+            endIcon={<Iconify icon="eva:chevron-down-fill" width={16} height={16} />}
+            sx={{
+              maxWidth: "100%", 
+              px: 2, 
+            }}
+          >
+            Display Content
+          </Button>
+        </Box>
+      )}
+
+      {/* Expandable content - Only show if displayContent is true */}
+      {hasExpandableContent && displayContent && (
+        <Box
+          sx={{
+            mt: 1,
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            position: "relative",
+          }}
+        >
+          {/* Content with conditional height and scrollbar */}
+          <Box
+            sx={{
+              overflow: "auto",
+              maxHeight: expanded ? "150px" : "60px", // Show 60px when collapsed, 150px when expanded
+              transition: "max-height 0.3s ease-in-out",
+              mb: 1,
             }}
           >
             {getExpandableContent()}
             {renderCustomContent && renderCustomContent()}
-          </Collapse>
+          </Box>
 
           {/* Show more/less button */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            mt: 'auto',
-            pt: 1,
-            position: 'relative',
-            zIndex: 1,
-            backgroundColor: theme.palette.background.paper,
-            borderTop: !expanded ? `1px solid ${theme.palette.divider}` : 'none'
-          }}>
-            <Button 
-              variant="text" 
-              size="small" 
-              onClick={toggleExpand}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              mt: "auto",
+              pt: 1,
+              position: "relative",
+              zIndex: 1,
+              backgroundColor: theme.palette.background.paper,
+              borderTop: `1px solid ${theme.palette.divider}`,
+            }}
+          >
+            <Button
+              variant="text"
+              size="small"
+              onClick={expanded ? onToggleDisplayContent : toggleExpand}
               endIcon={
-                expanded ? 
-                <Iconify icon="eva:chevron-up-fill" width={16} height={16} /> : 
-                <Iconify icon="eva:chevron-down-fill" width={16} height={16} />
+                expanded ? (
+                  <Iconify icon="eva:chevron-up-fill" width={16} height={16} />
+                ) : (
+                  <Iconify icon="eva:chevron-down-fill" width={16} height={16} />
+                )
               }
+              sx={{
+                maxWidth: "150px", // Decrease width
+                px: 2, // Add some horizontal padding
+              }}
             >
               {expanded ? "Show Less" : "Show More"}
             </Button>
@@ -236,11 +274,8 @@ export function AppWidgetSummary({
       )}
 
       {/* Custom content for non-expandable cards */}
-      {!hasExpandableContent && renderCustomContent && (
-        <Box sx={{ mt: 2 }}>
-          {renderCustomContent()}
-        </Box>
-      )}
+      {!hasExpandableContent && renderCustomContent && <Box sx={{ mt: 2 }}>{renderCustomContent()}</Box>}
     </Card>
   )
 }
+
