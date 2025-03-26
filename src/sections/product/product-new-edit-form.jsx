@@ -146,19 +146,10 @@ export function ProductNewEditForm({ currentProduct }) {
         if (response.data?.data?.length > 0) {
           setDocumentTypes(response.data.data)
 
-          // Set initial values using IDs instead of names
-          const firstType = response.data.data[0]
-          if (firstType) {
-            setSelectedDocumentType(firstType.id)
-            setDocumentSubTypes(firstType.document_sub_types || [])
-
-            // Store IDs instead of names
-            setValue("code", firstType.id) // Store document type ID
-
-            if (firstType.document_sub_types?.length > 0) {
-              setValue("sku", firstType.document_sub_types[0].id) // Store sub-type ID
-            }
-          }
+          // Don't automatically select a default value
+          // This allows the "Choose an option" to be displayed
+          setSelectedDocumentType("")
+          setDocumentSubTypes([])
         }
       } catch (error) {
         console.error("Error fetching document types:", error)
@@ -286,13 +277,25 @@ export function ProductNewEditForm({ currentProduct }) {
 
   const uploadSingleDocument = async (image, selectedType, selectedSubType, category) => {
     const formData = new FormData()
-
     formData.append("file", image)
     formData.append("document", image)
-    // Get the selected family member ID based on the selected name
-    const selectedFamilyMember = familyMembers.find((member) => member.name === category)
-    const familyMemberId = selectedFamilyMember ? selectedFamilyMember.id.toString() : user.id.toString()
-    formData.append("user_family_id", familyMemberId)
+
+    // Declare familyMemberId in the parent scope
+    let familyMemberId = "" // <-- Add this declaration
+
+    const isForMyself = category === "Myself" || category === user.name
+
+    if (isForMyself) {
+      formData.append("user_family_id", "")
+      formData.append("user_id", user.id.toString())
+    } else {
+      const selectedFamilyMember = familyMembers.find((member) => member.name === category)
+      // Assign value to the already declared variable
+      familyMemberId = selectedFamilyMember ? selectedFamilyMember.id.toString() : "" // <-- Modified this line
+      formData.append("user_family_id", familyMemberId)
+    }
+
+    // Rest of the code remains the same
     formData.append("document_type_id", selectedType.id.toString())
     formData.append("document_sub_type_id", selectedSubType.id.toString())
     formData.append("coupon_id", "")
@@ -506,7 +509,7 @@ export function ProductNewEditForm({ currentProduct }) {
     if (fileType.includes("text")) {
       return (
         <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="#607d8b">
-          <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+          <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z" />
         </svg>
       )
     }
@@ -530,6 +533,14 @@ export function ProductNewEditForm({ currentProduct }) {
         <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z" />
       </svg>
     )
+  }
+
+  const formatFileSize = (bytes) => {
+    const mb = bytes / (1024 * 1024)
+    if (mb > 5) {
+      return "File is larger than 5 MB"
+    }
+    return `${mb.toFixed(2)} MB`
   }
 
   const renderDetails = (
@@ -582,9 +593,10 @@ export function ProductNewEditForm({ currentProduct }) {
             }}
           >
             {isLoading ? (
-              <option value="">Loading family members...</option>
+              <option value="">Choose An Option</option>
             ) : (
               <>
+                <option value="">Choose An Option</option>
                 <option value={user.name || "Myself"}>Myself</option>
                 {familyMembers.length > 0 ? (
                   familyMembers.map((member) => (
@@ -614,10 +626,9 @@ export function ProductNewEditForm({ currentProduct }) {
               value: selectedDocumentType || "",
             }}
           >
+            <option value="">Choose An Option</option>
             {documentTypes.map((type) => (
               <option key={type.id} value={type.id}>
-                {" "}
-                {/* Value is ID */}
                 {type.name}
               </option>
             ))}
@@ -637,10 +648,9 @@ export function ProductNewEditForm({ currentProduct }) {
               onChange: (e) => setValue("sku", e.target.value),
             }}
           >
+            <option value="">Choose An Option</option>
             {documentSubTypes.map((subType) => (
               <option key={subType.id} value={subType.id}>
-                {" "}
-                {/* Value is ID */}
                 {subType.name}
               </option>
             ))}
@@ -687,6 +697,9 @@ export function ProductNewEditForm({ currentProduct }) {
                       <Typography variant="body2" color="text.secondary">
                         {file.type}
                       </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {formatFileSize(file.size)}
+                      </Typography>
                     </Box>
                   </Box>
                 ))}
@@ -701,7 +714,7 @@ export function ProductNewEditForm({ currentProduct }) {
               multiple
               thumbnail
               name="images"
-              maxSize={3145728}
+              maxSize={10485760}
               onRemove={handleRemoveFile}
               onRemoveAll={handleRemoveAllFiles}
               onUpload={() => console.info("ON UPLOAD")}
