@@ -54,7 +54,16 @@ export function AnalyticsWidgetSummary({ icon, title, total, chart, percent, col
       }}
       {...other}
     >
-      <Box sx={{ width: 48, height: 48, mb: 3 }}>{icon}</Box>
+      <Box   sx={{
+    width: 48,
+    height: 48,
+    mb: 3,
+    '& img': {
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover', // or 'contain'
+    },
+  }}>{icon}</Box>
 
       <Box
         sx={{

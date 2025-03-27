@@ -13,7 +13,6 @@ import IconButton from "@mui/material/IconButton"
 import LoadingButton from "@mui/lab/LoadingButton"
 import InputAdornment from "@mui/material/InputAdornment"
 import MenuItem from "@mui/material/MenuItem"
-import Stack from "@mui/material/Stack"
 import Paper from "@mui/material/Paper"
 import Stepper from "@mui/material/Stepper"
 import Step from "@mui/material/Step"
@@ -43,7 +42,8 @@ export const SignUpSchema = zod
       .string()
       .refine((date) => !Number.isNaN(Date.parse(date)), { message: "Date of birth must be a valid date!" }),
     nationality: zod
-      .union([zod.string().min(1, { message: "Country is required!" }), zod.number().int().positive()])
+      .union([zod.string().min(1, { message: "Nationality is required!" }), zod.number().int().positive(), zod.null()])
+      .refine((value) => value !== null, { message: "Nationality is required!" })
       .transform((value) => {
         if (typeof value === "string") {
           const numValue = Number.parseInt(value, 10)
@@ -52,7 +52,12 @@ export const SignUpSchema = zod
         return value
       }),
     placeofbirth: zod
-      .union([zod.string().min(1, { message: "Country is required!" }), zod.number().int().positive()])
+      .union([
+        zod.string().min(1, { message: "Country of Birth is required!" }),
+        zod.number().int().positive(),
+        zod.null(),
+      ])
+      .refine((value) => value !== null, { message: "Country of Birth is required!" })
       .transform((value) => {
         if (typeof value === "string") {
           const numValue = Number.parseInt(value, 10)
@@ -61,7 +66,12 @@ export const SignUpSchema = zod
         return value
       }),
     countryresiding: zod
-      .union([zod.string().min(1, { message: "Country is required!" }), zod.number().int().positive()])
+      .union([
+        zod.string().min(1, { message: "Country of Residence is required!" }),
+        zod.number().int().positive(),
+        zod.null(),
+      ])
+      .refine((value) => value !== null, { message: "Country of Residence is required!" })
       .transform((value) => {
         if (typeof value === "string") {
           const numValue = Number.parseInt(value, 10)
@@ -118,30 +128,7 @@ export function JwtSignUpView() {
   const handleNext = (e) => {
     // Prevent form submission
     e.preventDefault()
-
-    if (activeStep === 0) {
-      // Validate step 1 fields - Personal Details
-      methods.trigger(["firstName", "lastName", "dateOfBirth", "gender"]).then((isValid) => {
-        if (isValid) {
-          setActiveStep((prevActiveStep) => prevActiveStep + 1)
-        } else {
-          toast.error("Please fill in all required fields correctly")
-        }
-      })
-    } else if (activeStep === 1) {
-      // Validate step 2 fields - Location & Address
-      methods
-        .trigger(["placeofbirth", "nationality", "countryresiding", "address", "city", "postalCode"])
-        .then((isValid) => {
-          if (isValid) {
-            setActiveStep((prevActiveStep) => prevActiveStep + 1)
-          } else {
-            toast.error("Please fill in all required fields correctly")
-          }
-        })
-    } else {
-      setActiveStep((prevActiveStep) => prevActiveStep + 1)
-    }
+    setActiveStep((prevActiveStep) => prevActiveStep + 1)
   }
 
   const handleBack = (e) => {
@@ -241,41 +228,39 @@ export function JwtSignUpView() {
             format="YYYY-MM-DD"
           />
           <Field.Select name="gender" label="Gender" select defaultValue="" disabled={isLoadingGenders}>
-            <MenuItem value="">Choose an option</MenuItem>
             {genderOptions.map((option) => (
               <MenuItem key={option.value} value={option.value.toString()}>
                 {option.label}
               </MenuItem>
             ))}
           </Field.Select>
-        </>
-      )}
-
-      {activeStep === 1 && (
-        // Step 2 - Personal Details
-        <>
-          <Field.CountrySelect name="placeofbirth" label="Country of Birth" helperText="Please select a country" />
-          <Field.CountrySelect name="nationality" label="Nationality" helperText="Please select a country" />
-          <Field.CountrySelect
-            name="countryresiding"
-            label="Country Residing In"
-            helperText="Please select a country"
-          />
-          <Field.Text name="address" label="Address" />
-          <Field.Text name="city" label="City" />
-          <Field.Text name="postalCode" label="Postal Code" />
-        </>
-      )}
-
-      {activeStep === 2 && (
-        // Step 3 - Location & Terms
-        <>
           <Field.Phone
             name="phonenumber"
             label="Phone number"
             placeholder="+1234567890"
             helperText="Must start with + followed by 7-14 digits"
           />
+        </>
+      )}
+
+      {activeStep === 1 && (
+        // Step 2 - Personal Details
+        <>
+          <Field.Text name="address" label="Address" />
+          <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: "column", sm: "row" }}>
+            <Field.Text name="city" label="City" />
+            <Field.Text name="postalCode" label="Postal Code" />
+          </Box>
+          <Field.CountrySelect name="countryresiding" label="Country Residing In" placeholder="Choose an Option" />
+
+          <Field.CountrySelect name="placeofbirth" label="Country of Birth" placeholder="Choose an Option" select />
+          <Field.CountrySelect name="nationality" label="Nationality" placeholder="Choose an Option" />
+        </>
+      )}
+
+      {activeStep === 2 && (
+        // Step 3 - Location & Terms
+        <>
           <Field.Text name="email" label="Email" />
           <Field.Text
             name="password"
@@ -328,11 +313,19 @@ export function JwtSignUpView() {
             loading={isSubmitting}
             onClick={async (e) => {
               e.preventDefault()
-
               try {
                 const isValid = await methods.trigger()
                 if (!isValid) {
-                  toast.error("Please fill in all required fields correctly")
+                  // Get all form errors and display them in separate toasts
+                  const formErrors = methods.formState.errors
+
+                  Object.values(formErrors)
+                    .map((error) => error.message) // Extract error messages
+                    .filter(Boolean) // Remove any undefined messages
+                    .forEach((message) => {
+                      toast.error(message)
+                    })
+
                   return
                 }
 
@@ -365,7 +358,16 @@ export function JwtSignUpView() {
                 router.push(paths.auth.jwt.signIn)
               } catch (error) {
                 console.error("Submission error:", error)
-                toast.error(typeof error === "string" ? error : error.message || "An error occurred during sign up")
+                // Display API error in toast
+                if (error.response && error.response.data && error.response.data.message) {
+                  toast.error(error.response.data.message)
+                } else if (error.response && error.response.data && error.response.data.errors) {
+                  // Handle validation errors from API
+                  const errorMessages = Object.values(error.response.data.errors).flat()
+                  errorMessages.forEach((message) => toast.error(message))
+                } else {
+                  toast.error(typeof error === "string" ? error : error.message || "An error occurred during sign up")
+                }
               }
             }}
           >
@@ -377,7 +379,7 @@ export function JwtSignUpView() {
   )
 
   return (
-      <Box
+    <Box
       sx={{
         width: "100%",
         height: "100%",
@@ -385,54 +387,54 @@ export function JwtSignUpView() {
         alignItems: "center",
         justifyContent: "center",
       }}
+    >
+      {/* Form */}
+      <Paper
+        elevation={3}
+        sx={{
+          width: "100%",
+          maxWidth: { xs: "100%", sm: 500, md: 600, lg: 800 },
+          p: { xs: 3, sm: 4 },
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 2,
+        }}
       >
-        {/* Form */}
-        <Paper
-          elevation={3}
-          sx={{
-            width: "100%",
-            maxWidth: { xs: "100%", sm: 500, md: 600, lg:800 },
-            p: { xs: 3, sm: 4 },
-            border: "1px solid",
-            borderColor: "divider",
-            borderRadius: 2,
-          }}
-        >
-          {/* Stepper */}
-          <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-            {steps.map((label) => (
-              <Step key={label}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
+        {/* Stepper */}
+        <Stepper activeStep={activeStep} sx={{ mb: 4 }} nonLinear>
+          {steps.map((label, index) => (
+            <Step key={label} sx={{ cursor: "pointer" }} completed={false}>
+              <StepLabel onClick={() => setActiveStep(index)}>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
 
-          <FormHead
-            title="Get started absolutely free"
-            description={
-              <>
-                {`Already have an account? `}
-                <Link component={RouterLink} href={paths.auth.jwt.signIn} variant="subtitle2">
-                  Sign in
-                </Link>
-              </>
-            }
-            sx={{ textAlign: "center" }} // Centered the text
-          />
+        <FormHead
+          title="Get started absolutely free"
+          description={
+            <>
+              {`Already have an account? `}
+              <Link component={RouterLink} href={paths.auth.jwt.signIn} variant="subtitle2">
+                Sign in
+              </Link>
+            </>
+          }
+          sx={{ textAlign: "center" }} // Centered the text
+        />
 
-          {!!errorMsg && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              {errorMsg}
-            </Alert>
-          )}
+        {!!errorMsg && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {errorMsg}
+          </Alert>
+        )}
 
-          <Form methods={methods} onSubmit={(e) => e.preventDefault()}>
-            {renderForm}
-          </Form>
+        <Form methods={methods} onSubmit={(e) => e.preventDefault()}>
+          {renderForm}
+        </Form>
 
-          <SignUpTerms />
-        </Paper>
-      </Box>
+        <SignUpTerms />
+      </Paper>
+    </Box>
   )
 }
 
