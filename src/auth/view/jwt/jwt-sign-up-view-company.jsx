@@ -16,9 +16,14 @@ import Paper from "@mui/material/Paper"
 import Stepper from "@mui/material/Stepper"
 import Step from "@mui/material/Step"
 import StepLabel from "@mui/material/StepLabel"
-import Checkbox from "@mui/material/Checkbox"
-import FormControlLabel from "@mui/material/FormControlLabel"
 
+import MenuItem from "@mui/material/MenuItem"
+import Select from "@mui/material/Select"
+import Chip from "@mui/material/Chip"
+import FormControl from "@mui/material/FormControl"
+import InputLabel from "@mui/material/InputLabel"
+import OutlinedInput from "@mui/material/OutlinedInput"
+import FormHelperText from "@mui/material/FormHelperText"
 import { paths } from "src/routes/paths"
 import { useRouter } from "src/routes/hooks"
 import { RouterLink } from "src/routes/components"
@@ -31,6 +36,8 @@ import { countries } from "src/assets/data"
 import { useAuthContext } from "../../hooks"
 import { FormHead } from "../../components/form-head"
 import { SignUpTerms } from "../../components/sign-up-terms"
+
+// In the imports section, add the Close icon import
 
 // ----------------------------------------------------------------------
 
@@ -67,7 +74,11 @@ export const SignUpSchemaCompany = zod
       .email({ message: "Email must be a valid email address!" }),
     contact_number: zod.string().min(1, { message: "Phone number is required!" }),
     company_contact_sec_person_name: zod.string().optional(),
-    company_contact_sec_person_email: zod.string().email().optional(),
+    company_contact_sec_person_email: zod
+      .string()
+      .email({ message: "Please enter a valid email address" })
+      .optional()
+      .or(zod.literal("")),
 
     // Company Operational Details
     company_no_of_employees: zod.string().optional(),
@@ -128,6 +139,17 @@ export function JwtSignUpViewCompany() {
   const [loading, setLoading] = useState(false)
   const [forceUpdate, setForceUpdate] = useState(0)
   const [countryServicesCount, setCountryServicesCount] = useState(1)
+
+  const [businessTypeValue, setBusinessTypeValue] = useState("0")
+  const [companyTypeValue, setCompanyTypeValue] = useState("0")
+  const [roleValue, setRoleValue] = useState("0")
+  const [employeesValue, setEmployeesValue] = useState("0")
+  const [certifiedEmployerValue, setCertifiedEmployerValue] = useState("0")
+  const [collectiveAgreementValue, setCollectiveAgreementValue] = useState("0")
+  const [workPermitValue, setWorkPermitValue] = useState("0")
+  const [nonEuHiresValue, setNonEuHiresValue] = useState("0")
+  const [countryIdValue, setCountryIdValue] = useState(null) // Added for main country_id
+  const [countryServicesValues, setCountryServicesValues] = useState([{ country_id: null, service_types: [] }]) // Added for country_services array
 
   const steps = ["Company", "Contact", "Details", "Services", "Setup"]
 
@@ -223,6 +245,7 @@ export function JwtSignUpViewCompany() {
   const handleIndustryChange = (event) => {
     const selectedIndustry = event.target.value
     console.log(selectedIndustry)
+    setBusinessTypeValue(selectedIndustry)
     setValue("company_business_type", selectedIndustry, {
       shouldValidate: true,
       shouldDirty: true,
@@ -232,6 +255,101 @@ export function JwtSignUpViewCompany() {
     // Update isRealEstate state if the selected industry is Real Estate (id: 15)
     setIsRealEstate(selectedIndustry === "15")
     setForceUpdate((prev) => prev + 1) // Force a re-render to reflect the change
+  }
+
+  const handleCompanyTypeChange = (event) => {
+    const value = event.target.value
+    setCompanyTypeValue(value)
+    setValue("company_type_id", value, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    })
+  }
+
+  const handleRoleChange = (event) => {
+    const value = event.target.value
+    setRoleValue(value)
+    setValue("company_contact_person_role", value, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    })
+  }
+
+  const handleEmployeesChange = (event) => {
+    const value = event.target.value
+    setEmployeesValue(value)
+    setValue("company_no_of_employees", value, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    })
+  }
+
+  const handleCertifiedEmployerChange = (event) => {
+    const value = event.target.value
+    setCertifiedEmployerValue(value)
+    setValue("company_certified_employer", value, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    })
+  }
+
+  const handleCollectiveAgreementChange = (event) => {
+    const value = event.target.value
+    setCollectiveAgreementValue(value)
+    setValue("company_collective_agreement", value, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    })
+  }
+
+  const handleWorkPermitChange = (event) => {
+    const value = event.target.value
+    setWorkPermitValue(value)
+    setValue("company_applied_work_permit", value, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    })
+  }
+
+  const handleNonEuHiresChange = (event) => {
+    const value = event.target.value
+    setNonEuHiresValue(value)
+    setValue("company_non_eu_hires", value, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    })
+  }
+
+  // Handle country_id change
+  const handleCountryChange = (value) => {
+    setCountryIdValue(value)
+    setValue("country_id", value, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    })
+  }
+
+  // Handle country_services country_id change
+  const handleCountryServiceChange = (index, value) => {
+    const updatedCountryServices = [...countryServicesValues]
+    updatedCountryServices[index] = {
+      ...updatedCountryServices[index],
+      country_id: value,
+    }
+    setCountryServicesValues(updatedCountryServices)
+    setValue(`country_services[${index}].country_id`, value, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    })
   }
 
   const handleNext = () => {
@@ -279,7 +397,6 @@ export function JwtSignUpViewCompany() {
     return country ? country.label : null
   }
 
-  // Handle adding a new country service
   const handleAddCountryService = () => {
     const currentServices = getValues("country_services") || []
     const updatedServices = [
@@ -292,18 +409,31 @@ export function JwtSignUpViewCompany() {
     setValue("country_services", updatedServices)
     setCountryServicesCount((prev) => prev + 1)
 
-    // Show toast notification
-    toast.info("New country service added")
+    // Update the countryServicesValues state
+    setCountryServicesValues([...countryServicesValues, { country_id: null, service_types: [] }])
+  }
+
+  // Handle removing a country service
+  const handleRemoveCountryService = (indexToRemove) => {
+    const currentServices = getValues("country_services") || []
+    if (currentServices.length <= 1) {
+      // Don't remove if it's the last one
+      return
+    }
+
+    const updatedServices = currentServices.filter((_, index) => index !== indexToRemove)
+    setValue("country_services", updatedServices)
+
+    // Update the countryServicesValues state
+    setCountryServicesValues(countryServicesValues.filter((_, index) => index !== indexToRemove))
   }
 
   const YES_NO_OPTIONS = [
-    { value: "", label: "Choose an Option" },
     { value: "Yes", label: "Yes" },
     { value: "No", label: "No" },
   ]
 
   const EMPLOYEE_COUNT_OPTIONS = [
-    { value: "", label: "Select Number of Employees" },
     { value: "1-10", label: "1-10" },
     { value: "11-50", label: "11-50" },
     { value: "51-100", label: "51-100" },
@@ -312,7 +442,6 @@ export function JwtSignUpViewCompany() {
   ]
 
   const ROLE_OPTIONS = [
-    { value: "", label: "Select Role" },
     { value: "HR", label: "HR" },
     { value: "Manager", label: "Manager" },
     { value: "Director", label: "Director" },
@@ -337,89 +466,230 @@ export function JwtSignUpViewCompany() {
     return option.label === value || option.label === value.label
   }
 
+  // Clear field errors when they are filled correctly
+  useEffect(() => {
+    const subscription = methods.watch((value, { name, type }) => {
+      if (name && methods.formState.errors[name] && value[name]) {
+        // Check if the field now has a value and clear the error
+        if (
+          (typeof value[name] === "string" && value[name].trim() !== "") ||
+          (typeof value[name] === "boolean" && value[name] === true) ||
+          (Array.isArray(value[name]) && value[name].length > 0) ||
+          (typeof value[name] === "object" && value[name] !== null)
+        ) {
+          methods.clearErrors(name)
+        }
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [methods])
+
+  useEffect(() => {
+    const subscription = methods.watch((value) => {
+      // Update state values when form values change
+      if (value.company_business_type) {
+        setBusinessTypeValue(value.company_business_type)
+        // Update isRealEstate state when the value changes
+        setIsRealEstate(value.company_business_type === "15")
+      }
+      if (value.company_type_id) {
+        setCompanyTypeValue(value.company_type_id)
+      }
+      if (value.company_contact_person_role) {
+        setRoleValue(value.company_contact_person_role)
+      }
+      if (value.company_no_of_employees) {
+        setEmployeesValue(value.company_no_of_employees)
+      }
+      if (value.company_certified_employer) {
+        setCertifiedEmployerValue(value.company_certified_employer)
+      }
+      if (value.company_collective_agreement) {
+        setCollectiveAgreementValue(value.company_collective_agreement)
+      }
+      if (value.company_applied_work_permit) {
+        setWorkPermitValue(value.company_applied_work_permit)
+      }
+      if (value.company_non_eu_hires) {
+        setNonEuHiresValue(value.company_non_eu_hires)
+      }
+      if (value.country_id) {
+        setCountryIdValue(value.country_id)
+      }
+      if (value.country_services) {
+        setCountryServicesValues(value.country_services)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [methods])
+
   const renderForm = (
     <Box gap={3} display="flex" flexDirection="column">
       {activeStep === 0 && (
         <>
           {/* Company Information */}
           <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: "column", sm: "row" }}>
-            <Field.Text name="name" label="Company Name" />
-            <Field.Text name="company_web" label="Website" placeholder="https://example.com" />
+            <Field.Text
+              name="name"
+              label="Company Name"
+              error={Boolean(methods.formState.errors.name)}
+              helperText={methods.formState.errors.name?.message}
+            />
+            <Field.Text
+              name="company_web"
+              label="Website"
+              placeholder="https://example.com"
+              error={Boolean(methods.formState.errors.company_web)}
+              helperText={methods.formState.errors.company_web?.message}
+            />
           </Box>
 
           <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: "column", sm: "row" }}>
-            <Field.Text name="company_reg_no" label="Registration Number/VAT" />
+            <Field.Text
+              name="company_reg_no"
+              label="Registration Number/VAT"
+              error={Boolean(methods.formState.errors.company_reg_no)}
+              helperText={methods.formState.errors.company_reg_no?.message}
+            />
             <Field.DatePicker
               name="company_reg_date"
               label="Registration Date"
               format="YYYY/MM/DD" // Changed date format to YY/MM/DD
               maxDate={dayjs()}
+              error={Boolean(methods.formState.errors.company_reg_date)}
+              helperText={methods.formState.errors.company_reg_date?.message}
             />
           </Box>
 
           <Field.Select
-            native
+            select
             name="company_business_type"
             label="Company Industry / Sector"
-            onChange={handleIndustryChange}
+            value={businessTypeValue} // Make sure this is a valid value
+            onChange={handleIndustryChange} // Use the handler that updates both state and form value
             InputLabelProps={{ shrink: true }}
-            value={watch("company_business_type")}
+            error={Boolean(methods.formState.errors.company_business_type)}
+            helperText={methods.formState.errors.company_business_type?.message}
           >
-            <option value="">Select Industry</option>
+            <MenuItem value="0">Choose An Option</MenuItem> {/* Default selection */}
             {businessTypes.map((type) => (
-              <option key={type.id} value={type.id}>
+              <MenuItem key={type.id} value={String(type.id)}>
                 {type.name}
-              </option>
+              </MenuItem>
             ))}
           </Field.Select>
 
-          <Field.Select native name="company_type_id" label="Company Type" InputLabelProps={{ shrink: true }}>
-            <option value="">Select Company Type</option>
+          <Field.Select
+            select
+            name="company_type_id"
+            label="Company Type"
+            onChange={handleCompanyTypeChange}
+            InputLabelProps={{ shrink: true }}
+            value={companyTypeValue}
+            error={Boolean(methods.formState.errors.company_type_id)}
+            helperText={methods.formState.errors.company_type_id?.message}
+          >
+            <MenuItem value="0">Choose An Option</MenuItem> {/* Default selection */}
             {companyTypes.map((type) => (
-              <option key={type.id} value={type.id}>
+              <MenuItem key={type.id} value={String(type.id)}>
                 {type.name}
-              </option>
+              </MenuItem>
             ))}
           </Field.Select>
 
-          <Field.Text name="address" label="Address" />
+          <Field.Text
+            name="address"
+            label="Address"
+            error={Boolean(methods.formState.errors.address)}
+            helperText={methods.formState.errors.address?.message}
+          />
 
           <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: "column", sm: "row" }}>
-            <Field.Text name="city" label="City" sx={{ flex: 1 }} />
-            <Field.Text name="postal_code" label="Postal Code" sx={{ flex: 1 }} /> {/* Swapped position */}
+            <Field.Text
+              name="city"
+              label="City"
+              sx={{ flex: 1 }}
+              error={Boolean(methods.formState.errors.city)}
+              helperText={methods.formState.errors.city?.message}
+            />
+            <Field.Text
+              name="postal_code"
+              label="Postal Code"
+              sx={{ flex: 1 }}
+              error={Boolean(methods.formState.errors.postal_code)}
+              helperText={methods.formState.errors.postal_code?.message}
+            />{" "}
+            {/* Swapped position */}
           </Box>
 
-          <Field.CountrySelect name="country_id" label="Country" isOptionEqualToValue={isOptionEqualToValue} />
+          <Field.CountrySelect
+            name="country_id"
+            label="Country"
+            placeholder="Choose an option" // Add this
+            error={Boolean(methods.formState.errors.country_id)}
+            onChange={(event, value) => handleCountryChange(value)}
+            value={countryIdValue}
+          />
         </>
       )}
 
       {activeStep === 1 && (
         <>
           {/* Contact Details */}
-          <Field.Text name="company_contact_person_name" label="Primary Contact Person Name" />
+          <Field.Text
+            name="company_contact_person_name"
+            label="Primary Contact Person Name"
+            error={Boolean(methods.formState.errors.company_contact_person_name)}
+            helperText={methods.formState.errors.company_contact_person_name?.message}
+          />
 
           <Field.Select
-            native
+            select
             name="company_contact_person_role"
             label="Role in Company"
+            onChange={handleRoleChange}
             InputLabelProps={{ shrink: true }}
+            value={roleValue}
+            error={Boolean(methods.formState.errors.company_contact_person_role)}
+            helperText={methods.formState.errors.company_contact_person_role?.message}
           >
+            <MenuItem value="0">Choose An Option</MenuItem> {/* Default selection */}
             {ROLE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
+              <MenuItem key={option.value} value={option.value}>
                 {option.label}
-              </option>
+              </MenuItem>
             ))}
           </Field.Select>
 
-          <Field.Text name="email" label="Email Address" type="email" />
-          <Field.Phone name="contact_number" label="Contact Number" />
+          <Field.Text
+            name="email"
+            label="Email Address"
+            type="email"
+            error={Boolean(methods.formState.errors.email)}
+            helperText={methods.formState.errors.email?.message}
+          />
+          <Field.Phone
+            name="contact_number"
+            label="Contact Number"
+            error={Boolean(methods.formState.errors.contact_number)}
+            helperText={methods.formState.errors.contact_number?.message}
+          />
 
-          <Field.Text name="company_contact_sec_person_name" label="Secondary Contact Person Name (Optional)" />
+          <Field.Text
+            name="company_contact_sec_person_name"
+            label="Secondary Contact Person Name (Optional)"
+            error={Boolean(methods.formState.errors.company_contact_sec_person_name)}
+            helperText={methods.formState.errors.company_contact_sec_person_name?.message}
+          />
 
           <Field.Text
             name="company_contact_sec_person_email"
             label="Secondary Contact Person Email (Optional)"
             type="email"
+            error={Boolean(methods.formState.errors.company_contact_sec_person_email)}
+            helperText={methods.formState.errors.company_contact_sec_person_email?.message}
           />
         </>
       )}
@@ -428,118 +698,210 @@ export function JwtSignUpViewCompany() {
         <>
           {/* Company Operational Details */}
           <Field.Select
-            native
+            select
             name="company_no_of_employees"
             label="Number of Employees"
+            onChange={handleEmployeesChange}
             InputLabelProps={{ shrink: true }}
+            value={employeesValue}
+            error={Boolean(methods.formState.errors.company_no_of_employees)}
+            helperText={methods.formState.errors.company_no_of_employees?.message}
           >
+            <MenuItem value="0">Choose An Option</MenuItem> {/* Default selection */}
             {EMPLOYEE_COUNT_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
+              <MenuItem key={option.value} value={option.value}>
                 {option.label}
-              </option>
+              </MenuItem>
             ))}
           </Field.Select>
 
           <Field.Select
-            native
+            select
             name="company_certified_employer"
             label="Has your company posted jobs on the EURES (European Employment Services) "
+            onChange={handleCertifiedEmployerChange}
             InputLabelProps={{ shrink: true }}
+            value={certifiedEmployerValue}
+            error={Boolean(methods.formState.errors.company_certified_employer)}
+            helperText={methods.formState.errors.company_certified_employer?.message}
           >
+            <MenuItem value="0">Choose An Option</MenuItem> {/* Default selection */}
             {YES_NO_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
+              <MenuItem key={option.value} value={option.value}>
                 {option.label}
-              </option>
+              </MenuItem>
             ))}
+            <MenuItem value="Don’t Know">Dont Know</MenuItem> {/* Default selection */}
           </Field.Select>
 
           <Field.Select
-            native
+            select
             name="company_collective_agreement"
             label="Does your company have a collective agreement or employment insurance?"
+            onChange={handleCollectiveAgreementChange}
             InputLabelProps={{ shrink: true }}
+            value={collectiveAgreementValue}
+            error={Boolean(methods.formState.errors.company_collective_agreement)}
+            helperText={methods.formState.errors.company_collective_agreement?.message}
           >
+            <MenuItem value="0">Choose An Option</MenuItem> {/* Default selection */}
             {YES_NO_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
+              <MenuItem key={option.value} value={option.value}>
                 {option.label}
-              </option>
+              </MenuItem>
             ))}
+            <MenuItem value="Don’t Know">Dont Know</MenuItem> {/* Default selection */}
           </Field.Select>
 
           <Field.Select
-            native
+            select
             name="company_applied_work_permit"
             label="Has the company previously applied for a work permit for any employee?"
+            onChange={handleWorkPermitChange}
             InputLabelProps={{ shrink: true }}
+            value={workPermitValue}
+            error={Boolean(methods.formState.errors.company_applied_work_permit)}
+            helperText={methods.formState.errors.company_applied_work_permit?.message}
           >
+            <MenuItem value="0">Choose An Option</MenuItem> {/* Default selection */}
             {YES_NO_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
+              <MenuItem key={option.value} value={option.value}>
                 {option.label}
-              </option>
+              </MenuItem>
             ))}
           </Field.Select>
 
           <Field.Select
-            native
+            select
             name="company_non_eu_hires"
             label="Does your company require compliance support for non-EU hires?"
+            onChange={handleNonEuHiresChange}
             InputLabelProps={{ shrink: true }}
+            value={nonEuHiresValue}
+            error={Boolean(methods.formState.errors.company_non_eu_hires)}
+            helperText={methods.formState.errors.company_non_eu_hires?.message}
           >
+            <MenuItem value="0">Choose An Option</MenuItem> {/* Default selection */}
             {YES_NO_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
+              <MenuItem key={option.value} value={option.value}>
                 {option.label}
-              </option>
+              </MenuItem>
             ))}
+            <MenuItem value="Not Sure">Not Sure</MenuItem> {/* Default selection */}
           </Field.Select>
         </>
       )}
-      {activeStep === 3 && (
+
+      {/* Replace the services section (activeStep === 3) with this improved version */}
+      {activeStep === 3 && !isRealEstate && (
         <>
           {(getValues("country_services") || []).map((countryService, index) => (
-            <Box key={index} sx={{ mb: 4, p: 2, border: "1px solid", borderColor: "divider", borderRadius: 1 }}>
-              <Field.CountrySelect
-                name={`country_services[${index}].country_id`}
-                label={`Country ${index + 1}`}
-                isOptionEqualToValue={isOptionEqualToValue}
-              />
-
-              <Box sx={{ mt: 2 }}>
-                <Box component="p" sx={{ mb: 1, fontWeight: "medium" }}>
-                  What services are you looking for in this country? (Select all that apply)
+            <Box
+              key={index}
+              sx={{
+                mb: 1,
+                border: "1px solid",
+                borderColor: "divider",
+                borderRadius: 1,
+                position: "relative",
+              }}
+            >
+              <Box sx={{ p: 2 }}>
+                <Box sx={{ display: "flex", justifyContent: "end", alignItems: "center", mb: 2 }}>
+                  {index > 0 && (
+                    <Button
+                      variant="text"
+                      color="error"
+                      size="small"
+                      onClick={() => handleRemoveCountryService(index)}
+                      sx={{ minWidth: "auto", p: 0.5 }}
+                    >
+                      Remove
+                    </Button>
+                  )}
                 </Box>
 
-                {SERVICE_OPTIONS.map((option) => {
-                  const serviceTypes = watch(`country_services[${index}].service_types`) || []
-                  const isChecked = serviceTypes.includes(option.value)
+                <Field.CountrySelect
+                  name={`country_services[${index}].country_id`}
+                  label="Country"
+                  placeholder="Choose an Option"
+                  error={Boolean(methods.formState.errors.country_services?.[index]?.country_id)}
+                  helperText={methods.formState.errors.country_services?.[index]?.country_id?.message}
+                  onChange={(event, value) => handleCountryServiceChange(index, value)}
+                  value={countryServicesValues[index]?.country_id}
+                />
 
-                  return (
-                    <FormControlLabel
-                      key={option.value}
-                      control={
-                        <Checkbox
-                          checked={isChecked}
-                          onChange={() => {
-                            const currentServices = [...(getValues(`country_services[${index}].service_types`) || [])]
-
-                            const newServices = isChecked
-                              ? currentServices.filter((type) => type !== option.value)
-                              : [...currentServices, option.value]
-
-                            setValue(`country_services[${index}].service_types`, newServices, {
-                              shouldValidate: true,
-                              shouldDirty: true,
-                              shouldTouch: true,
-                            })
-
-                            trigger(`country_services[${index}].service_types`)
-                          }}
-                          name={`service_${index}_${option.value}`}
-                        />
+                <Box sx={{ mt: 4 }}>
+                  <FormControl
+                    fullWidth
+                    error={Boolean(methods.formState.errors.country_services?.[index]?.service_types)}
+                  >
+                    <InputLabel id={`service-types-label-${index}`}>
+                      What services are you looking for in this country? (Select all that apply)
+                    </InputLabel>
+                    <Select
+                      labelId={`service-types-label-${index}`}
+                      multiple
+                      value={watch(`country_services[${index}].service_types`) || []}
+                      onChange={(event) => {
+                        setValue(`country_services[${index}].service_types`, event.target.value, {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                          shouldTouch: true,
+                        })
+                        trigger(`country_services[${index}].service_types`)
+                      }}
+                      input={
+                        <OutlinedInput label="What services are you looking for in this country? (Select all that apply)" />
                       }
-                      label={option.label}
-                    />
-                  )
-                })}
+                      renderValue={(selected) => (
+                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                          {selected.map((value) => {
+                            const option = SERVICE_OPTIONS.find((opt) => opt.value === value)
+                            return (
+                              <Chip
+                                key={value}
+                                label={option ? option.label : value}
+                                size="small"
+                                onDelete={(event) => {
+                                  event.stopPropagation()
+                                  const newValue = watch(`country_services[${index}].service_types`).filter(
+                                    (item) => item !== value,
+                                  )
+                                  setValue(`country_services[${index}].service_types`, newValue, {
+                                    shouldValidate: true,
+                                    shouldDirty: true,
+                                    shouldTouch: true,
+                                  })
+                                }}
+                                onMouseDown={(event) => {
+                                  event.stopPropagation()
+                                }}
+                              />
+                            )
+                          })}
+                        </Box>
+                      )}
+                      MenuProps={{
+                        PaperProps: {
+                          style: {
+                            maxHeight: 224,
+                            width: 250,
+                          },
+                        },
+                      }}
+                    >
+                      {SERVICE_OPTIONS.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {methods.formState.errors.country_services?.[index]?.service_types && (
+                      <FormHelperText>Please select at least one service</FormHelperText>
+                    )}
+                  </FormControl>
+                </Box>
               </Box>
             </Box>
           ))}
@@ -559,11 +921,14 @@ export function JwtSignUpViewCompany() {
               label="Create Password"
               type={password.value ? "text" : "password"}
               helperText="Min. 8 characters required"
+              error={Boolean(methods.formState.errors.password)}
             />
             <Field.Text
               name="password_confirmation"
               label="Repeat Password"
               type={password.value ? "text" : "password"}
+              error={Boolean(methods.formState.errors.password_confirmation)}
+              helperText={methods.formState.errors.password_confirmation?.message}
             />
           </Box>
 
@@ -571,8 +936,15 @@ export function JwtSignUpViewCompany() {
             <Field.Checkbox
               name="is_information_accurate"
               label="I confirm that the information provided is accurate and truthful."
+              error={Boolean(methods.formState.errors.is_information_accurate)}
+              helperText={methods.formState.errors.is_information_accurate?.message}
             />
-            <Field.Checkbox name="is_term_accepted" label="I agree to the Terms & Conditions and Privacy Policy." />
+            <Field.Checkbox
+              name="is_term_accepted"
+              label="I agree to the Terms & Conditions and Privacy Policy."
+              error={Boolean(methods.formState.errors.is_term_accepted)}
+              helperText={methods.formState.errors.is_term_accepted?.message}
+            />
           </Box>
         </>
       )}
@@ -588,68 +960,7 @@ export function JwtSignUpViewCompany() {
           <LoadingButton
             variant="contained"
             onClick={() => {
-              // Validate current step before proceeding
-              const fieldsToValidate = []
-
-              // Add fields to validate based on current step
-              if (activeStep === 0) {
-                fieldsToValidate.push(
-                  "name",
-                  "company_web",
-                  "company_reg_no",
-                  "company_reg_date",
-                  "company_type_id",
-                  "company_business_type",
-                  "address",
-                  "city",
-                  "country_id",
-                  "postal_code",
-                )
-              } else if (activeStep === 1) {
-                fieldsToValidate.push(
-                  "company_contact_person_name",
-                  "company_contact_person_role",
-                  "email",
-                  "contact_number",
-                )
-              } else if (activeStep === 2 && !isRealEstate) {
-                fieldsToValidate.push(
-                  "company_no_of_employees",
-                  "company_certified_employer",
-                  "company_collective_agreement",
-                  "company_applied_work_permit",
-                  "company_non_eu_hires",
-                )
-              } else if (activeStep === 3) {
-                // Validate country services
-                const countryServices = getValues("country_services") || []
-                let isValid = true
-
-                for (let i = 0; i < countryServices.length; i += 1) {
-                  if (!countryServices[i].country_id) {
-                    toast.warning(`Please select a country for Country ${i + 1}`)
-                    isValid = false
-                    break
-                  }
-
-                  if (!countryServices[i].service_types || countryServices[i].service_types.length === 0) {
-                    toast.warning(`Please select at least one service for Country ${i + 1}`)
-                    isValid = false
-                    break
-                  }
-                }
-
-                if (!isValid) return
-              }
-
-              // Validate the fields
-              trigger(fieldsToValidate).then((isValid) => {
-                if (isValid) {
-                  handleNext()
-                } else {
-                  toast.warning("Please fill in all required fields correctly")
-                }
-              })
+              handleNext()
             }}
           >
             Next
@@ -702,12 +1013,14 @@ export function JwtSignUpViewCompany() {
                   const countryId = findCountryIdByLabel(data.country_id)
 
                   if (!countryId) {
-                    throw new Error(`Country not found: ${data.country_id}`)
+                    // More user-friendly error message
+                    toast.error("Please select a valid country from the dropdown list")
+                    throw new Error("Country selection is required")
                   }
 
                   // Format country_services properly by converting country names to integer IDs
                   const formattedCountryServices =
-                    data.country_services?.map((service) => {
+                    data.country_services?.map((service, index) => {
                       // Check if country_id exists before trying to find it
                       if (!service.country_id) {
                         // Return a default object with empty service_types if country_id is missing
@@ -719,11 +1032,38 @@ export function JwtSignUpViewCompany() {
 
                       const serviceCountryId = findCountryIdByLabel(service.country_id)
 
+                      if (!serviceCountryId && service.country_id) {
+                        // More user-friendly error for invalid country selection
+                        toast.error(
+                          `Invalid country selection for service #${index + 1}. Please select from the dropdown.`,
+                        )
+                      }
+
                       return {
                         country_id: serviceCountryId || "", // Use empty string as fallback if ID not found
                         service_types: service.service_types || [],
                       }
                     }) || []
+
+                  // Set default values for operational details if Real Estate is selected
+                  let operationalDetails = {}
+                  if (data.company_business_type === "15") {
+                    operationalDetails = {
+                      company_no_of_employees: "",
+                      company_certified_employer: "",
+                      company_collective_agreement: "",
+                      company_applied_work_permit: "",
+                      company_non_eu_hires: "",
+                    }
+                  } else {
+                    operationalDetails = {
+                      company_no_of_employees: data.company_no_of_employees || "",
+                      company_certified_employer: data.company_certified_employer || "",
+                      company_collective_agreement: data.company_collective_agreement || "",
+                      company_applied_work_permit: data.company_applied_work_permit || "",
+                      company_non_eu_hires: data.company_non_eu_hires || "",
+                    }
+                  }
 
                   // Format the data according to the API requirements
                   const formattedData = {
@@ -743,15 +1083,12 @@ export function JwtSignUpViewCompany() {
                     contact_number: data.contact_number,
                     company_contact_person_name: data.company_contact_person_name,
                     company_contact_person_role: data.company_contact_person_role,
-                    company_contact_sec_person_name: data.company_contact_sec_person_email,
-                    company_no_of_employees: data.company_no_of_employees,
-                    company_certified_employer: data.company_certified_employer,
-                    company_collective_agreement: data.company_collective_agreement,
-                    company_applied_work_permit: data.company_applied_work_permit,
-                    company_non_eu_hires: data.company_non_eu_hires,
+                    company_contact_sec_person_name: data.company_contact_sec_person_name || "",
+                    company_contact_sec_person_email: data.company_contact_sec_person_email || "",
+                    ...operationalDetails,
                     is_information_accurate: data.is_information_accurate ? 1 : 0,
                     is_term_accepted: data.is_term_accepted ? 1 : 0,
-                    country_services: formattedCountryServices,
+                    country_services: data.company_business_type === "15" ? [] : formattedCountryServices,
                   }
 
                   console.log("Formatted data being sent:", formattedData)
@@ -793,19 +1130,64 @@ export function JwtSignUpViewCompany() {
                 } catch (error) {
                   console.error("Error during sign-up:", error)
 
-                  // Show error toast
-                  const errorMessage =
-                    error.response?.data?.message ||
-                    (typeof error === "string" ? error : error.message) ||
-                    "Registration failed. Please try again."
+                  if (error.response?.data?.errors) {
+                    // Display specific validation errors from the API
+                    const apiErrors = error.response.data.errors
+                    Object.keys(apiErrors).forEach((field) => {
+                      // Create a more user-friendly field name
+                      const friendlyFieldName = field.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
 
-                  toast.error(errorMessage)
-                  setErrorMsg(errorMessage)
+                      // Create a more user-friendly error message
+                      let errorMessage = apiErrors[field][0]
+
+                      // Replace technical error messages with user-friendly ones
+                      if (errorMessage.includes("Expected string received null")) {
+                        errorMessage = `Please provide a value for ${friendlyFieldName}`
+                      } else if (errorMessage.includes("null")) {
+                        errorMessage = `${friendlyFieldName} is required`
+                      }
+
+                      methods.setError(field, {
+                        type: "manual",
+                        message: errorMessage,
+                      })
+
+                      // Show separate toast for each error with improved message
+                      toast.error(`${friendlyFieldName}: ${errorMessage}`)
+                    })
+                  } else {
+                    // Show general error toast
+                    const errorMessage =
+                      error.response?.data?.message ||
+                      (typeof error === "string" ? error : error.message) ||
+                      "Registration failed. Please try again."
+
+                    toast.error(errorMessage)
+                    setErrorMsg(errorMessage)
+                  }
                 } finally {
                   setLoading(false)
                 }
               } else {
-                toast.error("Please fill in all required fields correctly")
+                // Display separate toast notifications for each error with improved messages
+                const errors = methods.formState.errors
+                Object.keys(errors).forEach((fieldName) => {
+                  if (errors[fieldName]?.message) {
+                    let errorMessage = errors[fieldName].message
+                    const friendlyFieldName = fieldName.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+
+                    // Replace technical error messages with user-friendly ones
+                    if (
+                      errorMessage.includes("Expected string received null") ||
+                      errorMessage.includes("null") ||
+                      errorMessage.includes("undefined")
+                    ) {
+                      errorMessage = `Please provide a value for ${friendlyFieldName}`
+                    }
+
+                    toast.error(`${friendlyFieldName}: ${errorMessage}`)
+                  }
+                })
               }
             }}
           >
@@ -857,14 +1239,14 @@ export function JwtSignUpViewCompany() {
             {steps
               .filter((_, index) => {
                 // Hide steps 2 (index 2) and 3 (index 3) when Real Estate is selected
-                if (watch("company_business_type") === "15" && (index === 2 || index === 3)) {
+                if (isRealEstate && (index === 2 || index === 3)) {
                   return false
                 }
                 return true
               })
-              .map((label) => (
-                <Step key={label}>
-                  <StepLabel>{label}</StepLabel>
+              .map((label, index) => (
+                <Step key={label} onClick={() => setActiveStep(index)} sx={{ cursor: "pointer" }}>
+                  <StepLabel StepIconProps={{ completed: false }}>{label}</StepLabel>
                 </Step>
               ))}
           </Stepper>

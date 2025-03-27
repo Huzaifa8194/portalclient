@@ -1567,7 +1567,7 @@
     "@iconify/react" "^5.0.2"
     "@minimal-kit/vite-js" "file:"
     "@mui/lab" "^5.0.0-alpha.173"
-    "@mui/material" "^5.16.14"
+    "@mui/material" "^5.17.1"
     "@mui/x-data-grid" "^7.13.0"
     "@mui/x-date-pickers" "^7.27.3"
     "@mui/x-tree-view" "^7.13.0"

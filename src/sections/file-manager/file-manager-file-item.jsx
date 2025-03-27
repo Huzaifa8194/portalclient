@@ -107,28 +107,35 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
       <Typography
         variant="subtitle2"
         onClick={details.onTrue}
-        sx={(theme) => ({
-          ...maxLine({ line: 2, persistent: theme.typography.subtitle2 }),
+        sx={{
           mt: 2,
           mb: 0.5,
-          width: 1,
-        })}
+          width: "100%",
+          wordWrap: "break-word",
+          overflowWrap: "break-word",
+          whiteSpace: "normal",
+          display: "-webkit-box",
+          WebkitBoxOrient: "vertical",
+          WebkitLineClamp: 3, // Allows up to 3 lines before truncating
+          overflow: "hidden",
+          textAlign: "center", // Centering for better readability
+        }}
       >
         {file.name}
       </Typography>
-
+  
       <Stack
         direction="row"
         alignItems="center"
         sx={{
-          maxWidth: 0.99,
-          whiteSpace: 'nowrap',
-          typography: 'caption',
-          color: 'text.disabled',
+          maxWidth: "100%",
+          whiteSpace: "nowrap",
+          typography: "caption",
+          color: "text.disabled",
         }}
       >
         {fData(file.size)}
-
+  
         <Box
           component="span"
           sx={{
@@ -136,8 +143,8 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
             width: 2,
             height: 2,
             flexShrink: 0,
-            borderRadius: '50%',
-            bgcolor: 'currentColor',
+            borderRadius: "50%",
+            bgcolor: "currentColor",
           }}
         />
         <Typography noWrap component="span" variant="caption">
@@ -146,7 +153,7 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
       </Stack>
     </>
   );
-
+  
   const renderAvatar = (
     <AvatarGroup
       max={3}

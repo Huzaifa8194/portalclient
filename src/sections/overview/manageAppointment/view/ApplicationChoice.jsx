@@ -28,14 +28,14 @@ export function ApplicationChoice() {
       title: "Appointment",
       value: "Migrationsverket",
       total: "Sweden Relocators",
-      icon: `${CONFIG.assetsDir}/assets/icons/glass/ic-glass-users.svg`,
-      color: "primary",
+      icon: `${CONFIG.assetsDir}/assets/icons/navbar/ic-calendar.svg`,
+      color: "success",
     },
     {
       title: "Appointment",
       value: "GovernmentAuthority",
       total: "Government Authority",
-      icon: `${CONFIG.assetsDir}/assets/icons/glass/ic-glass-users.svg`,
+      icon: `${CONFIG.assetsDir}/assets/icons/navbar/ic-calendar.svg`,
       color: "secondary",
     },
   ]

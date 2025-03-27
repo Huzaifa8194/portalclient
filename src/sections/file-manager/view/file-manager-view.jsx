@@ -78,7 +78,7 @@ export function FileManagerView() {
           width: 200,
           height: 200,
           thumbnailStyle: {
-            width: "200px",
+            width: "100px",
             height: "200px",
             objectFit: "cover",
             borderRadius: "8px",
@@ -132,23 +132,23 @@ export function FileManagerView() {
             isFavorited: false,
             shared: [],
             // Add standardized dimensions for consistent display
-            width: 200,
-            height: 200,
-            thumbnailStyle: {
-              width: "200px",
-              height: "200px",
-              objectFit: "cover",
-              borderRadius: "8px",
-            },
+            // width: 200,
+            // height: 200,
+            // thumbnailStyle: {
+            //   width: "200px",
+            //   height: "200px",
+            //   objectFit: "cover",
+            //   borderRadius: "8px",
+            // },
           })),
           // Add folder thumbnail style
-          thumbnailStyle: {
-            width: "200px",
-            height: "200px",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          },
+          // thumbnailStyle: {
+          //   width: "200px",
+          //   height: "200px",
+          //   display: "flex",
+          //   justifyContent: "center",
+          //   alignItems: "center",
+          // },
         }))
 
         // Add "myself" folder at the beginning of the array
@@ -294,14 +294,14 @@ export function FileManagerView() {
           isFavorited: false,
           shared: [],
           // Add standardized dimensions for consistent display
-          width: 200,
-          height: 200,
-          thumbnailStyle: {
-            width: "200px",
-            height: "00px",
-            objectFit: "cover",
-            borderRadius: "8px",
-          },
+          // width: 200,
+          // height: 200,
+          // thumbnailStyle: {
+          //   width: "200px",
+          //   height: "00px",
+          //   objectFit: "cover",
+          //   borderRadius: "8px",
+          // },
         }))
 
         const updatedFolder = {
@@ -362,14 +362,14 @@ export function FileManagerView() {
         // Ensure URL is properly formatted for API URLs
         fullUrl: image.url.startsWith("/") ? `https://api.swedenrelocators.se${image.url}` : image.url,
         // Add standardized dimensions for consistent display
-        width: 200,
-        height: 200,
-        thumbnailStyle: {
-          width: "200px",
-          height: "200px",
-          objectFit: "cover",
-          borderRadius: "8px",
-        },
+        // width: 200,
+        // height: 200,
+        // thumbnailStyle: {
+        //   width: "200px",
+        //   height: "200px",
+        //   objectFit: "cover",
+        //   borderRadius: "8px",
+        // },
       })),
     }
 
@@ -387,14 +387,14 @@ export function FileManagerView() {
         onFolderUpdate={handleFolderUpdate}
         onBack={() => setSelectedFolder(null)}
         // Add custom styling for consistent file display
-        fileCardStyle={{
-          width: "200px",
-          height: "280px",
-          margin: "8px",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-        }}
+        // fileCardStyle={{
+        //   width: "200px",
+        //   height: "280px",
+        //   margin: "8px",
+        //   display: "flex",
+        //   flexDirection: "column",
+        //   overflow: "hidden",
+        // }}
       />
     )
   }
@@ -411,15 +411,15 @@ export function FileManagerView() {
       // Add props to display upload info in the grid view
       showUploadInfo
       // Add custom styling for consistent folder display
-      folderCardStyle={{
-        width: "200px",
-        height: "200px",
-        margin: "8px",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
+      // folderCardStyle={{
+      //   width: "200px",
+      //   height: "200px",
+      //   margin: "8px",
+      //   display: "flex",
+      //   flexDirection: "column",
+      //   justifyContent: "center",
+      //   alignItems: "center",
+      // }}
       folderIconStyle={{
         width: "80px",
         height: "80px",
@@ -427,8 +427,6 @@ export function FileManagerView() {
     />
   )
 
-  // Add a custom CSS style to the DashboardContent component to ensure consistent grid layout
-  // Update the return statement around line 350
 
   return (
     <>

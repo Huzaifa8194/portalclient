@@ -34,7 +34,7 @@ import { Form, Field, schemaHelper } from "src/components/hook-form"
 export const NewProductSchema = zod.object({
   name: zod.string().min(1, { message: "Name is required!" }),
   description: schemaHelper.editor({ message: { required_error: "Description is required!" } }),
-  images: schemaHelper.files({ message: { required_error: "Images are required!" }, min: 1, max: 10 }), // Ensure at least one image, with an optional maximum
+  images: schemaHelper.files({ message: { required_error: "Images are required!" }, min: 1, max: 10 }), 
   code: zod.string().min(1, { message: "Product code is required!" }),
   sku: zod.string().min(1, { message: "Product sku is required!" }),
   quantity: zod.number().min(1, { message: "Quantity is required!" }),
@@ -44,7 +44,6 @@ export const NewProductSchema = zod.object({
   gender: zod.string().array().nonempty({ message: "Choose at least one gender!" }),
   price: zod.number().min(1, { message: "Price should not be $0.00" }),
 
-  // Optional fields
   category: zod.string().optional(),
   priceSale: zod.number().optional(),
   subDescription: zod.string().optional(),
@@ -68,6 +67,8 @@ export function ProductNewEditForm({ currentProduct }) {
   const [documentSubTypes, setDocumentSubTypes] = useState([])
   const [selectedDocumentType, setSelectedDocumentType] = useState(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [showDocumentDetails, setShowDocumentDetails] = useState(false)
+  const [documentDetails, setDocumentDetails] = useState("")
 
   useEffect(() => {
     const fetchFamilyMembers = async () => {
@@ -140,14 +141,13 @@ export function ProductNewEditForm({ currentProduct }) {
     const fetchDocumentTypes = async () => {
       try {
         const response = await axios.get(
-          "https://api.swedenrelocators.se/api/miscellaneous/documentTypes", // Correct endpoint
+          "https://api.swedenrelocators.se/api/miscellaneous/documentTypes", 
         )
 
         if (response.data?.data?.length > 0) {
           setDocumentTypes(response.data.data)
 
-          // Don't automatically select a default value
-          // This allows the "Choose an option" to be displayed
+         
           setSelectedDocumentType("")
           setDocumentSubTypes([])
         }
@@ -241,7 +241,7 @@ export function ProductNewEditForm({ currentProduct }) {
   const handleAddDocument = () => {
     const fileInput = document.createElement("input")
     fileInput.type = "file"
-    fileInput.accept = "*" // Accept all file types (adjust as needed)
+    fileInput.accept = "*" 
     fileInput.multiple = true
 
     fileInput.onchange = (event) => {
@@ -280,8 +280,8 @@ export function ProductNewEditForm({ currentProduct }) {
     formData.append("file", image)
     formData.append("document", image)
 
-    // Declare familyMemberId in the parent scope
-    let familyMemberId = "" // <-- Add this declaration
+   
+    let familyMemberId = "" 
 
     const isForMyself = category === "Myself" || category === user.name
 
@@ -290,17 +290,17 @@ export function ProductNewEditForm({ currentProduct }) {
       formData.append("user_id", user.id.toString())
     } else {
       const selectedFamilyMember = familyMembers.find((member) => member.name === category)
-      // Assign value to the already declared variable
-      familyMemberId = selectedFamilyMember ? selectedFamilyMember.id.toString() : "" // <-- Modified this line
+      familyMemberId = selectedFamilyMember ? selectedFamilyMember.id.toString() : "" 
       formData.append("user_family_id", familyMemberId)
     }
 
-    // Rest of the code remains the same
     formData.append("document_type_id", selectedType.id.toString())
     formData.append("document_sub_type_id", selectedSubType.id.toString())
     formData.append("coupon_id", "")
 
-    if (category) {
+    if (selectedSubType.name === "Other" && documentDetails) {
+      formData.append("details", documentDetails)
+    } else if (category) {
       formData.append("details", category)
     }
 
@@ -309,6 +309,7 @@ export function ProductNewEditForm({ currentProduct }) {
     console.log("Document type ID:", selectedType.id)
     console.log("Document subtype ID:", selectedSubType.id)
     console.log("User family ID:", familyMemberId)
+    console.log("Document details:", documentDetails)
     console.log("Authorization token available:", !!user.accessToken)
 
     try {
@@ -392,26 +393,32 @@ export function ProductNewEditForm({ currentProduct }) {
     try {
       setIsUploading(true)
 
-      const selectedType = documentTypes.find((type) => type.id === code) // Find by ID
-      const selectedSubType = documentSubTypes.find((subType) => subType.id === sku) // Find by ID
+      const selectedType = documentTypes.find((type) => type.id === code) 
+      const selectedSubType = documentSubTypes.find((subType) => subType.id.toString() === sku.toString()) 
 
-      if (!selectedType || !selectedSubType) {
-        toast.error("Invalid document type or subtype.")
+      if (!selectedType) {
+        toast.error("Invalid document type.")
         return
       }
 
-      // Use Array.reduce to process uploads sequentially
+      if (!selectedSubType) {
+        toast.error("Invalid document subtype.")
+        return
+      }
+
+      if (selectedSubType.name === "Other" && !documentDetails.trim()) {
+        toast.error("Please provide document details for 'Other' document type.")
+        return
+      }
+
       const uploadResult = await images.reduce(async (previousPromise, image) => {
         const results = await previousPromise
 
-        // Use the actual API call instead of the mock
         console.log(`Uploading document: ${image.name} to API...`)
         const result = await uploadSingleDocument(image, selectedType, selectedSubType, category)
 
-        // Log the complete API response for debugging
         console.log(`API Response for ${image.name}:`, JSON.stringify(result, null, 2))
 
-        // If the upload failed, throw an error to stop the chain
         if (!result.success) {
           throw new Error(result.message || "Upload failed")
         }
@@ -434,6 +441,9 @@ export function ProductNewEditForm({ currentProduct }) {
         })
 
         setValue("images", [])
+        if (showDocumentDetails) {
+          setDocumentDetails("") 
+        }
       } else {
         toast.warning(`Only ${uploadResult.length} out of ${images.length} documents were uploaded.`)
       }
@@ -448,6 +458,8 @@ export function ProductNewEditForm({ currentProduct }) {
   const handleDocumentTypeChange = (event) => {
     const selectedTypeId = Number(event.target.value)
     setSelectedDocumentType(selectedTypeId)
+    setShowDocumentDetails(false)
+    setDocumentDetails("")
 
     const selectedType = documentTypes.find((type) => type.id === selectedTypeId)
 
@@ -464,11 +476,22 @@ export function ProductNewEditForm({ currentProduct }) {
     }
   }
 
+  const handleDocumentSubTypeChange = (event) => {
+    const selectedSubTypeId = event.target.value
+    setValue("sku", selectedSubTypeId)
+
+    const selectedSubType = documentSubTypes.find((subType) => subType.id.toString() === selectedSubTypeId.toString())
+    setShowDocumentDetails(selectedSubType && selectedSubType.name === "Other")
+
+    if (!(selectedSubType && selectedSubType.name === "Other")) {
+      setDocumentDetails("")
+    }
+  }
+
   const getFileIcon = (file) => {
     const fileType = file.type.toLowerCase()
     const fileName = file.name.toLowerCase()
 
-    // Return SVG icons based on file type
     if (fileType.includes("pdf")) {
       return (
         <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="#f44336">
@@ -527,7 +550,6 @@ export function ProductNewEditForm({ currentProduct }) {
       )
     }
 
-    // Default case (fallback)
     return (
       <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="#757575">
         <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z" />
@@ -645,7 +667,7 @@ export function ProductNewEditForm({ currentProduct }) {
             }}
             SelectProps={{
               native: true,
-              onChange: (e) => setValue("sku", e.target.value),
+              onChange: handleDocumentSubTypeChange,
             }}
           >
             <option value="">Choose An Option</option>
@@ -656,6 +678,20 @@ export function ProductNewEditForm({ currentProduct }) {
             ))}
           </Field.Select>
         </Box>
+
+        {showDocumentDetails && (
+          <Box sx={{ mt: 2, width: "100%" }}>
+            <TextField
+              fullWidth
+              label="Document Details"
+              value={documentDetails}
+              onChange={(e) => setDocumentDetails(e.target.value)}
+              placeholder="Enter document details"
+              InputLabelProps={{ shrink: true }}
+              required
+            />
+          </Box>
+        )}
 
         <Stack spacing={3}>
           {/* Uploaded Files */}
