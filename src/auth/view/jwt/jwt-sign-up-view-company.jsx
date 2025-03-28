@@ -3,7 +3,7 @@
 import Button from "@mui/material/Button"
 
 import { z as zod } from "zod"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import axios from "axios"
@@ -150,6 +150,9 @@ export function JwtSignUpViewCompany() {
   const [nonEuHiresValue, setNonEuHiresValue] = useState("0")
   const [countryIdValue, setCountryIdValue] = useState(null) // Added for main country_id
   const [countryServicesValues, setCountryServicesValues] = useState([{ country_id: null, service_types: [] }]) // Added for country_services array
+  const autocompleteRef = useRef(null)
+  const addressInputRef = useRef(null)
+  const googleMapsLoaded = useRef(false)
 
   const steps = ["Company", "Contact", "Details", "Services", "Setup"]
 
@@ -392,10 +395,10 @@ export function JwtSignUpViewCompany() {
     const country = countries.find((c) => c.label === countryLabel)
     return country ? Number(country.id) : null // Ensure it's a number
   }, [])
-  const findCountryLabelById = (countryId) => {
+  const findCountryLabelById = useCallback((countryId) => {
     const country = countries.find((c) => c.id === Number(countryId))
     return country ? country.label : null
-  }
+  }, [])
 
   const handleAddCountryService = () => {
     const currentServices = getValues("country_services") || []
@@ -525,6 +528,221 @@ export function JwtSignUpViewCompany() {
     return () => subscription.unsubscribe()
   }, [methods])
 
+  // Initialize Google Maps autocomplete for address field
+  useEffect(() => {
+    // Only initialize when on step 0 (Company Information)
+    if (activeStep !== 0) return undefined
+
+    // Function to load Google Maps API
+    const loadGoogleMapsAPI = () => {
+      // Check if Google Maps API is already loaded
+      if (window.google && window.google.maps && window.google.maps.places && googleMapsLoaded.current) {
+        initializeAutocomplete()
+        return
+      }
+
+      // Check if the script is already in the process of loading
+      const existingScript = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]')
+      if (existingScript) {
+        // If script is already loading, wait for it to load
+        existingScript.addEventListener("load", () => {
+          googleMapsLoaded.current = true
+          initializeAutocomplete()
+        })
+        return
+      }
+
+      // Create and load the script if it doesn't exist
+      const script = document.createElement("script")
+      script.src =
+        "https://maps.googleapis.com/maps/api/js?key=AIzaSyAAWOsJJP9SHiPLh_DSRHJIwdrXfY2WBNw&libraries=places"
+      script.async = true
+      script.defer = true
+      script.onload = () => {
+        googleMapsLoaded.current = true
+        initializeAutocomplete()
+      }
+      document.head.appendChild(script)
+    }
+
+    // Function to initialize autocomplete
+    const initializeAutocomplete = () => {
+      // Wait for the DOM to be fully loaded and the input to be available
+      setTimeout(() => {
+        // Get the address input element
+        const addressInput = document.getElementById("address")
+        if (!addressInput) {
+          console.error("Address input element not found")
+          return
+        }
+
+        try {
+          // Check if autocomplete is already initialized for this input
+          if (autocompleteRef.current) {
+            return
+          }
+
+          // Create the autocomplete instance
+          const autocomplete = new window.google.maps.places.Autocomplete(addressInput, {
+            types: ["address"],
+          })
+
+          // Apply custom styling to match MenuItem components
+          const pacContainer = document.querySelector(".pac-container")
+          if (pacContainer) {
+            // Remove the observer if it exists
+            if (window.autocompleteObserver) {
+              window.autocompleteObserver.disconnect()
+            }
+
+            // Create a new observer to watch for the pac-container
+            window.autocompleteObserver = new MutationObserver((mutations, observer) => {
+              const container = document.querySelector(".pac-container")
+              if (container) {
+                // Apply custom styling to match MenuItem
+                container.style.zIndex = "1500"
+                container.style.borderRadius = "4px"
+                container.style.boxShadow =
+                  "0px 5px 5px -3px rgba(0,0,0,0.2), 0px 8px 10px 1px rgba(0,0,0,0.14), 0px 3px 14px 2px rgba(0,0,0,0.12)"
+                container.style.backgroundColor = "white"
+                container.style.border = "1px solid rgba(0, 0, 0, 0.12)"
+                container.style.marginTop = "8px"
+
+                // Style the items
+                const items = container.querySelectorAll(".pac-item")
+                items.forEach((item) => {
+                  item.style.padding = "6px 16px"
+                  item.style.fontSize = "1rem"
+                  item.style.fontFamily = '"Roboto","Helvetica","Arial",sans-serif'
+                  item.style.lineHeight = "1.5"
+                  item.style.transition = "background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms"
+
+                  // Add hover effect
+                  item.addEventListener("mouseenter", () => {
+                    item.style.backgroundColor = "rgba(0, 0, 0, 0.04)"
+                  })
+                  item.addEventListener("mouseleave", () => {
+                    item.style.backgroundColor = "transparent"
+                  })
+                })
+
+                // Once we've styled it, we can disconnect the observer
+                observer.disconnect()
+              }
+            })
+
+            // Start observing the document body for the pac-container
+            window.autocompleteObserver.observe(document.body, {
+              childList: true,
+              subtree: true,
+            })
+          }
+
+          // Also add a focus event listener to ensure styling is applied when the dropdown appears
+          addressInput.addEventListener("focus", () => {
+            setTimeout(() => {
+              const container = document.querySelector(".pac-container")
+              if (container) {
+                container.style.zIndex = "1500"
+                container.style.borderRadius = "4px"
+                container.style.boxShadow =
+                  "0px 5px 5px -3px rgba(0,0,0,0.2), 0px 8px 10px 1px rgba(0,0,0,0.14), 0px 3px 14px 2px rgba(0,0,0,0.12)"
+                container.style.backgroundColor = "white"
+                container.style.border = "1px solid rgba(0, 0, 0, 0.12)"
+                container.style.marginTop = "8px"
+
+                const items = container.querySelectorAll(".pac-item")
+                items.forEach((item) => {
+                  item.style.padding = "6px 16px"
+                  item.style.fontSize = "1rem"
+                  item.style.fontFamily = '"Roboto","Helvetica","Arial",sans-serif'
+                  item.style.lineHeight = "1.5"
+                })
+              }
+            }, 300)
+          })
+
+          // Store the autocomplete instance in the ref
+          autocompleteRef.current = autocomplete
+
+          // Add a listener for place selection
+          autocomplete.addListener("place_changed", () => {
+            const place = autocomplete.getPlace()
+
+            if (!place.geometry) {
+              console.log("Place details not found")
+              return
+            }
+
+            // Populate the Address Field
+            const address = place.formatted_address
+            setValue("address", address)
+
+            // Extract and populate the City Field
+            let city = ""
+            let country = ""
+
+            for (let i = 0; i < place.address_components.length; i += 1) {
+              const component = place.address_components[i]
+
+              // Get the City (if present)
+              if (component.types.includes("locality")) {
+                city = component.long_name
+              }
+
+              // Get the Country (if present)
+              if (component.types.includes("country")) {
+                country = component.long_name
+              }
+
+              // Get the Postal Code (if present)
+              if (component.types.includes("postal_code")) {
+                setValue("postal_code", component.long_name)
+              }
+            }
+
+            // Populate the City Field
+            if (city) {
+              setValue("city", city)
+            }
+
+            // Populate the Country Dropdown
+            if (country) {
+              const countryId = findCountryIdByLabel(country)
+              const countryName = findCountryLabelById(countryId)
+              if (countryName) {
+                setCountryIdValue(countryId)
+                setValue("country_id", countryName, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                  shouldTouch: true,
+                })
+              }
+            }
+          })
+        } catch (error) {
+          console.error("Error initializing Google Maps Autocomplete:", error)
+        }
+      }, 500)
+    }
+
+    // Load the API
+    loadGoogleMapsAPI()
+
+    // Cleanup function
+    return () => {
+      if (autocompleteRef.current) {
+        window.google?.maps?.event?.clearInstanceListeners(autocompleteRef.current)
+        autocompleteRef.current = null
+      }
+
+      // Clean up the observer
+      if (window.autocompleteObserver) {
+        window.autocompleteObserver.disconnect()
+      }
+    }
+  }, [activeStep, setValue, findCountryLabelById, findCountryIdByLabel])
+
   const renderForm = (
     <Box gap={3} display="flex" flexDirection="column">
       {activeStep === 0 && (
@@ -602,6 +820,9 @@ export function JwtSignUpViewCompany() {
           <Field.Text
             name="address"
             label="Address"
+            id="address"
+            inputRef={addressInputRef}
+            placeholder="Start typing your address..."
             error={Boolean(methods.formState.errors.address)}
             helperText={methods.formState.errors.address?.message}
           />
@@ -731,7 +952,7 @@ export function JwtSignUpViewCompany() {
                 {option.label}
               </MenuItem>
             ))}
-            <MenuItem value="Don’t Know">Dont Know</MenuItem> {/* Default selection */}
+            <MenuItem value="Don't Know">Dont Know</MenuItem> {/* Default selection */}
           </Field.Select>
 
           <Field.Select
@@ -750,7 +971,7 @@ export function JwtSignUpViewCompany() {
                 {option.label}
               </MenuItem>
             ))}
-            <MenuItem value="Don’t Know">Dont Know</MenuItem> {/* Default selection */}
+            <MenuItem value="Don't Know">Dont Know</MenuItem> {/* Default selection */}
           </Field.Select>
 
           <Field.Select

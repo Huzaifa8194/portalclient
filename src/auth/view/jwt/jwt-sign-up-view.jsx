@@ -1,7 +1,7 @@
 "use client"
 
 import { z as zod } from "zod"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import dayjs from "dayjs"
@@ -124,6 +124,8 @@ export function JwtSignUpView() {
   const [isLoadingGenders, setIsLoadingGenders] = useState(true)
   const [activeStep, setActiveStep] = useState(0)
   const [steps, setSteps] = useState(["Personal Details", "Location & Address", "Password & Confirmation"])
+  const autocompleteRef = useRef(null)
+  const addressInputRef = useRef(null)
 
   const handleNext = (e) => {
     // Prevent form submission
@@ -195,6 +197,7 @@ export function JwtSignUpView() {
   const {
     handleSubmit,
     formState: { isSubmitting },
+    setValue,
   } = methods
 
   const findCountryIdByLabel = useCallback((countryLabel) => {
@@ -213,6 +216,180 @@ export function JwtSignUpView() {
     return dayjs(date).format("YYYY-MM-DD")
   }
 
+  // Initialize Google Maps autocomplete when the address field is visible
+  useEffect(() => {
+    // Only initialize when on step 1 (Location & Address)
+    if (activeStep !== 1) return undefined
+
+    // Function to load Google Maps API
+    const loadGoogleMapsAPI = () => {
+      if (window.google && window.google.maps && window.google.maps.places) {
+        initializeAutocomplete()
+      } else {
+        const script = document.createElement("script")
+        script.src =
+          "https://maps.googleapis.com/maps/api/js?key=AIzaSyAAWOsJJP9SHiPLh_DSRHJIwdrXfY2WBNw&libraries=places"
+        script.async = true
+        script.defer = true
+        script.onload = initializeAutocomplete
+        document.head.appendChild(script)
+      }
+    }
+
+    // Function to initialize autocomplete
+    const initializeAutocomplete = () => {
+      // Wait for the DOM to be fully loaded and the input to be available
+      setTimeout(() => {
+        // Get the address input element
+        const addressInput = document.getElementById("address")
+        if (!addressInput) {
+          console.error("Address input element not found")
+          return
+        }
+
+        try {
+          // Create the autocomplete instance
+          const autocomplete = new window.google.maps.places.Autocomplete(addressInput, {
+            types: ["address"],
+          })
+
+          // Apply custom styling to match MenuItem components
+          const pacContainer = document.querySelector(".pac-container")
+          if (pacContainer) {
+            // Remove the observer if it exists
+            if (window.autocompleteObserver) {
+              window.autocompleteObserver.disconnect()
+            }
+
+            // Create a new observer to watch for the pac-container
+            window.autocompleteObserver = new MutationObserver((mutations, observer) => {
+              const container = document.querySelector(".pac-container")
+              if (container) {
+                // Apply custom styling to match MenuItem
+              
+                
+
+                // Style the items
+                const items = container.querySelectorAll(".pac-item")
+                items.forEach((item) => {
+                  item.style.padding = "6px 16px"
+                  item.style.fontSize = "1rem"
+                  item.style.fontFamily = '"Roboto","Helvetica","Arial",sans-serif'
+                  item.style.lineHeight = "1.5"
+                  item.style.transition = "background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms"
+
+                  // Add hover effect
+                  item.addEventListener("mouseenter", () => {
+                    item.style.backgroundColor = "rgba(0, 0, 0, 0.04)"
+                  })
+                  item.addEventListener("mouseleave", () => {
+                    item.style.backgroundColor = "transparent"
+                  })
+                })
+
+                // Once we've styled it, we can disconnect the observer
+                observer.disconnect()
+              }
+            })
+
+            // Start observing the document body for the pac-container
+            window.autocompleteObserver.observe(document.body, {
+              childList: true,
+              subtree: true,
+            })
+          }
+
+          // Also add a focus event listener to ensure styling is applied when the dropdown appears
+          addressInput.addEventListener("focus", () => {
+            setTimeout(() => {
+              const container = document.querySelector(".pac-container")
+              if (container) {
+                container.style.zIndex = "1500"
+                container.style.borderRadius = "4px"
+                container.style.boxShadow =
+                  "0px 5px 5px -3px rgba(0,0,0,0.2), 0px 8px 10px 1px rgba(0,0,0,0.14), 0px 3px 14px 2px rgba(0,0,0,0.12)"
+                container.style.backgroundColor = "white"
+                container.style.border = "1px solid rgba(0, 0, 0, 0.12)"
+                container.style.marginTop = "8px"
+
+                const items = container.querySelectorAll(".pac-item")
+                items.forEach((item) => {
+                  item.style.padding = "6px 16px"
+                  item.style.fontSize = "1rem"
+                  item.style.fontFamily = '"Roboto","Helvetica","Arial",sans-serif'
+                  item.style.lineHeight = "1.5"
+                })
+              }
+            }, 300)
+          })
+
+          // Store the autocomplete instance in the ref
+          autocompleteRef.current = autocomplete
+
+          // Add a listener for place selection
+          autocomplete.addListener("place_changed", () => {
+            const place = autocomplete.getPlace()
+
+            if (!place.geometry) {
+              console.log("Place details not found")
+              return
+            }
+
+            // Populate the Address Field
+            const address = place.formatted_address
+            setValue("address", address)
+
+            // Extract and populate the City Field
+            let city = ""
+            let country = ""
+
+            for (let i = 0; i < place.address_components.length; i += 1) {
+              const component = place.address_components[i]
+
+              // Get the City (if present)
+              if (component.types.includes("locality")) {
+                city = component.long_name
+              }
+
+              // Get the Country (if present)
+              if (component.types.includes("country")) {
+                country = component.long_name
+              }
+            }
+
+            // Populate the City Field
+            if (city) {
+              setValue("city", city)
+            }
+
+            // Populate the Country Dropdown
+            if (country) {
+              const countryId = findCountryIdByLabel(country)
+              const countryName = findCountryLabelById(countryId)
+              if (countryName) {
+                setValue("countryresiding", countryName)
+              }
+            }
+          })
+        } catch (error) {
+          console.error("Error initializing Google Maps Autocomplete:", error)
+        }
+      }, 500)
+    }
+
+    // Load the API
+    loadGoogleMapsAPI()
+
+    // Cleanup function
+    return () => {
+      if (autocompleteRef.current) {
+        window.google?.maps?.event?.clearInstanceListeners(autocompleteRef.current)
+        autocompleteRef.current = null
+      }
+      return undefined // Add explicit return to satisfy ESLint
+    }
+  }, [activeStep, setValue, findCountryIdByLabel, findCountryLabelById])
+
   const renderForm = (
     <Box gap={3} display="flex" flexDirection="column">
       {activeStep === 0 && (
@@ -227,7 +404,7 @@ export function JwtSignUpView() {
             helperText="You must be at least 18 years old to register"
             format="YYYY-MM-DD"
           />
-          <Field.Select name="gender" label="Gender" select defaultValue="" disabled={isLoadingGenders}>
+          <Field.Select name="gender" label="Gender" defaultValue="" disabled={isLoadingGenders}>
             {genderOptions.map((option) => (
               <MenuItem key={option.value} value={option.value.toString()}>
                 {option.label}
@@ -246,14 +423,20 @@ export function JwtSignUpView() {
       {activeStep === 1 && (
         // Step 2 - Personal Details
         <>
-          <Field.Text name="address" label="Address" />
+          <Field.Text
+            name="address"
+            label="Address"
+            id="address"
+            inputRef={addressInputRef}
+            placeholder="Start typing your address..."
+          />
           <Box display="flex" gap={{ xs: 3, sm: 2 }} flexDirection={{ xs: "column", sm: "row" }}>
             <Field.Text name="city" label="City" />
             <Field.Text name="postalCode" label="Postal Code" />
           </Box>
           <Field.CountrySelect name="countryresiding" label="Country Residing In" placeholder="Choose an Option" />
 
-          <Field.CountrySelect name="placeofbirth" label="Country of Birth" placeholder="Choose an Option" select />
+          <Field.CountrySelect name="placeofbirth" label="Country of Birth" placeholder="Choose an Option" />
           <Field.CountrySelect name="nationality" label="Nationality" placeholder="Choose an Option" />
         </>
       )}
