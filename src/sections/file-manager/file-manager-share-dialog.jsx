@@ -57,8 +57,11 @@ export function FileManagerShareDialog({
       {hasShared && (
         <Scrollbar sx={{ height: 60 * 5, px: 3 }}>
           <Box component="ul">
-            {shared.map((person) => (
-              <FileManagerInvitedItem key={person.id} person={person} />
+            {shared.map((person, index) => (
+              <FileManagerInvitedItem
+                key={person.id || `${person.email}-${index}`} 
+                person={person}
+              />
             ))}
           </Box>
         </Scrollbar>

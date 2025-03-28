@@ -1,68 +1,68 @@
-import { useState, useCallback } from 'react';
+"use client"
 
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
-import Avatar from '@mui/material/Avatar';
-import Divider from '@mui/material/Divider';
-import MenuList from '@mui/material/MenuList';
-import MenuItem from '@mui/material/MenuItem';
-import Checkbox from '@mui/material/Checkbox';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import AvatarGroup, { avatarGroupClasses } from '@mui/material/AvatarGroup';
+import { useState, useCallback } from "react"
 
-import { useBoolean } from 'src/hooks/use-boolean';
-import { useCopyToClipboard } from 'src/hooks/use-copy-to-clipboard';
+import Box from "@mui/material/Box"
+import Paper from "@mui/material/Paper"
+import Stack from "@mui/material/Stack"
+import Button from "@mui/material/Button"
+import Avatar from "@mui/material/Avatar"
+import Divider from "@mui/material/Divider"
+import MenuList from "@mui/material/MenuList"
+import MenuItem from "@mui/material/MenuItem"
+import Checkbox from "@mui/material/Checkbox"
+import IconButton from "@mui/material/IconButton"
+import Typography from "@mui/material/Typography"
+import AvatarGroup, { avatarGroupClasses } from "@mui/material/AvatarGroup"
 
-import { fData } from 'src/utils/format-number';
-import { fDateTime } from 'src/utils/format-time';
+import { useBoolean } from "src/hooks/use-boolean"
+import { useCopyToClipboard } from "src/hooks/use-copy-to-clipboard"
 
-import { maxLine } from 'src/theme/styles';
+import { fData } from "src/utils/format-number"
+import { fDateTime } from "src/utils/format-time"
 
-import { toast } from 'src/components/snackbar';
-import { Iconify } from 'src/components/iconify';
-import { ConfirmDialog } from 'src/components/custom-dialog';
-import { FileThumbnail } from 'src/components/file-thumbnail';
-import { usePopover, CustomPopover } from 'src/components/custom-popover';
+import { toast } from "src/components/snackbar"
+import { Iconify } from "src/components/iconify"
+import { ConfirmDialog } from "src/components/custom-dialog"
+import { FileThumbnail } from "src/components/file-thumbnail"
+import { usePopover, CustomPopover } from "src/components/custom-popover"
 
-import { FileManagerShareDialog } from './file-manager-share-dialog';
-import { FileManagerFileDetails } from './file-manager-file-details';
+import { FileManagerShareDialog } from "./file-manager-share-dialog"
+import { FileManagerFileDetails } from "./file-manager-file-details"
 
 // ----------------------------------------------------------------------
 
 export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ...other }) {
-  const share = useBoolean();
+  const share = useBoolean()
 
-  const confirm = useBoolean();
+  const confirm = useBoolean()
 
-  const details = useBoolean();
+  const details = useBoolean()
 
-  const popover = usePopover();
+  const popover = usePopover()
 
-  const checkbox = useBoolean();
+  const checkbox = useBoolean()
 
-  const { copy } = useCopyToClipboard();
+  const { copy } = useCopyToClipboard()
 
-  const favorite = useBoolean(file.isFavorited);
+  const favorite = useBoolean(file.isFavorited)
 
-  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteEmail, setInviteEmail] = useState("")
 
   const handleChangeInvite = useCallback((event) => {
-    setInviteEmail(event.target.value);
-  }, []);
+    setInviteEmail(event.target.value)
+  }, [])
 
   const handleCopy = useCallback(() => {
-    toast.success('Copied!');
-    copy(file.url);
-  }, [copy, file.url]);
+    toast.success("Copied!")
+    copy(file.url)
+  }, [copy, file.url])
 
   const renderIcon = (
     <Box
       onMouseEnter={checkbox.onTrue}
       onMouseLeave={checkbox.onFalse}
-      sx={{ display: 'inline-flex', width: 36, height: 36 }}
+      sx={{ display: "inline-flex", width: 36, height: 36 }}
     >
       {(checkbox.value || selected) && onSelect ? (
         <Checkbox
@@ -72,7 +72,7 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
           checkedIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
           inputProps={{
             id: `item-checkbox-${file.id}`,
-            'aria-label': `Item checkbox`,
+            "aria-label": `Item checkbox`,
           }}
           sx={{ width: 1, height: 1 }}
         />
@@ -80,10 +80,10 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
         <FileThumbnail file={file.type} sx={{ width: 1, height: 1 }} />
       )}
     </Box>
-  );
+  )
 
   const renderAction = (
-    <Stack direction="row" alignItems="center" sx={{ top: 8, right: 8, position: 'absolute' }}>
+    <Stack direction="row" alignItems="center" sx={{ top: 8, right: 8, position: "absolute" }}>
       <Checkbox
         color="warning"
         icon={<Iconify icon="eva:star-outline" />}
@@ -92,15 +92,15 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
         onChange={favorite.onToggle}
         inputProps={{
           id: `favorite-checkbox-${file.id}`,
-          'aria-label': `Favorite checkbox`,
+          "aria-label": `Favorite checkbox`,
         }}
       />
 
-      <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
+      <IconButton color={popover.open ? "inherit" : "default"} onClick={popover.onOpen}>
         <Iconify icon="eva:more-vertical-fill" />
       </IconButton>
     </Stack>
-  );
+  )
 
   const renderText = (
     <>
@@ -116,14 +116,15 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
           whiteSpace: "normal",
           display: "-webkit-box",
           WebkitBoxOrient: "vertical",
-          WebkitLineClamp: 3, // Allows up to 3 lines before truncating
+          WebkitLineClamp: 3,
           overflow: "hidden",
-          textAlign: "center", // Centering for better readability
+          textAlign: "start", 
+          cursor: "pointer",
         }}
       >
         {file.name}
       </Typography>
-  
+
       <Stack
         direction="row"
         alignItems="center"
@@ -135,7 +136,7 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
         }}
       >
         {fData(file.size)}
-  
+
         <Box
           component="span"
           sx={{
@@ -152,8 +153,8 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
         </Typography>
       </Stack>
     </>
-  );
-  
+  )
+
   const renderAvatar = (
     <AvatarGroup
       max={3}
@@ -162,15 +163,15 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
         [`& .${avatarGroupClasses.avatar}`]: {
           width: 24,
           height: 24,
-          '&:first-of-type': { fontSize: 12 },
+          "&:first-of-type": { fontSize: 12 },
         },
       }}
     >
       {file.shared?.map((person) => (
-        <Avatar key={person.id} alt={person.name} src={person.avatarUrl} />
+        <Avatar key={person.id || person.name} alt={person.name} src={person.avatarUrl} />
       ))}
     </AvatarGroup>
-  );
+  )
 
   return (
     <>
@@ -178,18 +179,25 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
         variant="outlined"
         sx={{
           p: 2.5,
-          display: 'flex',
+          display: "flex",
           borderRadius: 2,
-          cursor: 'pointer',
-          position: 'relative',
-          bgcolor: 'transparent',
-          flexDirection: 'column',
-          alignItems: 'flex-start',
+          cursor: "pointer",
+          position: "relative",
+          bgcolor: "transparent",
+          flexDirection: "column",
+          alignItems: "flex-start",
           ...((checkbox.value || selected) && {
-            bgcolor: 'background.paper',
+            bgcolor: "background.paper",
             boxShadow: (theme) => theme.customShadows.z20,
           }),
           ...sx,
+        }}
+        onClick={(event) => {
+          // Prevent details opening when clicking on checkbox or action buttons
+          if (event.target.closest('input[type="checkbox"]') || event.target.closest("button")) {
+            return
+          }
+          details.onTrue()
         }}
         {...other}
       >
@@ -206,37 +214,37 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
         open={popover.open}
         anchorEl={popover.anchorEl}
         onClose={popover.onClose}
-        slotProps={{ arrow: { placement: 'right-top' } }}
+        slotProps={{ arrow: { placement: "right-top" } }}
       >
         <MenuList>
-          <MenuItem
+          {/* <MenuItem
             onClick={() => {
-              popover.onClose();
-              handleCopy();
+              popover.onClose()
+              handleCopy()
             }}
           >
             <Iconify icon="eva:link-2-fill" />
             Copy Link
-          </MenuItem>
+          </MenuItem> */}
 
-          <MenuItem
+          {/* <MenuItem
             onClick={() => {
-              popover.onClose();
-              share.onTrue();
+              popover.onClose()
+              share.onTrue()
             }}
           >
             <Iconify icon="solar:share-bold" />
             Share
-          </MenuItem>
+          </MenuItem> */}
 
-          <Divider sx={{ borderStyle: 'dashed' }} />
+          <Divider sx={{ borderStyle: "dashed" }} />
 
           <MenuItem
             onClick={() => {
-              confirm.onTrue();
-              popover.onClose();
+              confirm.onTrue()
+              popover.onClose()
             }}
-            sx={{ color: 'error.main' }}
+            sx={{ color: "error.main" }}
           >
             <Iconify icon="solar:trash-bin-trash-bold" />
             Delete
@@ -252,8 +260,8 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
         open={details.value}
         onClose={details.onFalse}
         onDelete={() => {
-          details.onFalse();
-          onDelete();
+          details.onFalse()
+          onDelete()
         }}
       />
 
@@ -264,8 +272,8 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
         onChangeInvite={handleChangeInvite}
         onCopyLink={handleCopy}
         onClose={() => {
-          share.onFalse();
-          setInviteEmail('');
+          share.onFalse()
+          setInviteEmail("")
         }}
       />
 
@@ -281,5 +289,6 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
         }
       />
     </>
-  );
+  )
 }
+

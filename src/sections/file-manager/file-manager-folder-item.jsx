@@ -1,52 +1,64 @@
-import { useCallback } from 'react';
+"use client"
 
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
-import Avatar from '@mui/material/Avatar';
-import Divider from '@mui/material/Divider';
-import MenuList from '@mui/material/MenuList';
-import MenuItem from '@mui/material/MenuItem';
-import Checkbox from '@mui/material/Checkbox';
-import IconButton from '@mui/material/IconButton';
-import ListItemText from '@mui/material/ListItemText';
-import AvatarGroup, { avatarGroupClasses } from '@mui/material/AvatarGroup';
+import { useCallback } from "react"
 
-import { useBoolean } from 'src/hooks/use-boolean';
-import { useCopyToClipboard } from 'src/hooks/use-copy-to-clipboard';
+import Box from "@mui/material/Box"
+import Paper from "@mui/material/Paper"
+import Stack from "@mui/material/Stack"
+import Button from "@mui/material/Button"
+import Avatar from "@mui/material/Avatar"
+import Divider from "@mui/material/Divider"
+import MenuList from "@mui/material/MenuList"
+import MenuItem from "@mui/material/MenuItem"
+import Checkbox from "@mui/material/Checkbox"
+import IconButton from "@mui/material/IconButton"
+import ListItemText from "@mui/material/ListItemText"
+import AvatarGroup, { avatarGroupClasses } from "@mui/material/AvatarGroup"
 
-import { fData } from 'src/utils/format-number';
+import { useBoolean } from "src/hooks/use-boolean"
+import { useCopyToClipboard } from "src/hooks/use-copy-to-clipboard"
 
-import { CONFIG } from 'src/config-global';
+import { fData } from "src/utils/format-number"
 
-import { toast } from 'src/components/snackbar';
-import { Iconify } from 'src/components/iconify';
-import { ConfirmDialog } from 'src/components/custom-dialog';
-import { usePopover, CustomPopover } from 'src/components/custom-popover';
+import { CONFIG } from "src/config-global"
 
-import { FileManagerShareDialog } from './file-manager-share-dialog';
+import { toast } from "src/components/snackbar"
+import { Iconify } from "src/components/iconify"
+import { ConfirmDialog } from "src/components/custom-dialog"
+import { usePopover, CustomPopover } from "src/components/custom-popover"
+
+import { FileManagerShareDialog } from "./file-manager-share-dialog"
 
 export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete, onFolderClick, ...other }) {
-  const { copy } = useCopyToClipboard();
+  const { copy } = useCopyToClipboard()
 
-  const share = useBoolean();
-  const popover = usePopover();
-  const confirm = useBoolean();
-  const checkbox = useBoolean();
-  const favorite = useBoolean(folder.isFavorited);
+  const share = useBoolean()
+  const popover = usePopover()
+  const confirm = useBoolean()
+  const checkbox = useBoolean()
+  const favorite = useBoolean(folder.isFavorited)
 
   const handleCopy = useCallback(() => {
-    toast.success('Copied!');
-    copy(folder.url);
-  }, [copy, folder.url]);
+    toast.success("Copied!")
+    copy(folder.url)
+  }, [copy, folder.url])
 
-  const handleFolderClick = useCallback(() => {
-    onFolderClick(folder);
-  }, [onFolderClick, folder]);
+  const handleFolderClick = useCallback(
+    (event) => {
+      
+      if (event.target.closest('input[type="checkbox"]') || event.target.closest("button")) {
+        return
+      }
+
+      if (onFolderClick) {
+        onFolderClick(folder)
+      }
+    },
+    [onFolderClick, folder],
+  )
 
   const renderAction = (
-    <Stack direction="row" alignItems="center" sx={{ top: 8, right: 8, position: 'absolute' }}>
+    <Stack direction="row" alignItems="center" sx={{ top: 8, right: 8, position: "absolute" }}>
       <Checkbox
         color="warning"
         icon={<Iconify icon="eva:star-outline" />}
@@ -54,23 +66,19 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
         checked={favorite.value}
         onChange={favorite.onToggle}
         inputProps={{
-          name: 'checkbox-favorite',
-          'aria-label': 'Checkbox favorite',
+          name: "checkbox-favorite",
+          "aria-label": "Checkbox favorite",
         }}
       />
 
-      <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
+      <IconButton color={popover.open ? "inherit" : "default"} onClick={popover.onOpen}>
         <Iconify icon="eva:more-vertical-fill" />
       </IconButton>
     </Stack>
-  );
+  )
 
   const renderIcon = (
-    <Box
-      onMouseEnter={checkbox.onTrue}
-      onMouseLeave={checkbox.onFalse}
-      sx={{ width: 36, height: 36 }}
-    >
+    <Box onMouseEnter={checkbox.onTrue} onMouseLeave={checkbox.onFalse} sx={{ width: 36, height: 36 }}>
       {(checkbox.value || selected) && onSelect ? (
         <Checkbox
           checked={selected}
@@ -87,11 +95,10 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
         />
       )}
     </Box>
-  );
+  )
 
   const renderText = (
     <ListItemText
-      onClick={handleFolderClick}
       primary={folder.name}
       secondary={
         <>
@@ -102,24 +109,33 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
               mx: 0.75,
               width: 2,
               height: 2,
-              borderRadius: '50%',
-              bgcolor: 'currentColor',
+              borderRadius: "50%",
+              bgcolor: "currentColor",
             }}
           />
           {folder.totalFiles} files
         </>
       }
-      primaryTypographyProps={{ noWrap: true, typography: 'subtitle1' }}
+      primaryTypographyProps={{
+        noWrap: true,
+        typography: "subtitle1",
+        color: "primary.main",
+        sx: {
+          "&:hover": {
+            textDecoration: "underline",
+          },
+        },
+      }}
       secondaryTypographyProps={{
         mt: 0.5,
-        component: 'span',
-        alignItems: 'center',
-        typography: 'caption',
-        color: 'text.disabled',
-        display: 'inline-flex',
+        component: "span",
+        alignItems: "center",
+        typography: "caption",
+        color: "text.disabled",
+        display: "inline-flex",
       }}
     />
-  );
+  )
 
   const renderAvatar = (
     <AvatarGroup
@@ -128,15 +144,15 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
         [`& .${avatarGroupClasses.avatar}`]: {
           width: 24,
           height: 24,
-          '&:first-of-type': { fontSize: 12 },
+          "&:first-of-type": { fontSize: 12 },
         },
       }}
     >
       {folder.shared?.map((person) => (
-        <Avatar key={person.id} alt={person.name} src={person.avatarUrl} />
+        <Avatar key={person.id || person.name} alt={person.name} src={person.avatarUrl} />
       ))}
     </AvatarGroup>
-  );
+  )
 
   return (
     <>
@@ -145,12 +161,15 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
         sx={{
           p: 2.5,
           width: 1,
-          cursor: 'pointer',
-          bgcolor: 'background.paper',
+          cursor: "pointer",
+          bgcolor: "background.paper",
           ...((checkbox.value || selected) && {
-            bgcolor: 'background.paper',
+            bgcolor: "background.paper",
             boxShadow: (theme) => theme.customShadows.z20,
           }),
+          "&:hover": {
+            bgcolor: "background.neutral",
+          },
           ...sx,
         }}
         onClick={handleFolderClick}
@@ -169,13 +188,13 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
         open={popover.open}
         anchorEl={popover.anchorEl}
         onClose={popover.onClose}
-        slotProps={{ arrow: { placement: 'right-top' } }}
+        slotProps={{ arrow: { placement: "right-top" } }}
       >
         <MenuList>
           <MenuItem
             onClick={() => {
-              popover.onClose();
-              handleCopy();
+              popover.onClose()
+              handleCopy()
             }}
           >
             <Iconify icon="eva:link-2-fill" />
@@ -184,22 +203,22 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
 
           <MenuItem
             onClick={() => {
-              popover.onClose();
-              share.onTrue();
+              popover.onClose()
+              share.onTrue()
             }}
           >
             <Iconify icon="solar:share-bold" />
             Share
           </MenuItem>
 
-          <Divider sx={{ borderStyle: 'dashed' }} />
+          <Divider sx={{ borderStyle: "dashed" }} />
 
           <MenuItem
             onClick={() => {
-              confirm.onTrue();
-              popover.onClose();
+              confirm.onTrue()
+              popover.onClose()
             }}
-            sx={{ color: 'error.main' }}
+            sx={{ color: "error.main" }}
           >
             <Iconify icon="solar:trash-bin-trash-bold" />
             Delete
@@ -207,11 +226,7 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
         </MenuList>
       </CustomPopover>
 
-      <FileManagerShareDialog
-        open={share.value}
-        shared={folder.shared}
-        onClose={share.onFalse}
-      />
+      <FileManagerShareDialog open={share.value} shared={folder.shared} onClose={share.onFalse} />
 
       <ConfirmDialog
         open={confirm.value}
@@ -225,6 +240,6 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
         }
       />
     </>
-  );
+  )
 }
 

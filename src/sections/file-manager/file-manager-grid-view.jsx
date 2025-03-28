@@ -1,81 +1,89 @@
-import { useRef, useState, useCallback } from 'react';
+"use client"
 
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import Collapse from '@mui/material/Collapse';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import IconButton from '@mui/material/IconButton';
+import { useRef, useState, useCallback } from "react"
 
-import { useBoolean } from 'src/hooks/use-boolean';
+import Box from "@mui/material/Box"
+import Button from "@mui/material/Button"
+import Divider from "@mui/material/Divider"
+import Collapse from "@mui/material/Collapse"
+import Menu from "@mui/material/Menu"
+import MenuItem from "@mui/material/MenuItem"
+import IconButton from "@mui/material/IconButton"
 
-import { Iconify } from 'src/components/iconify';
+import { useBoolean } from "src/hooks/use-boolean"
 
-import { FileManagerPanel } from './file-manager-panel';
-import { FileManagerFileItem } from './file-manager-file-item';
-import { FileManagerFolderItem } from './file-manager-folder-item';
-import { FileManagerShareDialog } from './file-manager-share-dialog';
-import { FileManagerActionSelected } from './file-manager-action-selected';
-import { FileManagerNewFolderDialog } from './file-manager-new-folder-dialog';
+import { Iconify } from "src/components/iconify"
+
+import { FileManagerPanel } from "./file-manager-panel"
+import { FileManagerFileItem } from "./file-manager-file-item"
+import { FileManagerFolderItem } from "./file-manager-folder-item"
+import { FileManagerShareDialog } from "./file-manager-share-dialog"
+import { FileManagerActionSelected } from "./file-manager-action-selected"
+import { FileManagerNewFolderDialog } from "./file-manager-new-folder-dialog"
 
 export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenConfirm, onFolderClick }) {
-  const { selected, onSelectRow: onSelectItem, onSelectAllRows: onSelectAllItems } = table;
+  const { selected, onSelectRow: onSelectItem, onSelectAllRows: onSelectAllItems } = table
 
-  const share = useBoolean();
+  const share = useBoolean()
 
-  const files = useBoolean();
+  const files = useBoolean()
 
-  const upload = useBoolean();
+  const upload = useBoolean()
 
-  const folders = useBoolean();
+  const folders = useBoolean()
 
-  const newFolder = useBoolean();
+  const newFolder = useBoolean()
 
-  const containerRef = useRef(null);
+  const containerRef = useRef(null)
 
-  const [folderName, setFolderName] = useState('');
+  const [folderName, setFolderName] = useState("")
 
-  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteEmail, setInviteEmail] = useState("")
 
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedFolderId, setSelectedFolderId] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null)
+  const [selectedFolderId, setSelectedFolderId] = useState(null)
 
   const handleChangeInvite = useCallback((event) => {
-    setInviteEmail(event.target.value);
-  }, []);
+    setInviteEmail(event.target.value)
+  }, [])
 
   const handleChangeFolderName = useCallback((event) => {
-    setFolderName(event.target.value);
-  }, []);
+    setFolderName(event.target.value)
+  }, [])
 
   const handleMenuOpen = (event, folderId) => {
-    event.stopPropagation();
-    setAnchorEl(event.currentTarget);
-    setSelectedFolderId(folderId);
-  };
+    event.stopPropagation()
+    setAnchorEl(event.currentTarget)
+    setSelectedFolderId(folderId)
+  }
 
   const handleMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedFolderId(null);
-  };
+    setAnchorEl(null)
+    setSelectedFolderId(null)
+  }
 
   const handleShareFolder = () => {
-    share.onTrue();
-    handleMenuClose();
-  };
+    share.onTrue()
+    handleMenuClose()
+  }
 
   const handleDeleteFolder = () => {
-    onDeleteItem(selectedFolderId);
-    handleMenuClose();
-  };
+    onDeleteItem(selectedFolderId)
+    handleMenuClose()
+  }
+
+  const handleFolderClick = (folder) => {
+    if (folder.isFolder && onFolderClick) {
+      onFolderClick(folder)
+    }
+  }
 
   return (
     <>
       <Box ref={containerRef}>
         <FileManagerPanel
           title="Folders"
-          subtitle={`${dataFiltered.filter((item) => item.type === 'folder').length} folders`}
+          subtitle={`${dataFiltered.filter((item) => item.type === "folder").length} folders`}
           onOpen={newFolder.onTrue}
           collapse={folders.value}
           onCollapse={folders.onToggle}
@@ -86,14 +94,14 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
             gap={3}
             display="grid"
             gridTemplateColumns={{
-              xs: 'repeat(1, 1fr)',
-              sm: 'repeat(2, 1fr)',
-              md: 'repeat(3, 1fr)',
-              lg: 'repeat(4, 1fr)',
+              xs: "repeat(1, 1fr)",
+              sm: "repeat(2, 1fr)",
+              md: "repeat(3, 1fr)",
+              lg: "repeat(4, 1fr)",
             }}
           >
             {dataFiltered
-              .filter((i) => i.type === 'folder')
+              .filter((i) => i.type === "folder")
               .map((folder) => (
                 <FileManagerFolderItem
                   key={folder.id}
@@ -101,14 +109,14 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
                   selected={selected.includes(folder.id)}
                   onSelect={() => onSelectItem(folder.id)}
                   onDelete={() => onDeleteItem(folder.id)}
-                  onFolderClick={onFolderClick}
-                  sx={{ maxWidth: 'auto' }}
+                  onFolderClick={() => handleFolderClick(folder)}
+                  sx={{ maxWidth: "auto" }}
                   action={
                     <IconButton
                       size="small"
                       onClick={(event) => handleMenuOpen(event, folder.id)}
                       sx={{
-                        position: 'absolute',
+                        position: "absolute",
                         top: 8,
                         right: 8,
                         zIndex: 9,
@@ -122,21 +130,21 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
           </Box>
         </Collapse>
 
-        <Divider sx={{ my: 5, borderStyle: 'dashed' }} />
+        <Divider sx={{ my: 5, borderStyle: "dashed" }} />
 
         <Collapse in={!files.value} unmountOnExit>
           <Box
             display="grid"
             gridTemplateColumns={{
-              xs: 'repeat(1, 1fr)',
-              sm: 'repeat(2, 1fr)',
-              md: 'repeat(3, 1fr)',
-              lg: 'repeat(4, 1fr)',
+              xs: "repeat(1, 1fr)",
+              sm: "repeat(2, 1fr)",
+              md: "repeat(3, 1fr)",
+              lg: "repeat(4, 1fr)",
             }}
             gap={3}
           >
             {dataFiltered
-              .filter((i) => i.type !== 'folder')
+              .filter((i) => i.type !== "folder")
               .map((file) => (
                 <FileManagerFileItem
                   key={file.id}
@@ -144,7 +152,7 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
                   selected={selected.includes(file.id)}
                   onSelect={() => onSelectItem(file.id)}
                   onDelete={() => onDeleteItem(file.id)}
-                  sx={{ maxWidth: 'auto' }}
+                  sx={{ maxWidth: "auto" }}
                 />
               ))}
           </Box>
@@ -158,7 +166,7 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
             onSelectAllItems={(checked) =>
               onSelectAllItems(
                 checked,
-                dataFiltered.map((row) => row.id)
+                dataFiltered.map((row) => row.id),
               )
             }
             action={
@@ -188,11 +196,7 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
         )}
       </Box>
 
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-      >
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
         <MenuItem onClick={handleShareFolder}>Share</MenuItem>
         <MenuItem onClick={handleDeleteFolder}>Delete</MenuItem>
       </Menu>
@@ -202,8 +206,8 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
         inviteEmail={inviteEmail}
         onChangeInvite={handleChangeInvite}
         onClose={() => {
-          share.onFalse();
-          setInviteEmail('');
+          share.onFalse()
+          setInviteEmail("")
         }}
       />
 
@@ -214,13 +218,14 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
         onClose={newFolder.onFalse}
         title="New Folder"
         onCreate={() => {
-          newFolder.onFalse();
-          setFolderName('');
-          console.info('CREATE NEW FOLDER', folderName);
+          newFolder.onFalse()
+          setFolderName("")
+          console.info("CREATE NEW FOLDER", folderName)
         }}
         folderName={folderName}
         onChangeFolderName={handleChangeFolderName}
       />
     </>
-  );
+  )
 }
+

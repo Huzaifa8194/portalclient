@@ -1,87 +1,133 @@
-import { useState, useCallback } from 'react';
+"use client"
 
-import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
-import Avatar from '@mui/material/Avatar';
-import Divider from '@mui/material/Divider';
-import MenuList from '@mui/material/MenuList';
-import MenuItem from '@mui/material/MenuItem';
-import Checkbox from '@mui/material/Checkbox';
-import { useTheme } from '@mui/material/styles';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import ListItemText from '@mui/material/ListItemText';
-import TableRow, { tableRowClasses } from '@mui/material/TableRow';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-import AvatarGroup, { avatarGroupClasses } from '@mui/material/AvatarGroup';
+import { useState, useCallback, useContext } from "react"
+import axios from "axios";
+import { AuthContext } from "src/auth/context/auth-context";
+import Stack from "@mui/material/Stack"
+import Button from "@mui/material/Button"
+import Avatar from "@mui/material/Avatar"
+import Divider from "@mui/material/Divider"
+import MenuList from "@mui/material/MenuList"
+import MenuItem from "@mui/material/MenuItem"
+import Checkbox from "@mui/material/Checkbox"
+import { useTheme } from "@mui/material/styles"
+import IconButton from "@mui/material/IconButton"
+import Typography from "@mui/material/Typography"
+import ListItemText from "@mui/material/ListItemText"
+import TableRow, { tableRowClasses } from "@mui/material/TableRow"
+import TableCell, { tableCellClasses } from "@mui/material/TableCell"
+import AvatarGroup, { avatarGroupClasses } from "@mui/material/AvatarGroup"
 
-import { useBoolean } from 'src/hooks/use-boolean';
-import { useDoubleClick } from 'src/hooks/use-double-click';
-import { useCopyToClipboard } from 'src/hooks/use-copy-to-clipboard';
+import { useBoolean } from "src/hooks/use-boolean"
+import { useDoubleClick } from "src/hooks/use-double-click"
+import { useCopyToClipboard } from "src/hooks/use-copy-to-clipboard"
 
-import { fData } from 'src/utils/format-number';
-import { fDate, fTime } from 'src/utils/format-time';
+import { fData } from "src/utils/format-number"
+import { fDate, fTime } from "src/utils/format-time"
 
-import { varAlpha } from 'src/theme/styles';
+import { varAlpha } from "src/theme/styles"
 
-import { toast } from 'src/components/snackbar';
-import { Iconify } from 'src/components/iconify';
-import { ConfirmDialog } from 'src/components/custom-dialog';
-import { FileThumbnail } from 'src/components/file-thumbnail';
-import { usePopover, CustomPopover } from 'src/components/custom-popover';
+import { toast } from "src/components/snackbar"
+import { Iconify } from "src/components/iconify"
+import { ConfirmDialog } from "src/components/custom-dialog"
+import { FileThumbnail } from "src/components/file-thumbnail"
+import { usePopover, CustomPopover } from "src/components/custom-popover"
 
-import { FileManagerShareDialog } from './file-manager-share-dialog';
-import { FileManagerFileDetails } from './file-manager-file-details';
+import { FileManagerShareDialog } from "./file-manager-share-dialog"
+import { FileManagerFileDetails } from "./file-manager-file-details"
 
 // ----------------------------------------------------------------------
 
-export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow }) {
-  const theme = useTheme();
+export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow, onFolderClick }) {
+  const theme = useTheme()
 
-  const { copy } = useCopyToClipboard();
+  const { copy } = useCopyToClipboard()
 
-  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteEmail, setInviteEmail] = useState("")
 
-  const favorite = useBoolean(row.isFavorited);
+  const favorite = useBoolean(row.isFavorited)
 
-  const details = useBoolean();
+  const details = useBoolean()
 
-  const share = useBoolean();
+  const share = useBoolean()
 
-  const confirm = useBoolean();
+  const confirm = useBoolean()
 
-  const popover = usePopover();
+  const popover = usePopover()
+
+  const { user } = useContext(AuthContext);
+
+  const handleDelete = async () => {
+    try {
+      
+      if (!user?.accessToken) {
+        toast.error("Authentication required. Please log in again.");
+        return;
+      }
+
+      await axios.delete(`https://api.swedenrelocators.se/api/document/${row.id}`, {
+        headers: {
+          Authorization: `Bearer ${user.accessToken}`,
+        },
+      });
+
+      onDeleteRow(row.id); 
+      confirm.onFalse(); 
+    } catch (err) {
+      console.error("Delete error:", err);
+      confirm.onFalse();
+
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        toast.error("Authentication failed. Please log in again.");
+      } else if (err.response?.status === 404) {
+        toast.error("Document not found.");
+      } else {
+        toast.error(err.response?.data?.message || "Failed to delete document");
+      }
+    }
+  };
+
 
   const handleChangeInvite = useCallback((event) => {
-    setInviteEmail(event.target.value);
-  }, []);
+    setInviteEmail(event.target.value)
+  }, [])
 
   const handleClick = useDoubleClick({
     click: () => {
-      details.onTrue();
+      if (row.isFolder && onFolderClick) {
+        onFolderClick()
+      } else {
+        details.onTrue()
+      }
     },
-    doubleClick: () => console.info('DOUBLE CLICK'),
-  });
+    doubleClick: () => {
+      if (row.isFolder && onFolderClick) {
+        onFolderClick()
+      } else {
+        console.info("DOUBLE CLICK")
+      }
+    },
+  })
 
   const handleCopy = useCallback(() => {
-    toast.success('Copied!');
-    copy(row.url);
-  }, [copy, row.url]);
+    toast.success("Copied!")
+    copy(row.url)
+  }, [copy, row.url])
 
   const defaultStyles = {
-    borderTop: `solid 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.16)}`,
-    borderBottom: `solid 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.16)}`,
-    '&:first-of-type': {
+    borderTop: `solid 1px ${varAlpha(theme.vars.palette.grey["500Channel"], 0.16)}`,
+    borderBottom: `solid 1px ${varAlpha(theme.vars.palette.grey["500Channel"], 0.16)}`,
+    "&:first-of-type": {
       borderTopLeftRadius: 16,
       borderBottomLeftRadius: 16,
-      borderLeft: `solid 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.16)}`,
+      borderLeft: `solid 1px ${varAlpha(theme.vars.palette.grey["500Channel"], 0.16)}`,
     },
-    '&:last-of-type': {
+    "&:last-of-type": {
       borderTopRightRadius: 16,
       borderBottomRightRadius: 16,
-      borderRight: `solid 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.16)}`,
+      borderRight: `solid 1px ${varAlpha(theme.vars.palette.grey["500Channel"], 0.16)}`,
     },
-  };
+  }
 
   return (
     <>
@@ -89,13 +135,14 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow })
         selected={selected}
         sx={{
           borderRadius: 2,
+          cursor: row.isFolder ? "pointer" : "default",
           [`&.${tableRowClasses.selected}, &:hover`]: {
-            backgroundColor: 'background.paper',
+            backgroundColor: "background.paper",
             boxShadow: theme.customShadows.z20,
-            transition: theme.transitions.create(['background-color', 'box-shadow'], {
+            transition: theme.transitions.create(["background-color", "box-shadow"], {
               duration: theme.transitions.duration.shortest,
             }),
-            '&:hover': { backgroundColor: 'background.paper', boxShadow: theme.customShadows.z20 },
+            "&:hover": { backgroundColor: "background.paper", boxShadow: theme.customShadows.z20 },
           },
           [`& .${tableCellClasses.root}`]: { ...defaultStyles },
           ...(details.value && { [`& .${tableCellClasses.root}`]: { ...defaultStyles } }),
@@ -104,9 +151,9 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow })
         <TableCell padding="checkbox">
           <Checkbox
             checked={selected}
-            onDoubleClick={() => console.info('ON DOUBLE CLICK')}
+            onDoubleClick={() => console.info("ON DOUBLE CLICK")}
             onClick={onSelectRow}
-            inputProps={{ id: `row-checkbox-${row.id}`, 'aria-label': `row-checkbox` }}
+            inputProps={{ id: `row-checkbox-${row.id}`, "aria-label": `row-checkbox` }}
           />
         </TableCell>
 
@@ -119,8 +166,12 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow })
               variant="inherit"
               sx={{
                 maxWidth: 360,
-                cursor: 'pointer',
-                ...(details.value && { fontWeight: 'fontWeightBold' }),
+                cursor: "pointer",
+                ...(details.value && { fontWeight: "fontWeightBold" }),
+                ...(row.isFolder && {
+                  
+                  "&:hover": { textDecoration: "underline" },
+                }),
               }}
             >
               {row.name}
@@ -128,43 +179,48 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow })
           </Stack>
         </TableCell>
 
-        <TableCell onClick={handleClick} sx={{ whiteSpace: 'nowrap' }}>
-          {fData(row.size)}
+        <TableCell onClick={handleClick} sx={{ whiteSpace: "nowrap" }}>
+          {row.isFolder ? "--" : fData(row.size)}
         </TableCell>
 
-        <TableCell onClick={handleClick} sx={{ whiteSpace: 'nowrap' }}>
-          {row.type}
+        <TableCell onClick={handleClick} sx={{ whiteSpace: "nowrap" }}>
+          {row.isFolder ? "Folder" : row.type}
         </TableCell>
 
-        <TableCell onClick={handleClick} sx={{ whiteSpace: 'nowrap' }}>
+        <TableCell onClick={handleClick} sx={{ whiteSpace: "nowrap" }}>
           <ListItemText
             primary={fDate(row.modifiedAt)}
             secondary={fTime(row.modifiedAt)}
-            primaryTypographyProps={{ typography: 'body2' }}
-            secondaryTypographyProps={{ mt: 0.5, component: 'span', typography: 'caption' }}
+            primaryTypographyProps={{ typography: "body2" }}
+            secondaryTypographyProps={{ mt: 0.5, component: "span", typography: "caption" }}
           />
         </TableCell>
 
         <TableCell align="right" onClick={handleClick}>
+
           <AvatarGroup
             max={4}
             sx={{
-              display: 'inline-flex',
+              display: "inline-flex",
               [`& .${avatarGroupClasses.avatar}`]: {
                 width: 24,
                 height: 24,
-                '&:first-of-type': { fontSize: 12 },
+                "&:first-of-type": { fontSize: 12 },
               },
             }}
           >
             {row.shared &&
-              row.shared.map((person) => (
-                <Avatar key={person.id} alt={person.name} src={person.avatarUrl} />
+              row.shared.map((person, index) => (
+                <Avatar
+                  key={person.id || `avatar-${index}-${row.id}`}  
+                  alt={person.name}
+                  src={person.avatarUrl}
+                />
               ))}
           </AvatarGroup>
         </TableCell>
 
-        <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
+        <TableCell align="right" sx={{ px: 1, whiteSpace: "nowrap" }}>
           <Checkbox
             color="warning"
             icon={<Iconify icon="eva:star-outline" />}
@@ -174,7 +230,7 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow })
             sx={{ p: 0.75 }}
           />
 
-          <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
+          <IconButton color={popover.open ? "inherit" : "default"} onClick={popover.onOpen}>
             <Iconify icon="eva:more-vertical-fill" />
           </IconButton>
         </TableCell>
@@ -184,13 +240,13 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow })
         open={popover.open}
         anchorEl={popover.anchorEl}
         onClose={popover.onClose}
-        slotProps={{ arrow: { placement: 'right-top' } }}
+        slotProps={{ arrow: { placement: "right-top" } }}
       >
         <MenuList>
-          <MenuItem
+          {/* <MenuItem
             onClick={() => {
-              popover.onClose();
-              handleCopy();
+              popover.onClose()
+              handleCopy()
             }}
           >
             <Iconify icon="eva:link-2-fill" />
@@ -199,22 +255,22 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow })
 
           <MenuItem
             onClick={() => {
-              popover.onClose();
-              share.onTrue();
+              popover.onClose()
+              share.onTrue()
             }}
           >
             <Iconify icon="solar:share-bold" />
             Share
-          </MenuItem>
+          </MenuItem> */}
 
-          <Divider sx={{ borderStyle: 'dashed' }} />
+          <Divider sx={{ borderStyle: "dashed" }} />
 
           <MenuItem
             onClick={() => {
-              confirm.onTrue();
-              popover.onClose();
+              confirm.onTrue()
+              popover.onClose()
             }}
-            sx={{ color: 'error.main' }}
+            sx={{ color: "error.main" }}
           >
             <Iconify icon="solar:trash-bin-trash-bold" />
             Delete
@@ -239,8 +295,8 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow })
         onChangeInvite={handleChangeInvite}
         onCopyLink={handleCopy}
         onClose={() => {
-          share.onFalse();
-          setInviteEmail('');
+          share.onFalse()
+          setInviteEmail("")
         }}
       />
 
@@ -250,11 +306,12 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow })
         title="Delete"
         content="Are you sure want to delete?"
         action={
-          <Button variant="contained" color="error" onClick={onDeleteRow}>
+          <Button variant="contained" color="error" onClick={handleDelete}>
             Delete
           </Button>
         }
       />
     </>
-  );
+  )
 }
+

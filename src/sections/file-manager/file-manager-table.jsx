@@ -1,37 +1,34 @@
-import Box from '@mui/material/Box';
-import Table from '@mui/material/Table';
-import Tooltip from '@mui/material/Tooltip';
-import TableBody from '@mui/material/TableBody';
-import IconButton from '@mui/material/IconButton';
-import TableContainer from '@mui/material/TableContainer';
-import { tableCellClasses } from '@mui/material/TableCell';
-import { tablePaginationClasses } from '@mui/material/TablePagination';
+"use client"
 
-import { Iconify } from 'src/components/iconify';
-import {
-  TableNoData,
-  TableHeadCustom,
-  TableSelectedAction,
-  TablePaginationCustom,
-} from 'src/components/table';
+import Box from "@mui/material/Box"
+import Table from "@mui/material/Table"
+import Tooltip from "@mui/material/Tooltip"
+import TableBody from "@mui/material/TableBody"
+import IconButton from "@mui/material/IconButton"
+import TableContainer from "@mui/material/TableContainer"
+import { tableCellClasses } from "@mui/material/TableCell"
+import { tablePaginationClasses } from "@mui/material/TablePagination"
 
-import { FileManagerTableRow } from './file-manager-table-row';
+import { Iconify } from "src/components/iconify"
+import { TableNoData, TableHeadCustom, TableSelectedAction, TablePaginationCustom } from "src/components/table"
+
+import { FileManagerTableRow } from "./file-manager-table-row"
 
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Name' },
-  { id: 'size', label: 'Size', width: 120 },
-  { id: 'type', label: 'Type', width: 120 },
-  { id: 'modifiedAt', label: 'Modified', width: 140 },
+  { id: "name", label: "Name" },
+  { id: "size", label: "Size", width: 120 },
+  { id: "type", label: "Type", width: 120 },
+  { id: "modifiedAt", label: "Modified", width: 140 },
   {
-    id: 'shared',
-    label: 'Shared',
-    align: 'right',
+    id: "shared",
+    label: "Shared",
+    align: "right",
     width: 140,
   },
-  { id: '', width: 88 },
-];
+  { id: "", width: 88 },
+]
 
 // ----------------------------------------------------------------------
 
@@ -42,6 +39,7 @@ export function FileManagerTable({
   onDeleteRow,
   dataFiltered,
   onOpenConfirm,
+  onFolderClick,
   ...other
 }) {
   const {
@@ -59,13 +57,13 @@ export function FileManagerTable({
     onChangeDense,
     onChangePage,
     onChangeRowsPerPage,
-  } = table;
+  } = table
 
   return (
     <>
       <Box
         sx={{
-          position: 'relative',
+          position: "relative",
           m: (theme) => ({ md: theme.spacing(-2, -3, 0, -3) }),
           ...sx,
         }}
@@ -78,7 +76,7 @@ export function FileManagerTable({
           onSelectAllRows={(checked) =>
             onSelectAllRows(
               checked,
-              dataFiltered.map((row) => row.id)
+              dataFiltered.map((row) => row.id),
             )
           }
           action={
@@ -102,18 +100,18 @@ export function FileManagerTable({
             top: 16,
             left: 24,
             right: 24,
-            width: 'auto',
+            width: "auto",
             borderRadius: 1.5,
           }}
         />
 
         <TableContainer sx={{ px: { md: 3 } }}>
           <Table
-            size={dense ? 'small' : 'medium'}
+            size={dense ? "small" : "medium"}
             sx={{
               minWidth: 960,
-              borderCollapse: 'separate',
-              borderSpacing: '0 16px',
+              borderCollapse: "separate",
+              borderSpacing: "0 16px",
             }}
           >
             <TableHeadCustom
@@ -126,16 +124,16 @@ export function FileManagerTable({
               onSelectAllRows={(checked) =>
                 onSelectAllRows(
                   checked,
-                  dataFiltered.map((row) => row.id)
+                  dataFiltered.map((row) => row.id),
                 )
               }
               sx={{
                 [`& .${tableCellClasses.head}`]: {
-                  '&:first-of-type': {
+                  "&:first-of-type": {
                     borderTopLeftRadius: 12,
                     borderBottomLeftRadius: 12,
                   },
-                  '&:last-of-type': {
+                  "&:last-of-type": {
                     borderTopRightRadius: 12,
                     borderBottomRightRadius: 12,
                   },
@@ -144,17 +142,16 @@ export function FileManagerTable({
             />
 
             <TableBody>
-              {dataFiltered
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row) => (
-                  <FileManagerTableRow
-                    key={row.id}
-                    row={row}
-                    selected={selected.includes(row.id)}
-                    onSelectRow={() => onSelectRow(row.id)}
-                    onDeleteRow={() => onDeleteRow(row.id)}
-                  />
-                ))}
+              {dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                <FileManagerTableRow
+                  key={row.id}  
+                  row={row}
+                  selected={selected.includes(row.id)}
+                  onSelectRow={() => onSelectRow(row.id)}
+                  onDeleteRow={() => onDeleteRow(row.id)}
+                  onFolderClick={() => row.isFolder && onFolderClick && onFolderClick(row)}
+                />
+              ))}
 
               <TableNoData
                 notFound={notFound}
@@ -179,10 +176,11 @@ export function FileManagerTable({
         onRowsPerPageChange={onChangeRowsPerPage}
         sx={{
           [`& .${tablePaginationClasses.toolbar}`]: {
-            borderTopColor: 'transparent',
+            borderTopColor: "transparent",
           },
         }}
       />
     </>
-  );
+  )
 }
+
