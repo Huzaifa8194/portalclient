@@ -1,3 +1,4 @@
+
 "use client"
 
 import Button from "@mui/material/Button"
@@ -674,16 +675,26 @@ export function JwtSignUpViewCompany() {
               return
             }
 
-            // Populate the Address Field
-            const address = place.formatted_address
-            setValue("address", address)
-
-            // Extract and populate the City Field
+            // Extract address components
+            const street = ""
             let city = ""
             let country = ""
+            let postalCode = ""
+            let streetNumber = ""
+            let route = ""
 
             for (let i = 0; i < place.address_components.length; i += 1) {
               const component = place.address_components[i]
+
+              // Get the street number
+              if (component.types.includes("street_number")) {
+                streetNumber = component.long_name
+              }
+
+              // Get the route (street name)
+              if (component.types.includes("route")) {
+                route = component.long_name
+              }
 
               // Get the City (if present)
               if (component.types.includes("locality")) {
@@ -697,16 +708,42 @@ export function JwtSignUpViewCompany() {
 
               // Get the Postal Code (if present)
               if (component.types.includes("postal_code")) {
-                setValue("postal_code", component.long_name)
+                postalCode = component.long_name
               }
             }
 
-            // Populate the City Field
-            if (city) {
-              setValue("city", city)
+            // Format the address to only include street information
+            // This will be like "Italiener Str." or "Italiener Str. 123" if street number exists
+            let formattedAddress = ""
+            if (route) {
+              formattedAddress = route
+              if (streetNumber) {
+                formattedAddress += ` ${streetNumber}`
+              }
+            } else {
+              // If no specific street info is found, use the first part of the formatted address
+              const firstPart = place.formatted_address.split(",")[0]
+              formattedAddress = firstPart
             }
 
-            // Populate the Country Dropdown
+            // Set the address field with only the street information
+            setValue("address", formattedAddress)
+
+            // Always update city when a new address is selected
+            if (city) {
+              setValue("city", city)
+            } else {
+              setValue("city", "")
+            }
+
+            // Always update postal code when a new address is selected
+            if (postalCode) {
+              setValue("postal_code", postalCode)
+            } else {
+              setValue("postal_code", "")
+            }
+
+            // Update the Country Dropdown if country is found
             if (country) {
               const countryId = findCountryIdByLabel(country)
               const countryName = findCountryLabelById(countryId)
