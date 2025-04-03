@@ -1,4 +1,3 @@
-"use client"
 
 import Box from "@mui/material/Box"
 import { useTheme } from "@mui/material/styles"
@@ -19,6 +18,7 @@ import Stack from "@mui/material/Stack"
 import { useState, useEffect, useRef } from "react"
 import CardHeader from "@mui/material/CardHeader"
 import { Iconify } from "src/components/iconify"
+import { FileStorageOverview } from "../file-storage-overview"
 import { AppWidgetButton } from "../app-widget-button"
 import { AppWelcome } from "../app-welcome"
 import { AppFeatured } from "../app-featured"
@@ -38,6 +38,8 @@ const dummyAppointment = {
   time: "14:30",
   country: "US",
 }
+
+const GB = 1000000000 // 1 GB in bytes
 
 const image =
   "https://i0.wp.com/picjumbo.com/wp-content/uploads/red-and-blue-pillars-wallpaper-abstract-background-free-image.jpeg?w=600&quality=80"
@@ -223,23 +225,35 @@ export function OverviewAppView() {
         </Grid>
 
         <Grid xs={12} md={4} sx={gridItemStyles}>
-          <Box sx={{ height: "auto", display: "flex", flexDirection: "column" }}>
-            <AppWidgetSummary
-              title="Documents"
-              percent={0.2}
-              total={4876}
-              chart={{
-                colors: [theme.vars.palette.info.main],
-                categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
-                series: [20, 41, 63, 33, 28, 35, 50, 46],
-              }}
-              initialExpanded={expandedWidgets.documents}
-              onToggleExpand={() => toggleWidgetExpand("documents")}
-              displayContent={displayContent.documents}
-              onToggleDisplayContent={() => toggleDisplayContent("documents")}
-              sx={{ flex: 1 }}
-            />
-          </Box>
+          <FileStorageOverview
+            total={GB}
+            chart={{
+              series: 76,
+              colors: [theme.palette.primary.main, theme.palette.primary.light],
+            }}
+            data={[
+              {
+                name: "Images",
+                usedStorage: GB / 2,
+                filesCount: 223,
+              },
+              {
+                name: "Media",
+                usedStorage: GB / 5,
+                filesCount: 223,
+              },
+              {
+                name: "Documents",
+                usedStorage: GB / 5,
+                filesCount: 223,
+              },
+              {
+                name: "Other",
+                usedStorage: GB / 10,
+                filesCount: 223,
+              },
+            ]}
+          />
         </Grid>
 
         <Grid xs={12} md={4} sx={gridItemStyles}>

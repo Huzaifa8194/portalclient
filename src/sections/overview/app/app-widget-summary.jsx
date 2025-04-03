@@ -7,12 +7,13 @@ import Button from "@mui/material/Button"
 import { useState, useEffect } from "react"
 import Tabs from "@mui/material/Tabs"
 import Tab from "@mui/material/Tab"
-
+import { CONFIG } from 'src/config-global';
+import { _files, _folders } from 'src/_mock';
 import { fNumber } from "src/utils/format-number"
 import { useNavigate } from "react-router-dom"
 import { Chart, useChart } from "src/components/chart"
 import { Iconify } from "src/components/iconify"
-
+import { FileStorageOverview } from "src/sections/file-manager/file-storage-overview"
 // ----------------------------------------------------------------------
 
 export function AppWidgetSummary({
@@ -100,6 +101,44 @@ export function AppWidgetSummary({
   // Determine if this card should have expandable content
   const hasExpandableContent = title === "Co-applicants" || title === "Documents" || title === "Appointment"
 
+
+  const GB = 1000000000 * 24;
+
+   const renderStorageOverview = (
+      <FileStorageOverview
+        total={GB}
+        chart={{ series: 76 }}
+        data={[
+          {
+            name: 'Images',
+            usedStorage: GB / 2,
+            filesCount: 223,
+            icon: <Box component="img" src={`${CONFIG.assetsDir}/assets/icons/files/ic-img.svg`} />,
+          },
+          {
+            name: 'Media',
+            usedStorage: GB / 5,
+            filesCount: 223,
+            icon: <Box component="img" src={`${CONFIG.assetsDir}/assets/icons/files/ic-video.svg`} />,
+          },
+          {
+            name: 'Documents',
+            usedStorage: GB / 5,
+            filesCount: 223,
+            icon: (
+              <Box component="img" src={`${CONFIG.assetsDir}/assets/icons/files/ic-document.svg`} />
+            ),
+          },
+          {
+            name: 'Other',
+            usedStorage: GB / 10,
+            filesCount: 223,
+            icon: <Box component="img" src={`${CONFIG.assetsDir}/assets/icons/files/ic-file.svg`} />,
+          },
+        ]}
+      />
+    );
+
   // Get content based on title
   const getExpandableContent = () => {
     if (title === "Co-applicants") {
@@ -123,20 +162,7 @@ export function AppWidgetSummary({
 
     if (title === "Documents") {
       return (
-        <Box sx={{ mt: 2 }}>
-          <Button variant="text" onClick={() => setShowDocs(!showDocs)}>
-            {showDocs ? "Hide submitted documents" : "Show submitted documents"}
-          </Button>
-          {showDocs && (
-            <Box sx={{ mt: 1 }}>
-              {dummyDocuments.map((doc, index) => (
-                <Box key={index} sx={{ typography: "body2", mb: 0.5 }}>
-                  {doc.name} - {doc.count} submitted
-                </Box>
-              ))}
-            </Box>
-          )}
-        </Box>
+        renderStorageOverview
       )
     }
 

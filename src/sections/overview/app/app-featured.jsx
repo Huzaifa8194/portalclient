@@ -91,7 +91,7 @@ function CarouselItem({ item, onButtonClick, ...other }) {
           my:{ xs: 1, sm: 1,lg: 1, xl: 5 },
          
         }}>
-          Go now
+          {item.title==="Business & Work Permit Not just an application form"?"Learn More":"Apply Now"}
         </Button>
       </Box>
 
