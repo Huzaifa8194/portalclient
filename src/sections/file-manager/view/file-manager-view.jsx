@@ -40,7 +40,6 @@ export function FileManagerView() {
   const [currentFolder, setCurrentFolder] = useState(null)
   const [folderPath, setFolderPath] = useState([])
 
-
   const filters = useSetState({
     name: "",
     type: [],
@@ -55,96 +54,125 @@ export function FileManagerView() {
       png: 'image',
       gif: 'image',
       bmp: 'image',
-
       pdf: 'pdf',
       doc: 'word',
       docx: 'word',
       txt: 'text',
       rtf: 'text',
-
       xls: 'excel',
       xlsx: 'excel',
-
       zip: 'zip',
       rar: 'zip',
-
       default: 'file'
     };
-
     return typeMap[extension] || typeMap.default;
-  }, []);
+  }, [])
 
-  const processApiData = useCallback(
-    (data) => {
-      const processedData = []
-
-      data.forEach((familyMember) => {
-        const folderItem = {
-
-          id: familyMember.id || `folder-${familyMember.directory_name}`,
-          name: familyMember.directory_name,
-          type: "folder",
-          size: 0,
+  const processFamilyData = useCallback((data) => {
+    const processedData = []
+    data.forEach((familyMember) => {
+      const folderItem = {
+        id: familyMember.id || `folder-${familyMember.directory_name}`,
+        name: familyMember.directory_name,
+        type: "folder",
+        size: 0,
+        isFavorited: false,
+        shared: [],
+        createdAt: new Date().toISOString(),
+        modifiedAt: new Date().toISOString(),
+        isFolder: true,
+        files: [],
+      }
+      familyMember.documents.forEach((doc) => {
+        const fileExtension = doc.url.split(".").pop().toLowerCase()
+        const fileType = getFileType(fileExtension)
+        folderItem.files.push({
+          id: doc.id,
+          name: `${doc.document_sub_type}.${fileExtension}`,
+          type: fileType,
+          url: doc.url,
+          size: Math.floor(Math.random() * 10000) + 1000,
           isFavorited: false,
-          shared: [],
-          createdAt: new Date().toISOString(),
-          modifiedAt: new Date().toISOString(),
-          isFolder: true,
-          files: [],
-        }
-
-        familyMember.documents.forEach((doc) => {
-          const fileExtension = doc.url.split(".").pop().toLowerCase()
-          const fileType = getFileType(fileExtension)
-
-          folderItem.files.push({
-            id: doc.id,
-            name: `${doc.document_sub_type}.${fileExtension}`,
-            type: fileType,
-            url: doc.url,
-            size: Math.floor(Math.random() * 10000) + 1000,
-            isFavorited: false,
-            shared: [
-              {
-                id: doc.uploaded_by_id,
-                name: doc.uploaded_by,
-                email: `${doc.uploaded_by.toLowerCase().replace(" ", ".")}@example.com`,
-                permission: "view",
-                avatarUrl: null,
-              },
-            ],
-            createdAt: new Date(doc.uploaded_at).toISOString(),
-            modifiedAt: new Date(doc.uploaded_at).toISOString(),
-            parentFolder: familyMember.directory_name,
-            documentType: doc.document_type,
-            documentSubType: doc.document_sub_type,
-            uploadedBy: doc.uploaded_by,
-            uploadedAt: doc.uploaded_at,
-          })
+          shared: [{
+            id: doc.uploaded_by_id,
+            name: doc.uploaded_by,
+            email: `${doc.uploaded_by.toLowerCase().replace(" ", ".")}@example.com`,
+            permission: "view",
+            avatarUrl: null,
+          }],
+          createdAt: new Date(doc.uploaded_at).toISOString(),
+          modifiedAt: new Date(doc.uploaded_at).toISOString(),
+          parentFolder: familyMember.directory_name,
+          documentType: doc.document_type,
+          documentSubType: doc.document_sub_type,
+          uploadedBy: doc.uploaded_by,
+          uploadedAt: doc.uploaded_at,
         })
-
-        processedData.push(folderItem)
       })
-      return processedData
-    },
-    [getFileType],
-  )
-  // Fetch data from API
+      processedData.push(folderItem)
+    })
+    return processedData
+  }, [getFileType])
+
+  const processMyselfData = useCallback((data) => {
+    const folderItem = {
+      id: 'folder-myself',
+      name: 'myself',
+      type: 'folder',
+      size: 0,
+      isFavorited: false,
+      shared: [],
+      createdAt: new Date().toISOString(),
+      modifiedAt: new Date().toISOString(),
+      isFolder: true,
+      files: [],
+    }
+    data.forEach((doc) => {
+      const fileExtension = doc.url.split('.').pop().toLowerCase()
+      const fileType = getFileType(fileExtension)
+      folderItem.files.push({
+        id: doc.id,
+        name: `${doc.document_sub_type_name}.${fileExtension}`,
+        type: fileType,
+        url: doc.url,
+        size: Math.floor(Math.random() * 10000) + 1000,
+        isFavorited: false,
+        shared: [{
+          id: 'default',
+          name: 'User',
+          email: 'user@example.com',
+          permission: 'view',
+          avatarUrl: null,
+        }],
+        createdAt: new Date(doc.created_at).toISOString(),
+        modifiedAt: new Date(doc.updated_at).toISOString(),
+        parentFolder: 'myself',
+        documentType: doc.document_type_name,
+        documentSubType: doc.document_sub_type_name,
+        uploadedBy: 'User',
+        uploadedAt: doc.created_at,
+      })
+    })
+    return [folderItem]
+  }, [getFileType])
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true)
-        const response = await axios.get("https://api.swedenrelocators.se/api/miscellaneous/documents/familyMembers", {
-          headers: {
-            Authorization: `Bearer ${user.accessToken}`,
-          },
-        })
+        const [familyResponse, myselfResponse] = await Promise.all([
+          axios.get("https://api.swedenrelocators.se/api/miscellaneous/documents/familyMembers", {
+            headers: { Authorization: `Bearer ${user.accessToken}` }
+          }),
+          axios.get("https://api.swedenrelocators.se/api/document/list", {
+            headers: { Authorization: `Bearer ${user.accessToken}` }
+          })
+        ])
 
-        if (response.data?.data) {
-          const processedData = processApiData(response.data.data)
-          setTableData(processedData)
-          // toast.success("Documents loaded successfully!")
-        }
+        const familyData = familyResponse.data?.data ? processFamilyData(familyResponse.data.data) : []
+        const myselfData = myselfResponse.data?.data ? processMyselfData(myselfResponse.data.data) : []
+        
+        setTableData([...myselfData, ...familyData])
       } catch (err) {
         console.error("Error fetching data:", err)
         setError("Failed to fetch documents. Please try again later.")
@@ -153,11 +181,35 @@ export function FileManagerView() {
         setIsLoading(false)
       }
     }
-
     fetchData()
-  }, [processApiData, user.accessToken])
+  }, [processFamilyData, processMyselfData, user.accessToken])
 
-  // Handle folder click
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       setIsLoading(true)
+  //       const response = await axios.get("https://api.swedenrelocators.se/api/document/list", {
+  //         headers: {
+  //           Authorization: `Bearer ${user.accessToken}`,
+  //         },
+  //       })
+
+  //       if (response.data?.data) {
+  //         const processedData = processApiData(response.data.data)
+  //         setTableData(processedData)
+  //       }
+  //     } catch (err) {
+  //       console.error("Error fetching data:", err)
+  //       setError("Failed to fetch documents. Please try again later.")
+  //       toast.error("Failed to fetch documents")
+  //     } finally {
+  //       setIsLoading(false)
+  //     }
+  //   }
+
+  //   fetchData()
+  // }, [processApiData, user.accessToken])
+
   const handleFolderClick = useCallback(
     (folder) => {
       setCurrentFolder(folder)
@@ -166,11 +218,9 @@ export function FileManagerView() {
     [folderPath],
   )
 
-  // Handle breadcrumb navigation
   const handleBreadcrumbClick = useCallback(
     (index) => {
       if (index === -1) {
-        // Root level
         setCurrentFolder(null)
         setFolderPath([])
       } else {
@@ -186,11 +236,9 @@ export function FileManagerView() {
 
   const getCurrentData = useCallback(() => {
     if (currentFolder === null) {
-
       return tableData
     }
     return currentFolder.files
-
   }, [currentFolder, tableData])
 
   const dataFiltered = applyFilter({
@@ -216,22 +264,17 @@ export function FileManagerView() {
   const handleDeleteItem = useCallback(
     (id) => {
       if (currentFolder === null) {
-
         const deleteRow = tableData.filter((row) => row.id !== id)
         setTableData(deleteRow)
       } else {
-
         const updatedFolder = {
           ...currentFolder,
           files: currentFolder.files.filter((file) => file.id !== id),
         }
-
         const updatedTableData = tableData.map((folder) => (folder.id === updatedFolder.id ? updatedFolder : folder))
-
         setTableData(updatedTableData)
         setCurrentFolder(updatedFolder)
       }
-
       toast.success("Delete success!")
       table.onUpdatePageDeleteRow(dataInPage.length)
     },
@@ -240,23 +283,17 @@ export function FileManagerView() {
 
   const handleDeleteItems = useCallback(() => {
     if (currentFolder === null) {
-
       const deleteRows = tableData.filter((row) => !table.selected.includes(row.id))
       setTableData(deleteRows)
     } else {
-
       const updatedFolder = {
         ...currentFolder,
         files: currentFolder.files.filter((file) => !table.selected.includes(file.id)),
       }
-
-
       const updatedTableData = tableData.map((folder) => (folder.id === updatedFolder.id ? updatedFolder : folder))
-
       setTableData(updatedTableData)
       setCurrentFolder(updatedFolder)
     }
-
     toast.success("Delete success!")
     table.onUpdatePageDeleteRows({
       totalRowsInPage: dataInPage.length,
@@ -275,16 +312,31 @@ export function FileManagerView() {
         onCloseDateRange={openDateRange.onFalse}
         options={{ types: FILE_TYPE_OPTIONS }}
       />
-
-      <ToggleButtonGroup size="small" value={view} exclusive onChange={handleChangeView}>
-        <ToggleButton value="list">
-          <Iconify icon="solar:list-bold" />
-        </ToggleButton>
-
-        <ToggleButton value="grid">
-          <Iconify icon="mingcute:dot-grid-fill" />
-        </ToggleButton>
-      </ToggleButtonGroup>
+      <Stack direction={{ xs: "column", md: "row" }} spacing={1}>
+        <ToggleButtonGroup size="small" value={view} exclusive onChange={handleChangeView}>
+          <ToggleButton value="list">
+            <Iconify icon="solar:list-bold" />
+          </ToggleButton>
+          <ToggleButton value="grid">
+            <Iconify icon="mingcute:dot-grid-fill" />
+          </ToggleButton>
+        </ToggleButtonGroup>
+        <Button
+          variant="contained"
+          startIcon={<Iconify icon="eva:folder-add-fill" />}
+          onClick={upload.onTrue}
+          sx={{ 
+            whiteSpace: 'nowrap',
+            bgcolor: 'main',
+            color: 'common.white',
+            '&:hover': {
+              bgcolor: 'dark'
+            }
+          }}
+        >
+          Create Folder
+        </Button>
+      </Stack>
     </Stack>
   )
 
@@ -294,7 +346,7 @@ export function FileManagerView() {
 
   const renderBreadcrumbs = (
     <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
-      {/* <Link
+      <Link
         component="button"
         underline="hover"
         color="inherit"
@@ -318,8 +370,7 @@ export function FileManagerView() {
             Home
           </>
         )}
-      </Link> */}
-
+      </Link>
       {folderPath.map((folder, index) => (
         <Link
           key={folder.id}
@@ -332,19 +383,14 @@ export function FileManagerView() {
         </Link>
       ))}
     </Breadcrumbs>
-  );
+  )
 
   return (
     <>
       <DashboardContent>
-
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Typography variant="h4">Family Documents</Typography>
-          <Button variant="contained" startIcon={<Iconify icon="eva:cloud-upload-fill" />} onClick={upload.onTrue}>
-            Upload
-          </Button>
         </Stack>
-
         {folderPath.length > 0 && (
           <Stack direction="row" alignItems="center" gap={2} sx={{ my: 2 }}>
             <Button
@@ -376,50 +422,45 @@ export function FileManagerView() {
             </Breadcrumbs>
           </Stack>
         )}
-
-        {/* Rest of your existing code remains the same */}
         <Stack spacing={2.5} sx={{ my: { xs: 3, md: 5 } }}>
           {renderFilters}
           {canReset && renderResults}
         </Stack>
-        {/* </Stack> */}
-
-        {isLoading ? (
-          <Typography variant="body1" sx={{ py: 10, textAlign: "center" }}>
-            Loading documents...
-          </Typography>
-        ) : error ? (
-          <Typography variant="body1" color="error" sx={{ py: 10, textAlign: "center" }}>
-            {error}
-          </Typography>
-        ) : notFound ? (
-          <EmptyContent filled sx={{ py: 10 }} />
-        ) : (
-          <>
-            {view === "list" ? (
-              <FileManagerTable
-                table={table}
-                dataFiltered={dataFiltered}
-                onDeleteRow={handleDeleteItem}
-                notFound={notFound}
-                onOpenConfirm={confirm.onTrue}
-                onFolderClick={handleFolderClick}
-              />
-            ) : (
-              <FileManagerGridView
-                table={table}
-                dataFiltered={dataFiltered}
-                onDeleteItem={handleDeleteItem}
-                onOpenConfirm={confirm.onTrue}
-                onFolderClick={handleFolderClick}
-              />
-            )}
-          </>
-        )}
+        {isLoading ? 
+          (
+            <Typography variant="body1" sx={{ py: 10, textAlign: "center" }}>
+              Loading documents...
+            </Typography>)
+          : error ? (
+            <Typography variant="body1" color="error" sx={{ py: 10, textAlign: "center" }}>
+              {error}
+            </Typography>
+          ) : notFound ? (
+            <EmptyContent filled sx={{ py: 10 }} />
+          ) : (
+            <>
+              {view === "list" ? (
+                <FileManagerTable
+                  table={table}
+                  dataFiltered={dataFiltered}
+                  onDeleteRow={handleDeleteItem}
+                  notFound={notFound}
+                  onOpenConfirm={confirm.onTrue}
+                  onFolderClick={handleFolderClick}
+                />
+              ) : (
+                <FileManagerGridView
+                  table={table}
+                  dataFiltered={dataFiltered}
+                  onDeleteItem={handleDeleteItem}
+                  onOpenConfirm={confirm.onTrue}
+                  onFolderClick={handleFolderClick}
+                />
+              )}
+            </>
+          )}
       </DashboardContent>
-
       <FileManagerNewFolderDialog open={upload.value} onClose={upload.onFalse} />
-
       <ConfirmDialog
         open={confirm.value}
         onClose={confirm.onFalse}
@@ -475,4 +516,3 @@ function applyFilter({ inputData, comparator, filters, dateError }) {
 
   return inputData
 }
-

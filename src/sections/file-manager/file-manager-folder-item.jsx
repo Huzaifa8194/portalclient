@@ -119,7 +119,7 @@ export function FileManagerFolderItem({ sx, folder, selected, onSelect, onDelete
       primaryTypographyProps={{
         noWrap: true,
         typography: "subtitle1",
-        color: "primary.main",
+        color: "main",
         sx: {
           "&:hover": {
             textDecoration: "underline",
