@@ -176,12 +176,12 @@ export function FileManagerFileDetails({
                     Document Details
                   </Typography>
 
-                  {/* <Stack direction="row" sx={{ typography: "caption", textTransform: "capitalize" }}>
+                  <Stack direction="row" sx={{ typography: "caption", textTransform: "capitalize" }}>
                     <Box component="span" sx={{ width: 80, color: "text.secondary", mr: 2 }}>
                       Document ID
                     </Box>
                     {fileDetails.id || "N/A"}
-                  </Stack> */}
+                  </Stack>
 
                   <Stack direction="row" sx={{ typography: "caption", textTransform: "capitalize" }}>
                     <Box component="span" sx={{ width: 80, color: "text.secondary", mr: 2 }}>

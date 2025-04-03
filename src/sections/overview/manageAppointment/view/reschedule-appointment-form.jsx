@@ -25,15 +25,6 @@ import { APPOINTMENT_COUNTRY_OPTIONS } from "src/_mock"
 
 // ----------------------------------------------------------------------
 
-// Language options
-const LANGUAGE_OPTIONS = [
-  { id: 1, name: "English" },
-  { id: 2, name: "Swedish" },
-  { id: 3, name: "Norwegian" },
-  { id: 4, name: "Danish" },
-  { id: 5, name: "Finnish" },
-]
-
 export const RescheduleSchema = zod.object({
   type_id: zod.string().min(1, { message: "Appointment Type is required!" }),
   category_id: zod.string().min(1, { message: "Appointment Category is required!" }),
@@ -70,7 +61,7 @@ export function RescheduleAppointmentForm({ appointment, onClose, onSuccess }) {
   const [canReschedule, setCanReschedule] = useState(true)
   const [rescheduleError, setRescheduleError] = useState("")
   const { user } = useAuthContext()
-
+  const [languages, setLanguages] = useState([])
 
   const getMinDate = () => {
     const tomorrow = new Date()
@@ -87,7 +78,7 @@ export function RescheduleAppointmentForm({ appointment, onClose, onSuccess }) {
       country: appointment?.country || "",
       time_slot_id: appointment?.time_slot_id?.toString() || "",
       description: appointment?.description || "",
-      language_id: appointment?.language_id?.toString() || "1", 
+      language_id: appointment?.language_id?.toString() || "1",
       agreement: false,
     }),
     [appointment],
@@ -103,52 +94,97 @@ export function RescheduleAppointmentForm({ appointment, onClose, onSuccess }) {
     reset,
     handleSubmit,
     setValue,
+    getValues,
     formState: { isSubmitting, isValid },
   } = methods
 
-  const checkRescheduleEligibility = useCallback(
-    (slots) => {
-      if (!appointment) return
+  const fetchTimeSlots = useCallback(
+    async (date) => {
+      if (!date) return
 
-      // Check if appointment was booked with promo code
-      if (appointment.is_coupon === 1) {
-        setCanReschedule(false)
-        setRescheduleError("Appointments booked through promo code cannot be rescheduled.")
-        return
-      }
+      try {
+        console.log("Fetching time slots for date:", date)
+        const response = await axios.post(
+          "https://api.swedenrelocators.se/api/miscellaneous/appointment/timeSlots",
+          {
+            appointment_date: date,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${user.accessToken}`,
+            },
+          },
+        )
 
-      // Check if appointment has already been rescheduled
-      if (appointment.is_rescheduled === 1) {
-        setCanReschedule(false)
-        setRescheduleError("This appointment has already been rescheduled once and cannot be rescheduled again.")
-        return
-      }
+        console.log("Time slots API response:", response.data)
 
-      // Check if appointment is within 24 hours
-      const appointmentDate = new Date(appointment.appointment_date)
-      const appointmentTime = slots.find((slot) => slot.id === Number(appointment.time_slot_id))?.time_range
+        if (response.data && response.data.data) {
+          const timeSlots = Object.values(response.data.data)
+          console.log("Processed time slots:", timeSlots)
 
-      if (appointmentTime) {
-        const [startTime] = appointmentTime.split(" - ")
-        const [hours, minutes] = startTime.split(":").map(Number)
-        appointmentDate.setHours(hours, minutes, 0, 0)
-
-        const now = new Date()
-        const timeDiff = appointmentDate.getTime() - now.getTime()
-        const hoursDiff = timeDiff / (1000 * 60 * 60)
-
-        if (hoursDiff < 24) {
-          setCanReschedule(false)
-          setRescheduleError("Appointments cannot be rescheduled less than 24 hours before the scheduled time.")
-          return
+          if (timeSlots.length > 0) {
+            setAppointmentTimeSlots(timeSlots)
+          } else {
+            console.log("No time slots available for this date")
+            setAppointmentTimeSlots([])
+            toast.info(response.data.message || "No time slots available for the selected date.")
+          }
+        } else {
+          console.log("No data returned from API or unexpected format")
+          setAppointmentTimeSlots([])
+          toast.info(response.data.message || "No time slots available for the selected date.")
         }
+      } catch (error) {
+        console.error("Error fetching time slots:", error)
+        toast.error(error.response?.data?.message || "Failed to load available time slots. Please try again.")
+        setAppointmentTimeSlots([])
       }
-
-      setCanReschedule(true)
-      setRescheduleError("")
     },
-    [appointment],
+    [user.accessToken],
   )
+
+  const checkRescheduleEligibility = useCallback(() => {
+    if (!appointment) return
+
+    // Check if appointment was booked with promo code
+    if (appointment.is_coupon === 1) {
+      setCanReschedule(false)
+      setRescheduleError("Appointments booked through promo code cannot be rescheduled.")
+      return
+    }
+
+    // Check if appointment has already been rescheduled
+    if (appointment.is_rescheduled === 1) {
+      setCanReschedule(false)
+      setRescheduleError("This appointment has already been rescheduled once and cannot be rescheduled again.")
+      return
+    }
+
+    
+    const appointmentDate = new Date(appointment.appointment_date)
+
+    
+    if (appointment.time_slot) {
+      const timeSlotParts = appointment.time_slot.split(" - ")[0].split(":")
+      if (timeSlotParts.length === 2) {
+        const [hours, minutes] = timeSlotParts.map(Number)
+        appointmentDate.setHours(hours, minutes, 0, 0)
+      }
+    }
+
+    const now = new Date()
+    const timeDiff = appointmentDate.getTime() - now.getTime()
+    const hoursDiff = timeDiff / (1000 * 60 * 60)
+
+    if (hoursDiff < 24) {
+      setCanReschedule(false)
+      setRescheduleError("Appointments cannot be rescheduled less than 24 hours before the scheduled time.")
+      return
+    }
+
+    setCanReschedule(true)
+    setRescheduleError("")
+  }, [appointment])
 
   useEffect(() => {
     if (appointment) {
@@ -157,20 +193,22 @@ export function RescheduleAppointmentForm({ appointment, onClose, onSuccess }) {
       const fetchAppointmentData = async () => {
         try {
           setLoading(true)
-          const [timeslotResponse, typeResponse, categoriesResponse] = await Promise.all([
-            axios.get("https://api.swedenrelocators.se/api/miscellaneous/appointmentTimeSlots"),
+          const [typeResponse, categoriesResponse] = await Promise.all([
             axios.get("https://api.swedenrelocators.se/api/miscellaneous/appointmentTypes"),
             axios.get("https://api.swedenrelocators.se/api/miscellaneous/appointmentCategories"),
           ])
 
-          setAppointmentTimeSlots(timeslotResponse.data.data || [])
           setAppointmentTypes(typeResponse.data.data || [])
           setAppointmentCategories(categoriesResponse.data.data || [])
 
-          checkRescheduleEligibility(timeslotResponse.data.data || [])
+          if (appointment.appointment_date) {
+            await fetchTimeSlots(appointment.appointment_date)
+          }
+
+          checkRescheduleEligibility()
         } catch (error) {
           console.error("Error fetching appointment data:", error)
-          toast.error("Failed to load appointment options. Please try again.")
+          toast.error(error.response?.data?.message || "Failed to load appointment options. Please try again.")
         } finally {
           setLoading(false)
         }
@@ -178,7 +216,27 @@ export function RescheduleAppointmentForm({ appointment, onClose, onSuccess }) {
 
       fetchAppointmentData()
     }
-  }, [appointment, defaultValues, reset, checkRescheduleEligibility])
+  }, [appointment, defaultValues, reset, checkRescheduleEligibility, fetchTimeSlots])
+
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        const response = await axios.get(
+          "https://api.swedenrelocators.se/api/miscellaneous/languages",
+          {
+            headers: {
+              Authorization: `Bearer ${user.accessToken}`,
+            },
+          }
+        )
+        setLanguages(response.data.data || [])
+      } catch (error) {
+        console.error("Error fetching languages:", error)
+      }
+    }
+
+    fetchLanguages()
+  }, [user.accessToken])
 
   const onSubmit = handleSubmit(async (data) => {
     try {
@@ -207,7 +265,7 @@ export function RescheduleAppointmentForm({ appointment, onClose, onSuccess }) {
         },
       )
 
-      toast.success("Appointment rescheduled successfully!")
+      toast.success(response.data.message || "Appointment rescheduled successfully!")
       if (onSuccess) {
         onSuccess(response.data.data)
       }
@@ -261,7 +319,7 @@ export function RescheduleAppointmentForm({ appointment, onClose, onSuccess }) {
                     InputLabelProps={{ shrink: true }}
                     disabled={!canReschedule}
                   >
-                    <option value="">Select Appointment Type</option>
+                    <option value="">Choose An Option</option>
                     {appointmentTypes.map((option) => (
                       <option key={option.id} value={option.id}>
                         {option.name}
@@ -276,7 +334,7 @@ export function RescheduleAppointmentForm({ appointment, onClose, onSuccess }) {
                     InputLabelProps={{ shrink: true }}
                     disabled={!canReschedule}
                   >
-                    <option value="">Select Appointment Category</option>
+                    <option value="">Choose An Option</option>
                     {appointmentCategories.map((option) => (
                       <option key={option.id} value={option.id}>
                         {option.name}
@@ -291,7 +349,7 @@ export function RescheduleAppointmentForm({ appointment, onClose, onSuccess }) {
                     InputLabelProps={{ shrink: true }}
                     disabled={!canReschedule}
                   >
-                    <option value="">Select Country</option>
+                    {/* <option value="">Choose An Option</option> */}
                     {APPOINTMENT_COUNTRY_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
@@ -306,8 +364,8 @@ export function RescheduleAppointmentForm({ appointment, onClose, onSuccess }) {
                     InputLabelProps={{ shrink: true }}
                     disabled={!canReschedule}
                   >
-                    <option value="">Select Language</option>
-                    {LANGUAGE_OPTIONS.map((option) => (
+                    <option value="">Choose An Option</option>
+                    {languages.map((option) => (
                       <option key={option.id} value={option.id}>
                         {option.name}
                       </option>
@@ -320,44 +378,130 @@ export function RescheduleAppointmentForm({ appointment, onClose, onSuccess }) {
                     inputFormat="yyyy-MM-dd"
                     disablePast
                     shouldDisableDate={(date) => {
-                      // Disable dates less than 24 hours from now
+                      
                       const now = new Date()
                       const tomorrow = new Date(now)
                       tomorrow.setDate(tomorrow.getDate() + 1)
                       tomorrow.setHours(0, 0, 0, 0)
-                      return date < tomorrow
+
+                      
+                      let jsDate
+
+                      if (typeof date.format === "function") {
+                        jsDate = date.toDate() 
+                      }
+                      
+                      else if (date._isAMomentObject) {
+                        jsDate = date.toDate() 
+                      }
+                      
+                      else if (date instanceof Date) {
+                        jsDate = date
+                      }
+                      
+                      else if (typeof date.toDate === "function") {
+                        jsDate = date.toDate()
+                      }
+                      
+                      else if (typeof date.toJSDate === "function") {
+                        jsDate = date.toJSDate()
+                      }
+                      
+                      else {
+                        
+                        const dayOfWeek =
+                          typeof date.getDay === "function"
+                            ? date.getDay()
+                            : date.day !== undefined
+                              ? date.day()
+                              : new Date(date).getDay()
+
+                      
+                        if (dayOfWeek === 0 || dayOfWeek === 6) {
+                          return true
+                        }
+
+                        
+                        const selectedCountry = methods.getValues("country")
+
+                        
+                        if (selectedCountry === "sweden" && (dayOfWeek < 1 || dayOfWeek > 4)) {
+                          
+                          return true
+                        }
+
+                        if (selectedCountry === "denmark" && dayOfWeek !== 5) {
+                          
+                          return true
+                        }
+
+                        
+                        const dateObj = new Date(date)
+                        return dateObj < tomorrow
+                      }
+
+                      
+                      const dayOfWeek = jsDate.getDay()
+
+                      
+                      if (dayOfWeek === 0 || dayOfWeek === 6) {
+                        return true
+                      }
+
+                      
+                      const selectedCountry = methods.getValues("country")
+
+                      
+                      if (selectedCountry === "sweden" && (dayOfWeek < 1 || dayOfWeek > 4)) {
+                        
+                        return true
+                      }
+
+                      if (selectedCountry === "denmark" && dayOfWeek !== 5) {
+                        
+                        return true
+                      }
+
+                      
+                      return jsDate < tomorrow
                     }}
                     onChange={(date) => {
                       if (date) {
                         console.log("Date object type:", typeof date, date)
 
-                        // Handle the date object safely regardless of its type
+                        
                         let formattedDate
 
-                        // Check if it's a string (already formatted)
+                        
                         if (typeof date === "string") {
                           formattedDate = date
                         }
-                        // Check if it has a format method (dayjs/moment)
+                        
                         else if (typeof date.format === "function") {
                           formattedDate = date.format("YYYY-MM-DD")
                         }
-                        // Check if it has a toISOString method (native Date)
+                        
                         else if (typeof date.toISOString === "function") {
-                          // Use a method that doesn't have timezone issues
+                          
                           const d = new Date(date)
                           const year = d.getFullYear()
                           const month = String(d.getMonth() + 1).padStart(2, "0")
                           const day = String(d.getDate()).padStart(2, "0")
                           formattedDate = `${year}-${month}-${day}`
                         }
-                        // Fallback
+                        
                         else {
                           formattedDate = String(date)
                         }
 
                         setValue("appointment_date", formattedDate)
                         console.log("Selected date formatted:", formattedDate)
+
+                        
+                        setValue("time_slot_id", "")
+
+                        
+                        fetchTimeSlots(formattedDate)
                       }
                     }}
                     slotProps={{
@@ -375,12 +519,18 @@ export function RescheduleAppointmentForm({ appointment, onClose, onSuccess }) {
                     InputLabelProps={{ shrink: true }}
                     disabled={!canReschedule}
                   >
-                    <option value="">Select Appointment Time</option>
-                    {appointmentTimeSlots.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.time_range}
+                    <option value="">Choose An Option</option>
+                    {appointmentTimeSlots.length > 0 ? (
+                      appointmentTimeSlots.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.slot}
+                        </option>
+                      ))
+                    ) : (
+                      <option value="" disabled>
+                        No available time slots for selected date
                       </option>
-                    ))}
+                    )}
                   </Field.Select>
 
                   <Field.Text

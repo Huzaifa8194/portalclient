@@ -87,29 +87,56 @@ export function PostNewEditForm({ currentPost }) {
   useEffect(() => {
     const fetchAppointmentData = async () => {
       try {
-        const [timeslotResponse, typeResponse, categoriesResponse] = await Promise.all([
-          axios.get("https://api.swedenrelocators.se/api/miscellaneous/appointmentTimeSlots"),
+        const [typeResponse, categoriesResponse] = await Promise.all([
           axios.get("https://api.swedenrelocators.se/api/miscellaneous/appointmentTypes"),
           axios.get("https://api.swedenrelocators.se/api/miscellaneous/appointmentCategories"),
         ])
 
         console.log("Appointment Types:", typeResponse.data)
         console.log("Appointment Categories:", categoriesResponse.data)
-        console.log("Appointment Time Slots:", timeslotResponse.data.data)
 
         setAppointmentTypes(typeResponse.data.data || [])
         setAppointmentCategories(categoriesResponse.data.data || [])
-        const timeSlots = timeslotResponse.data.data || []
-        console.log("Time slots before setting state:", timeSlots)
-        setAppointmentTimeSlots(timeSlots)
       } catch (error) {
         console.error("Error fetching appointment data:", error)
-        toast.error("Failed to load some appointment options. Please try again.")
+        toast.error(error.response?.data?.message || "Failed to load some appointment options. Please try again.")
       }
     }
 
     fetchAppointmentData()
   }, [])
+
+  const fetchTimeSlots = async (date) => {
+    if (!date) return
+
+    try {
+      console.log("Fetching time slots for date:", date)
+      const response = await axios.post("https://api.swedenrelocators.se/api/miscellaneous/appointment/timeSlots", {
+        appointment_date: date,
+      })
+
+      console.log("Time slots API response:", response.data)
+
+      if (response.data && response.data.data) {
+        const timeSlots = Object.values(response.data.data)
+        console.log("Processed time slots:", timeSlots)
+
+        if (timeSlots.length > 0) {
+          setAppointmentTimeSlots(timeSlots)
+        } else {
+          console.log("No time slots available for this date")
+          setAppointmentTimeSlots([])
+        }
+      } else {
+        console.log("No data returned from API or unexpected format")
+        setAppointmentTimeSlots([])
+      }
+    } catch (error) {
+      console.error("Error fetching time slots:", error)
+      toast.error(error.response?.data?.message || "Failed to load available time slots. Please try again.")
+      setAppointmentTimeSlots([])
+    }
+  }
 
   const onSubmit = handleSubmit(async (data) => {
     try {
@@ -119,7 +146,7 @@ export function PostNewEditForm({ currentPost }) {
       console.info("DATA", data)
     } catch (error) {
       console.error(error)
-      toast.error("An error occurred. Please try again.")
+      toast.error(error.response?.data?.message || "An error occurred. Please try again.")
     }
   })
 
@@ -138,8 +165,7 @@ export function PostNewEditForm({ currentPost }) {
 
       if (response.data.success) {
         toast.success(`Promo code "${promoCode}" applied successfully!`)
-        // might want to store the coupon details or discount amount
-        // in the form state or component state for later use
+       
       } else {
         toast.error(response.data.message || "Invalid promo code.")
       }
@@ -161,46 +187,47 @@ export function PostNewEditForm({ currentPost }) {
       "agreement",
     ]
     const emptyFields = requiredFields.filter((field) => !formData[field])
-
-    if (emptyFields.length === 0) {
-      try {
+  
+    try {
+      if (emptyFields.length === 0) {
         const appointmentData = {
           type_id: formData.category,
-          language_id: 1, // Adding default language_id
+          language_id: 1,
           category_id: formData.category2,
           country: formData.category3,
           appointment_date: formData.dateofbirth,
           time_slot_id: formData.category4,
           description: formData.description,
           is_coupon: formData.promocode ? 1 : 0,
-          net_total_amount: 0, //  need to calculate this based on business logic
-          total_amount: 0, //  need to calculate this based on  business logic
-          transaction_id: "PENDING", //  may need to generate this or get it from somewhere
-          vat: 0, //  need to calculate this based on your business logic
+          net_total_amount: 0,
+          total_amount: 0,
+          transaction_id: "PENDING",
+          vat: 0,
         }
-
         console.log("Appointment data being sent:", appointmentData)
         const response = await axios.post("https://api.swedenrelocators.se/api/appointment/book", appointmentData)
         console.log("Appointment booked:", response.data)
-        toast.success("Appointment booked successfully!")
-      } catch (error) {
-        console.error("Error booking appointment:", error.response?.data || error)
-        toast.error(error.response?.data?.message || "Failed to book appointment. Please try again.")
-      }
-    } else {
-      clearErrors()
-      emptyFields.forEach((field) => {
-        setError(field, {
-          type: "manual",
-          message: "This field is required",
+        toast.success(response.data.message)
+  
+        reset()
+  
+        setAppointmentTimeSlots([])
+      } else {
+        clearErrors()
+        emptyFields.forEach((field) => {
+          setError(field, {
+            type: "manual",
+            message: "This field is required",
+          })
         })
-      })
-      toast.error("Please fill in all required fields.")
+        throw new Error("Please fill in all required fields.")
+      }
+    } catch (error) {
+      console.error("Error booking appointment:", error.response?.data || error)
+      toast.error(error.response?.data?.message || error.message)
     }
   }
-
-  // Note: You'll need to implement logic to calculate net_total_amount, total_amount, and vat
-  // based on your business requirements. These values are currently set to 0.
+  
 
   return (
     <Form methods={methods} onSubmit={onSubmit}>
@@ -222,8 +249,7 @@ export function PostNewEditForm({ currentPost }) {
               free appointment is available for Swedish Students & EU citizens except Swedish citizens.
             </Typography>
             <Box
-              rowGap={3}
-              columnGap={2}
+              gap={3}
               display="grid"
               gridTemplateColumns={{
                 xs: "repeat(1, 1fr)",
@@ -264,45 +290,124 @@ export function PostNewEditForm({ currentPost }) {
                 inputFormat="YYYY-MM-DD"
                 disablePast
                 shouldDisableDate={(date) => {
-                  // Disable dates less than 24 hours from now
+                  
                   const now = new Date()
                   const tomorrow = new Date(now)
                   tomorrow.setDate(tomorrow.getDate() + 1)
                   tomorrow.setHours(0, 0, 0, 0)
-                  return date < tomorrow
+
+                  
+                  let jsDate
+
+                  
+                  if (typeof date.format === "function") {
+                    jsDate = date.toDate() 
+                  }
+                  
+                  else if (date._isAMomentObject) {
+                    jsDate = date.toDate() 
+                  }
+                  
+                  else if (date instanceof Date) {
+                    jsDate = date
+                  }
+                  
+                  else if (typeof date.toDate === "function") {
+                    jsDate = date.toDate()
+                  }
+                 
+                  else if (typeof date.toJSDate === "function") {
+                    jsDate = date.toJSDate()
+                  }
+                  
+                  else {
+                    
+                    const dayOfWeek =
+                      typeof date.getDay === "function"
+                        ? date.getDay()
+                        : date.day !== undefined
+                          ? date.day()
+                          : new Date(date).getDay()
+
+                    
+                    if (dayOfWeek === 0 || dayOfWeek === 6) {
+                      return true
+                    }
+
+                    
+                    const selectedCountry = getValues("category3")
+
+                    
+                    if (selectedCountry === "sweden" && (dayOfWeek < 1 || dayOfWeek > 4)) {
+                      
+                      return true
+                    }
+
+                    if (selectedCountry === "denmark" && dayOfWeek !== 5) {
+                      
+                      return true
+                    }
+
+                    const dateObj = new Date(date)
+                    return dateObj < tomorrow
+                  }
+
+                  const dayOfWeek = jsDate.getDay()
+
+                  if (dayOfWeek === 0 || dayOfWeek === 6) {
+                    return true
+                  }
+
+                  const selectedCountry = getValues("category3")
+
+                  if (selectedCountry === "sweden" && (dayOfWeek < 1 || dayOfWeek > 4)) {
+                    
+                    return true
+                  }
+
+                  if (selectedCountry === "denmark" && dayOfWeek !== 5) {
+                    
+                    return true
+                  }
+
+                  
+                  return jsDate < tomorrow
                 }}
                 onChange={(date) => {
                   if (date) {
                     console.log("Date object type:", typeof date, date)
 
-                    // Handle the date object safely regardless of its type
-                    // This works with both native Date objects and library objects like dayjs
                     let formattedDate
 
-                    // Check if it's a string (already formatted)
                     if (typeof date === "string") {
                       formattedDate = date
                     }
-                    // Check if it has a format method (dayjs/moment)
+
                     else if (typeof date.format === "function") {
                       formattedDate = date.format("YYYY-MM-DD")
                     }
-                    // Check if it has a toISOString method (native Date)
+                    
                     else if (typeof date.toISOString === "function") {
-                      // Use a method that doesn't have timezone issues
+                      
                       const d = new Date(date)
                       const year = d.getFullYear()
                       const month = String(d.getMonth() + 1).padStart(2, "0")
                       const day = String(d.getDate()).padStart(2, "0")
                       formattedDate = `${year}-${month}-${day}`
                     }
-                    // Fallback
+                    
                     else {
                       formattedDate = String(date)
                     }
 
                     setValue("dateofbirth", formattedDate)
                     console.log("Selected date formatted:", formattedDate)
+
+                    
+                    setValue("category4", "")
+
+                    
+                    fetchTimeSlots(formattedDate)
                   }
                 }}
                 slotProps={{
@@ -314,19 +419,19 @@ export function PostNewEditForm({ currentPost }) {
                 }}
               />
 
-              <Field.Select
-                native
-                name="category4"
-                label="Appointment Time"
-                InputLabelProps={{ shrink: true }}
-                // sx={{ gridColumn: '1 / -1' }} // Full width
-              >
+              <Field.Select native name="category4" label="Appointment Time" InputLabelProps={{ shrink: true }}>
                 <option value="">Choose An Option</option>
-                {appointmentTimeSlots.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.time_range}
+                {appointmentTimeSlots.length > 0 ? (
+                  appointmentTimeSlots.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.slot}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>
+                    No available time slots for selected date
                   </option>
-                ))}
+                )}
               </Field.Select>
 
               <Field.Text
@@ -334,17 +439,12 @@ export function PostNewEditForm({ currentPost }) {
                 label="Appointment Description"
                 multiline
                 rows={3}
-                sx={{ gridColumn: "1 / -1" }} // New line with full width
+                sx={{ gridColumn: "1 / -1" }} 
               />
             </Box>
 
             <Stack spacing={1.5} direction="row" alignItems="center" sx={{ mt: 3 }}>
-              <Field.Text
-                name="promocode"
-                label="Do you have a Promo Code?"
-                rowGap={3}
-                sx={{ flex: 1, maxWidth: 350 }}
-              />
+              <Field.Text name="promocode" label="Do you have a Promo Code?" gap={3} sx={{ flex: 1, maxWidth: 350 }} />
               <LoadingButton onClick={handleApplyPromoCode} variant="contained" loading={isSubmitting}>
                 Add Promo Code
               </LoadingButton>
