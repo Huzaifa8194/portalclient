@@ -1,3 +1,5 @@
+"use client"
+
 import Autoplay from "embla-carousel-autoplay"
 import Box from "@mui/material/Box"
 import Link from "@mui/material/Link"
@@ -38,12 +40,13 @@ export function AppFeatured({ list, sx, ...other }) {
   }
 
   return (
-    <Card sx={{ bgcolor: "common.black",...sx }} {...other}>
+    // Changed background to match the green color of the button (primary color)
+    <Card sx={{ bgcolor: "primary.main", ...sx }} {...other}>
       <CarouselDotButtons
         scrollSnaps={carousel.dots.scrollSnaps}
         selectedIndex={carousel.dots.selectedIndex}
         onClickDot={carousel.dots.onClickDot}
-        sx={{ top: 16, left: 16, position: "absolute", color: "primary.light" }}
+        sx={{ top: 16, left: 16, position: "absolute", color: "common.white" }}
       />
 
       <CarouselArrowBasicButtons
@@ -64,6 +67,22 @@ export function AppFeatured({ list, sx, ...other }) {
 // ----------------------------------------------------------------------
 
 function CarouselItem({ item, onButtonClick, ...other }) {
+  // Determine the image source based on the title
+  const getImageSource = (title) => {
+    if (title.includes("Family Reunification")) {
+      return "./family.png"
+    }
+    if (title.includes("Worldwide Visit Visas")) {
+      return "./visa.png"
+    }
+    if (title.includes("Business & Work Permit")) {
+      return "./permit.png"
+    }
+    return item.coverUrl || "/placeholder.svg"
+  }
+
+  const imageSource = getImageSource(item.title)
+
   return (
     <Box sx={{ width: 1, position: "relative", ...other }}>
       <Box
@@ -86,27 +105,31 @@ function CarouselItem({ item, onButtonClick, ...other }) {
         <Typography variant="body2" sx={{ wordWrap: "break-word" }}>
           {item.description}
         </Typography>
-        <Button variant="contained" color="primary" onClick={onButtonClick}
-        sx={{
-          my:{ xs: 1, sm: 1,lg: 1, xl: 5 },
-         
-        }}>
-          {item.title==="Business & Work Permit Not just an application form"?"Learn More":"Apply Now"}
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={onButtonClick}
+          sx={{
+            my: { xs: 1, sm: 1, lg: 1, xl: 5 },
+          }}
+        >
+          {item.title === "Business & Work Permit Not just an application form" ? "Learn More" : "Apply Now"}
         </Button>
       </Box>
 
+      {/* Full image coverage with object-fit: cover and uniform black overlay across the entire image */}
       <Image
         alt={item.title}
-        src={item.coverUrl || "/placeholder.svg"}
+        src={imageSource || "/placeholder.svg"}
         slotProps={{
           overlay: {
-            background: (theme) =>
-              `linear-gradient(to bottom, ${varAlpha(theme.vars.palette.common.blackChannel, 0)} 0%, ${theme.vars.palette.common.black} 75%)`,
+            background: (theme) => `${varAlpha(theme.vars.palette.common.blackChannel, 0.7)}`, // Uniform black overlay with 30% opacity
           },
         }}
         sx={{
           width: 1,
           height: { xs: 288, xl: 320 },
+          objectFit: "cover", // Ensures full image coverage
         }}
       />
     </Box>
