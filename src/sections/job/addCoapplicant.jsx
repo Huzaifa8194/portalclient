@@ -1,4 +1,6 @@
-import { useMemo, useState, useCallback } from "react"
+"use client"
+
+import { useMemo, useState, useCallback, useEffect, useRef } from "react"
 import { useForm, FormProvider } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z as zod } from "zod"
@@ -15,7 +17,6 @@ import { FAMILY_CATEGORY_OPTIONS } from "src/_mock"
 import { toast } from "src/components/snackbar"
 import { Field } from "src/components/hook-form"
 import { countries } from "src/assets/data"
-import { secondary } from "src/theme/core"
 
 // Update the schema to include country fields
 const FamilyMemberSchema = zod.object({
@@ -47,6 +48,8 @@ export function JobNewEditForm({ currentJob }) {
   const router = useRouter()
   const { id } = useParams()
   const [isLoading, setIsLoading] = useState(false)
+  const autocompleteRef = useRef(null)
+  const secondaryAutocompleteRef = useRef(null)
 
   // Function to find country ID by label
   const findCountryIdByLabel = useCallback((countryLabel) => {
@@ -79,7 +82,7 @@ export function JobNewEditForm({ currentJob }) {
       country: null,
       email: "",
       address: "",
-      secondaryAddress: ""
+      secondaryAddress: "",
     }
   }, [])
 
@@ -88,6 +91,298 @@ export function JobNewEditForm({ currentJob }) {
     resolver: zodResolver(FamilyMemberSchema),
     defaultValues,
   })
+
+  // Initialize Google Maps autocomplete
+  useEffect(() => {
+    // Function to load Google Maps API
+    const loadGoogleMapsAPI = () => {
+      if (window.google && window.google.maps && window.google.maps.places) {
+        initializeAutocomplete()
+      } else {
+        const script = document.createElement("script")
+        script.src =
+          "https://maps.googleapis.com/maps/api/js?key=AIzaSyAAWOsJJP9SHiPLh_DSRHJIwdrXfY2WBNw&libraries=places"
+        script.async = true
+        script.defer = true
+        script.onload = initializeAutocomplete
+        document.head.appendChild(script)
+      }
+    }
+
+    // Function to initialize autocomplete
+    const initializeAutocomplete = () => {
+      // Wait for the DOM to be fully loaded and the input to be available
+      setTimeout(() => {
+        // Get the address input elements
+        const addressInput = document.getElementById("address")
+        const secondaryAddressInput = document.getElementById("secondaryAddress")
+
+        if (!addressInput && !secondaryAddressInput) {
+          console.error("Address input elements not found")
+          return
+        }
+
+        // Initialize primary address autocomplete
+        if (addressInput) {
+          try {
+            // Create the autocomplete instance
+            const autocomplete = new window.google.maps.places.Autocomplete(addressInput, {
+              types: ["address"],
+            })
+
+            // Store the autocomplete instance in the ref
+            autocompleteRef.current = autocomplete
+
+            // Add a listener for place selection
+            autocomplete.addListener("place_changed", () => {
+              const place = autocomplete.getPlace()
+
+              if (!place.geometry) {
+                console.log("Place details not found")
+                return
+              }
+
+              // Extract address components
+              let city = ""
+              let country = ""
+              let postalCode = ""
+              let streetNumber = ""
+              let route = ""
+
+              for (let i = 0; i < place.address_components.length; i += 1) {
+                const component = place.address_components[i]
+
+                // Get the street number
+                if (component.types.includes("street_number")) {
+                  streetNumber = component.long_name
+                }
+
+                // Get the route (street name)
+                if (component.types.includes("route")) {
+                  route = component.long_name
+                }
+
+                // Get the City (if present)
+                if (component.types.includes("locality")) {
+                  city = component.long_name
+                }
+
+                // Get the Country (if present)
+                if (component.types.includes("country")) {
+                  country = component.long_name
+                }
+
+                // Get the Postal Code (if present)
+                if (component.types.includes("postal_code")) {
+                  postalCode = component.long_name
+                }
+              }
+
+              // Format the address to only include street information
+              let formattedAddress = ""
+              if (route) {
+                formattedAddress = route
+                if (streetNumber) {
+                  formattedAddress += ` ${streetNumber}`
+                }
+              } else {
+                // If no specific street info is found, use the first part of the formatted address
+                const firstPart = place.formatted_address.split(",")[0]
+                formattedAddress = firstPart
+              }
+
+              // Set form values using the form methods
+              methods.setValue("address", formattedAddress)
+
+              // Always set city and postal code - empty if not found
+              methods.setValue("city", city || "")
+              methods.setValue("postalCode", postalCode || "")
+
+              // Update country if found
+              if (country) {
+                const countryId = findCountryIdByLabel(country)
+                if (countryId) {
+                  const countryLabel = countries.find((c) => c.id === countryId)?.label
+                  if (countryLabel) {
+                    methods.setValue("country", countryLabel)
+                  }
+                }
+              } else {
+                methods.setValue("country", null)
+              }
+            })
+          } catch (error) {
+            console.error("Error initializing Google Maps Autocomplete for primary address:", error)
+          }
+        }
+
+        // Initialize secondary address autocomplete
+        if (secondaryAddressInput) {
+          try {
+            // Create the autocomplete instance for secondary address
+            const secondaryAutocomplete = new window.google.maps.places.Autocomplete(secondaryAddressInput, {
+              types: ["address"],
+            })
+
+            // Store the autocomplete instance in the ref
+            secondaryAutocompleteRef.current = secondaryAutocomplete
+
+            // Add a listener for place selection
+            secondaryAutocomplete.addListener("place_changed", () => {
+              const place = secondaryAutocomplete.getPlace()
+
+              if (!place.geometry) {
+                console.log("Place details not found for secondary address")
+                return
+              }
+
+              // Extract address components
+              let city = ""
+              let country = ""
+              let postalCode = ""
+              let streetNumber = ""
+              let route = ""
+
+              for (let i = 0; i < place.address_components.length; i += 1) {
+                const component = place.address_components[i]
+
+                // Get the street number
+                if (component.types.includes("street_number")) {
+                  streetNumber = component.long_name
+                }
+
+                // Get the route (street name)
+                if (component.types.includes("route")) {
+                  route = component.long_name
+                }
+
+                // Get the City (if present)
+                if (component.types.includes("locality")) {
+                  city = component.long_name
+                }
+
+                // Get the Country (if present)
+                if (component.types.includes("country")) {
+                  country = component.long_name
+                }
+
+                // Get the Postal Code (if present)
+                if (component.types.includes("postal_code")) {
+                  postalCode = component.long_name
+                }
+              }
+
+              // Format the address to include the full formatted address
+              methods.setValue("secondaryAddress", place.formatted_address)
+
+              // Update city field - set to empty if not found
+              methods.setValue("city", city || "")
+
+              // Update postal code field - set to empty if not found
+              methods.setValue("postalCode", postalCode || "")
+
+              // Update country if found
+              if (country) {
+                const countryId = findCountryIdByLabel(country)
+                if (countryId) {
+                  const countryLabel = countries.find((c) => c.id === countryId)?.label
+                  if (countryLabel) {
+                    methods.setValue("country", countryLabel)
+                  }
+                }
+              } else {
+                methods.setValue("country", null)
+              }
+            })
+          } catch (error) {
+            console.error("Error initializing Google Maps Autocomplete for secondary address:", error)
+          }
+        }
+
+        // Apply custom styling to match MenuItem components
+        const applyCustomStyling = () => {
+          const pacContainers = document.querySelectorAll(".pac-container")
+
+          pacContainers.forEach((container) => {
+            container.style.zIndex = "1500"
+            container.style.borderRadius = "4px"
+            container.style.boxShadow =
+              "0px 5px 5px -3px rgba(0,0,0,0.2), 0px 8px 10px 1px rgba(0,0,0,0.14), 0px 3px 14px 2px rgba(0,0,0,0.12)"
+            container.style.backgroundColor = "white"
+            container.style.border = "1px solid rgba(0, 0, 0, 0.12)"
+            container.style.marginTop = "8px"
+
+            // Style the items
+            const items = container.querySelectorAll(".pac-item")
+            items.forEach((item) => {
+              item.style.padding = "6px 16px"
+              item.style.fontSize = "1rem"
+              item.style.fontFamily = '"Roboto","Helvetica","Arial",sans-serif'
+              item.style.lineHeight = "1.5"
+              item.style.transition = "background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms"
+
+              // Add hover effect
+              item.addEventListener("mouseenter", () => {
+                item.style.backgroundColor = "rgba(0, 0, 0, 0.04)"
+              })
+              item.addEventListener("mouseleave", () => {
+                item.style.backgroundColor = "transparent"
+              })
+            })
+          })
+        }
+
+        // Create a mutation observer to watch for the pac-container
+        if (window.autocompleteObserver) {
+          window.autocompleteObserver.disconnect()
+        }
+
+        window.autocompleteObserver = new MutationObserver((mutations) => {
+          const pacContainer = document.querySelector(".pac-container")
+          if (pacContainer) {
+            applyCustomStyling()
+          }
+        })
+
+        // Start observing the document body
+        window.autocompleteObserver.observe(document.body, {
+          childList: true,
+          subtree: true,
+        })
+
+        // Add focus event listeners to ensure styling is applied
+        if (addressInput) {
+          addressInput.addEventListener("focus", () => {
+            setTimeout(applyCustomStyling, 300)
+          })
+        }
+
+        if (secondaryAddressInput) {
+          secondaryAddressInput.addEventListener("focus", () => {
+            setTimeout(applyCustomStyling, 300)
+          })
+        }
+      }, 500)
+    }
+
+    // Load the API
+    loadGoogleMapsAPI()
+
+    // Cleanup function
+    return () => {
+      if (autocompleteRef.current) {
+        window.google?.maps?.event?.clearInstanceListeners(autocompleteRef.current)
+        autocompleteRef.current = null
+      }
+      if (secondaryAutocompleteRef.current) {
+        window.google?.maps?.event?.clearInstanceListeners(secondaryAutocompleteRef.current)
+        secondaryAutocompleteRef.current = null
+      }
+      if (window.autocompleteObserver) {
+        window.autocompleteObserver.disconnect()
+      }
+    }
+  }, [findCountryIdByLabel, methods])
 
   const {
     reset,
@@ -119,7 +414,7 @@ export function JobNewEditForm({ currentJob }) {
       apiData.append("country_id", countryId || "")
       apiData.append("place_of_birth", placeOfBirthId || "")
       apiData.append("nationality", nationalityId || "")
-      apiData.append("secondary_address", data.secondAddress || "")
+      apiData.append("secondary_address", data.secondaryAddress || "")
 
       apiData.append("nic", data.nic || "")
       apiData.append("passport_no", data.passport_no || "")
@@ -186,10 +481,10 @@ export function JobNewEditForm({ currentJob }) {
                     </optgroup>
                   ))}
                 </Field.Select>
-                <Field.Text name="contact_number" label="Contact Number" />
+                <Field.Phone name="contact_number" label="Contact Number" />
                 <Field.Text name="email" label="Email address" />
-                <Field.Text name="address" label="Address" />
-                <Field.Text name="secondAddress" label="Secondary Address" />
+                <Field.Text name="address" label="Address" id="address" />
+                <Field.Text name="secondaryAddress" label="Secondary Address" id="secondaryAddress" />
                 <Field.Text name="city" label="City" />
                 <Field.Text name="postalCode" label="Postal Code" />
                 <Field.CountrySelect
@@ -199,7 +494,7 @@ export function JobNewEditForm({ currentJob }) {
                   helperText="Select a country"
                 />
                 <Field.Text name="nic" label="National Identification Number - CPR - Personnummer" />
-                <Field.DatePicker name="dob" label="Date of Birth" />
+                <Field.DatePicker name="dob" label="Date of Birth" format="YYYY/MM/DD" />
                 <Field.CountrySelect
                   name="place_of_birth"
                   label="Place of Birth"
@@ -213,8 +508,8 @@ export function JobNewEditForm({ currentJob }) {
                   helperText="Select nationality"
                 />
                 <Field.Text name="passport_no" label="Passport Number" />
-                <Field.DatePicker name="issue_date" label="Issue Date" />
-                <Field.DatePicker name="expiry_date" label="Expiry Date" />
+                <Field.DatePicker name="issue_date" label="Issue Date" format="YYYY/MM/DD" />
+                <Field.DatePicker name="expiry_date" label="Expiry Date" format="YYYY/MM/DD" />
               </Box>
               <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>
                 <LoadingButton type="submit" variant="contained" loading={isSubmitting}>

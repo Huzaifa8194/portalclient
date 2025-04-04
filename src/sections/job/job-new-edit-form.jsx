@@ -1,7 +1,11 @@
-import { useMemo, useEffect, useState, useCallback } from "react"
-import { useForm, FormProvider } from "react-hook-form"
+"use client"
+
+
+import { React, useMemo, useEffect, useState, useCallback, useRef } from "react"
+import { useForm, FormProvider, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z as zod } from "zod"
+import { isValidPhoneNumber, parsePhoneNumber } from "react-phone-number-input"
 import Grid from "@mui/material/Unstable_Grid2"
 import Box from "@mui/material/Box"
 import Card from "@mui/material/Card"
@@ -20,7 +24,9 @@ import { countries } from "src/assets/data"
 const FamilyMemberSchema = zod.object({
   name: zod.string().min(1, { message: "Name is required" }),
   relationship: zod.string().min(1, { message: "Relationship is required" }),
-  contact_number: zod.string().optional(),
+  contact_number: zod.string().refine((value) => !value || isValidPhoneNumber(value), {
+    message: "Invalid phone number",
+  }),
   email: zod.string().email().optional(),
   address: zod.string().optional(),
   city: zod.string().optional(),
@@ -41,16 +47,183 @@ const FamilyMemberSchema = zod.object({
     .refine((date) => !Number.isNaN(Date.parse(date)), { message: "Date of birth must be a valid date!" }),
 })
 
+// Separate component for phone input to avoid hooks rules violation
+function PhoneInputWithCountryDetection({ name, label, helperText, ...other }) {
+  return (
+    <Controller
+      name={name}
+      render={({ field, fieldState: { error } }) => {
+        // Try to detect country from phone number
+        let detectedCountry = null
+        if (field.value) {
+          try {
+            const parsedNumber = parsePhoneNumber(field.value)
+            if (parsedNumber?.country) {
+              detectedCountry = parsedNumber.country
+              console.log("Detected country from phone:", detectedCountry)
+            }
+          } catch (parseError) {
+            console.error("Error parsing phone number:", parseError)
+          }
+        }
+
+        return (
+          <Field.Phone
+            {...field}
+            label={label}
+            error={!!error}
+            helperText={error ? error.message : helperText}
+            country={detectedCountry}
+            {...other}
+          />
+        )
+      }}
+    />
+  )
+}
+
+// Custom address input component with Google Maps autocomplete
+function AddressAutocompleteInput({ name, label, helperText, onPlaceSelected, ...other }) {
+  const inputRef = useRef(null)
+  const autocompleteRef = useRef(null)
+
+  useEffect(() => {
+    // Only initialize if Google Maps API is loaded
+    if (!window.google || !window.google.maps || !window.google.maps.places) {
+      console.log("Google Maps API not yet loaded")
+      return undefined // Return undefined for consistent return
+    }
+
+    if (!inputRef.current) {
+      console.log("Input ref not available yet")
+      return undefined // Return undefined for consistent return
+    }
+
+    try {
+      // Create the autocomplete instance with broader options
+      const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
+        types: ["geocode"], // Use geocode for broader results
+        fields: ["address_components", "formatted_address", "geometry", "name"],
+      })
+
+      // Store the autocomplete instance in the ref
+      autocompleteRef.current = autocomplete
+
+      // Add a listener for place selection
+      const listener = autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace()
+        console.log("Selected place:", place)
+
+        if (!place.geometry) {
+          console.log("Place details not found")
+          return
+        }
+
+        if (onPlaceSelected) {
+          onPlaceSelected(place)
+        }
+      })
+
+      // Cleanup function
+      return () => {
+        if (window.google && window.google.maps && window.google.maps.event) {
+          window.google.maps.event.removeListener(listener)
+        }
+      }
+    } catch (error) {
+      console.error("Error initializing Google Maps Autocomplete:", error)
+      return undefined // Return undefined for consistent return
+    }
+  }, [onPlaceSelected])
+
+  // Prevent form submission on enter key
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault()
+    }
+  }
+
+  return (
+    <Controller
+      name={name}
+      render={({ field, fieldState: { error } }) => (
+        <Field.Text
+          {...field}
+          inputRef={inputRef}
+          label={label}
+          error={!!error}
+          helperText={error ? error.message : helperText}
+          onKeyDown={handleKeyDown}
+          {...other}
+        />
+      )}
+    />
+  )
+}
+
+// // Forward ref to fix the warning about function components not accepting refs
+// const RHFTextField = React.forwardRef((props, ref) => <Field.Text {...props} inputRef={ref} />)
+// RHFTextField.displayName = "RHFTextField"
+
 export function JobNewEditForm({ currentJob }) {
   const router = useRouter()
   const { id } = useParams()
   const [memberData, setMemberData] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [googleMapsLoaded, setGoogleMapsLoaded] = useState(false)
 
   // Function to find country ID by label
   const findCountryIdByLabel = useCallback((countryLabel) => {
     const country = countries.find((c) => c.label === countryLabel)
     return country ? country.id : null
+  }, [])
+
+  // Function to find country label by ID
+  const findCountryLabelById = useCallback((countryId) => {
+    const country = countries.find((c) => c.id === Number(countryId))
+    return country ? country.label : null
+  }, [])
+
+  // Load Google Maps API
+  useEffect(() => {
+    // Function to load Google Maps API
+    const loadGoogleMapsAPI = () => {
+      // Check if the API is already loaded
+      if (window.google && window.google.maps && window.google.maps.places) {
+        console.log("Google Maps API already loaded")
+        setGoogleMapsLoaded(true)
+        return
+      }
+
+      // Check if the script is already being loaded
+      const existingScript = document.querySelector('script[src*="maps.googleapis.com/maps/api"]')
+      if (existingScript) {
+        console.log("Google Maps API script is already loading")
+        existingScript.addEventListener("load", () => {
+          console.log("Google Maps API loaded via existing script")
+          setGoogleMapsLoaded(true)
+        })
+        return
+      }
+
+      console.log("Loading Google Maps API script")
+      const script = document.createElement("script")
+      script.src =
+        "https://maps.googleapis.com/maps/api/js?key=AIzaSyAAWOsJJP9SHiPLh_DSRHJIwdrXfY2WBNw&libraries=places"
+      script.async = true
+      script.defer = true
+      script.onload = () => {
+        console.log("Google Maps API script loaded successfully")
+        setGoogleMapsLoaded(true)
+      }
+      script.onerror = (error) => {
+        console.error("Error loading Google Maps API script:", error)
+      }
+      document.head.appendChild(script)
+    }
+
+    // Load the API
+    loadGoogleMapsAPI()
   }, [])
 
   // Fetch family member data
@@ -103,12 +276,6 @@ export function JobNewEditForm({ currentJob }) {
         address: "",
       }
 
-    // Function to find country label by ID (inside useMemo to avoid dependency issues)
-    const findCountryLabelById = (countryId) => {
-      const country = countries.find((c) => c.id === Number(countryId))
-      return country ? country.label : null
-    }
-
     // Get country labels from IDs if available, otherwise use the provided labels
     const nationality = memberData.data.nationality_id
       ? findCountryLabelById(memberData.data.nationality_id)
@@ -139,7 +306,7 @@ export function JobNewEditForm({ currentJob }) {
       email: memberData.data.email || "",
       address: memberData.data.address || "",
     }
-  }, [memberData])
+  }, [memberData, findCountryLabelById])
 
   const methods = useForm({
     mode: "all",
@@ -150,8 +317,94 @@ export function JobNewEditForm({ currentJob }) {
   const {
     reset,
     handleSubmit,
+    setValue,
     formState: { isSubmitting },
   } = methods
+
+  // Handle place selection from Google Maps autocomplete
+  const handlePlaceSelected = useCallback(
+    (place) => {
+      if (!place || !place.address_components) return
+
+      // Extract address components
+      let city = ""
+      let country = ""
+      let postalCode = ""
+      let streetNumber = ""
+      let route = ""
+
+      for (let i = 0; i < place.address_components.length; i += 1) {
+        const component = place.address_components[i]
+
+        // Get the street number
+        if (component.types.includes("street_number")) {
+          streetNumber = component.long_name
+        }
+
+        // Get the route (street name)
+        if (component.types.includes("route")) {
+          route = component.long_name
+        }
+
+        // Get the City (if present)
+        if (component.types.includes("locality")) {
+          city = component.long_name
+        }
+
+        // Get the Country (if present)
+        if (component.types.includes("country")) {
+          country = component.long_name
+        }
+
+        // Get the Postal Code (if present)
+        if (component.types.includes("postal_code")) {
+          postalCode = component.long_name
+        }
+      }
+
+      // Format the address to only include street information
+      let formattedAddress = ""
+      if (route) {
+        formattedAddress = route
+        if (streetNumber) {
+          formattedAddress += ` ${streetNumber}`
+        }
+      } else {
+        // If no specific street info is found, use the first part of the formatted address
+        const firstPart = place.formatted_address.split(",")[0]
+        formattedAddress = firstPart
+      }
+
+      // Set form values
+      setValue("address", formattedAddress, { shouldValidate: true })
+
+      // Clear previous values first to ensure they don't persist
+      setValue("city", "", { shouldValidate: true })
+      setValue("postalCode", "", { shouldValidate: true })
+      setValue("country", "", { shouldValidate: true })
+
+      // Update city if found
+      if (city) {
+        setValue("city", city, { shouldValidate: true })
+      }
+
+      // Update postal code if found
+      if (postalCode) {
+        setValue("postalCode", postalCode, { shouldValidate: true })
+      }
+
+      // Update country if found
+      if (country) {
+        // Find the country in our list
+        const countryOption = countries.find((c) => c.label.toLowerCase() === country.toLowerCase())
+
+        if (countryOption) {
+          setValue("country", countryOption.label, { shouldValidate: true })
+        }
+      }
+    },
+    [setValue],
+  )
 
   useEffect(() => {
     if (memberData) {
@@ -183,7 +436,7 @@ export function JobNewEditForm({ currentJob }) {
       apiData.append("country_id", countryId || "")
       apiData.append("place_of_birth", placeOfBirthId || "")
       apiData.append("nationality", nationalityId || "")
-      apiData.append("secondary_address","")
+      apiData.append("secondary_address", "")
 
       apiData.append("nic", data.nic || "")
       apiData.append("passport_no", data.passport_no || "")
@@ -250,9 +503,17 @@ export function JobNewEditForm({ currentJob }) {
                     </optgroup>
                   ))}
                 </Field.Select>
-                <Field.Text name="contact_number" label="Contact Number" />
+                {/* Use the custom phone input component to fix country detection */}
+                <PhoneInputWithCountryDetection name="contact_number" label="Contact Number" />
                 <Field.Text name="email" label="Email address" />
-                <Field.Text name="address" label="Address" />
+
+                {/* Use the custom address input with autocomplete */}
+                {googleMapsLoaded ? (
+                  <AddressAutocompleteInput name="address" label="Address" onPlaceSelected={handlePlaceSelected} />
+                ) : (
+                  <Field.Text name="address" label="Address" />
+                )}
+
                 <Field.Text name="city" label="City" />
                 <Field.Text name="postalCode" label="Postal Code" />
                 <Field.CountrySelect
@@ -262,7 +523,7 @@ export function JobNewEditForm({ currentJob }) {
                   helperText="Select a country"
                 />
                 <Field.Text name="nic" label="National Identification Number - CPR - Personnummer" />
-                <Field.DatePicker name="dob" label="Date of Birth" />
+                <Field.DatePicker name="dob" label="Date of Birth" format="YYYY/MM/DD" />
                 <Field.CountrySelect
                   name="place_of_birth"
                   label="Place of Birth"
@@ -276,8 +537,8 @@ export function JobNewEditForm({ currentJob }) {
                   helperText="Select nationality"
                 />
                 <Field.Text name="passport_no" label="Passport Number" />
-                <Field.DatePicker name="issue_date" label="Issue Date" />
-                <Field.DatePicker name="expiry_date" label="Expiry Date" />
+                <Field.DatePicker name="issue_date" label="Issue Date" format="YYYY/MM/DD" />
+                <Field.DatePicker name="expiry_date" label="Expiry Date" format="YYYY/MM/DD" />
               </Box>
               <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>
                 <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
