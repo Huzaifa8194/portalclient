@@ -576,7 +576,7 @@ export function OverviewAppView() {
             }}
           >
             <CardHeader
-              title="Top installed countries"
+              title="Global Visa Partners"
               action={
                 <Button variant="text" size="small" onClick={() => toggleExpand("installed")}>
                   {expandedSections.installed ? (
