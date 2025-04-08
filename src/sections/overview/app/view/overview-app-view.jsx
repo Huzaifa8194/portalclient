@@ -215,6 +215,13 @@ export function OverviewAppView() {
   const gender = "Male"
   const avatarImage = gender === "Male" ? _mock.image.avatar(24) : _mock.image.avatar(2)
 
+  // Custom title component with smaller font size
+  const CustomTitle = () => (
+    <Typography variant="h5" sx={{ fontWeight: 600 }}>
+      Welcome Moaz Ateeq👋
+    </Typography>
+  )
+
   return (
     <DashboardContent maxWidth="xl">
       <Grid container spacing={3}>
@@ -222,8 +229,20 @@ export function OverviewAppView() {
         <Grid xs={12} md={8} sx={gridItemStyles}>
           <Box sx={{ height: "280px", display: "flex", flexDirection: "column" }}>
             <AppWelcome
-              title={`Welcome\n ${user?.displayName} 👋`}
-              description="This all-in-one platform streamlines immigration and relocation worldwide for you and your family."
+              title={<CustomTitle />}
+              description="You have entered the digital world of seamless relocation and immigration solutions."
+              img={
+                <Box sx={{ mt: 3, display: "flex", justifyContent: "center" }}>
+                  <Image
+                    src="/dashboard.png"
+                    alt="Dashboard"
+                    sx={{
+                      width: 180,
+                      height: 220,
+                    }}
+                  />
+                </Box>
+              }
               sx={{ flex: 1 }}
             />
           </Box>
@@ -367,7 +386,7 @@ export function OverviewAppView() {
 
             <Stack direction="row" alignItems="center" justifyContent="center" sx={{ mb: 2.5 }}>
               <Typography variant="body2" color="textSecondary">
-                <strong>Client id:</strong> 08
+                <strong>Client ID:</strong> 08
               </Typography>
             </Stack>
 
@@ -709,4 +728,3 @@ export function OverviewAppView() {
     </DashboardContent>
   )
 }
-

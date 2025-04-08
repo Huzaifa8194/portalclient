@@ -7,8 +7,10 @@ import Button from "@mui/material/Button"
 import { useState, useEffect } from "react"
 import Tabs from "@mui/material/Tabs"
 import Tab from "@mui/material/Tab"
-import { CONFIG } from 'src/config-global';
-import { _files, _folders } from 'src/_mock';
+import Avatar from "@mui/material/Avatar" // Added Avatar import
+import Stack from "@mui/material/Stack" // Added Stack import
+import { CONFIG } from "src/config-global"
+import { _mock } from "src/_mock" // Added _mock import
 import { fNumber } from "src/utils/format-number"
 import { useNavigate } from "react-router-dom"
 import { Chart, useChart } from "src/components/chart"
@@ -51,18 +53,18 @@ export function AppWidgetSummary({
     { name: "Liam", count: 15 },
   ]
 
-  const chartColors = chart.colors ?? [theme.palette.primary.main]
+  const chartColors = chart?.colors ?? [theme.palette.primary.main]
 
   const chartOptions = useChart({
     chart: { sparkline: { enabled: true } },
     colors: chartColors,
     stroke: { width: 0 },
-    xaxis: { categories: chart.categories },
+    xaxis: { categories: chart?.categories },
     tooltip: {
       y: { formatter: (value) => fNumber(value), title: { formatter: () => "" } },
     },
     plotOptions: { bar: { borderRadius: 1.5, columnWidth: "64%" } },
-    ...chart.options,
+    ...chart?.options,
   })
   const navigate = useNavigate()
 
@@ -101,43 +103,40 @@ export function AppWidgetSummary({
   // Determine if this card should have expandable content
   const hasExpandableContent = title === "Co-applicants" || title === "Documents" || title === "Appointment"
 
+  const GB = 1000000000 * 24
 
-  const GB = 1000000000 * 24;
-
-   const renderStorageOverview = (
-      <FileStorageOverview
-        total={GB}
-        chart={{ series: 76 }}
-        data={[
-          {
-            name: 'Images',
-            usedStorage: GB / 2,
-            filesCount: 223,
-            icon: <Box component="img" src={`${CONFIG.assetsDir}/assets/icons/files/ic-img.svg`} />,
-          },
-          {
-            name: 'Media',
-            usedStorage: GB / 5,
-            filesCount: 223,
-            icon: <Box component="img" src={`${CONFIG.assetsDir}/assets/icons/files/ic-video.svg`} />,
-          },
-          {
-            name: 'Documents',
-            usedStorage: GB / 5,
-            filesCount: 223,
-            icon: (
-              <Box component="img" src={`${CONFIG.assetsDir}/assets/icons/files/ic-document.svg`} />
-            ),
-          },
-          {
-            name: 'Other',
-            usedStorage: GB / 10,
-            filesCount: 223,
-            icon: <Box component="img" src={`${CONFIG.assetsDir}/assets/icons/files/ic-file.svg`} />,
-          },
-        ]}
-      />
-    );
+  const renderStorageOverview = (
+    <FileStorageOverview
+      total={GB}
+      chart={{ series: 76 }}
+      data={[
+        {
+          name: "Images",
+          usedStorage: GB / 2,
+          filesCount: 223,
+          icon: <Box component="img" src={`${CONFIG.assetsDir}/assets/icons/files/ic-img.svg`} />,
+        },
+        {
+          name: "Media",
+          usedStorage: GB / 5,
+          filesCount: 223,
+          icon: <Box component="img" src={`${CONFIG.assetsDir}/assets/icons/files/ic-video.svg`} />,
+        },
+        {
+          name: "Documents",
+          usedStorage: GB / 5,
+          filesCount: 223,
+          icon: <Box component="img" src={`${CONFIG.assetsDir}/assets/icons/files/ic-document.svg`} />,
+        },
+        {
+          name: "Other",
+          usedStorage: GB / 10,
+          filesCount: 223,
+          icon: <Box component="img" src={`${CONFIG.assetsDir}/assets/icons/files/ic-file.svg`} />,
+        },
+      ]}
+    />
+  )
 
   // Get content based on title
   const getExpandableContent = () => {
@@ -161,9 +160,7 @@ export function AppWidgetSummary({
     }
 
     if (title === "Documents") {
-      return (
-        renderStorageOverview
-      )
+      return renderStorageOverview
     }
 
     if (title === "Appointment") {
@@ -180,6 +177,33 @@ export function AppWidgetSummary({
     return null
   }
 
+  // Avatar component for co-applicants
+  const renderAvatars = () => {
+    const avatar1 = _mock.image.avatar(24)
+    const avatar2 = _mock.image.avatar(4)
+    const avatar3 = _mock.image.avatar(2)
+
+    return (
+      <Stack direction="row" spacing={-0.5}>
+        <Avatar
+          src={avatar1}
+          alt="Co-applicant 1"
+          sx={{ width: 32, height: 32, border: `1px solid ${theme.palette.background.paper}` }}
+        />
+        <Avatar
+          src={avatar2}
+          alt="Co-applicant 2"
+          sx={{ width: 32, height: 32, border: `1px solid ${theme.palette.background.paper}` }}
+        />
+        <Avatar
+          src={avatar3}
+          alt="Co-applicant 3"
+          sx={{ width: 32, height: 32, border: `1px solid ${theme.palette.background.paper}` }}
+        />
+      </Stack>
+    )
+  }
+
   return (
     <Card
       sx={{
@@ -192,13 +216,17 @@ export function AppWidgetSummary({
       }}
       {...other}
     >
-      {/* Header with title, total, and chart */}
+      {/* Header with title, total, and chart or avatars */}
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
         <Box>
           <Box sx={{ typography: "subtitle2" }}>{title}</Box>
           <Box sx={{ mt: 1.5, typography: "h3" }}>{fNumber(total)}</Box>
         </Box>
-        <Chart type="bar" series={[{ data: chart.series }]} options={chartOptions} width={60} height={40} />
+        {title === "Co-applicants" ? (
+          renderAvatars()
+        ) : (
+          <Chart type="bar" series={[{ data: chart?.series }]} options={chartOptions} width={60} height={40} />
+        )}
       </Box>
 
       {/* Action button */}
@@ -230,8 +258,8 @@ export function AppWidgetSummary({
             onClick={onToggleDisplayContent}
             endIcon={<Iconify icon="eva:chevron-down-fill" width={16} height={16} />}
             sx={{
-              maxWidth: "100%", 
-              px: 2, 
+              maxWidth: "100%",
+              px: 2,
             }}
           >
             Display Content
@@ -304,4 +332,3 @@ export function AppWidgetSummary({
     </Card>
   )
 }
-
