@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useContext } from "react"
 
 import Box from "@mui/material/Box"
 import Paper from "@mui/material/Paper"
@@ -26,6 +26,7 @@ import { Iconify } from "src/components/iconify"
 import { ConfirmDialog } from "src/components/custom-dialog"
 import { FileThumbnail } from "src/components/file-thumbnail"
 import { usePopover, CustomPopover } from "src/components/custom-popover"
+import { AuthContext } from "src/auth/context/auth-context"
 
 import { FileManagerShareDialog } from "./file-manager-share-dialog"
 import { FileManagerFileDetails } from "./file-manager-file-details"
@@ -49,6 +50,8 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
 
   const [inviteEmail, setInviteEmail] = useState("")
 
+  const { user } = useContext(AuthContext)
+
   const handleChangeInvite = useCallback((event) => {
     setInviteEmail(event.target.value)
   }, [])
@@ -57,6 +60,45 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
     toast.success("Copied!")
     copy(file.url)
   }, [copy, file.url])
+
+  const handleDownload = () => {
+    try {
+      // toast.info("Opening document...")
+
+      // Get the full URL
+      let fileUrl = file.url
+      if (fileUrl.startsWith("/")) {
+        fileUrl = `https://api.swedenrelocators.se${fileUrl}`
+      }
+
+      // Create a form to submit with authentication
+      const form = document.createElement("form")
+      form.method = "GET"
+      form.action = fileUrl
+      form.target = "_blank"
+
+      // Add authorization header as a hidden field
+      // Note: This is a workaround - the server needs to be configured to accept this
+      if (user?.accessToken) {
+        const authInput = document.createElement("input")
+        authInput.type = "hidden"
+        authInput.name = "auth_token"
+        authInput.value = user.accessToken
+        form.appendChild(authInput)
+      }
+
+      // Submit the form
+      document.body.appendChild(form)
+      form.submit()
+      document.body.removeChild(form)
+
+      // Show instructions to the user
+      // toast.success("Document opened. Please use the browser's download button to save it.")
+    } catch (error) {
+      console.error("Download error:", error)
+      // toast.error("Failed to open document. Please try again.")
+    }
+  }
 
   const renderIcon = (
     <Box
@@ -118,7 +160,7 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
           WebkitBoxOrient: "vertical",
           WebkitLineClamp: 3,
           overflow: "hidden",
-          textAlign: "start", 
+          textAlign: "start",
           cursor: "pointer",
         }}
       >
@@ -227,15 +269,25 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
             Copy Link
           </MenuItem> */}
 
-          {/* <MenuItem
+          <MenuItem
             onClick={() => {
               popover.onClose()
-              share.onTrue()
+              handleDownload()
             }}
           >
-            <Iconify icon="solar:share-bold" />
-            Share
-          </MenuItem> */}
+            <Iconify icon="eva:download-fill" />
+            Download
+          </MenuItem>
+
+          <MenuItem
+            onClick={() => {
+              popover.onClose()
+              // Move functionality will be implemented later
+            }}
+          >
+            <Iconify icon="eva:move-fill" />
+            Move
+          </MenuItem>
 
           <Divider sx={{ borderStyle: "dashed" }} />
 
@@ -291,4 +343,3 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
     </>
   )
 }
-
