@@ -273,8 +273,11 @@ export function OverviewAppView() {
           </Box>
         </Grid>
 
-        <Grid xs={12} md={4} sx={gridItemStyles}>
+        <Grid xs={12} md={4} sx={gridItemStyles} >
+          
           <FileStorageOverview
+          
+          
             total={GB}
             chart={{
               series: 76,

@@ -16,10 +16,13 @@ export function AppWelcome({ title, description, action, img, sx, ...other }) {
         ...bgGradient({
           color: `to right, ${varAlpha(
             theme.vars.palette.grey['900Channel'],
-            0.5
-          )} 30%, ${theme.vars.palette.grey[900]} 100%`,
-          imgUrl: 'welcome1.jpg',
+            0.75,
+          )} 50%, ${theme.vars.palette.grey[900]} 100%`,
+          imgUrl: 'welcome7.png',
         }),
+        backgroundSize: '100% auto',
+        backgroundPosition: 'top',
+        backgroundRepeat: 'no-repeat',
         pt: 5,
         pb: 5,
         pr: 3,
