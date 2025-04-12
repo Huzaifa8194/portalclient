@@ -27,8 +27,8 @@ import { AppTopAuthors } from "../app-top-authors"
 import { AppTopRelated } from "../app-top-related"
 import { AppWidgetSummary } from "../app-widget-summary"
 import { AppTopInstalledCountries } from "../app-top-installed-countries"
-import { AppWidgetAppointment } from "../app-widget-appointment"
 import { AppDirectMessages } from "../app-direct-messages"
+import AppWidgetAppointment from "../app-widget-appointment"
 
 // ----------------------------------------------------------------------
 
@@ -273,11 +273,8 @@ export function OverviewAppView() {
           </Box>
         </Grid>
 
-        <Grid xs={12} md={4} sx={gridItemStyles} >
-          
+        <Grid xs={12} md={4} sx={gridItemStyles}>
           <FileStorageOverview
-          
-          
             total={GB}
             chart={{
               series: 76,
@@ -314,11 +311,6 @@ export function OverviewAppView() {
               title="Appointment"
               percent={-0.1}
               total={678}
-              chart={{
-                colors: [theme.vars.palette.error.main],
-                categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
-                series: [18, 19, 31, 8, 16, 37, 12, 33],
-              }}
               appointment={appointment}
               initialExpanded={expandedWidgets.appointment}
               onToggleExpand={() => toggleWidgetExpand("appointment")}
@@ -412,12 +404,6 @@ export function OverviewAppView() {
             </Box>
 
             <Divider sx={{ borderStyle: "dashed" }} />
-
-            {/* <Box sx={{ py: 2, mt: "auto" }}>
-              <Button variant="contained" onClick={() => handleViewClick("Not Assigned", "Migrationsverket")}>
-                View Details
-              </Button>
-            </Box> */}
           </Card>
         </Grid>
 
