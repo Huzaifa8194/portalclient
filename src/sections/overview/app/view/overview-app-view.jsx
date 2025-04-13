@@ -28,7 +28,7 @@ import { AppTopRelated } from "../app-top-related"
 import { AppWidgetSummary } from "../app-widget-summary"
 import { AppTopInstalledCountries } from "../app-top-installed-countries"
 import { AppDirectMessages } from "../app-direct-messages"
-import AppWidgetAppointment from "../app-widget-appointment"
+import { AppWidgetAppointment } from "../app-widget-appointment"
 
 // ----------------------------------------------------------------------
 
@@ -217,8 +217,13 @@ export function OverviewAppView() {
 
   // Custom title component with smaller font size
   const CustomTitle = () => (
-    <Typography variant="h5" sx={{ fontWeight: 600 }}>
+    <Typography variant="h3" sx={{ fontWeight: 600 }}>
       Welcome Moaz Ateeq👋
+    </Typography>
+  )
+  const CustomTitle2 = () => (
+    <Typography variant="h6" sx={{ fontWeight: 300, color: "white" }}>
+     You have entered the digital world of seamless relocation and immigration solutions.
     </Typography>
   )
 
@@ -230,19 +235,8 @@ export function OverviewAppView() {
           <Box sx={{ height: "280px", display: "flex", flexDirection: "column" }}>
             <AppWelcome
               title={<CustomTitle />}
-              description="You have entered the digital world of seamless relocation and immigration solutions."
-              img={
-                <Box sx={{ mt: 3, display: "flex", justifyContent: "center" }}>
-                  <Image
-                    src="/dashboard.png"
-                    alt="Dashboard"
-                    sx={{
-                      width: 180,
-                      height: 220,
-                    }}
-                  />
-                </Box>
-              }
+              description={<CustomTitle2 />}
+             
               sx={{ flex: 1 }}
             />
           </Box>

@@ -85,7 +85,7 @@ function CarouselItem({ item, onButtonClick, ...other }) {
         sx={{
           width: 1,
           height: { xs: 288, xl: 320 },
-          objectFit: "cover",
+          objectFit: "contain",
         }}
       />
 

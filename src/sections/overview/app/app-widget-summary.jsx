@@ -260,6 +260,7 @@ export function AppWidgetSummary({
             sx={{
               maxWidth: "100%",
               px: 2,
+              
             }}
           >
             Display Content

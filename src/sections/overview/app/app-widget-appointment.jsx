@@ -5,6 +5,7 @@ import Typography from "@mui/material/Typography"
 import Button from "@mui/material/Button"
 import { AppWidgetSummary } from "./app-widget-summary"
 
+// Export as a named export only (remove the default export)
 export function AppWidgetAppointment({
   title,
   percent,
@@ -84,4 +85,4 @@ export function AppWidgetAppointment({
   )
 }
 
-export default AppWidgetAppointment
+
