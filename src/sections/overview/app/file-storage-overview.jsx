@@ -87,7 +87,7 @@ export function FileStorageOverview({ data, total, chart, title = "Documents", .
       }}>
         <Box component="img" 
           src={`${CONFIG.assetsDir}/assets/icons/files/ic-folder.svg`} 
-          sx={{ width: 24, height: 24 }}
+          sx={{ width: 24, height: 24 , right: "10%", position: 'absolute' }}
         />
         {title}
       </Typography>

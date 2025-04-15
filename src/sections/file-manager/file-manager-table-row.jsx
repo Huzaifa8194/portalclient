@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useCallback, useContext } from "react"
-import axios from "axios";
-import { AuthContext } from "src/auth/context/auth-context";
+import axios from "axios"
+import { AuthContext } from "src/auth/context/auth-context"
 import Stack from "@mui/material/Stack"
 import Button from "@mui/material/Button"
 import Avatar from "@mui/material/Avatar"
@@ -55,38 +55,36 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow, o
 
   const popover = usePopover()
 
-  const { user } = useContext(AuthContext);
+  const { user } = useContext(AuthContext)
 
   const handleDelete = async () => {
     try {
-      
       if (!user?.accessToken) {
-        toast.error("Authentication required. Please log in again.");
-        return;
+        toast.error("Authentication required. Please log in again.")
+        return
       }
 
       await axios.delete(`https://api.swedenrelocators.se/api/document/${row.id}`, {
         headers: {
           Authorization: `Bearer ${user.accessToken}`,
         },
-      });
+      })
 
-      onDeleteRow(row.id); 
-      confirm.onFalse(); 
+      onDeleteRow(row.id)
+      confirm.onFalse()
     } catch (err) {
-      console.error("Delete error:", err);
-      confirm.onFalse();
+      console.error("Delete error:", err)
+      confirm.onFalse()
 
       if (err.response?.status === 401 || err.response?.status === 403) {
-        toast.error("Authentication failed. Please log in again.");
+        toast.error("Authentication failed. Please log in again.")
       } else if (err.response?.status === 404) {
-        toast.error("Document not found.");
+        toast.error("Document not found.")
       } else {
-        toast.error(err.response?.data?.message || "Failed to delete document");
+        toast.error(err.response?.data?.message || "Failed to delete document")
       }
     }
-  };
-
+  }
 
   const handleChangeInvite = useCallback((event) => {
     setInviteEmail(event.target.value)
@@ -113,6 +111,45 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow, o
     toast.success("Copied!")
     copy(row.url)
   }, [copy, row.url])
+
+  const handleDownload = () => {
+    try {
+      // toast.info("Opening document...")
+
+      // Get the full URL
+      let fileUrl = row.url
+      if (fileUrl.startsWith("/")) {
+        fileUrl = `https://api.swedenrelocators.se${fileUrl}`
+      }
+
+      // Create a form to submit with authentication
+      const form = document.createElement("form")
+      form.method = "GET"
+      form.action = fileUrl
+      form.target = "_blank"
+
+      // Add authorization header as a hidden field
+      // Note: This is a workaround - the server needs to be configured to accept this
+      if (user?.accessToken) {
+        const authInput = document.createElement("input")
+        authInput.type = "hidden"
+        authInput.name = "auth_token"
+        authInput.value = user.accessToken
+        form.appendChild(authInput)
+      }
+
+      // Submit the form
+      document.body.appendChild(form)
+      form.submit()
+      document.body.removeChild(form)
+
+      // Show instructions to the user
+      // toast.success("Document opened. Please use the browser's download button to save it.")
+    } catch (error) {
+      console.error("Download error:", error)
+      // toast.error("Failed to open document. Please try again.")
+    }
+  }
 
   const defaultStyles = {
     borderTop: `solid 1px ${varAlpha(theme.vars.palette.grey["500Channel"], 0.16)}`,
@@ -169,7 +206,6 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow, o
                 cursor: "pointer",
                 ...(details.value && { fontWeight: "fontWeightBold" }),
                 ...(row.isFolder && {
-                  
                   "&:hover": { textDecoration: "underline" },
                 }),
               }}
@@ -197,7 +233,6 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow, o
         </TableCell>
 
         <TableCell align="right" onClick={handleClick}>
-
           <AvatarGroup
             max={4}
             sx={{
@@ -211,11 +246,7 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow, o
           >
             {row.shared &&
               row.shared.map((person, index) => (
-                <Avatar
-                  key={person.id || `avatar-${index}-${row.id}`}  
-                  alt={person.name}
-                  src={person.avatarUrl}
-                />
+                <Avatar key={person.id || `avatar-${index}-${row.id}`} alt={person.name} src={person.avatarUrl} />
               ))}
           </AvatarGroup>
         </TableCell>
@@ -251,17 +282,27 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow, o
           >
             <Iconify icon="eva:link-2-fill" />
             Copy Link
+          </MenuItem> */}
+
+          <MenuItem
+            onClick={() => {
+              popover.onClose()
+              handleDownload()
+            }}
+          >
+            <Iconify icon="eva:download-fill" />
+            Download
           </MenuItem>
 
           <MenuItem
             onClick={() => {
               popover.onClose()
-              share.onTrue()
+              // Move functionality will be implemented later
             }}
           >
-            <Iconify icon="solar:share-bold" />
-            Share
-          </MenuItem> */}
+            <Iconify icon="eva:move-fill" />
+            Move
+          </MenuItem>
 
           <Divider sx={{ borderStyle: "dashed" }} />
 
@@ -314,4 +355,3 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow, o
     </>
   )
 }
-

@@ -104,7 +104,7 @@ export function JobItem({ job, onEdit, onDelete }) {
             }}
             sx={{
               position: "absolute",
-              top: 8,
+              top: 180,
               right: 8,
               zIndex: 12,
             }}

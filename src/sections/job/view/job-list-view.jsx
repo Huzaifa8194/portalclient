@@ -182,8 +182,8 @@ export function JobListView() {
 
       {notFound && <EmptyContent filled sx={{ pt: 10 }} />}
 
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid xs={12} md={4}>
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid xs={12} md={4} lg={4}>
           <AppWidgetSummary
             title="User ID:"
             codeicon={
@@ -211,7 +211,7 @@ export function JobListView() {
           />
         </Grid>
 
-        <Grid xs={12} md={4}>
+        <Grid xs={12} md={3.8}>
           <AppWidgetSummary
             title="User Type"
             extratext="Basic User."

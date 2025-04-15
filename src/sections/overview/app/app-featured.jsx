@@ -1,3 +1,5 @@
+"use client"
+
 import Autoplay from "embla-carousel-autoplay"
 import Box from "@mui/material/Box"
 import Link from "@mui/material/Link"
@@ -6,12 +8,11 @@ import Typography from "@mui/material/Typography"
 import Button from "@mui/material/Button"
 import { useNavigate } from "react-router-dom"
 
-import { varAlpha } from "src/theme/styles"
-
 import { Image } from "src/components/image"
 import { Carousel, useCarousel, CarouselDotButtons, CarouselArrowBasicButtons } from "src/components/carousel"
 
 // ----------------------------------------------------------------------
+
 export function AppFeatured({ list, sx, ...other }) {
   const carousel = useCarousel({ loop: true }, [Autoplay({ playOnInit: true, delay: 8000 })])
   const navigate = useNavigate()
@@ -19,13 +20,10 @@ export function AppFeatured({ list, sx, ...other }) {
   const getPath = (title) => {
     switch (title) {
       case "Family Reunification Spouse, Children & Parents EU Residence":
-        console.log("Family Reunification")
         return "/dashboard/family-reunification"
       case "Worldwide Visit Visas Apply Now! Global Visa Services":
-        console.log("Visit Visa")
         return "/dashboard/visit-visa"
       case "Business & Work Permit Not just an application form":
-        console.log("Work Permit")
         return "/dashboard/work-visa"
       default:
         return "#"
@@ -33,17 +31,16 @@ export function AppFeatured({ list, sx, ...other }) {
   }
 
   const handleButtonClick = (path) => {
-    console.log("Navigating to:", path)
     navigate(path)
   }
 
   return (
-    <Card sx={{ bgcolor: "common.black",...sx }} {...other}>
+    <Card sx={{ bgcolor: "primary", ...sx, position: "relative" }} {...other}>
       <CarouselDotButtons
         scrollSnaps={carousel.dots.scrollSnaps}
         selectedIndex={carousel.dots.selectedIndex}
         onClickDot={carousel.dots.onClickDot}
-        sx={{ top: 16, left: 16, position: "absolute", color: "primary.light" }}
+        sx={{ top: 16, left: 16, position: "absolute", color: "common.white" }}
       />
 
       <CarouselArrowBasicButtons
@@ -64,15 +61,55 @@ export function AppFeatured({ list, sx, ...other }) {
 // ----------------------------------------------------------------------
 
 function CarouselItem({ item, onButtonClick, ...other }) {
+  const getImageSource = (title) => {
+    if (title.includes("Family Reunification")) {
+      return "./family.png"
+    }
+    if (title.includes("Worldwide Visit Visas")) {
+      return "./visa.png"
+    }
+    if (title.includes("Business & Work Permit")) {
+      return "./permit.png"
+    }
+    return item.coverUrl || "/placeholder.svg"
+  }
+
+  const imageSource = getImageSource(item.title)
+
   return (
     <Box sx={{ width: 1, position: "relative", ...other }}>
+      {/* Image with overlay */}
+      <Image
+        alt={item.title}
+        src={imageSource}
+        sx={{
+          width: 1,
+          height: { xs: 288, xl: 320 },
+          objectFit: "contain",
+        }}
+      />
+
+      {/* Black overlay box */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "rgba(0, 0, 0, 0.8)",
+          zIndex: 1,
+        }}
+      />
+
+      {/* Text content */}
       <Box
         sx={{
           p: 3,
           gap: 1,
           width: 1,
           bottom: 0,
-          zIndex: 9,
+          zIndex: 2,
           display: "flex",
           position: "absolute",
           color: "common.white",
@@ -86,30 +123,18 @@ function CarouselItem({ item, onButtonClick, ...other }) {
         <Typography variant="body2" sx={{ wordWrap: "break-word" }}>
           {item.description}
         </Typography>
-        <Button variant="contained" color="primary" onClick={onButtonClick}
-        sx={{
-          my:{ xs: 1, sm: 1,lg: 1, xl: 5 },
-         
-        }}>
-          {item.title==="Business & Work Permit Not just an application form"?"Learn More":"Apply Now"}
+
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={onButtonClick}
+          sx={{
+            my: { xs: 1, sm: 1, lg: 1, xl: 5 },
+          }}
+        >
+          {item.title === "Business & Work Permit Not just an application form" ? "Learn More" : "Apply Now"}
         </Button>
       </Box>
-
-      <Image
-        alt={item.title}
-        src={item.coverUrl || "/placeholder.svg"}
-        slotProps={{
-          overlay: {
-            background: (theme) =>
-              `linear-gradient(to bottom, ${varAlpha(theme.vars.palette.common.blackChannel, 0)} 0%, ${theme.vars.palette.common.black} 75%)`,
-          },
-        }}
-        sx={{
-          width: 1,
-          height: { xs: 288, xl: 320 },
-        }}
-      />
     </Box>
   )
 }
-

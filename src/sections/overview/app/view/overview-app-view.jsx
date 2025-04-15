@@ -1,21 +1,21 @@
+"use client"
 
 import Box from "@mui/material/Box"
 import { useTheme } from "@mui/material/styles"
 import Grid from "@mui/material/Unstable_Grid2"
 import { DashboardContent } from "src/layouts/dashboard"
-import { SeoIllustration, AvatarShape } from "src/assets/illustrations"
-import { _appAuthors, _appRelated, _appFeatured, _appInstalled } from "src/_mock"
+import { AvatarShape } from "src/assets/illustrations"
+import { _appAuthors, _appRelated, _appFeatured, _appInstalled, _mock } from "src/_mock"
 import { useMockedUser } from "src/auth/hooks"
 import Divider from "@mui/material/Divider"
 import Typography from "@mui/material/Typography"
 import Button from "@mui/material/Button"
 import ListItemText from "@mui/material/ListItemText"
 import { Image } from "src/components/image"
-import { varAlpha } from "src/theme/styles"
 import Card from "@mui/material/Card"
 import Avatar from "@mui/material/Avatar"
 import Stack from "@mui/material/Stack"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import CardHeader from "@mui/material/CardHeader"
 import { Iconify } from "src/components/iconify"
 import { FileStorageOverview } from "../file-storage-overview"
@@ -27,8 +27,8 @@ import { AppTopAuthors } from "../app-top-authors"
 import { AppTopRelated } from "../app-top-related"
 import { AppWidgetSummary } from "../app-widget-summary"
 import { AppTopInstalledCountries } from "../app-top-installed-countries"
-import { AppWidgetAppointment } from "../app-widget-appointment"
 import { AppDirectMessages } from "../app-direct-messages"
+import { AppWidgetAppointment } from "../app-widget-appointment"
 
 // ----------------------------------------------------------------------
 
@@ -41,8 +41,13 @@ const dummyAppointment = {
 
 const GB = 1000000000 // 1 GB in bytes
 
-const image =
-  "https://i0.wp.com/picjumbo.com/wp-content/uploads/red-and-blue-pillars-wallpaper-abstract-background-free-image.jpeg?w=600&quality=80"
+// Dummy country data for profile
+const countries = {
+  pakistan: {
+    code: "pk",
+    display: "Pakistan",
+  },
+}
 
 // Dummy invoice data
 const _appInvoices = [
@@ -92,16 +97,16 @@ export function OverviewAppView() {
   const { user } = useMockedUser()
   const theme = useTheme()
 
-  // First, let's create a state to track the Business Permit Card height
-  const [businessCardHeight, setBusinessCardHeight] = useState(0)
-  const businessCardRef = useRef(null)
+  // First, let's create a state to track the Profile Card height
+  const [profileCardHeight, setProfileCardHeight] = useState(0)
+  const profileCardRef = useRef(null)
 
   // Add useEffect to measure and update the height
   useEffect(() => {
     const updateHeight = () => {
-      if (businessCardRef.current) {
-        const height = businessCardRef.current.clientHeight
-        setBusinessCardHeight(height)
+      if (profileCardRef.current) {
+        const height = profileCardRef.current.clientHeight
+        setProfileCardHeight(height)
       }
     }
 
@@ -111,6 +116,28 @@ export function OverviewAppView() {
     // Update on window resize
     window.addEventListener("resize", updateHeight)
     return () => window.removeEventListener("resize", updateHeight)
+  }, [])
+
+  // Use useMemo to compute flag URL and display country - similar to job-item.jsx
+  const { flagUrl, displayCountry } = useMemo(() => {
+    try {
+      const rawCountry = "pakistan".toLowerCase().trim()
+      const countryData = countries[rawCountry] || {
+        code: rawCountry.slice(0, 2),
+        display: "Pakistan",
+      }
+
+      return {
+        displayCountry: countryData.display.charAt(0).toUpperCase() + countryData.display.slice(1).toLowerCase(),
+        flagUrl: `https://flagcdn.com/${countryData.code}.svg`,
+      }
+    } catch (error) {
+      console.error("Error processing country data:", error)
+      return {
+        displayCountry: "Pakistan",
+        flagUrl: _mock.image.cover(1),
+      }
+    }
   }, [])
 
   // State for expanded/collapsed content - all set to false by default
@@ -184,6 +211,22 @@ export function OverviewAppView() {
     flexDirection: "column",
   }
 
+  // Determine avatar image based on gender - similar to job-item.jsx
+  const gender = "Male"
+  const avatarImage = gender === "Male" ? _mock.image.avatar(24) : _mock.image.avatar(2)
+
+  // Custom title component with smaller font size
+  const CustomTitle = () => (
+    <Typography variant="h3" sx={{ fontWeight: 600 }}>
+      Welcome Moaz Ateeq👋
+    </Typography>
+  )
+  const CustomTitle2 = () => (
+    <Typography variant="h6" sx={{ fontWeight: 300, color: "white" }}>
+     You have entered the digital world of seamless relocation and immigration solutions.
+    </Typography>
+  )
+
   return (
     <DashboardContent maxWidth="xl">
       <Grid container spacing={3}>
@@ -191,9 +234,9 @@ export function OverviewAppView() {
         <Grid xs={12} md={8} sx={gridItemStyles}>
           <Box sx={{ height: "280px", display: "flex", flexDirection: "column" }}>
             <AppWelcome
-              title={`Welcome\n ${user?.displayName} 👋`}
-              description="This all-in-one platform streamlines immigration and relocation worldwide for you and your family."
-              img={<SeoIllustration hideBackground />}
+              title={<CustomTitle />}
+              description={<CustomTitle2 />}
+             
               sx={{ flex: 1 }}
             />
           </Box>
@@ -262,11 +305,6 @@ export function OverviewAppView() {
               title="Appointment"
               percent={-0.1}
               total={678}
-              chart={{
-                colors: [theme.vars.palette.error.main],
-                categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
-                series: [18, 19, 31, 8, 16, 37, 12, 33],
-              }}
               appointment={appointment}
               initialExpanded={expandedWidgets.appointment}
               onToggleExpand={() => toggleWidgetExpand("appointment")}
@@ -277,10 +315,10 @@ export function OverviewAppView() {
           </Box>
         </Grid>
 
-        {/* Business Permit Card */}
+        {/* Profile Card */}
         <Grid xs={12} sm={6} md={4} sx={gridItemStyles}>
           <Card
-            ref={businessCardRef}
+            ref={profileCardRef}
             sx={{
               textAlign: "center",
               height: "auto",
@@ -302,8 +340,8 @@ export function OverviewAppView() {
               />
 
               <Avatar
-                alt="Business Permit"
-                src="/static/images/avatar_placeholder.png"
+                alt="Moaz Ateeq"
+                src={avatarImage}
                 sx={{
                   width: 64,
                   height: 64,
@@ -317,28 +355,27 @@ export function OverviewAppView() {
               />
 
               <Image
-                src={image || "/placeholder.svg"}
-                alt="Cover"
+                src={flagUrl || "/placeholder.svg"}
+                alt={`${displayCountry} flag`}
                 ratio="16/9"
-                slotProps={{
-                  overlay: {
-                    bgcolor: (themeParam) => varAlpha(themeParam.vars.palette.common.blackChannel, 0.48),
-                  },
+                sx={{
+                  border: (themeParam) => `2px solid ${themeParam.palette.divider}`,
+                  borderRadius: 1,
                 }}
               />
             </Box>
 
             <ListItemText
               sx={{ mt: 7, mb: 1 }}
-              primary="Business Permit"
-              secondary="Migrationsverket"
+              primary="Moaz Ateeq"
+              secondary="Male"
               primaryTypographyProps={{ typography: "subtitle1" }}
               secondaryTypographyProps={{ component: "span", mt: 0.5 }}
             />
 
             <Stack direction="row" alignItems="center" justifyContent="center" sx={{ mb: 2.5 }}>
               <Typography variant="body2" color="textSecondary">
-                <strong>Case No:</strong> N/A
+                <strong>Client ID:</strong> 08
               </Typography>
             </Stack>
 
@@ -347,26 +384,20 @@ export function OverviewAppView() {
             <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" sx={{ py: 3, typography: "subtitle1" }}>
               <div>
                 <Typography variant="caption" component="div" sx={{ mb: 0.5, color: "text.secondary" }}>
-                  Registration Date
+                  D.O.B
                 </Typography>
-                2023-02-16
+                1990-01-01
               </div>
 
               <div>
                 <Typography variant="caption" component="div" sx={{ mb: 0.5, color: "text.secondary" }}>
-                  Status
+                  Nationality
                 </Typography>
-                Pending
+                {displayCountry}
               </div>
             </Box>
 
             <Divider sx={{ borderStyle: "dashed" }} />
-
-            {/* <Box sx={{ py: 2, mt: "auto" }}>
-              <Button variant="contained" onClick={() => handleViewClick("Not Assigned", "Migrationsverket")}>
-                View Details
-              </Button>
-            </Box> */}
           </Card>
         </Grid>
 
@@ -374,7 +405,7 @@ export function OverviewAppView() {
         <Grid xs={12} md={6} lg={8} sx={gridItemStyles}>
           <Card
             sx={{
-              height: businessCardHeight > 0 ? `${businessCardHeight}px` : "auto",
+              height: profileCardHeight > 0 ? `${profileCardHeight}px` : "auto",
               display: "flex",
               flexDirection: "column",
             }}
@@ -547,7 +578,7 @@ export function OverviewAppView() {
             }}
           >
             <CardHeader
-              title="Top installed countries"
+              title="Global Visa Partners"
               action={
                 <Button variant="text" size="small" onClick={() => toggleExpand("installed")}>
                   {expandedSections.installed ? (
@@ -680,4 +711,3 @@ export function OverviewAppView() {
     </DashboardContent>
   )
 }
-
