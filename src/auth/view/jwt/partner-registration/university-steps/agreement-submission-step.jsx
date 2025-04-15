@@ -1,38 +1,67 @@
-import { Box, Typography } from "@mui/material"
-import { Field } from "src/components/hook-form"
+"use client"
 
-export function AgreementSubmissionStep() {
+import { Box, Checkbox, FormControlLabel, Typography, FormHelperText, InputAdornment, IconButton } from "@mui/material"
+import { useFormContext } from "react-hook-form"
+import { Field } from "src/components/hook-form"
+import { Iconify } from "src/components/iconify"
+
+export function AgreementSubmissionStep({ password }) {
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext()
+  const termsError = errors?.is_term_accepted
+
   return (
     <Box gap={3} display="flex" flexDirection="column">
       <Typography variant="h6" gutterBottom>
         Agreement & Submission
       </Typography>
 
-      <Typography variant="body1" sx={{ mb: 3 }}>
+      <Box gap={3} display="flex" flexDirection="column">
+        <Field.Text
+          name="password"
+          label="Password"
+          type={password.value ? "text" : "password"}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={password.onToggle} edge="end">
+                  <Iconify icon={password.value ? "solar:eye-bold" : "solar:eye-closed-bold"} />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+          required
+        />
+        <Field.Text
+          name="password_confirmation"
+          label="Confirm Password"
+          type={password.value ? "text" : "password"}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={password.onToggle} edge="end">
+                  <Iconify icon={password.value ? "solar:eye-bold" : "solar:eye-closed-bold"} />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+          required
+        />
+      </Box>
+
+      <Typography variant="body1" paragraph>
         By submitting this form, the university agrees to explore collaboration opportunities with Sweden Relocators and
         acknowledges the terms of service for student relocation support.
       </Typography>
 
-      <Field.Checkbox name="terms_accepted" label="I agree to the terms and conditions of this partnership." required />
+      <FormControlLabel
+        control={<Checkbox {...register("is_term_accepted", { required: true })} />}
+        label="I agree to the terms and conditions of this partnership."
+      />
+      {termsError && <FormHelperText error>You must accept the terms and conditions to proceed</FormHelperText>}
 
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 4 }}>
-        Thank you for submitting your request. We will review it and respond within 72 hours if any additional
-        information is required. Otherwise, we will provide you with login credentials, giving you seamless access to
-        manage the digital profiles of students referred by Sweden Relocators.
-      </Typography>
-
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-        You can also ask your students to register on our website or through our mobile app as individuals, and we will
-        automatically link their profiles to your account. Additionally, you have the flexibility to create student
-        profiles yourself for those who require assistance, and we will handle the rest.
-      </Typography>
-
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-        With our one-window relocation and immigration solution, you can effortlessly manage the entire student
-        journey—from profile creation and visa support to accommodation and settlement—through a single, user-friendly
-        platform. This ensures a smooth, efficient, and hassle-free experience for both you and your students.
-      </Typography>
     </Box>
   )
 }
-

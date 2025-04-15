@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import Link from "@mui/material/Link"
 
 import Box from "@mui/material/Box"
 import Alert from "@mui/material/Alert"
@@ -17,11 +18,17 @@ import Button from "@mui/material/Button"
 import { useBoolean } from "src/hooks/use-boolean"
 import { Form } from "src/components/hook-form"
 import { toast } from "src/components/snackbar"
+import { paths } from "src/routes/paths"
+import { useRouter } from "src/routes/hooks"
+import { RouterLink } from "src/routes/components"
 
 // Import components
+import { FormHead } from "../../components/form-head"
+
 import { formSchema } from "./partner-registration/form-schema"
 import { defaultValues } from "./partner-registration/default-values"
 import { BasicInfoStep } from "./partner-registration/form-steps/basic-info-step"
+import { AddressInfoStep } from "./partner-registration/form-steps/address-info-step"
 import { LawyerDetailsStep } from "./partner-registration/form-steps/lawyer-details-step"
 import { ConsultantDetailsStep } from "./partner-registration/form-steps/consultant-details-step"
 import { FirmDetailsStep } from "./partner-registration/form-steps/firm-details-step"
@@ -31,6 +38,7 @@ import { CBIStep } from "./partner-registration/form-steps/cbi-step"
 import { DocumentationStep } from "./partner-registration/form-steps/documentation-step"
 import { ReviewStep } from "./partner-registration/form-steps/review-step"
 import { SuccessDialog } from "./success-dialog"
+import { SuccessDialogUni } from "./success-dialog-uni"
 import { submitForm } from "./partner-registration/form-submission"
 
 // Import university-specific steps
@@ -42,6 +50,7 @@ import { PartnershipTermsStep } from "./partner-registration/university-steps/pa
 import { AgreementSubmissionStep } from "./partner-registration/university-steps/agreement-submission-step"
 
 export function JwtSignUpViewPartner() {
+  const router = useRouter()
   const [activeStep, setActiveStep] = useState(0)
   const [errorMsg, setErrorMsg] = useState("")
   const [successDialogOpen, setSuccessDialogOpen] = useState(false)
@@ -63,6 +72,14 @@ export function JwtSignUpViewPartner() {
   const [isUniversityFlow, setIsUniversityFlow] = useState(false)
 
   const password = useBoolean()
+
+  // Handle dialog close and navigation to login
+  const handleDialogClose = () => {
+    setSuccessDialogOpen(false)
+    setTimeout(() => {
+      router.push(paths.auth.jwt.signIn)
+    }, 1500)
+  }
 
   // Fetch data from APIs
   useEffect(() => {
@@ -206,20 +223,23 @@ export function JwtSignUpViewPartner() {
 
   // Get steps based on the flow
   const getSteps = () => {
+    // All flows start with Basic Information and Address
+    const baseSteps = ["Basic Information", "Address Information"]
+
     // University flow
     if (isUniversityFlow) {
       return [
-        "1. University Information",
-        "2. Partnership Scope & Collaboration",
-        "3. Pre-Arrival & Onboarding Support",
-        "4. Compliance & Legal Considerations",
-        "5. Partnership Terms & Next Steps",
-        "6. Agreement & Submission",
+        ...baseSteps,
+        "University Information",
+        "Partnership Scope & Collaboration",
+        "Pre-Arrival & Onboarding Support",
+        "Compliance & Legal Considerations",
+        "Partnership Terms & Next Steps",
+        "Agreement & Submission",
       ]
     }
 
     // Default flow for other partner types
-    const baseSteps = ["Basic Information"]
     const additionalSteps = []
 
     if (isLawyer) {
@@ -266,22 +286,33 @@ export function JwtSignUpViewPartner() {
   }
 
   // Render the current step content
-  const getStepContent = (step) => {
+  const getStepContent = (stepIndex) => {
+    const step = steps[stepIndex]
+
+    // Basic Information and Address steps are common for all flows
+    if (step === "Basic Information") {
+      return <BasicInfoStep partnerTypes={partnerTypes} />
+    }
+
+    if (step === "Address Information") {
+      return <AddressInfoStep />
+    }
+
     // University flow
     if (isUniversityFlow) {
-      switch (activeStep) {
-        case 0: // University Information
+      switch (step) {
+        case "University Information":
           return <UniversityInfoStep />
-        case 1: // Partnership Scope & Collaboration
+        case "Partnership Scope & Collaboration":
           return <PartnershipScopeStep />
-        case 2: // Pre-Arrival & Onboarding Support
+        case "Pre-Arrival & Onboarding Support":
           return <PreArrivalSupportStep />
-        case 3: // Compliance & Legal Considerations
+        case "Compliance & Legal Considerations":
           return <ComplianceStep />
-        case 4: // Partnership Terms & Next Steps
+        case "Partnership Terms & Next Steps":
           return <PartnershipTermsStep />
-        case 5: // Agreement & Submission
-          return <AgreementSubmissionStep />
+        case "Agreement & Submission":
+          return <AgreementSubmissionStep password={password} />
         default:
           return null
       }
@@ -289,8 +320,6 @@ export function JwtSignUpViewPartner() {
 
     // Default flow for other partner types
     switch (step) {
-      case "Basic Information":
-        return <BasicInfoStep partnerTypes={partnerTypes} password={password} />
       case "Profession-Specific Details":
         if (isLawyer) return <LawyerDetailsStep lawyerFields={lawyerFields} accreditations={accreditations} />
         if (isImmigrationConsultant)
@@ -309,11 +338,10 @@ export function JwtSignUpViewPartner() {
             isLawyer={isLawyer}
             isImmigrationConsultant={isImmigrationConsultant}
             isFreelancer={isFreelancer}
-            watch={watch}
           />
         )
       case "Review & Submit":
-        return <ReviewStep />
+        return <ReviewStep password={password} />
       default:
         return null
     }
@@ -343,7 +371,6 @@ export function JwtSignUpViewPartner() {
         elevation={3}
         sx={{
           width: "100%",
-          maxWidth: { xs: "100%", sm: 500, md: 600, lg: 800 },
           p: { xs: 3, sm: 4 },
           border: "1px solid",
           borderColor: "divider",
@@ -359,16 +386,17 @@ export function JwtSignUpViewPartner() {
           ))}
         </Stepper>
 
-        <Box sx={{ mb: 4, textAlign: "center" }}>
-          <Typography variant="h4" gutterBottom>
-            {isUniversityFlow ? "University Registration" : "Partner Registration"}
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            {isUniversityFlow
-              ? "Complete all fields to register your university"
-              : "Complete all fields to register as a partner"}
-          </Typography>
-        </Box>
+        <FormHead
+          description={
+            <>
+              {`Already have an account? `}
+              <Link component={RouterLink} href={paths.auth.jwt.signIn} variant="subtitle2">
+                Sign in
+              </Link>
+            </>
+          }
+          sx={{ mb: 4, textAlign: "center" }}
+        />
 
         {!!errorMsg && (
           <Alert severity="error" sx={{ mb: 3 }}>
@@ -391,16 +419,22 @@ export function JwtSignUpViewPartner() {
             }
           }}
         >
-          {getStepContent(steps[activeStep])}
+          {getStepContent(activeStep)}
 
-          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: activeStep > 0 ? "space-between" : "flex-end",
+              mt: 4,
+            }}
+          >
             {activeStep > 0 && (
               <Button color="inherit" variant="outlined" onClick={handleBack}>
                 Back
               </Button>
             )}
             {activeStep < steps.length - 1 ? (
-              <Button variant="contained" onClick={handleNext}>
+              <Button variant="contained" onClick={handleNext} sx={{ minWidth: 150 }}>
                 Next
               </Button>
             ) : (
@@ -412,7 +446,10 @@ export function JwtSignUpViewPartner() {
                 onClick={(e) => {
                   e.preventDefault()
                   const formData = getValues()
-                  submitForm(formData, countries, setErrorMsg, setSuccessDialogOpen)
+                  const success = submitForm(formData, countries, setErrorMsg, setSuccessDialogOpen)
+                  if (success) {
+                    toast.success("Registration successful! Redirecting to login page shortly.")
+                  }
                 }}
               >
                 Submit and Pay
@@ -420,17 +457,14 @@ export function JwtSignUpViewPartner() {
             )}
           </Box>
         </Form>
-
-        <Box sx={{ mt: 4, pt: 2, borderTop: "1px solid", borderColor: "divider" }}>
-          <Typography variant="body2" color="text.secondary" align="center">
-            By registering, you agree to our Terms of Service and Privacy Policy.
-          </Typography>
-        </Box>
       </Paper>
 
-      {/* Success Dialog */}
-      <SuccessDialog open={successDialogOpen} onClose={() => setSuccessDialogOpen(false)} />
+      {/* Success Dialog - Conditionally render based on business type */}
+      {isUniversityFlow ? (
+        <SuccessDialogUni open={successDialogOpen} onClose={handleDialogClose} />
+      ) : (
+        <SuccessDialog open={successDialogOpen} onClose={handleDialogClose} />
+      )}
     </Box>
   )
 }
-

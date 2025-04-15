@@ -72,9 +72,17 @@ export function Section({
         alignItems: "center",
         justifyContent: "center",
         textAlign: "center",
+        height:"100%",
         position: "relative",
-        gap: isInternationalTalent ? 7 : 10,
-        ...sx,
+        gap: isInternationalTalent ? 7 : isPartnerSignup  ? 15  : 10,
+        ...bgGradient({
+          color: `0deg, ${varAlpha(
+            theme.vars.palette.background.defaultChannel,
+            0.92
+          )}, ${varAlpha(theme.vars.palette.background.defaultChannel, 0.92)}`,
+          imgUrl: `${CONFIG.assetsDir}/assets/background/background-3-blur.webp`,
+        }),
+              ...sx,
       }}
       {...other}
     >

@@ -37,7 +37,7 @@ Field.MultiSelect = function MultiSelect({ name, label, options, ...other }) {
     <Controller
       name={name}
       control={control}
-      defaultValue={[]} // Add this line to ensure it's always initialized
+      defaultValue={[]} // Initialize as empty array
       render={({ field, fieldState: { error } }) => (
         <FormControl fullWidth error={!!error}>
           <InputLabel id={`${name}-label`}>{label}</InputLabel>
@@ -46,15 +46,14 @@ Field.MultiSelect = function MultiSelect({ name, label, options, ...other }) {
             labelId={`${name}-label`}
             multiple
             displayEmpty
-            value={field.value || []}
+            value={field.value || []} // Ensure value is never undefined
             onChange={(e) => field.onChange(e.target.value)}
             input={<OutlinedInput label={label} />}
             renderValue={(selected) => (
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                {selected && selected.length === 0 ? (
+                {!selected || selected.length === 0 ? (
                   <Typography sx={{ color: "text.secondary" }}>Select options</Typography>
                 ) : (
-                  selected &&
                   selected.map((value) => {
                     const option = options.find((opt) => opt.value === value)
                     return (
@@ -137,6 +136,7 @@ Field.Upload = function Upload({ name, label, helperText, required, accept = "im
     <Controller
       name={name}
       control={control}
+      defaultValue={null} // Initialize as null
       render={({ field: { onChange, value, onBlur, ...field } }) => {
         const error = errors[name]
 
@@ -214,4 +214,3 @@ export const findCountryIdByLabel = (countryValue, countries) => {
   const country = countries.find((c) => c.name === countryValue)
   return country ? country.id : null
 }
-

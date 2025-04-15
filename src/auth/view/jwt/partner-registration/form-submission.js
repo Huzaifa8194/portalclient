@@ -107,12 +107,12 @@ export const submitForm = async (formData, countries, setErrorMsg, setSuccessDia
       // 1. As a regular field with a default value
       apiFormData.append("immigration_exp_handling_cases", formData.immigration_exp_handling_cases || "0")
       // 2. As an array element with a default value
-      apiFormData.append("immigration_exp_handling_cases[]", formData.immigration_exp_handling_cases || "0")
+      // apiFormData.append("immigration_exp_handling_cases[]", formData.immigration_exp_handling_cases || "0")
       // 3. As a JSON string
-      apiFormData.append(
-        "immigration_exp_handling_cases_json",
-        JSON.stringify(formData.immigration_exp_handling_cases || "0"),
-      )
+      // apiFormData.append(
+      //   "immigration_exp_handling_cases_json",
+      //   JSON.stringify(formData.immigration_exp_handling_cases || "0"),
+      // )
 
       if (formData.immigration_countries && formData.immigration_countries.length > 0) {
         formData.immigration_countries.forEach((country) => {
@@ -124,9 +124,7 @@ export const submitForm = async (formData, countries, setErrorMsg, setSuccessDia
       }
     } else {
       // For other business types, send empty values
-      apiFormData.append("immigration_exp_handling_cases", "0")
-      apiFormData.append("immigration_exp_handling_cases[]", "0")
-      apiFormData.append("immigration_exp_handling_cases_json", JSON.stringify("0"))
+      apiFormData.append("immigration_exp_handling_cases", "")
       apiFormData.append("immigration_countries[]", "")
     }
 
@@ -232,8 +230,11 @@ export const submitForm = async (formData, countries, setErrorMsg, setSuccessDia
 
     // Add file uploads based on business type - ONLY include the required documents
 
-    // Immigration Firms (not Lawyers): ONLY registration_doc
-    if (isImmigrationFirm && !isLawyer && formData.registration_doc) {
+    // Immigration Firms (not Lawyers) and Self-Employed: ONLY registration_doc
+    if (
+      (isImmigrationFirm && !isLawyer && formData.registration_doc) ||
+      (formData.business_type_id === "6" && formData.registration_doc)
+    ) {
       apiFormData.append("registration_doc", formData.registration_doc)
     }
 
@@ -299,4 +300,3 @@ export const submitForm = async (formData, countries, setErrorMsg, setSuccessDia
     return false
   }
 }
-

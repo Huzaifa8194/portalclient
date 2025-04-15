@@ -156,7 +156,8 @@ export function AuthSplitLayout({ sx, section, children, header }) {
           ]}
           sx={{
             width: { xs: "100%", md: "50%" },
-            minHeight: { xs: "auto", md: "auto" },
+            // minHeight: { xs: "auto", md: "auto" },
+            height:"100vh",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
@@ -211,7 +212,7 @@ export function AuthSplitLayout({ sx, section, children, header }) {
           <Box
             sx={{
               width: "100%",
-              maxWidth: { xs: "100%", sm: 600, md: 800 },
+              maxWidth: { xs: "100%", sm: 600, md: 900 },
               mx: "auto",
               display: "flex",
               flexDirection: "column",
