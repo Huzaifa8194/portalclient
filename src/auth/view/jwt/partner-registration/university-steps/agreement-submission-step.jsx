@@ -14,9 +14,7 @@ export function AgreementSubmissionStep({ password }) {
 
   return (
     <Box gap={3} display="flex" flexDirection="column">
-      <Typography variant="h6" gutterBottom>
-        Agreement & Submission
-      </Typography>
+
 
       <Box gap={3} display="flex" flexDirection="column">
         <Field.Text
@@ -50,11 +48,6 @@ export function AgreementSubmissionStep({ password }) {
           required
         />
       </Box>
-
-      <Typography variant="body1" paragraph>
-        By submitting this form, the university agrees to explore collaboration opportunities with Sweden Relocators and
-        acknowledges the terms of service for student relocation support.
-      </Typography>
 
       <FormControlLabel
         control={<Checkbox {...register("is_term_accepted", { required: true })} />}

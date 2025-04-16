@@ -4,9 +4,6 @@ import { Field } from "src/components/hook-form"
 export function ComplianceStep() {
   return (
     <Box gap={3} display="flex" flexDirection="column">
-      <Typography variant="h6" gutterBottom>
-        Compliance & Legal Considerations
-      </Typography>
 
       <Field.Select
         name="uni_gdpr_compliant_policies"

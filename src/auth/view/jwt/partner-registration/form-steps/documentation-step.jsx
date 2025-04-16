@@ -10,8 +10,15 @@ export function DocumentationStep({ isImmigrationFirm, isLawyer, isImmigrationCo
   // Watch the self_accreditation_or_experience field
   const hasAccreditation = watch("self_accreditation_or_experience") === "Yes"
 
+  // Watch the is_accreditations field
+  const hasAccreditations = watch("is_accreditations") === "Yes"
+
   // Check if user is Self-Employed (business_type_id === "6")
   const isSelfEmployed = watch("business_type_id") === "6"
+
+  // Determine if accreditation document is required
+  const isAccreditationDocRequired =
+    isLawyer || isImmigrationConsultant || (isFreelancer && hasAccreditation) || hasAccreditations
 
   return (
     <Box gap={3} display="flex" flexDirection="column">
@@ -19,52 +26,30 @@ export function DocumentationStep({ isImmigrationFirm, isLawyer, isImmigrationCo
         Documentation & Verification
       </Typography>
 
-      {/* ONLY for Immigration Firms (not for Lawyers) */}
-      {isImmigrationFirm && !isLawyer && (
+      {/* Registration document for Law Firms and Immigration Firms */}
+      {(isLawyer || isImmigrationFirm) && (
         <Field.Upload
           name="registration_doc"
           label="Attach Business License or Registration Document"
           accept="image/jpeg,image/png,application/pdf"
-          helperText="Required for Immigration Firms (JPG, PNG, PDF)"
+          helperText="Required for Law Firms and Immigration Firms (JPG, PNG, PDF)"
           required
         />
       )}
 
-      {/* ONLY for Self-Employed users */}
-      {isSelfEmployed && (
-        <Field.Upload
-          name="registration_doc"
-          label="Attach Business License or Registration Document"
-          accept="image/jpeg,image/png,application/pdf"
-          helperText="Required for Self-Employed (JPG, PNG, PDF)"
-          required
-        />
-      )}
-
-      {/* ONLY for Lawyers and Consultants */}
-      {(isLawyer || isImmigrationConsultant) && (
+      {/* Accreditation document for Lawyers, Consultants, and anyone with accreditations */}
+      {isAccreditationDocRequired && (
         <Field.Upload
           name="accreditation_doc"
           label="Attach Professional Accreditation Certificate"
           accept="image/jpeg,image/png,application/pdf"
-          helperText="Required for Lawyers and Consultants (JPG, PNG, PDF)"
+          helperText="Required for Lawyers, Consultants, and anyone with accreditations (JPG, PNG, PDF)"
           required
         />
       )}
 
-      {/* Show accreditation document upload for Freelancers with self-accreditation */}
-      {isFreelancer && hasAccreditation && (
-        <Field.Upload
-          name="freelancer_accreditation_doc"
-          label="Attach Your Accreditation Certificate"
-          accept="image/jpeg,image/png,application/pdf"
-          helperText="Required for Freelancers with accreditation (JPG, PNG, PDF)"
-          required
-        />
-      )}
-
-      {/* ONLY for Consultants, Individual Applicants & Freelancers */}
-      {(isImmigrationConsultant || isFreelancer) && (
+      {/* Passport document for Consultants, Self-Employed & Freelancers */}
+      {(isImmigrationConsultant || isFreelancer || isSelfEmployed) && (
         <Field.Upload
           name="passport_doc"
           label="Attach Passport or National ID"

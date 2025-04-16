@@ -18,6 +18,9 @@ export const submitForm = async (formData, countries, setErrorMsg, setSuccessDia
     const isImmigrationFirm = formData.business_type_id === "4"
     const isImmigrationConsultant = formData.business_type_id === "3"
     const isFreelancer = formData.business_type_id === "5" || formData.business_type_id === "6"
+    const isSelfEmployed = formData.business_type_id === "6"
+    const hasAccreditation = formData.self_accreditation_or_experience === "Yes"
+    const hasAccreditations = formData.is_accreditations === "Yes"
 
     // Create FormData object for file uploads
     const apiFormData = new FormData()
@@ -90,6 +93,27 @@ export const submitForm = async (formData, countries, setErrorMsg, setSuccessDia
       apiFormData.append("lawyerBars[0][bar_country_id]", "")
     }
 
+    // Handle immigration experience and countries for all business types except university
+    if (formData.business_type_id !== "7") {
+      // Ensure immigration_exp_handling_cases is always sent with a valid value
+      const immigrationExp = formData.immigration_exp_handling_cases || "0"
+      console.log("Setting immigration experience:", immigrationExp)
+      apiFormData.append("immigration_exp_handling_cases", immigrationExp)
+
+      if (formData.immigration_countries && formData.immigration_countries.length > 0) {
+        formData.immigration_countries.forEach((country) => {
+          apiFormData.append(`immigration_countries[]`, country)
+        })
+      } else {
+        // Send empty value for immigration countries if none selected
+        apiFormData.append("immigration_countries[]", "")
+      }
+    } else {
+      // For university type, still send default values to avoid undefined errors
+      apiFormData.append("immigration_exp_handling_cases", "0")
+      apiFormData.append("immigration_countries[]", "")
+    }
+
     // Handle accreditations
     apiFormData.append("is_accreditations", formData.is_accreditations || "No")
     if (formData.accreditations && formData.accreditations.length > 0) {
@@ -101,38 +125,12 @@ export const submitForm = async (formData, countries, setErrorMsg, setSuccessDia
       apiFormData.append("accreditations[]", "")
     }
 
-    // Immigration consultant fields - only include if relevant business type
-    if (formData.business_type_id === "3" || formData.business_type_id === "4") {
-      // Try multiple approaches to ensure the field is properly sent
-      // 1. As a regular field with a default value
-      apiFormData.append("immigration_exp_handling_cases", formData.immigration_exp_handling_cases || "0")
-      // 2. As an array element with a default value
-      // apiFormData.append("immigration_exp_handling_cases[]", formData.immigration_exp_handling_cases || "0")
-      // 3. As a JSON string
-      // apiFormData.append(
-      //   "immigration_exp_handling_cases_json",
-      //   JSON.stringify(formData.immigration_exp_handling_cases || "0"),
-      // )
-
-      if (formData.immigration_countries && formData.immigration_countries.length > 0) {
-        formData.immigration_countries.forEach((country) => {
-          apiFormData.append(`immigration_countries[]`, country)
-        })
-      } else {
-        // Send empty value for immigration countries if none selected
-        apiFormData.append("immigration_countries[]", "")
-      }
-    } else {
-      // For other business types, send empty values
-      apiFormData.append("immigration_exp_handling_cases", "")
-      apiFormData.append("immigration_countries[]", "")
-    }
-
     // Company fields
     apiFormData.append("company_type_id", formData.company_type_id || "")
     apiFormData.append("company_no_of_employees", formData.company_no_of_employees || "")
     apiFormData.append("company_eor", formData.company_eor || "")
     apiFormData.append("company_hr_services", formData.company_hr_services || "")
+
     apiFormData.append(
       "company_specialize_business_immigration",
       formData.company_specialize_business_immigration || "",
@@ -228,34 +226,23 @@ export const submitForm = async (formData, countries, setErrorMsg, setSuccessDia
     // Make sure is_term_accepted is properly converted to "1" or "0"
     apiFormData.append("is_term_accepted", formData.is_term_accepted === true ? "1" : "0")
 
-    // Add file uploads based on business type - ONLY include the required documents
+    // Add file uploads based on business type and conditions
 
-    // Immigration Firms (not Lawyers) and Self-Employed: ONLY registration_doc
-    if (
-      (isImmigrationFirm && !isLawyer && formData.registration_doc) ||
-      (formData.business_type_id === "6" && formData.registration_doc)
-    ) {
+    // Registration document for Law Firms and Immigration Firms
+    if ((isLawyer || isImmigrationFirm) && formData.registration_doc) {
       apiFormData.append("registration_doc", formData.registration_doc)
     }
 
-    // Lawyers: ONLY accreditation_doc
-    if (isLawyer && formData.accreditation_doc) {
+    // Accreditation document for Lawyers, Consultants, and anyone with accreditations
+    if (
+      (isLawyer || isImmigrationConsultant || (isFreelancer && hasAccreditation) || hasAccreditations) &&
+      formData.accreditation_doc
+    ) {
       apiFormData.append("accreditation_doc", formData.accreditation_doc)
     }
 
-    // Consultants: BOTH accreditation_doc AND passport_doc
-    if (isImmigrationConsultant) {
-      if (formData.accreditation_doc) {
-        apiFormData.append("accreditation_doc", formData.accreditation_doc)
-      }
-
-      if (formData.passport_doc) {
-        apiFormData.append("passport_doc", formData.passport_doc)
-      }
-    }
-
-    // Individual Applicants & Freelancers: ONLY passport_doc
-    if (isFreelancer && formData.passport_doc) {
+    // Passport document for Consultants, Self-Employed & Freelancers
+    if ((isImmigrationConsultant || isFreelancer || isSelfEmployed) && formData.passport_doc) {
       apiFormData.append("passport_doc", formData.passport_doc)
     }
 

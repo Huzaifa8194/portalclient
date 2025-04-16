@@ -4,9 +4,7 @@ import { Field } from "src/components/hook-form"
 export function PartnershipTermsStep() {
   return (
     <Box gap={3} display="flex" flexDirection="column">
-      <Typography variant="h6" gutterBottom>
-        Partnership Terms & Next Steps
-      </Typography>
+
 
       <Field.Text
         name="uni_key_expectations"
@@ -16,14 +14,8 @@ export function PartnershipTermsStep() {
         required
       />
 
-      <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
-        Primary contact for partnership coordination:
-      </Typography>
-      <Typography variant="body2" color="text.secondary" gutterBottom>
-        Same as International Student Coordinator or provide different contact details below
-      </Typography>
-
-      <Field.DatePicker name="uni_preferred_state_date" label="Preferred start date for collaboration" required />
+      <Field.DatePicker name="uni_preferred_state_date" label="Preferred start date for collaboration" required  format="YYYY/MM/DD"
+      />
     </Box>
   )
 }

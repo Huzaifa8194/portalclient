@@ -22,6 +22,7 @@ import { paths } from "src/routes/paths"
 import { useRouter } from "src/routes/hooks"
 import { RouterLink } from "src/routes/components"
 
+import { countries as countryCodes  } from "src/assets/data"
 // Import components
 import { FormHead } from "../../components/form-head"
 
@@ -82,28 +83,38 @@ export function JwtSignUpViewPartner() {
   }
 
   // Fetch data from APIs
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true)
-
-        // Fetch countries from API
+  
+        // === Fetch Countries ===
         try {
           const countriesResponse = await fetch("https://api.swedenrelocators.se/api/miscellaneous/countries")
           const countriesResult = await countriesResponse.json()
           if (countriesResult.data) {
-            setCountries(countriesResult.data)
+            const enrichedCountries = countriesResult.data.map((country) => {
+              const match = countryCodes.find(
+                (c) => c.label.toLowerCase() === country.name.toLowerCase()
+              )
+              return {
+                ...country,
+                code: match?.code || null,
+              }
+            })
+            setCountries(enrichedCountries)
           } else {
             console.error("Unexpected countries API response structure:", countriesResult)
           }
         } catch (error) {
           console.error("Error fetching countries:", error)
         }
-
-        // Fetch business types from API
+  
+        // === Fetch Business Types ===
         try {
           const businessTypesResponse = await fetch(
-            "https://api.swedenrelocators.se/api/miscellaneous/partner/businessTypes",
+            "https://api.swedenrelocators.se/api/miscellaneous/partner/businessTypes"
           )
           const businessTypesResult = await businessTypesResponse.json()
           if (businessTypesResult.data) {
@@ -114,36 +125,29 @@ export function JwtSignUpViewPartner() {
         } catch (error) {
           console.error("Error fetching business types:", error)
         }
-
-        // Fetch partner records from API
+  
+        // === Fetch Partner Records ===
         try {
           const partnerRecordsResponse = await fetch(
-            "https://api.swedenrelocators.se/api/miscellaneous/partner/records",
+            "https://api.swedenrelocators.se/api/miscellaneous/partner/records"
           )
           const partnerRecordsResult = await partnerRecordsResponse.json()
           if (partnerRecordsResult.data) {
             setPartnerRecords(partnerRecordsResult.data)
-            // Set lawyer fields
+  
             if (partnerRecordsResult.data.lawyerFields) {
               setLawyerFields(partnerRecordsResult.data.lawyerFields)
             }
-
-            // Set accreditations
+  
             if (partnerRecordsResult.data.accreditation) {
               setAccreditations(partnerRecordsResult.data.accreditation)
             }
-
-            // Set application specializations
+  
             if (partnerRecordsResult.data.ApplicationSpecialize) {
               setApplicationTypes(partnerRecordsResult.data.ApplicationSpecialize)
-            }
-
-            // Set additional services (using ApplicationSpecialize as it contains similar data)
-            if (partnerRecordsResult.data.ApplicationSpecialize) {
               setAdditionalServices(partnerRecordsResult.data.ApplicationSpecialize)
             }
-
-            // Set CBI programs
+  
             if (partnerRecordsResult.data.CBISpecialize) {
               setCbiPrograms(partnerRecordsResult.data.CBISpecialize)
             }
@@ -160,9 +164,10 @@ export function JwtSignUpViewPartner() {
         setLoading(false)
       }
     }
-
+  
     fetchData()
   }, [])
+  
 
   // Initialize form with React Hook Form
   const methods = useForm({
@@ -321,11 +326,11 @@ export function JwtSignUpViewPartner() {
     // Default flow for other partner types
     switch (step) {
       case "Profession-Specific Details":
-        if (isLawyer) return <LawyerDetailsStep lawyerFields={lawyerFields} accreditations={accreditations} />
+        if (isLawyer) return <LawyerDetailsStep lawyerFields={lawyerFields} accreditations={accreditations} countries={countries} />
         if (isImmigrationConsultant)
           return <ConsultantDetailsStep accreditations={accreditations} countries={countries} />
-        if (isImmigrationFirm) return <FirmDetailsStep />
-        if (isFreelancer) return <FreelancerDetailsStep />
+        if (isImmigrationFirm) return <FirmDetailsStep countries={countries} accreditations={accreditations} />
+        if (isFreelancer) return <FreelancerDetailsStep countries={countries}/>
         return null
       case "Additional Services":
         return <AdditionalServicesStep applicationTypes={applicationTypes} additionalServices={additionalServices} />

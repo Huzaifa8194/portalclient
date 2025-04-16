@@ -34,17 +34,11 @@ export function PreArrivalSupportStep() {
 
   return (
     <Box gap={3} display="flex" flexDirection="column">
-      <Typography variant="h6" gutterBottom>
-        Pre-Arrival & Onboarding Support for International Students
-      </Typography>
 
-      <Typography variant="subtitle1" gutterBottom>
-        What are the biggest challenges international students face at the university?
-      </Typography>
 
       <FormControl fullWidth error={Boolean(errors.uni_challenges_intl_student)}>
         <InputLabel id="challenges-label">
-          Select the challenges international students face (Select all that apply)
+        What are the biggest challenges international students face at the university?
         </InputLabel>
         <Select
           labelId="challenges-label"
@@ -58,7 +52,7 @@ export function PreArrivalSupportStep() {
             })
             trigger("uni_challenges_intl_student")
           }}
-          input={<OutlinedInput label="Select the challenges international students face (Select all that apply)" />}
+          input={<OutlinedInput label="What are the biggest challenges international students face at the university?" />}
           renderValue={(selected) => (
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
               {selected.map((value) => {
