@@ -228,8 +228,8 @@ export const submitForm = async (formData, countries, setErrorMsg, setSuccessDia
 
     // Add file uploads based on business type and conditions
 
-    // Registration document for Law Firms and Immigration Firms
-    if ((isLawyer || isImmigrationFirm) && formData.registration_doc) {
+    // Registration document for Law Firms, Immigration Firms, and Self-Employed
+    if ((isLawyer || isImmigrationFirm || isSelfEmployed) && formData.registration_doc) {
       apiFormData.append("registration_doc", formData.registration_doc)
     }
 

@@ -26,13 +26,13 @@ export function DocumentationStep({ isImmigrationFirm, isLawyer, isImmigrationCo
         Documentation & Verification
       </Typography>
 
-      {/* Registration document for Law Firms and Immigration Firms */}
-      {(isLawyer || isImmigrationFirm) && (
+      {/* Registration document for Law Firms, Immigration Firms, and Self-Employed */}
+      {(isLawyer || isImmigrationFirm || isSelfEmployed) && (
         <Field.Upload
           name="registration_doc"
           label="Attach Business License or Registration Document"
           accept="image/jpeg,image/png,application/pdf"
-          helperText="Required for Law Firms and Immigration Firms (JPG, PNG, PDF)"
+          helperText="Required for Law Firms, Immigration Firms, and Self-Employed (JPG, PNG, PDF)"
           required
         />
       )}
